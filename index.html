@@ -73,7 +73,7 @@
 			window.addEventListener("resize", this.setSizes);
 		}
 		setSizes(){
-			var winW = window.innerWidth, winH = window.innerHeight, mainH, mainW;
+			var winW = window.innerWidth, winH = window.innerHeight;
 			var mainH = Math.floor(winH - winH*MAINMARGIN*2), mainW = Math.floor(winW - winW*MAINMARGIN*2);
 			if(mainW/mainH > MAINRATIO)
 				mainW = Math.floor(mainH * MAINRATIO);
