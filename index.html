@@ -1,0 +1,61 @@
+<!DOCUMENTTYPE html>
+<html>
+<head>
+	<script>
+		class ViewGame{
+			constructor(model,){
+
+			}
+		}
+	</script>
+	<style>
+		:root{
+			--page-background: #583e38;
+			--table-background: rgba(255, 255, 255, 0.8);
+			--table-top-margin: 10px;
+		}
+		body{
+			background: var(--page-background);
+		}
+		#main{
+			height: 768px;
+			width: 1202px;
+			margin: var(--table-top-margin) auto 0;
+		}
+		#pool,#machine,#player,#scoreboard,#specialboard{
+			background: var(--table-background);
+		}
+		#scoreboard,#specialboard{
+			float: left;
+			width: 200px;
+			height: 768px;
+		}
+		#table{
+			float: left;
+			width: 800px;
+			height: 768px;
+			margin: 0 1px;
+		}
+		#machine,#player{
+			height: 200px;
+		}
+		#pool{
+			height: 366px;
+			margin: 1px 0;
+		}
+	</style>
+</head>
+<body>
+<div id="main">
+	<div id="scoreboard"></div>
+	<div id="table">
+		<div id="machine"></div>
+		<div id="pool"></div>
+		<div id="player"></div>
+	</div>
+	<div id="specialboard"></div>
+</div>
+</body>
+</html>
+<script>
+</script>

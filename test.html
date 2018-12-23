@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Object-oriented JavaScript inheritance</title>
+</head>
+
+<body>
+<div>
+    <label></label>
+    <p style="width:215px;height:287px;"></p>
+</div>
+</body>
+
+<script>
+    function setMsg(msg, portrait){
+        var para = document.querySelector('label');
+        var pt = document.querySelector('p');
+        para.setAttribute('style', 'white-space: pre;');
+        para.textContent = msg;
+        pt.style.backgroundImage = "url('"+portrait+"')";
+    }
+    class Trick{
+        constructor(description){
+            this.description = description;
+        }
+        performTrick(){return this.description;}
+    }
+
+    class Character{
+        constructor(ID, name, score, season){
+            this.ID = ID;
+            this. name = name;
+            this.description =  "img/" + ID + ".jpg";
+            this.score = score;
+            this.season = season;
+            this.owner = null;
+        }
+        isSpecial(){return false;}
+        getName(){return this.name;}
+        getSeason(){return this.season;}
+        getScore(){return this.score;}
+        getPortrait(){return this.description}
+        getDesc(){
+            var msg = this.ID + "：" + this.getName() +"，" + this.getScore() + "分，" + this.getSeason() + "季\n";
+            return msg;
+        }
+    }
+
+    class SpecialCharacter extends Character{
+        constructor(ID, name, description, score, season){
+            super(ID, name, description, score, season);
+            this.tricks = [];
+        }
+        addTrick(trick){this.tricks.push(trick);}
+        isSpecial(){return true;}
+        performTricks(){
+            var msg="" , tlen = this.tricks.length;
+            for(var i=0; i<tlen; i++)
+                msg += "技能"+(i+1)+"："+this.tricks[i].performTrick()+"\n";
+            return msg;
+        }
+        getDesc(){
+            var msg = super.getDesc();
+            msg += this.performTricks();
+            return msg;
+        }
+    }
+    class Deck{
+        constructor(){
+            this.characters = [];
+        }
+        addCharacter(char){this.characters.push(char);}
+        clear(){this.characters.length = 0;}
+        removeRandom(){
+            var i = Math.floor((Math.random() * this.characters.length));
+            var char = this.characters[i];
+            this.characters.splice(i, 1);
+            return char;
+        }
+        removeCharacter(char){
+            var target=-1, clen = this.characters.length;
+            for(var i=0; i<clen; i++) {
+                if (this.characters[i] == char) {
+                target = i;
+                break;
+                }
+            }
+            if(target < 0) return false;
+            this.characters.splice(target, 1);
+            return true;
+        }
+        getDesc(){
+            var msg = "", clen = this.characters.length;
+            for(var i=0; i<clen; i++){
+                msg += this.characters[i].getDesc();
+            }
+            return msg;
+        }
+    }
+/*
+    class Combo{
+        constructor(name, score, characters){
+            this.name = name;
+            this.score = score;
+            this.characters = characters;
+        }
+       getCharList(){return this.characters;}
+    }
+    */
+    class Player{
+        constructor()
+    }
+
+    class Model{
+        constructor(player1, player2){
+            this.player1 = player1;
+            this.player2 = player2;
+            this.views =
+        }
+
+    }
+    function test(){
+        let sy = new SpecialCharacter(0, "沈夜",6, "冬");
+        let t1 = new Trick("打徒弟"), t2 = new Trick("打徒孙");
+        sy.addTrick(t1);
+        sy.addTrick(t2);
+        let sx = new Character(1, "沈曦", 4, "春");
+        let lyc = new Character(2,"流月城", 4, "冬");
+        let deck = new Deck();
+        deck.addCharacter(sy);
+        deck.addCharacter(sx);
+        deck.addCharacter(lyc);
+        deck.removeCharacter(sx);
+        var msg = deck.getDesc();
+        setMsg(msg, sy.getPortrait());
+    }
+    test();
+</script>
+</html>
