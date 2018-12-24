@@ -22,14 +22,27 @@ COMMONCHARLIST = [
   [4, "太华山", 4, "冬"],
   [5, "华月", 4, "冬"],
   [6, "乐无异", 4, "夏"],
-  [7, "闻人羽", 4, "秋"]
+  [7, "闻人羽", 4, "秋"],
+  [8, "瞳", 4, "冬"],
+  [9, "司危", 4, "夏"],
+  [10, "怀曦", 4, "春"],
+  [11, "鸤鸠", 4, "夏"],
+  [12, "獍", 4, "夏"],
+  [13, "骨笛", 4, "秋"],
+  [14, "西陵", 4, "春"],
+  [15, "巫之国", 4, "冬"],
+  [16, "侯氐", 4, "秋"],
+  [17, "半魂莲", 4, "夏"],
+  [18, "巫炤", 4, "冬"],
+  [19, "梦魂枝", 4, "秋"],
+  [20, "巫之堂", 4, "春"]
 ];
 PLAYERSPECIALS = [
   [],
-  [201]
+  [103]
 ];
-INITCARDNUMHAND = 2;
-INITCARDNUMPOOL = 3
+INITCARDNUMHAND = 10;
+INITCARDNUMPOOL = 1;
 
 function setMsg(msg, portrait) {
   var para = document.querySelector('label');
@@ -183,13 +196,13 @@ class Repository extends Deck {
     //let lyc = new Character(2,"流月城", 4, "冬");
   }
   initSpecialRepo() {
-    let sp = new SpecialCharacter(200, "沈夜", 6, "冬");
+    let sp = new SpecialCharacter(100, "沈夜", 6, "冬");
     let t1 = new Trick("打徒弟"),
       t2 = new Trick("打徒孙");
     sp.addTrick(t1);
     sp.addTrick(t2);
     this.addCharacter(sp);
-    sp = new SpecialCharacter(201, "夏夷则", 6, "冬");
+    sp = new SpecialCharacter(103, "夏夷则", 6, "冬");
     t1 = new Trick("逸尘"), t2 = new Trick("小鱼干");
     sp.addTrick(t1);
     sp.addTrick(t2);
@@ -205,7 +218,7 @@ class Repository extends Deck {
         }
        getCharList(){return this.characters;}
     }
-    */
+*/
 class Player {
   constructor(id, commonRepo, specialRepo) {
     this.id = id;

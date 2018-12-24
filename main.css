@@ -1,7 +1,9 @@
 :root {
   --page-background: #583e38;
-  --table-background: rgba(255, 255, 255, 0.7);
-  --board-background: rgba(255, 255, 255, 0.5);
+  --table-background: rgba(255, 255, 255, 0.6);
+  --board-background: rgba(255, 255, 255, 0.4);
+  --transition-sec: 0.6s;
+  /*
   --block-margin: 1px;
   --main-height: 768px;
   --main-width: 1202px;
@@ -12,8 +14,13 @@
   --hand0-height: 200px;
   --hand1-height: 200px;
   --pool-height: 400px;
-  --card-width: 100px;
+  --card-width: 120px;
   --card-height: 133px;
+  --card-border-radius: 5px;
+  --hand0-card-top: 30px;
+  --hand1-card-top: 90px;
+  --hand1-card-top2: 10px;
+  */
 }
 
 body {
@@ -27,7 +34,7 @@ body {
   width: var(--main-width);
 }
 
-#pool, #hand0, #hand1{
+#pool, #hand0, #hand1 {
   background: var(--table-background);
 }
 
@@ -56,20 +63,39 @@ body {
 
 #hand0 {
   height: var(--hand0-height);
+  position: relative;
 }
 
 #hand1 {
   height: var(--hand1-height);
+  position: relative;
 }
 
 #pool {
   margin: var(--block-margin) 0;
   height: var(--pool-height);
+  position: relative;
 }
 
 .card {
   width: var(--card-width);
   height: var(--card-height);
-  background-size: var(--card-width) var(--card-height );;
-  float: left;
+  background-size: var(--card-width) var(--card-height);
+  position: absolute;
+  transition: top var(--transition-sec), left var(--transition-sec);
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  border-radius: var(--card-border-radius);
+  left: 0;
+}
+
+#hand0 .card {
+  top: var(--hand0-card-top);
+}
+
+#hand1 .card {
+  top: var(--hand1-card-top);
+}
+
+#hand1 .card:hover {
+  top: var(--hand1-card-top2);
 }
