@@ -21,7 +21,8 @@ COMMONCHARLIST = [
   [3, "夏夷则", 4, "冬"],
   [4, "太华山", 4, "冬"],
   [5, "华月", 4, "冬"],
-  [6, "乐无异", 4, "夏"]
+  [6, "乐无异", 4, "夏"],
+  [7, "闻人羽", 4, "秋"]
 ];
 PLAYERSPECIALS = [
   [],
@@ -47,16 +48,18 @@ class Trick {
 }
 
 class Character {
-  constructor(ID, name, score, season) {
-    this.ID = ID;
+  constructor(id, name, score, season) {
+    this.id = id;
     this.name = name;
-    this.description = "img/" + ID + ".jpg";
-    this.score = score;
+    this.description = "img/" + id
     this.season = season;
     this.owner = null;
   }
   isSpecial() {
     return false;
+  }
+  getID(){
+    return this.id;
   }
   getName() {
     return this.name;
@@ -68,17 +71,17 @@ class Character {
     return this.score;
   }
   getPortrait() {
-    return this.description
+    return this.description + ".jpg";
   }
   getDesc() {
-    var msg = this.ID + "：" + this.getName() + "，" + this.getScore() + "分，" + this.getSeason() + "季\n";
+    var msg = this.id + "：" + this.getName() + "，" + this.getScore() + "分，" + this.getSeason() + "季\n";
     return msg;
   }
 }
 
 class SpecialCharacter extends Character {
-  constructor(ID, name, description, score, season) {
-    super(ID, name, description, score, season);
+  constructor(id, name, description, score, season) {
+    super(id, name, description, score, season);
     this.tricks = [];
   }
   addTrick(trick) {
@@ -115,6 +118,9 @@ class Deck {
   clear() {
     this.characters.length = 0;
   }
+  getChars(){
+    return this.characters;
+  }
   removeRandom() {
     var i = Math.floor((Math.random() * this.characters.length));
     var char = this.characters[i];
@@ -134,11 +140,11 @@ class Deck {
     this.characters.splice(target, 1);
     return true;
   }
-  removeCharacterByID(ID) {
+  removeCharacterByID(id) {
     var target = -1,
       clen = this.characters.length;
     for (var i = 0; i < clen; i++) {
-      if (this.characters[i].ID == ID) {
+      if (this.characters[i].id == id) {
         target = i;
         break;
       }
@@ -241,6 +247,9 @@ class Model {
   }
   getPlayer1(){
     return this.player1;
+  }
+  getPool(){
+    return this.pool;
   }
   getDesc() {
     var msg = this.player0.getDesc();

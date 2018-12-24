@@ -22,13 +22,16 @@
 </html>
 <script>
 	var MAINRATIO = 1920 / 1080; //width/height
+	var CARDRATIO = 169 / 224; //width/height
 	var MAINMARGINPERCENT = 0.0; //percent
 	var BLOCKMARGIN = 1; //px
-	var SCOREBOARDPERCENT = 0.333;
+	var SCOREBOARDPERCENT = 0.333; //percent
 	var SPECIALBOARDPERCENT = 0.3; //percent
 	var PLAYER0PERCENT = 0.28; //percent
 	var PLAYER1PERCENT = 0.345; //percent
+	var CARDHEIGHTPERCENT = 0.8; //card height percent wrt hand0
 	var CARDBACKFILE = "img/back.jpg";
+
 	function getCSSInt(name) {
 		var cv = getComputedStyle(document.documentElement).getPropertyValue(name);
 		cv = parseInt(cv.substring(0, cv.length - 2));
@@ -39,12 +42,25 @@
 		document.documentElement.style.setProperty(name, val + "px");
 	}
 
-	class Card{
-		constructor(char, display){
+	function createCardDiv(char, display) {
+		var div = document.createElement("div");
+		div.classList.add("card");
+		div.id = "card" + char.getID();
+		if (display == "show")
+			div.style.backgroundImage = "url('" + char.getPortrait() + "')";
+		else if (display == "hidden")
+			div.style.backgroundImage = "url('" + CARDBACKFILE + "')";
+		else
+			alert("Invalid card display mode: " + display);
+		return div;
+	}
+
+	class Card {
+		constructor(char, display) {
 			this.char = char;
 			this.div = document.createElement("div");
 			this.div.classList.add("card");
-			if(display == "show")
+			if (display == "show")
 				this.div.style.backgroundImage = "url('" + char.getPortrait() + "')";
 			else if (display == "hidden")
 				this.div.style.backgroundImage = "url('" + CARDBACKFILE + "')";
@@ -53,16 +69,31 @@
 		}
 	}
 
-	class Hand0Div{
-		constructor(div, player){
+	class CardDiv{
+		constructor(div){
 			this.container = div;
-			this.player = player;
-			this.cards = [];
-			var chars = this.player.getHand();
-			for(var i=0; i<chars.length; i++)
-				//////////////////////////////////this.addCard(chars)
 		}
-		addCard(){
+		addCard(cardDiv) {
+			this.container.appendChild(cardDiv);
+		}
+	}
+	class Hand0Div extends CardDiv{
+		constructor(div, player) {
+			super(div);
+			this.player = player;
+			var chars = this.player.getHand().getChars();
+			for (var i = 0; i < chars.length; i++)
+				this.addCard(createCardDiv(chars[i], "show"));
+		}
+
+	}
+	class PoolDiv extends CardDiv{
+		constructor(div, pool) {
+			super(div);
+			this.pool = pool;
+			var chars = this.pool.getChars();
+			for (var i = 0; i < chars.length; i++)
+				this.addCard(createCardDiv(chars[i], "show"));
 		}
 	}
 	class ViewGame {
@@ -70,16 +101,17 @@
 			this.model = model;
 			this.controller = controller;
 			this.setSizes();
-			this.player0HandDiv = new Hand0Div(document.getElementById("hand0"), this.model.getPlayer0);
-			this.player1HandDiv = new Hand0Div(document.getElementById("hand0"), this.model.getPlayer1);
-			this.poolDiv = document.getElementById("pool");
+			this.player0HandDiv = new Hand0Div(document.getElementById("hand0"), this.model.getPlayer0());
+			this.player1HandDiv = new Hand0Div(document.getElementById("hand1"), this.model.getPlayer1());
+			this.poolDiv = new PoolDiv(document.getElementById("pool"), this.model.getPool());
 			window.addEventListener("resize", this.setSizes);
 		}
 		setSizes() {
-			var winW = window.innerWidth, winH = window.innerHeight;
+			var winW = window.innerWidth,
+				winH = window.innerHeight;
 			var mainH = Math.floor(winH - winH * MAINMARGINPERCENT * 2);
 			var mainW = Math.floor(winW - winH * MAINMARGINPERCENT * 2);
-			if (MAINRATIO > 0){
+			if (MAINRATIO > 0) {
 				if (mainW / mainH > MAINRATIO)
 					mainW = Math.floor(mainH * MAINRATIO);
 				else
@@ -88,10 +120,12 @@
 			var tMargin = Math.floor((winH - mainH) / 2);
 			var scbW = Math.floor(mainH * SCOREBOARDPERCENT);
 			var spbW = Math.floor(mainH * SPECIALBOARDPERCENT);
-			var tableW = mainW - scbW - spbW -BLOCKMARGIN*2;
+			var tableW = mainW - scbW - spbW - BLOCKMARGIN * 2;
 			var player0H = Math.floor(mainH * PLAYER0PERCENT);
 			var player1H = Math.floor(mainH * PLAYER1PERCENT);
-			var poolH = mainH - player0H - player1H - BLOCKMARGIN*2;
+			var poolH = mainH - player0H - player1H - BLOCKMARGIN * 2;
+			var cardH = Math.floor(player0H * CARDHEIGHTPERCENT);
+			var cardW = cardH * CARDRATIO;
 			setCSSInt("--block-margin", BLOCKMARGIN);
 			setCSSInt("--main-height", mainH);
 			setCSSInt("--main-width", mainW);
@@ -102,6 +136,8 @@
 			setCSSInt("--hand0-height", player0H);
 			setCSSInt("--hand1-height", player1H);
 			setCSSInt("--pool-height", poolH);
+			setCSSInt("--card-width", cardW);
+			setCSSInt("--card-height", cardH);
 		}
 	}
 

@@ -12,8 +12,8 @@
   --hand0-height: 200px;
   --hand1-height: 200px;
   --pool-height: 400px;
-  --card-width: 300px;
-  --card-height: 200px;
+  --card-width: 100px;
+  --card-height: 133px;
 }
 
 body {
@@ -70,4 +70,6 @@ body {
 .card {
   width: var(--card-width);
   height: var(--card-height);
+  background-size: var(--card-width) var(--card-height );;
+  float: left;
 }
