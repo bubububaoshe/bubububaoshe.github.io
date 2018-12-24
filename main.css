@@ -1,0 +1,73 @@
+:root {
+  --page-background: #583e38;
+  --table-background: rgba(255, 255, 255, 0.7);
+  --board-background: rgba(255, 255, 255, 0.5);
+  --block-margin: 1px;
+  --main-height: 768px;
+  --main-width: 1202px;
+  --main-margin: 30px;
+  --scoreboard-width: 200px;
+  --specialboard-width: 200px;
+  --table-width: 802px;
+  --hand0-height: 200px;
+  --hand1-height: 200px;
+  --pool-height: 400px;
+  --card-width: 300px;
+  --card-height: 200px;
+}
+
+body {
+  background: var(--page-background);
+  margin: 0;
+}
+
+#main {
+  margin: var(--main-margin) auto;
+  height: var(--main-height);
+  width: var(--main-width);
+}
+
+#pool, #hand0, #hand1{
+  background: var(--table-background);
+}
+
+#scoreboard, #specialboard {
+  background: var(--board-background);
+}
+
+#scoreboard {
+  float: left;
+  width: var(--scoreboard-width);
+  height: var(--main-height);
+}
+
+#specialboard {
+  float: left;
+  width: var(--specialboard-width);
+  height: var(--main-height);
+}
+
+#table {
+  float: left;
+  width: var(--table-width);
+  height: var(--main-height);
+  margin: 0 var(--block-margin);
+}
+
+#hand0 {
+  height: var(--hand0-height);
+}
+
+#hand1 {
+  height: var(--hand1-height);
+}
+
+#pool {
+  margin: var(--block-margin) 0;
+  height: var(--pool-height);
+}
+
+.card {
+  width: var(--card-width);
+  height: var(--card-height);
+}
