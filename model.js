@@ -115,6 +115,7 @@ class Deck {
   addRandom(size, repo) {
     for (var i = 0; i < size; i++)
       this.addChar(repo.removeRandom());
+<<<<<<< HEAD
   }
   getMatch(char){
     var s = char.getSeason();
@@ -123,6 +124,8 @@ class Deck {
       if(this.characters[i].getSeason() == s)
         return this.characters[i];
     return null;
+=======
+>>>>>>> a616528adc5ef783ebd39514219c575cc36679e9
   }
   clear() {
     this.characters.length = 0;
@@ -268,6 +271,7 @@ class Model {
     this.pool.addRandom(INITCARDNUMPOOL, this.commonRepository);
     this.activeChar = null;
   }
+<<<<<<< HEAD
   aiPick(){
     var poolChars = this.pool.getChars();
     var hand = this.player0.getHand();
@@ -301,6 +305,21 @@ class Model {
 
   setHand1Active(char){
     if(this.activeChar == null || this.activeChar != char){
+=======
+  pickPoolCard(pid, poolCharID){
+    var handChar = this.activeChar;
+    this.setHand1Active(handChar.id);
+    var player = pid==0? this.player0:this.player1;
+    var char = this.pool.removeCharByID(poolCharID);
+    player.hand.removeChar(handChar);
+    player.table.addChar(char);
+    player.table.addChar(handChar);
+    view.updatePickPoolCard(pid, handChar.id, poolCharID);
+  }
+  setHand1Active(id){
+    if(this.activeChar == null || this.activeChar.id != id){
+      var char = this.player1.getHand().getChar(id);
+>>>>>>> a616528adc5ef783ebd39514219c575cc36679e9
       view.updateHand1Active(this.activeChar, char);
       this.activeChar = char;
     }
