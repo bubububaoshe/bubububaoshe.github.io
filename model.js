@@ -298,7 +298,7 @@ class Model {
     view.updatePickPoolCard(player.id, handChar.id, poolChar.id);
     log(handChar.getDesc()+poolChar.getDesc());
   }
-  
+
   setHand1Active(char){
     if(this.activeChar == null || this.activeChar != char){
       view.updateHand1Active(this.activeChar, char);

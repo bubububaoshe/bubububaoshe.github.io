@@ -4,7 +4,7 @@ function getCardID(div){
 class Controller{
   constructor(){
   }
-  hand1CardClick(){
+  hand1CardClick(){log("hand1CardClick");
     var id = getCardID(this);
     var hc = model.getPlayer1().getHand().getChar(id);
     model.setHand1Active(hc);
