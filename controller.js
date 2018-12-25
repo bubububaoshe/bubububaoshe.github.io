@@ -1,8 +1,14 @@
+function getCardID(div){
+  return parseInt(div.id.substr(4));
+}
 class Controller{
   constructor(){
   }
   hand1CardClick(){
-    var id = parseInt(this.id.substr(4));
-    model.setHand1Active(id);
+    model.setHand1Active(getCardID(this));
+  }
+  poolCardClick(){
+    var id = getCardID(this);
+    model.pickPoolCard(1, id);
   }
 }

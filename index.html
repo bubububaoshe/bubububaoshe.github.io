@@ -104,6 +104,12 @@
 			this.setPosition(cardDiv, left);
 			cardDiv.style.left = left + "px";
 		}
+		removeCard(cid){
+			var card = this.container.querySelector("#card"+cid);
+			this.container.removeChild(card);
+			this.repaint();
+			return card;
+		}
 		repaint() {
 			reflow();
 			var cards = this.container.childNodes;
@@ -178,9 +184,11 @@
 				for (var i = cards.length - 1; i >= 0; i--) {
 					if(chars[i].getSeason() == oldSeason){
 						cards[i].classList.remove("glow");
+						cards[i].removeEventListener("click", controller.poolCardClick);
 					}
 					else if (chars[i].getSeason() == newSeason) {
 						cards[i].classList.add("glow");
+						cards[i].addEventListener("click", controller.poolCardClick);
 					}
 				}
 			}
@@ -208,6 +216,11 @@
 			this.poolDiv = new PoolDiv(document.getElementById("pool"), model.getPool(), controller);
 			this.repaint();
 			window.addEventListener("resize", this.repaint.bind(this));
+		}
+		updatePickPoolCard(pid, hcid, pcid){
+			var hand = pid==0? this.hand0Div:this.hand1Div;
+			hand.removeCard(hcid);
+			this.poolDiv.removeCard(pcid);
 		}
 		updateHand1Active(oldChar, newChar) {
 			this.hand1Div.updateActive(oldChar, newChar);

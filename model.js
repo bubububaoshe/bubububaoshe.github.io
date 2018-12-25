@@ -105,12 +105,12 @@ class Deck {
   constructor() {
     this.characters = [];
   }
-  addCharacter(char) {
+  addChar(char) {
     this.characters.push(char);
   }
   addRandom(size, repo) {
     for (var i = 0; i < size; i++)
-      this.addCharacter(repo.removeRandom());
+      this.addChar(repo.removeRandom());
   }
   clear() {
     this.characters.length = 0;
@@ -181,7 +181,7 @@ class Repository extends Deck {
     var len = COMMONCHARLIST.length;
     for (var i = 0; i < len; i++) {
       let char = new Character(COMMONCHARLIST[i][0], COMMONCHARLIST[i][1], COMMONCHARLIST[i][2], COMMONCHARLIST[i][3]);
-      this.addCharacter(char);
+      this.addChar(char);
     }
     //let sx = new Character(1, "沈曦", 4, "春");
     //let lyc = new Character(2,"流月城", 4, "冬");
@@ -191,17 +191,17 @@ class Repository extends Deck {
     let t1 = new Trick("打徒弟"), t2 = new Trick("打徒孙");
     sp.addTrick(t1);
     sp.addTrick(t2);
-    this.addCharacter(sp);
+    this.addChar(sp);
     sp = new SpecialCharacter(203, "夏夷则", 6, "冬");
     t1 = new Trick("逸尘"), t2 = new Trick("小鱼干");
     sp.addTrick(t1);
     sp.addTrick(t2);
-    this.addCharacter(sp);
+    this.addChar(sp);
     sp = new SpecialCharacter(214, "姬轩辕", 6, "秋");
     t1 = new Trick("失忆"), t2 = new Trick("做梦");
     sp.addTrick(t1);
     sp.addTrick(t2);
-    this.addCharacter(sp);
+    this.addChar(sp);
   }
 }
 /*
@@ -226,7 +226,7 @@ class Player {
   initSpecials(repo) {
     var slen = PLAYERSPECIALS[this.id].length;
     for (var i = 0; i < slen; i++) {
-      this.specials.addCharacter(repo.removeCharacterByID(PLAYERSPECIALS[this.id][i]));
+      this.specials.addChar(repo.removeCharacterByID(PLAYERSPECIALS[this.id][i]));
     }
   }
   getHand(){
@@ -251,6 +251,16 @@ class Model {
     this.pool.addRandom(INITCARDNUMPOOL, this.commonRepository);
     this.activeChar = null;
   }
+  pickPoolCard(pid, poolCharID){
+    var handChar = this.activeChar;
+    this.setHand1Active(handChar.id);
+    var player = pid==0? this.player0:this.player1;
+    var char = this.pool.removeCharByID(poolCharID);
+    player.hand.removeChar(handChar);
+    player.table.addChar(char);
+    player.table.addChar(handChar);
+    view.updatePickPoolCard(pid, handChar.id, poolCharID);
+  }
   setHand1Active(id){
     if(this.activeChar == null || this.activeChar.id != id){
       var char = this.player1.getHand().getChar(id);
@@ -261,6 +271,9 @@ class Model {
       view.updateHand1Active(this.activeChar, null);
       this.activeChar = null;
     }
+  }
+  getActiveChar(){
+    return this.activeChar;
   }
   getPlayer0(){
     return this.player0;
