@@ -5,6 +5,7 @@
 	<meta charset="UTF-8">
 	<link rel="stylesheet" type="text/css" href="main.css">
 	<script src="model.js"></script>
+	<script src="controller.js"></script>
 </head>
 
 <body>
@@ -116,6 +117,14 @@
 			super(div);
 			this.player = player;
 			this.initCards(this.player.getHand().getChars(), "show");
+		}
+		initCards(chars, display) {
+			for (var i = 0; i < chars.length; i++){
+				var card = createCardDiv(chars[i], display);
+				this.container.appendChild((card));
+				//card.addEventListener("click", this.bind(this))
+			}
+
 		}
 	}
 	class PoolDiv extends DeckDiv {
