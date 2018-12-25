@@ -23,23 +23,28 @@ COMMONCHARLIST = [
   [5, "华月", 4, "冬"],
   [6, "乐无异", 4, "夏"],
   [7, "闻人羽", 4, "秋"],
-  [8, "瞳", 4, "冬"],
-  [9, "司危", 4, "夏"],
-  [10, "怀曦", 4, "春"],
-  [11, "鸤鸠", 4, "夏"],
-  [12, "獍", 4, "夏"],
-  [13, "骨笛", 4, "秋"],
-  [14, "西陵", 4, "春"],
-  [15, "巫之国", 4, "冬"],
-  [16, "侯氐", 4, "秋"],
-  [17, "半魂莲", 4, "夏"],
+  [8, "北洛", 4, "春"],
+  [9, "云无月", 4, "冬"],
+  [10, "岑婴", 4, "夏"],
+  [11, "司危", 4, "春"],
+  [12, "玄戈", 4, "秋"],
+  [13, "霓商", 4, "夏"],
+  [14, "姬轩辕", 4, "秋"],
+  [15, "缙云", 4, "夏"],
+  [16, "半魂莲", 4, "秋"],
+  [17, "天鹿", 4, "秋"],
   [18, "巫炤", 4, "冬"],
-  [19, "梦魂枝", 4, "秋"],
-  [20, "巫之堂", 4, "春"]
+  [19, "太岁", 4, "春"],
+  [20, "蜃珠", 4, "夏"],
+  [21, "无名之地", 4, "冬"],
+  [22, "天鹿城", 4, "秋"],
+  [23, "巫之国", 4, "冬"],
+  [24, "西陵", 4, "春"],
+  [25, "嫘祖", 4, "夏"]
 ];
 PLAYERSPECIALS = [
-  [],
-  [103]
+  [214],
+  [203, 200]
 ];
 INITCARDNUMHAND = 10;
 INITCARDNUMPOOL = 1;
@@ -196,14 +201,18 @@ class Repository extends Deck {
     //let lyc = new Character(2,"流月城", 4, "冬");
   }
   initSpecialRepo() {
-    let sp = new SpecialCharacter(100, "沈夜", 6, "冬");
-    let t1 = new Trick("打徒弟"),
-      t2 = new Trick("打徒孙");
+    let sp = new SpecialCharacter(200, "沈夜", 6, "冬");
+    let t1 = new Trick("打徒弟"), t2 = new Trick("打徒孙");
     sp.addTrick(t1);
     sp.addTrick(t2);
     this.addCharacter(sp);
-    sp = new SpecialCharacter(103, "夏夷则", 6, "冬");
+    sp = new SpecialCharacter(203, "夏夷则", 6, "冬");
     t1 = new Trick("逸尘"), t2 = new Trick("小鱼干");
+    sp.addTrick(t1);
+    sp.addTrick(t2);
+    this.addCharacter(sp);
+    sp = new SpecialCharacter(214, "姬轩辕", 6, "秋");
+    t1 = new Trick("失忆"), t2 = new Trick("做梦");
     sp.addTrick(t1);
     sp.addTrick(t2);
     this.addCharacter(sp);
@@ -254,6 +263,9 @@ class Model {
     this.player1 = new Player(1, this.commonRepository, this.specialRepository);
     this.pool = new Deck();
     this.pool.addRandom(INITCARDNUMPOOL, this.commonRepository);
+  }
+  addView(view){
+    this.view = view;
   }
   getPlayer0(){
     return this.player0;
