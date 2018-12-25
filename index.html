@@ -32,23 +32,33 @@
 	var PLAYER1PERCENT = 0.345; //height of player1 hand board wrt table height
 	var HANDLEFTPADDINGPERCENT = 0.04; //left padding of the hand boards in percent
 	var HANDTOPPERCENT = 0.7; //top of inactive cards at player1 hand board
-	var HANDTOPPERCENT2 = 0.2; //top of active cards at player1 hand board
+	var HANDTOPPERCENT2 = 0.4; //top of onfocus cards at player1 hand board
+	var HANDTOPPERCENT3 = 0.1; //top of active cards at player1 hand board
 	var HANDCARDOVERLAPPERCENT = 0.44; //percent of neighboring cards that overlap in hand board
 	var POOLCARDOVERLAPPERCENT = HANDCARDOVERLAPPERCENT * 0.6; //percent of neighboring cards that overlap in pool board
 	var CARDBORDERRADIUSPERCENT = 0.04; //border radius of cards wrt card width
 	var MAXCARDROTATION = 15; //max degree of rotation the pool cards turns
 	var CARDBACKFILE = "img/back.jpg"; //file name of the back of a card
 
+	function log(msg) {
+		var para = document.querySelector("#scoreboard");
+		para.setAttribute('style', 'white-space: pre;');
+		para.textContent += msg + "\n";
+	}
+
 	function reflow() {
 		document.getElementById('main').clientWidth;
 	}
+
 	function getCSSInt(name) {
 		var cv = getComputedStyle(document.documentElement).getPropertyValue(name);
 		return parseInt(cv);
 	}
+
 	function setCSSInt(name, val) {
 		document.documentElement.style.setProperty(name, val + "px");
 	}
+
 	function createCardDiv(char, display) {
 		var div = document.createElement("div");
 		div.classList.add("card");
@@ -119,50 +129,89 @@
 			this.initCards(this.player.getHand().getChars(), "show");
 		}
 		initCards(chars, display) {
-			for (var i = 0; i < chars.length; i++){
+			for (var i = 0; i < chars.length; i++) {
 				var card = createCardDiv(chars[i], display);
 				this.container.appendChild((card));
-				//card.addEventListener("click", this.bind(this))
+				card.addEventListener("click", controller.hand1CardClick);
 			}
 
 		}
+		updateActive(oldChar, newChar) {
+			if (oldChar != null) {
+				var card = this.container.querySelector("#card" + oldChar.getID());
+				card.classList.remove("pop");
+				card.classList.remove("glow");
+			}
+			if (newChar != null) {
+				var card = this.container.querySelector("#card" + newChar.getID());
+				card.classList.add("pop");
+				card.classList.add("glow");
+			}
+		}
 	}
 	class PoolDiv extends DeckDiv {
-		constructor(div, pool) {
-			super(div);
+		constructor(div, pool, controller) {
+			super(div, controller);
 			this.pool = pool;
 			this.initCards(this.pool.getChars(), "show");
 			this.rotate = [];
-			for(var i=0; i<INITCARDNUMPOOL; i++){
+			for (var i = 0; i < INITCARDNUMPOOL; i++) {
 				var rand = Math.floor((Math.random() * MAXCARDROTATION * 2));
-				this.rotate[i] = (rand - MAXCARDROTATION)%360;
+				this.rotate[i] = (rand - MAXCARDROTATION) % 360;
 			}
 		}
-		repaint(){
+		updateMatch(oldChar, newChar) {
+			//update card matchs in pool according to seasons
+			//Match: glow, clickable
+			var oldSeason, newSeason;
+			if (oldChar == null)
+				oldSeason = null;
+			else
+				oldSeason = oldChar.getSeason();
+			if (newChar == null)
+				newSeason = null;
+			else
+				newSeason = newChar.getSeason();
+			if(oldSeason != newSeason){
+				var cards = this.container.childNodes;
+				var chars = this.pool.getChars();
+				for (var i = cards.length - 1; i >= 0; i--) {
+					if(chars[i].getSeason() == oldSeason){
+						cards[i].classList.remove("glow");
+					}
+					else if (chars[i].getSeason() == newSeason) {
+						cards[i].classList.add("glow");
+					}
+				}
+			}
+		}
+		repaint() {
 			var cards = this.container.childNodes;
-			var diffTop = Math.floor(getCSSInt("--card-height")/4);
+			var diffTop = Math.floor(getCSSInt("--card-height") / 4);
 			var top = getCSSInt("--pool-card-top");
 			var left = this.leftPadding;
 			for (var i = cards.length - 1; i >= 0; i--) {
 				cards[i].style.left = left + "px";
-				if (i%2 == 1)
+				if (i % 2 == 1)
 					cards[i].style.top = top + diffTop;
 				else
-						cards[i].style.top = top - diffTop;
+					cards[i].style.top = top - diffTop;
 				left += this.offset;
-				cards[i].style.transform = 'rotate('+this.rotate[i]+'deg)';
+				cards[i].style.transform = 'rotate(' + this.rotate[i] + 'deg)';
 			}
 		}
 	}
-	class ViewGame {
-		constructor(model, controller) {
-			this.model = model;
-			this.controller = controller;
-			this.hand0Div = new Hand0Div(document.getElementById("hand0"), this.model.getPlayer0());
-			this.hand1Div = new Hand1Div(document.getElementById("hand1"), this.model.getPlayer1());
-			this.poolDiv = new PoolDiv(document.getElementById("pool"), this.model.getPool());
+	class View {
+		constructor() {
+			this.hand0Div = new Hand0Div(document.getElementById("hand0"), model.getPlayer0(), controller);
+			this.hand1Div = new Hand1Div(document.getElementById("hand1"), model.getPlayer1(), controller);
+			this.poolDiv = new PoolDiv(document.getElementById("pool"), model.getPool(), controller);
 			this.repaint();
 			window.addEventListener("resize", this.repaint.bind(this));
+		}
+		updateHand1Active(oldChar, newChar) {
+			this.hand1Div.updateActive(oldChar, newChar);
+			this.poolDiv.updateMatch(oldChar, newChar);
 		}
 		repaint() {
 			this.setSizes();
@@ -196,6 +245,7 @@
 			var poolCT = Math.floor((poolH - cardH) / 2);
 			var hand1CT = Math.floor((player1H - cardH) * HANDTOPPERCENT);
 			var hand1CT2 = Math.floor((player1H - cardH) * HANDTOPPERCENT2);
+			var hand1CT3 = Math.floor((player1H - cardH) * HANDTOPPERCENT3);
 			var handOFS = Math.floor(cardW * (1 - HANDCARDOVERLAPPERCENT));
 			var poolOFS = Math.floor(cardW * (1 - POOLCARDOVERLAPPERCENT));
 			var blockLP = Math.floor(tableW * HANDLEFTPADDINGPERCENT);
@@ -218,6 +268,7 @@
 			setCSSInt("--pool-card-top", poolCT);
 			setCSSInt("--hand1-card-top", hand1CT);
 			setCSSInt("--hand1-card-top2", hand1CT2);
+			setCSSInt("--hand1-card-top3", hand1CT3);
 
 			this.hand0Div.setOffset(handOFS);
 			this.hand1Div.setOffset(handOFS);
@@ -226,17 +277,19 @@
 			this.hand1Div.setLeftPadding(blockLP);
 			this.poolDiv.setLeftPadding(blockLP);
 		}
+
+		getHand0() {
+			return this.hand0Div;
+		}
+		getHand1() {
+			return this.hand1Div;
+		}
+		getPool() {
+			return this.poolDiv;
+		}
 	}
 
-	function vTest() {
-		let model = new Model();
-		let gameView = new ViewGame(model, 0);
-	}
-
-	function log(msg) {
-		var para = document.querySelector("#scoreboard");
-		para.setAttribute('style', 'white-space: pre;');
-		para.textContent += msg + "\n";
-	}
-	vTest();
+	let model = new Model();
+	let controller = new Controller();
+	let view = new View();
 </script>

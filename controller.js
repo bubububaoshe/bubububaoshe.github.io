@@ -1,7 +1,8 @@
 class Controller{
-  constructor(model){
-    this.model = model;
+  constructor(){
   }
-  handCardClick(){
+  hand1CardClick(){
+    var id = parseInt(this.id.substr(4));
+    model.setHand1Active(id);
   }
 }

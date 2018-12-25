@@ -1,19 +1,3 @@
-/*
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>QQX Model</title>
-</head>
-
-<body>
-<div>
-    <label></label>
-    <p style="width:215px;height:287px;"></p>
-</div>
-</body>
-</html>
-*/
 COMMONCHARLIST = [
   [0, "沈夜", 4, "冬"],
   [1, "沈曦", 4, "春"],
@@ -51,13 +35,6 @@ PLAYERSPECIALS = [
 INITCARDNUMHAND = 10;
 INITCARDNUMPOOL = 8;
 
-function setMsg(msg, portrait) {
-  var para = document.querySelector('label');
-  var pt = document.querySelector('p');
-  para.setAttribute('style', 'white-space: pre;');
-  para.textContent = msg;
-  pt.style.backgroundImage = "url('" + portrait + "')";
-}
 class Trick {
   constructor(description) {
     this.description = description;
@@ -147,7 +124,7 @@ class Deck {
     this.characters.splice(i, 1);
     return char;
   }
-  removeCharacter(char) {
+  removeChar(char) {
     var target = -1,
       clen = this.characters.length;
     for (var i = 0; i < clen; i++) {
@@ -160,11 +137,11 @@ class Deck {
     this.characters.splice(target, 1);
     return true;
   }
-  removeCharacterByID(id) {
+  removeCharByID(id) {
     var target = -1,
       clen = this.characters.length;
     for (var i = 0; i < clen; i++) {
-      if (this.characters[i].id == id) {
+      if (this.characters[i].getID() == id) {
         target = i;
         break;
       }
@@ -173,6 +150,13 @@ class Deck {
     var char = this.characters[target];
     this.characters.splice(target, 1);
     return char;
+  }
+  getChar(id){
+    var clen = this.characters.length;
+    for (var i = 0; i < clen; i++)
+      if (this.characters[i].getID() == id)
+        return this.characters[i];
+    return null;
   }
   getDesc() {
     var msg = "",
@@ -265,9 +249,18 @@ class Model {
     this.player1 = new Player(1, this.commonRepository, this.specialRepository);
     this.pool = new Deck();
     this.pool.addRandom(INITCARDNUMPOOL, this.commonRepository);
+    this.activeChar = null;
   }
-  addView(view){
-    this.view = view;
+  setHand1Active(id){
+    if(this.activeChar == null || this.activeChar.id != id){
+      var char = this.player1.getHand().getChar(id);
+      view.updateHand1Active(this.activeChar, char);
+      this.activeChar = char;
+    }
+    else {
+      view.updateHand1Active(this.activeChar, null);
+      this.activeChar = null;
+    }
   }
   getPlayer0(){
     return this.player0;
@@ -285,11 +278,3 @@ class Model {
     return msg;
   }
 }
-
-function mTest() {
-  let model = new Model();
-  var msg = model.commonRepository.getDesc();
-  msg += model.specialRepository.getDesc();
-  setMsg(msg, model.player1.hand.characters[0].getPortrait());
-}
-//mTest();

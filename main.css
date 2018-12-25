@@ -1,8 +1,9 @@
 :root {
   --page-background: #583e38;
-  --table-background: rgba(255, 255, 255, 0.6);
+  --table-background: rgba(255, 255, 255, 0.5);
   --board-background: rgba(255, 255, 255, 0.4);
-  --transition-sec: 0.6s;
+  --card-glow-color: #F9F56E;
+  --transition-sec: 0.5s;
   /*
   --block-margin: 1px;
   --main-height: 768px;
@@ -21,6 +22,7 @@
   --hand0-card-top: 30px;
   --pool-card-top: 30px;
   --hand1-card-top: 90px;
+  --hand1-card-top2: 20px;
   --hand1-card-top2: 10px;
   */
 }
@@ -86,7 +88,7 @@ body {
   position: absolute;
   transition: all var(--transition-sec);
   transition-timing-function: ease-out;
-  //transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  /*transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);*/
   border-radius: var(--card-border-radius);
   left: var(--card-init-left);
 }
@@ -105,4 +107,13 @@ body {
 
 #hand1 .card:hover {
   top: var(--hand1-card-top2);
+}
+#hand1 .pop{
+  top: var(--hand1-card-top3) !important;
+}
+.glow{
+  border: 2px solid var(--card-glow-color)
+  -webkit-box-shadow: 0px 0px 10px 5px var(--card-glow-color);
+  -moz-box-shadow: 0px 0px 10px 5px var(--card-glow-color);
+  box-shadow: 0px 0px 10px 5px var(--card-glow-color);
 }
