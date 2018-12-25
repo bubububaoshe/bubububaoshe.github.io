@@ -13,7 +13,9 @@
 		<div id="scoreboard"></div>
 		<div id="table">
 			<div id="hand0"></div>
-			<div id="pool"></div>
+			<div id="pool">
+				<div id="repository"></div>
+			</div>
 			<div id="hand1"></div>
 		</div>
 		<div id="specialboard"></div>
@@ -35,10 +37,12 @@
 	var HANDTOPPERCENT2 = 0.4; //top of onfocus cards at player1 hand board
 	var HANDTOPPERCENT3 = 0.1; //top of active cards at player1 hand board
 	var HANDCARDOVERLAPPERCENT = 0.44; //percent of neighboring cards that overlap in hand board
-	var POOLCARDOVERLAPPERCENT = HANDCARDOVERLAPPERCENT * 0.6; //percent of neighboring cards that overlap in pool board
+	var POOLCARDOVERLAPPERCENT = HANDCARDOVERLAPPERCENT * 0.8; //percent of neighboring cards that overlap in pool board
 	var CARDBORDERRADIUSPERCENT = 0.04; //border radius of cards wrt card width
 	var MAXCARDROTATION = 15; //max degree of rotation the pool cards turns
 	var CARDBACKFILE = "img/back.jpg"; //file name of the back of a card
+
+	var OPERATIONDELAY = 500; //delay in milliseconds between machine operations
 
 	function log(msg) {
 		var para = document.querySelector("#scoreboard");
@@ -104,6 +108,12 @@
 			this.setPosition(cardDiv, left);
 			cardDiv.style.left = left + "px";
 		}
+		removeCard(cid){
+			var card = this.container.querySelector("#card"+cid);
+			this.container.removeChild(card);
+			this.repaint();
+			return card;
+		}
 		repaint() {
 			reflow();
 			var cards = this.container.childNodes;
@@ -118,9 +128,8 @@
 		constructor(div, player) {
 			super(div);
 			this.player = player;
-			this.initCards(this.player.getHand().getChars(), "hidden");
+			this.initCards(this.player.getHand().getChars(), "show");
 		}
-
 	}
 	class Hand1Div extends DeckDiv {
 		constructor(div, player) {
@@ -178,9 +187,11 @@
 				for (var i = cards.length - 1; i >= 0; i--) {
 					if(chars[i].getSeason() == oldSeason){
 						cards[i].classList.remove("glow");
+						cards[i].removeEventListener("click", controller.poolCardClick);
 					}
 					else if (chars[i].getSeason() == newSeason) {
 						cards[i].classList.add("glow");
+						cards[i].addEventListener("click", controller.poolCardClick);
 					}
 				}
 			}
@@ -208,6 +219,11 @@
 			this.poolDiv = new PoolDiv(document.getElementById("pool"), model.getPool(), controller);
 			this.repaint();
 			window.addEventListener("resize", this.repaint.bind(this));
+		}
+		updatePickPoolCard(pid, hcid, pcid){
+			var hand = pid==0? this.hand0Div:this.hand1Div;
+			hand.removeCard(hcid);
+			this.poolDiv.removeCard(pcid);
 		}
 		updateHand1Active(oldChar, newChar) {
 			this.hand1Div.updateActive(oldChar, newChar);
@@ -240,7 +256,7 @@
 			var cardW = Math.floor(tableW * (1 - 3 * HANDLEFTPADDINGPERCENT) / (9 * (1 - HANDCARDOVERLAPPERCENT) + 1));
 			var cardH = Math.floor(cardW / CARDRATIO);
 			var cardR = Math.floor(cardW * CARDBORDERRADIUSPERCENT);
-			var cardIL = tableW * (1 - HANDLEFTPADDINGPERCENT * 2) - cardW;
+			var cardIL = tableW - cardW;
 			var hand0CT = Math.floor((player0H - cardH) / 2);
 			var poolCT = Math.floor((poolH - cardH) / 2);
 			var hand1CT = Math.floor((player1H - cardH) * HANDTOPPERCENT);
@@ -292,4 +308,5 @@
 	let model = new Model();
 	let controller = new Controller();
 	let view = new View();
+	var repository = document.querySelector("#repository");
 </script>

@@ -81,6 +81,15 @@ body {
   position: relative;
 }
 
+#repository {
+  background: pink;
+  position: absolute;
+  width: var(--card-width);
+  height: var(--card-height);
+  left: var(--card-init-left);
+  top: var(--pool-card-top);
+}
+
 .card {
   width: var(--card-width);
   height: var(--card-height);
