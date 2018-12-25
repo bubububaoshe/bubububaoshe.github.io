@@ -17,7 +17,9 @@
   --card-width: 120px;
   --card-height: 133px;
   --card-border-radius: 5px;
+  --card-init-left: 300px;
   --hand0-card-top: 30px;
+  --pool-card-top: 30px;
   --hand1-card-top: 90px;
   --hand1-card-top2: 10px;
   */
@@ -82,14 +84,19 @@ body {
   height: var(--card-height);
   background-size: var(--card-width) var(--card-height);
   position: absolute;
-  transition: top var(--transition-sec), left var(--transition-sec);
-  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all var(--transition-sec);
+  transition-timing-function: ease-out;
+  //transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   border-radius: var(--card-border-radius);
-  left: 0;
+  left: var(--card-init-left);
 }
 
 #hand0 .card {
   top: var(--hand0-card-top);
+}
+
+#pool .card{
+  top: var(--pool-card-top);
 }
 
 #hand1 .card {

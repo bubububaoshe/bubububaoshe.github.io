@@ -1,0 +1,2 @@
+不明觉厉的规则：
+在js里调用clientWidth一定能触发transition(据说会令css reflow，有资源消耗)

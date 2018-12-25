@@ -23,7 +23,7 @@
 <script>
 	var MAINRATIO = 1920 / 1080; //width/height ratio of the main board
 	var CARDRATIO = 182 / 240; //width/height ratio of a card
-	var BLOCKMARGIN = 1; //margin in px between game blocks
+	var BLOCKMARGIN = 0; //margin in px between game blocks
 	var MAINMARGINPERCENT = 0.0; //margin of the main board wrt window size
 	var SCOREBOARDPERCENT = 0.333; //width of the score board wrt main width
 	var SPECIALBOARDPERCENT = 0.3; //width of the special card board wrt main width
@@ -32,20 +32,22 @@
 	var HANDLEFTPADDINGPERCENT = 0.04; //left padding of the hand boards in percent
 	var HANDTOPPERCENT = 0.7; //top of inactive cards at player1 hand board
 	var HANDTOPPERCENT2 = 0.2; //top of active cards at player1 hand board
-	var HANDCARDOVERLAPPERCENT = 0.44; //percent of neighboring cards that overlap
+	var HANDCARDOVERLAPPERCENT = 0.44; //percent of neighboring cards that overlap in hand board
+	var POOLCARDOVERLAPPERCENT = HANDCARDOVERLAPPERCENT * 0.6; //percent of neighboring cards that overlap in pool board
 	var CARDBORDERRADIUSPERCENT = 0.04; //border radius of cards wrt card width
+	var MAXCARDROTATION = 15; //max degree of rotation the pool cards turns
 	var CARDBACKFILE = "img/back.jpg"; //file name of the back of a card
 
+	function reflow() {
+		document.getElementById('main').clientWidth;
+	}
 	function getCSSInt(name) {
 		var cv = getComputedStyle(document.documentElement).getPropertyValue(name);
-		cv = parseInt(cv.substring(0, cv.length - 2));
-		return cv;
+		return parseInt(cv);
 	}
-
 	function setCSSInt(name, val) {
 		document.documentElement.style.setProperty(name, val + "px");
 	}
-
 	function createCardDiv(char, display) {
 		var div = document.createElement("div");
 		div.classList.add("card");
@@ -58,63 +60,110 @@
 			alert("Invalid card display mode: " + display);
 		return div;
 	}
-
-	class CardDiv {
+	class DeckDiv {
 		constructor(div) {
 			this.container = div;
+			this.offset = 0;
+			this.leftPadding = 0;
+		}
+		setOffset(offset) {
+			this.offset = offset;
+		}
+		setLeftPadding(left) {
+			this.leftPadding = left;
+		}
+		initCards(chars, display) {
+			for (var i = 0; i < chars.length; i++)
+				this.container.appendChild((createCardDiv(chars[i], display)));
 		}
 		addCard(cardDiv) {
+			var cardW = getCSSInt("--card-width");
+			var offset = Math.floor(cardW * (1 - HANDCARDOVERLAPPERCENT));
+			var left;
+			if (this.container.hasChildNodes()) {
+				var prev = parseInt(this.container.lastChild.style.left);
+				left = prev + offset;
+			} else {
+				var containerW = this.container.clientWidth;
+				left = Math.floor(containerW * HANDLEFTPADDINGPERCENT);
+			}
+			log(this.container.id + ":" + containerW + ":" + offset + ":" + prev);
 			this.container.appendChild(cardDiv);
+			cardDiv.style.left = '0';
+			this.setPosition(cardDiv, left);
+			cardDiv.style.left = left + "px";
+		}
+		repaint() {
+			reflow();
+			var cards = this.container.childNodes;
+			var left = this.leftPadding;
+			for (var i = cards.length - 1; i >= 0; i--) {
+				cards[i].style.left = left + "px";
+				left += this.offset;
+			}
 		}
 	}
-	class Hand0Div extends CardDiv {
+	class Hand0Div extends DeckDiv {
 		constructor(div, player) {
 			super(div);
 			this.player = player;
-			var chars = this.player.getHand().getChars();
-			for (var i = 0; i < chars.length; i++)
-				this.addCard(createCardDiv(chars[i], "hidden"));
+			this.initCards(this.player.getHand().getChars(), "hidden");
 		}
+
 	}
-	class Hand1Div extends CardDiv {
+	class Hand1Div extends DeckDiv {
 		constructor(div, player) {
 			super(div);
 			this.player = player;
-			var chars = this.player.getHand().getChars();
-			for (var i = 0; i < chars.length; i++)
-				this.addCard(createCardDiv(chars[i], "show"));
+			this.initCards(this.player.getHand().getChars(), "show");
 		}
 	}
-	class PoolDiv extends CardDiv {
+	class PoolDiv extends DeckDiv {
 		constructor(div, pool) {
 			super(div);
 			this.pool = pool;
-			var chars = this.pool.getChars();
-			for (var i = 0; i < chars.length; i++)
-				this.addCard(createCardDiv(chars[i], "show"));
+			this.initCards(this.pool.getChars(), "show");
+			this.rotate = [];
+			for(var i=0; i<INITCARDNUMPOOL; i++){
+				var rand = Math.floor((Math.random() * MAXCARDROTATION * 2));
+				this.rotate[i] = (rand - MAXCARDROTATION)%360;
+			}
 		}
-		update(chars){
-
+		repaint(){
+			var cards = this.container.childNodes;
+			var diffTop = Math.floor(getCSSInt("--card-height")/4);
+			var top = getCSSInt("--pool-card-top");
+			var left = this.leftPadding;
+			for (var i = cards.length - 1; i >= 0; i--) {
+				cards[i].style.left = left + "px";
+				if (i%2 == 1)
+					cards[i].style.top = top + diffTop;
+				else
+						cards[i].style.top = top - diffTop;
+				left += this.offset;
+				cards[i].style.transform = 'rotate('+this.rotate[i]+'deg)';
+			}
 		}
 	}
 	class ViewGame {
 		constructor(model, controller) {
 			this.model = model;
 			this.controller = controller;
-			this.player0HandDiv = new Hand0Div(document.getElementById("hand0"), this.model.getPlayer0());
-			this.player1HandDiv = new Hand1Div(document.getElementById("hand1"), this.model.getPlayer1());
+			this.hand0Div = new Hand0Div(document.getElementById("hand0"), this.model.getPlayer0());
+			this.hand1Div = new Hand1Div(document.getElementById("hand1"), this.model.getPlayer1());
 			this.poolDiv = new PoolDiv(document.getElementById("pool"), this.model.getPool());
-			this.update();
-			window.addEventListener("resize", this.update.bind(this));
+			this.repaint();
+			window.addEventListener("resize", this.repaint.bind(this));
 		}
-		update() {
+		repaint() {
 			this.setSizes();
-			this.setPositions();
-			var f = "card12";
+			this.hand0Div.repaint();
+			this.hand1Div.repaint();
+			this.poolDiv.repaint();
 		}
 		setSizes() {
-			var winW = window.innerWidth,
-				winH = window.innerHeight;
+			var winW = window.innerWidth;
+			var winH = window.innerHeight;
 			var mainH = Math.floor(winH - winH * MAINMARGINPERCENT * 2);
 			var mainW = Math.floor(winW - winH * MAINMARGINPERCENT * 2);
 			if (MAINRATIO > 0) {
@@ -130,11 +179,18 @@
 			var player0H = Math.floor(mainH * PLAYER0PERCENT);
 			var player1H = Math.floor(mainH * PLAYER1PERCENT);
 			var poolH = mainH - player0H - player1H - BLOCKMARGIN * 2;
-			//var cardH = Math.floor(player0H * CARDHEIGHTPERCENT);
-			//var cardW = Math.floor(cardH * CARDRATIO);
 			var cardW = Math.floor(tableW * (1 - 3 * HANDLEFTPADDINGPERCENT) / (9 * (1 - HANDCARDOVERLAPPERCENT) + 1));
 			var cardH = Math.floor(cardW / CARDRATIO);
 			var cardR = Math.floor(cardW * CARDBORDERRADIUSPERCENT);
+			var cardIL = tableW * (1 - HANDLEFTPADDINGPERCENT * 2) - cardW;
+			var hand0CT = Math.floor((player0H - cardH) / 2);
+			var poolCT = Math.floor((poolH - cardH) / 2);
+			var hand1CT = Math.floor((player1H - cardH) * HANDTOPPERCENT);
+			var hand1CT2 = Math.floor((player1H - cardH) * HANDTOPPERCENT2);
+			var handOFS = Math.floor(cardW * (1 - HANDCARDOVERLAPPERCENT));
+			var poolOFS = Math.floor(cardW * (1 - POOLCARDOVERLAPPERCENT));
+			var blockLP = Math.floor(tableW * HANDLEFTPADDINGPERCENT);
+
 			setCSSInt("--block-margin", BLOCKMARGIN);
 			setCSSInt("--main-height", mainH);
 			setCSSInt("--main-width", mainW);
@@ -148,35 +204,18 @@
 			setCSSInt("--card-width", cardW);
 			setCSSInt("--card-height", cardH);
 			setCSSInt("--card-border-radius", cardR);
-		}
-		setPositions() {
-			this.setHandPosition(this.player0HandDiv.container);
-			this.setHandPosition(this.player1HandDiv.container);
-		}
-		setHandPosition(container) {
-			var id = container.id;
-			var containerW = container.clientWidth
-			var containerH = container.clientHeight;
-			var cardW = getCSSInt("--card-width");
-			var cardH = getCSSInt("--card-height");
+			setCSSInt("--card-init-left", cardIL);
+			setCSSInt("--hand0-card-top", hand0CT);
+			setCSSInt("--pool-card-top", poolCT);
+			setCSSInt("--hand1-card-top", hand1CT);
+			setCSSInt("--hand1-card-top2", hand1CT2);
 
-			if (id == "hand1") {
-				var cardT = Math.floor((containerH - cardH) * HANDTOPPERCENT);
-				var cardT2 = Math.floor((containerH - cardH) * HANDTOPPERCENT2);
-				setCSSInt("--hand1-card-top", cardT);
-				setCSSInt("--hand1-card-top2", cardT2);
-			} else {
-				var cardT = Math.floor((containerH - cardH) / 2);
-				setCSSInt("--hand0-card-top", cardT);
-			}
-
-			var cards = container.childNodes;
-			var left = Math.floor(containerW * HANDLEFTPADDINGPERCENT);
-			var offset = Math.floor(cardW * (1 - HANDCARDOVERLAPPERCENT));
-			for (var i = 0; i < cards.length; i++) {
-				cards[i].style.left = left + "px";
-				left += offset;
-			}
+			this.hand0Div.setOffset(handOFS);
+			this.hand1Div.setOffset(handOFS);
+			this.poolDiv.setOffset(poolOFS);
+			this.hand0Div.setLeftPadding(blockLP);
+			this.hand1Div.setLeftPadding(blockLP);
+			this.poolDiv.setLeftPadding(blockLP);
 		}
 	}
 
@@ -188,7 +227,7 @@
 	function log(msg) {
 		var para = document.querySelector("#scoreboard");
 		para.setAttribute('style', 'white-space: pre;');
-		para.textContent += msg+"\n";
+		para.textContent += msg + "\n";
 	}
 	vTest();
 </script>
