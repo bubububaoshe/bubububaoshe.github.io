@@ -1,6 +1,7 @@
 <!DOCUMENTTYPE html>
 <html>
 <head>
+	<title>千秋戏</title>
 	<meta charset="UTF-8">
 	<link rel="stylesheet" type="text/css" href="main.css">
 	<script src="model.js"></script>
@@ -146,7 +147,7 @@
 		constructor(div, player) {
 			super(div);
 			this.player = player;
-			this.initCards(this.player.getHand().getChars(), "show");
+			this.initCards(this.player.getHand().getChars(), "hidden");
 		}
 	}
 	class Hand1Div extends DeckDiv {

@@ -17,27 +17,23 @@ class Controller{
     var hc = model.getActiveChar();
     model.setHand1Active(hc);
     model.pickCard(model.getPlayer1(), hc, pc);
-
+/*
     model.dealOne(null);
-    //model.handleNoMatch(model.getPlayer0());
     model.makeOpponentPick();
     model.dealOne(null);
     model.handlePlayer1NoMatch();
-    /*
+  */
     setTimeout(function(){
       model.dealOne(null);
-      model.handleNoMatch(model.getPlayer0());
     }, OPERATIONDELAY);
     setTimeout(function(){
       model.makeOpponentPick();
-    }, OPERATIONDELAY*2);
+    }, OPERATIONDELAY*3);
     setTimeout(function(){
       model.dealOne(null);
-      log(1);
-      model.handleNoMatch(model.getPlayer1());
-    }, OPERATIONDELAY*3);*/
+      model.handlePlayer1NoMatch();
+    }, OPERATIONDELAY*4);
   }
-
   discardCardClick(){
     var id = getCardID(this);
     var char = model.getPlayer1().getHand().getChar(id);

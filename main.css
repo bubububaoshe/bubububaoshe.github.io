@@ -3,7 +3,7 @@
   --table-background: rgba(255, 255, 255, 0.5);
   --board-background: rgba(255, 255, 255, 0.4);
   --card-glow-color: #F9F56E;
-  --transition-sec: 0.5s;
+  --transition-sec: 0.7s;
   /*
   --block-margin: 1px;
   --main-height: 768px;
@@ -96,8 +96,8 @@ body {
   background-size: var(--card-width) var(--card-height);
   position: absolute;
   transition: all var(--transition-sec);
-  transition-timing-function: ease-out;
-  /*transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);*/
+  /*transition-timing-function: ease-out;*/
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   border-radius: var(--card-border-radius);
   left: var(--card-init-left);
 }
