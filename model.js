@@ -26,7 +26,14 @@ COMMONCHARLIST = [
   [24, "西陵", 4, "春"],
   [25, "嫘祖", 4, "夏"],
   [26, "陵越", 4, "冬"],
-  [27, "悭臾", 4, "夏"]
+  [27, "悭臾", 4, "夏"],
+  [28, "风晴雪", 4, "春"],
+  [29, "昭明", 4, "春"],
+  [30, "古剑焚寂", 4, "夏"],
+  [31, "阿阮", 4, "春"],
+  [32, "禺期", 4, "夏"],
+  [33, "乐无异", 4, "夏"],
+  [34, "忘川", 4, "冬"]
 ];
 PLAYERSPECIALS = [
   [214],
@@ -56,10 +63,10 @@ class Character {
   isSpecial() {
     return false;
   }
-  setOwner(owner){
+  setOwner(owner) {
     this.owner = owner;
   }
-  getID(){
+  getID() {
     return this.id;
   }
   getName() {
@@ -75,7 +82,7 @@ class Character {
     return "img/" + this.id + ".jpg";
   }
   getDesc() {
-    var msg = this.id + "：" + this.getName() + "，" + this.getScore() + "分，" + this.getSeason() + "季, 归属玩家" + (this.owner==null?"-":this.owner.id) + "\n";
+    var msg = this.id + "：" + this.getName() + "，" + this.getScore() + "分，" + this.getSeason() + "季, 归属玩家" + (this.owner == null ? "-" : this.owner.id) + "\n";
     return msg;
   }
 }
@@ -110,27 +117,33 @@ class Deck {
     this.characters = [];
   }
   addChar(char) {
-    this.characters.push(char);
+    this.characters.unshift(char);
   }
-  addRandom(size, repo) {
+  initDeck(size, repo) {
     for (var i = 0; i < size; i++)
       this.addChar(repo.removeRandom());
-<<<<<<< HEAD
   }
-  getMatch(char){
+  addRandom(repo) {
+    if (repo.characters.length == 0) {
+      log("Empty deck!!!!!!!!!!!!!!!!!");
+      return null;
+    }
+    var char = repo.removeRandom();
+    this.addChar(char);
+    return char;
+  }
+  getMatch(char) {
     var s = char.getSeason();
     var len = this.characters.length;
-    for(var i=0; i<len; i++)
-      if(this.characters[i].getSeason() == s)
+    for (var i = 0; i < len; i++)
+      if (this.characters[i].getSeason() == s)
         return this.characters[i];
     return null;
-=======
->>>>>>> a616528adc5ef783ebd39514219c575cc36679e9
   }
   clear() {
     this.characters.length = 0;
   }
-  getChars(){
+  getChars() {
     return this.characters;
   }
   removeRandom() {
@@ -166,7 +179,7 @@ class Deck {
     this.characters.splice(target, 1);
     return char;
   }
-  getChar(id){
+  getChar(id) {
     var clen = this.characters.length;
     for (var i = 0; i < clen; i++)
       if (this.characters[i].getID() == id)
@@ -204,7 +217,8 @@ class Repository extends Deck {
   }
   initSpecialRepo() {
     let sp = new SpecialCharacter(200, "沈夜", 6, "冬");
-    let t1 = new Trick("打徒弟"), t2 = new Trick("打徒孙");
+    let t1 = new Trick("打徒弟"),
+      t2 = new Trick("打徒孙");
     sp.addTrick(t1);
     sp.addTrick(t2);
     this.addChar(sp);
@@ -234,10 +248,10 @@ class Player {
   constructor(id, commonRepo, specialRepo) {
     this.id = id;
     this.hand = new Deck();
-    this.hand.addRandom(INITCARDNUMHAND, commonRepo);
+    this.hand.initDeck(INITCARDNUMHAND, commonRepo);
     this.table = new Deck();
     this.specials = new Deck();
-    this.specials.addRandom(1, specialRepo);
+    //this.specials.addRandom(1, specialRepo);
   }
   initSpecials(repo) {
     var slen = PLAYERSPECIALS[this.id].length;
@@ -245,11 +259,11 @@ class Player {
       this.specials.addChar(repo.removeCharacterByID(PLAYERSPECIALS[this.id][i]));
     }
   }
-  addChar(char){
+  addChar(char) {
     this.table.addChar(char);
     char.setOwner(this);
   }
-  getHand(){
+  getHand() {
     return this.hand;
   }
   getDesc() {
@@ -268,76 +282,67 @@ class Model {
     this.player0 = new Player(0, this.commonRepository, this.specialRepository);
     this.player1 = new Player(1, this.commonRepository, this.specialRepository);
     this.pool = new Deck();
-    this.pool.addRandom(INITCARDNUMPOOL, this.commonRepository);
+    this.pool.initDeck(INITCARDNUMPOOL, this.commonRepository);
     this.activeChar = null;
   }
-<<<<<<< HEAD
-  aiPick(){
+  dealOne(char) {
+    if (char == null)
+      var char = this.pool.addRandom(this.commonRepository);
+    else
+      this.pool.addChar(char);log("发牌:"+char.getDesc());
+    view.updateDeal(char);
+  }
+  aiPick() {
     var poolChars = this.pool.getChars();
     var hand = this.player0.getHand();
-    var poolChar = null, handChar=null;
-    for(var i=0; i<poolChars.length; i++){
+    var poolChar = null,
+      handChar = null;
+    for (var i = 0; i < poolChars.length; i++) {
       handChar = hand.getMatch(poolChars[i]);
-      if(handChar != null){
+      if (handChar != null) {
         poolChar = poolChars[i];
         break;
       }
     }
-    if(handChar != null)
+    if (handChar != null)
       return [handChar, poolChar];
     return null;
   }
-  makeOpponentPick(){
+  makeOpponentPick() {
     var pick = this.aiPick();
-    if(pick==null)
+    if (pick == null)
       log("NO MATCH!!!!!!!!!!!!!!");
     else
       this.pickCard(this.player0, pick[0], pick[1]);
   }
-  pickCard(player, handChar, poolChar){
+  pickCard(player, handChar, poolChar) {
     this.pool.removeChar(poolChar);
     player.hand.removeChar(handChar);
     player.addChar(poolChar);
     player.addChar(handChar);
     view.updatePickPoolCard(player.id, handChar.id, poolChar.id);
-    log(handChar.getDesc()+poolChar.getDesc());
+    log(handChar.getDesc() + poolChar.getDesc());
   }
 
-  setHand1Active(char){
-    if(this.activeChar == null || this.activeChar != char){
-=======
-  pickPoolCard(pid, poolCharID){
-    var handChar = this.activeChar;
-    this.setHand1Active(handChar.id);
-    var player = pid==0? this.player0:this.player1;
-    var char = this.pool.removeCharByID(poolCharID);
-    player.hand.removeChar(handChar);
-    player.table.addChar(char);
-    player.table.addChar(handChar);
-    view.updatePickPoolCard(pid, handChar.id, poolCharID);
-  }
-  setHand1Active(id){
-    if(this.activeChar == null || this.activeChar.id != id){
-      var char = this.player1.getHand().getChar(id);
->>>>>>> a616528adc5ef783ebd39514219c575cc36679e9
+  setHand1Active(char) {
+    if (this.activeChar == null || this.activeChar != char) {
       view.updateHand1Active(this.activeChar, char);
       this.activeChar = char;
-    }
-    else {
+    } else {
       view.updateHand1Active(this.activeChar, null);
       this.activeChar = null;
     }
   }
-  getActiveChar(){
+  getActiveChar() {
     return this.activeChar;
   }
-  getPlayer0(){
+  getPlayer0() {
     return this.player0;
   }
-  getPlayer1(){
+  getPlayer1() {
     return this.player1;
   }
-  getPool(){
+  getPool() {
     return this.pool;
   }
   getDesc() {

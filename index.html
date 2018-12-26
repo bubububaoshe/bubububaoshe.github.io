@@ -35,7 +35,7 @@
 	var HANDTOPPERCENT2 = 0.4; //top of onfocus cards at player1 hand board
 	var HANDTOPPERCENT3 = 0.1; //top of active cards at player1 hand board
 	var HANDCARDOVERLAPPERCENT = 0.44; //percent of neighboring cards that overlap in hand board
-	var POOLCARDOVERLAPPERCENT = HANDCARDOVERLAPPERCENT * 0.8; //percent of neighboring cards that overlap in pool board
+	var POOLCARDOVERLAPPERCENT = HANDCARDOVERLAPPERCENT * 0.9; //percent of neighboring cards that overlap in pool board
 	var CARDBORDERRADIUSPERCENT = 0.04; //border radius of cards wrt card width
 	var MAXCARDROTATION = 15; //max degree of rotation the pool cards turns
 	var CARDBACKFILE = "img/back.jpg"; //file name of the back of a card
@@ -89,22 +89,13 @@
 			for (var i = 0; i < chars.length; i++)
 				this.container.appendChild((createCardDiv(chars[i], display)));
 		}
-		addCard(cardDiv) {
-			var cardW = getCSSInt("--card-width");
-			var offset = Math.floor(cardW * (1 - HANDCARDOVERLAPPERCENT));
-			var left;
-			if (this.container.hasChildNodes()) {
-				var prev = parseInt(this.container.lastChild.style.left);
-				left = prev + offset;
-			} else {
-				var containerW = this.container.clientWidth;
-				left = Math.floor(containerW * HANDLEFTPADDINGPERCENT);
-			}
-			log(this.container.id + ":" + containerW + ":" + offset + ":" + prev);
-			this.container.appendChild(cardDiv);
-			cardDiv.style.left = '0';
-			this.setPosition(cardDiv, left);
-			cardDiv.style.left = left + "px";
+		addCard(card) {
+			//assumption: the deck is not empty before insertion
+			var prevCard = this.container.firstChild;
+			var left = parseInt(prevCard.style.left) + this.offset;
+			this.container.insertBefore(card, prevCard);
+			reflow();
+			card.style.left = left + "px";
 		}
 		removeCard(cid){
 			var card = this.container.querySelector("#card"+cid);
@@ -141,7 +132,6 @@
 				this.container.appendChild((card));
 				card.addEventListener("click", controller.hand1CardClick);
 			}
-
 		}
 		updateActive(oldChar, newChar) {
 			if (oldChar != null) {
@@ -162,10 +152,21 @@
 			this.pool = pool;
 			this.initCards(this.pool.getChars(), "show");
 			this.rotate = [];
-			for (var i = 0; i < INITCARDNUMPOOL; i++) {
+			for (var i = 0; i < INITCARDNUMPOOL*2; i++) {
 				var rand = Math.floor((Math.random() * MAXCARDROTATION * 2));
 				this.rotate[i] = (rand - MAXCARDROTATION) % 360;
 			}
+		}
+		addCard(card){
+			super.addCard(card);
+			var i = this.container.childNodes.length - 1;
+			var diffTop = Math.floor(getCSSInt("--card-height") / 4);
+			var top = getCSSInt("--pool-card-top");
+			if (i % 2 == 1)
+				card.style.top = top + diffTop;
+			else
+				card.style.top = top - diffTop;log(i)
+			cards.style.transform = 'rotate(' + this.rotate[i] + 'deg)';
 		}
 		updateMatch(oldChar, newChar) {
 			//update card matchs in pool according to seasons
@@ -200,7 +201,7 @@
 			var top = getCSSInt("--pool-card-top");
 			var left = this.leftPadding;
 			for (var i = cards.length - 1; i >= 0; i--) {
-				cards[i].style.left = left + "px";
+				cards[i].style.left = left;
 				if (i % 2 == 1)
 					cards[i].style.top = top + diffTop;
 				else
@@ -217,6 +218,11 @@
 			this.poolDiv = new PoolDiv(document.getElementById("pool"), model.getPool(), controller);
 			this.repaint();
 			window.addEventListener("resize", this.repaint.bind(this));
+		}
+		updateDeal(char){
+			var card = createCardDiv(char, "show");
+			this.poolDiv.addCard(card);
+			this.repaint;
 		}
 		updatePickPoolCard(pid, hcid, pcid){
 			var hand = pid==0? this.hand0Div:this.hand1Div;
@@ -254,7 +260,7 @@
 			var cardW = Math.floor(tableW * (1 - 3 * HANDLEFTPADDINGPERCENT) / (9 * (1 - HANDCARDOVERLAPPERCENT) + 1));
 			var cardH = Math.floor(cardW / CARDRATIO);
 			var cardR = Math.floor(cardW * CARDBORDERRADIUSPERCENT);
-			var cardIL = tableW - cardW;
+			var cardIL = tableW - Math.floor(cardW*1.3);
 			var hand0CT = Math.floor((player0H - cardH) / 2);
 			var poolCT = Math.floor((poolH - cardH) / 2);
 			var hand1CT = Math.floor((player1H - cardH) * HANDTOPPERCENT);

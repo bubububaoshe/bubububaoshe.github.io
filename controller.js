@@ -4,8 +4,7 @@ function getCardID(div){
 class Controller{
   constructor(){
   }
-<<<<<<< HEAD
-  hand1CardClick(){log("hand1CardClick");
+  hand1CardClick(){
     var id = getCardID(this);
     var hc = model.getPlayer1().getHand().getChar(id);
     model.setHand1Active(hc);
@@ -16,15 +15,14 @@ class Controller{
     var hc = model.getActiveChar();
     model.setHand1Active(hc);
     model.pickCard(model.getPlayer1(), hc, pc);
-    setTimeout(function(){model.makeOpponentPick();}, OPERATIONDELAY);
-    //model.makeOpponentPick();
-=======
-  hand1CardClick(){
-    model.setHand1Active(getCardID(this));
-  }
-  poolCardClick(){
-    var id = getCardID(this);
-    model.pickPoolCard(1, id);
->>>>>>> a616528adc5ef783ebd39514219c575cc36679e9
+    setTimeout(function(){
+      model.dealOne(null);
+    }, OPERATIONDELAY);
+    setTimeout(function(){
+      model.makeOpponentPick();
+    }, OPERATIONDELAY);
+    setTimeout(function(){
+      model.dealOne(null);
+    }, OPERATIONDELAY);
   }
 }
