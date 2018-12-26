@@ -39,14 +39,28 @@ COMMONCHARLIST = [
   [37, "清和真人", 4, "秋"],
   [38, "巽芳", 4, "春"],
   [39, "古剑红玉", 4, "夏"],
-  [40, "青玉司南佩", 4, "春"]
+  [40, "青玉司南佩", 4, "春"],
+  [41, "无名之剑", 4, "秋"],
+  [42, "长安", 4, "春"],
+  [43, "古剑晗光", 4, "冬"],
+  [44, "金麒麟", 4, "秋"],
+  [45, "襄铃", 4, "夏"],
+  [46, "通天之器", 4, "秋"],
+  [47, "巫山", 4, "夏"],
+  [48, "风里沙", 4, "秋"],
+  [49, "凌星见", 4, "春"],
+  [50, "闻人羽", 4, "秋"],
+  [51, "百草谷", 4, "夏"]
 ];
 PLAYERSPECIALS = [
   [214],
   [203, 200]
 ];
+
 INITCARDNUMHAND = 10;
 INITCARDNUMPOOL = 8;
+//configurable settings
+var AILEVEL = "巫炤";
 
 class Trick {
   constructor(description) {
@@ -56,7 +70,6 @@ class Trick {
     return this.description;
   }
 }
-
 class Character {
   constructor(id, name, score, season) {
     this.id = id;
@@ -92,7 +105,6 @@ class Character {
     return msg;
   }
 }
-
 class SpecialCharacter extends Character {
   constructor(id, name, description, score, season) {
     super(id, name, description, score, season);
@@ -117,7 +129,6 @@ class SpecialCharacter extends Character {
     return msg;
   }
 }
-
 class Deck {
   constructor() {
     this.characters = [];
@@ -257,6 +268,7 @@ class Player {
     this.hand.initDeck(INITCARDNUMHAND, commonRepo);
     this.table = new Deck();
     this.specials = new Deck();
+    this.matchable = true;
     //this.specials.addRandom(1, specialRepo);
   }
   initSpecials(repo) {
@@ -280,7 +292,6 @@ class Player {
     return msg;
   }
 }
-
 class Model {
   constructor() {
     this.commonRepository = new Repository("common");
@@ -291,33 +302,88 @@ class Model {
     this.pool.initDeck(INITCARDNUMPOOL, this.commonRepository);
     this.activeChar = null;
   }
+  discardCard(player, char){
+    if(char == null)
+      char = player.hand.removeRandom();
+    else
+      player.hand.removeChar(char);
+    this.pool.addChar(char);
+    var newChar = player.hand.addRandom(this.commonRepository);
+    log((player==this.player0?"AI":"你") +"背弃「"+char.name+"」获得一只「"+newChar.name+"」");
+    view.updateDiscard(player.id, char, newChar);
+  }
+  handlePlayer1NoMatch(){
+      if(!this.hasMatch(this.player1)){
+        this.player1.matchable = false;
+        notifyNoMatch("show");
+        view.getHand1().addDiscardController();
+      }
+      else if(!this.player1.matchable){
+        notifyNoMatch("hidden");
+        this.player1.matchable = true;
+        view.getHand1().removeDiscardController();
+      }
+  }
+  hasMatch(player){
+    var match = this.pickLeft(player);
+    return match!=null;/*
+    if(match==null){
+      if(player.id == 0)
+        log("AI is dead!");
+      else {
+        log("I am dead!");
+      }
+    }
+    else log("Player"+player.id + " not dead yet!");*/
+  }
   dealOne(char) {
     if (char == null)
       var char = this.pool.addRandom(this.commonRepository);
     else
-      this.pool.addChar(char);log("发牌:"+char.getDesc());
+      this.pool.addChar(char);//log("发牌:"+char.getDesc());
     view.updateDeal(char);
   }
-  aiPick() {
-    var poolChars = this.pool.getChars();
-    var hand = this.player0.getHand();
-    var poolChar = null,
-      handChar = null;
-    for (var i = poolChars.length -1; i >= 0 ; i++) {
-      handChar = hand.getMatch(poolChars[i]);
-      if (handChar != null) {
-        poolChar = poolChars[i];
-        break;
+  pickLeft(player){
+      var poolChars = this.pool.getChars();
+      var hand = player.getHand();
+      var poolChar = null;
+      var handChar = null;
+      for (var i = poolChars.length -1; i >= 0 ; i--) {
+        handChar = hand.getMatch(poolChars[i]);
+        if (handChar != null) {
+          poolChar = poolChars[i];
+          break;
+        }
       }
+      if (handChar != null)
+        return [handChar, poolChar];
+      return null;
+  }
+  aiPick() {
+    switch (AILEVEL) {
+      case "巫炤":
+        return this.pickLeft(this.player0);
+        break;
+      default: log("Invalid AI　Level!!!!!!!!");
+        return null;
     }
-    if (handChar != null)
-      return [handChar, poolChar];
-    return null;
+  }
+  aiDiscard(){
+    switch (AILEVEL) {
+      case "巫炤":
+        return null;
+        break;
+      default: log("Invalid AI　Level!!!!!!!!");
+        return null;
+    }
   }
   makeOpponentPick() {
     var pick = this.aiPick();
-    if (pick == null)
-      log("NO MATCH!!!!!!!!!!!!!!");
+    if (pick == null) {
+      var discard = this.aiDiscard();
+      this.discardCard(this.player0, discard);
+      this.makeOpponentPick();
+    }
     else
       this.pickCard(this.player0, pick[0], pick[1]);
   }
@@ -327,7 +393,7 @@ class Model {
     player.addChar(poolChar);
     player.addChar(handChar);
     view.updatePickPoolCard(player.id, handChar.id, poolChar.id);
-    log(handChar.getDesc() + poolChar.getDesc());
+    log((player==this.player0?"AI用「":"你用「")+handChar.name +"」吸引到一只「"+ poolChar.name+"」");
   }
   setHand1Active(char) {
     if (this.activeChar == null || this.activeChar != char) {

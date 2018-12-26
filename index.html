@@ -1,13 +1,11 @@
 <!DOCUMENTTYPE html>
 <html>
-
 <head>
 	<meta charset="UTF-8">
 	<link rel="stylesheet" type="text/css" href="main.css">
 	<script src="model.js"></script>
 	<script src="controller.js"></script>
 </head>
-
 <body>
 	<div id="main">
 		<div id="scoreboard"></div>
@@ -19,9 +17,10 @@
 		<div id="specialboard"></div>
 	</div>
 </body>
-
 </html>
 <script>
+
+//consts
 	var MAINRATIO = 1920 / 1080; //width/height ratio of the main board
 	var CARDRATIO = 182 / 240; //width/height ratio of a card
 	var BLOCKMARGIN = 0; //margin in px between game blocks
@@ -40,14 +39,19 @@
 	var MAXCARDROTATION = 15; //max degree of rotation the pool cards turns
 	var CARDBACKFILE = "img/back.jpg"; //file name of the back of a card
 
-	var OPERATIONDELAY = 500; //delay in milliseconds between machine operations
-
 	function log(msg) {
 		var para = document.querySelector("#scoreboard");
 		para.setAttribute('style', 'white-space: pre;');
 		para.textContent += msg + "\n";
 	}
-
+	function notifyNoMatch(display) {
+		var para = document.querySelector("#specialboard");
+		para.setAttribute('style', 'white-space: pre;');
+		if(display == "show")
+			para.textContent = "无牌可匹配\n需背弃一张牌\n";
+		else
+			para.textContent = "";
+	}
 	function reflow() {
 		document.getElementById('main').clientWidth;
 	}
@@ -73,6 +77,24 @@
 			alert("Invalid card display mode: " + display);
 		return div;
 	}
+	function removeDiscardController(card){
+		card.removeEventListener("click", controller.discardCardClick);
+	}
+	function addDiscardController(card){
+		card.addEventListener("click", controller.discardCardClick);
+	}
+	function removeHand1ClickController(card){
+		card.removeEventListener("click", controller.hand1CardClick);
+	}
+	function addHand1ClickController(card){
+		card.addEventListener("click", controller.hand1CardClick);
+	}
+	function removePoolClickController(card){
+		card.removeEventListener("click", controller.poolCardClick);
+	}
+	function addPoolClickController(card){
+		card.addEventListener("click", controller.poolCardClick);
+	}
 	class DeckDiv {
 		constructor(div) {
 			this.container = div;
@@ -92,8 +114,15 @@
 		addCard(card) {
 			//assumption: the deck is not empty before insertion
 			var prevCard = this.container.firstChild;
-			var left = parseInt(prevCard.style.left) + this.offset;
-			this.container.insertBefore(card, prevCard);
+			var left;
+			if (prevCard){
+				left = parseInt(prevCard.style.left) + this.offset;
+				this.container.insertBefore(card, prevCard);
+			}
+			else {
+				this.container.appendChild(card);
+				left = this.leftPadding;
+			}
 			reflow();
 			card.style.left = left + "px";
 		}
@@ -117,7 +146,7 @@
 		constructor(div, player) {
 			super(div);
 			this.player = player;
-			this.initCards(this.player.getHand().getChars(), "hidden");
+			this.initCards(this.player.getHand().getChars(), "show");
 		}
 	}
 	class Hand1Div extends DeckDiv {
@@ -126,11 +155,30 @@
 			this.player = player;
 			this.initCards(this.player.getHand().getChars(), "show");
 		}
+		addCard(card){
+			super.addCard(card);
+			addHand1ClickController(card);
+		}
 		initCards(chars, display) {
 			for (var i = 0; i < chars.length; i++) {
 				var card = createCardDiv(chars[i], display);
 				this.container.appendChild((card));
 				card.addEventListener("click", controller.hand1CardClick);
+			}
+			//this.addCardController(controller.discardCardClick);
+		}
+		addDiscardController(){
+			var cards = this.container.childNodes;
+			for (var i = 0; i < cards.length; i++) {
+				removeHand1ClickController(cards[i]);
+				addDiscardController(cards[i]);
+			}
+		}
+		removeDiscardController(){
+			var cards = this.container.childNodes;
+			for (var i = 0; i < cards.length; i++) {
+				removeDiscardController(cards[i]);
+				addHand1ClickController(cards[i]);
 			}
 		}
 		updateActive(oldChar, newChar) {
@@ -151,11 +199,14 @@
 			super(div, controller);
 			this.pool = pool;
 			this.initCards(this.pool.getChars(), "show");
-			this.rotate = [];
+			this.rotates = [];
 			for (var i = 0; i < INITCARDNUMPOOL*2; i++) {
-				var rand = Math.floor((Math.random() * MAXCARDROTATION * 2));
-				this.rotate[i] = (rand - MAXCARDROTATION) % 360;
+				this.rotates[i] = this.getRandomRotate();
 			}
+		}
+		getRandomRotate(){
+			var rand = Math.floor((Math.random() * MAXCARDROTATION * 2));
+			return (rand - MAXCARDROTATION) % 360;
 		}
 		addCard(card){
 			super.addCard(card);
@@ -166,7 +217,8 @@
 				card.style.top = top + diffTop;
 			else
 				card.style.top = top - diffTop;
-			cards.style.transform = 'rotate(' + this.rotate[i] + 'deg)';
+				this.rotates[i] = this.getRandomRotate();
+			card.style.transform = 'rotate(' + this.rotates[i] + 'deg)';
 		}
 		updateMatch(oldChar, newChar) {
 			//update card matchs in pool according to seasons
@@ -207,7 +259,7 @@
 				else
 					cards[i].style.top = top - diffTop;
 				left += this.offset;
-				cards[i].style.transform = 'rotate(' + this.rotate[i] + 'deg)';
+				cards[i].style.transform = 'rotate(' + this.rotates[i] + 'deg)';
 			}
 		}
 	}
@@ -219,15 +271,23 @@
 			this.repaint();
 			window.addEventListener("resize", this.repaint.bind(this));
 		}
+		updateDiscard(pid, oldChar, newChar){
+			var hand = pid==0?this.hand0Div:this.hand1Div;
+			var card = hand.removeCard(oldChar.id);
+			removeDiscardController(card);
+			this.poolDiv.addCard(card);
+			hand.addCard(createCardDiv(newChar, "show"));
+		}
 		updateDeal(char){
 			var card = createCardDiv(char, "show");
 			this.poolDiv.addCard(card);
-			this.repaint;
 		}
 		updatePickPoolCard(pid, hcid, pcid){
 			var hand = pid==0? this.hand0Div:this.hand1Div;
-			hand.removeCard(hcid);
-			this.poolDiv.removeCard(pcid);
+			var card = hand.removeCard(hcid);
+			removeHand1ClickController(card);
+			card = this.poolDiv.removeCard(pcid);
+			removePoolClickController(card);
 		}
 		updateHand1Active(oldChar, newChar) {
 			this.hand1Div.updateActive(oldChar, newChar);
@@ -312,4 +372,5 @@
 	let model = new Model();
 	let controller = new Controller();
 	let view = new View();
+	model.handlePlayer1NoMatch();
 </script>
