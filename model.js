@@ -309,32 +309,44 @@ class Model {
       player.hand.removeChar(char);
     this.pool.addChar(char);
     var newChar = player.hand.addRandom(this.commonRepository);
-    log((player==this.player0?"AI":"你") +"背弃「"+char.name+"」获得一只「"+newChar.name+"」");
+    log((player==this.player0?"AI":"你") +"抛弃「"+char.name+"」换取一只「"+newChar.name+"」");
     view.updateDiscard(player.id, char, newChar);
   }
+  needRedeal(){
+    return this.pool.getChars().length>=INITCARDNUMPOOL+2;
+  }
+  redeal(){
+    var chars = this.commonRepository.characters;
+    this.commonRepository.characters = chars.concat(this.pool.getChars());
+    this.pool.clear();
+    this.pool.initDeck(INITCARDNUMPOOL, this.commonRepository);
+    view.getPool().updateRedeal();
+  }
   handlePlayer1NoMatch(){
-      if(!this.hasMatch(this.player1)){
+    if(!this.hasMatch(this.player1)){
+      if(this.needRedeal()){
+        setTimeout(function(){
+          model.redeal();
+          model.handlePlayer1NoMatch();
+        }, OPERATIONDELAY*2);
+        //this.redeal();
+        //this.
+      }
+      else if(this.player1.matchable){
         this.player1.matchable = false;
         notifyNoMatch("show");
         view.getHand1().addDiscardController();
       }
-      else if(!this.player1.matchable){
-        notifyNoMatch("hidden");
-        this.player1.matchable = true;
-        view.getHand1().removeDiscardController();
-      }
+    }
+    else if(!this.player1.matchable){
+      notifyNoMatch("hidden");
+      this.player1.matchable = true;
+      view.getHand1().removeDiscardController();
+    }
   }
   hasMatch(player){
     var match = this.pickLeft(player);
-    return match!=null;/*
-    if(match==null){
-      if(player.id == 0)
-        log("AI is dead!");
-      else {
-        log("I am dead!");
-      }
-    }
-    else log("Player"+player.id + " not dead yet!");*/
+    return match!=null;
   }
   dealOne(char) {
     if (char == null)
@@ -360,6 +372,7 @@ class Model {
       return null;
   }
   aiPick() {
+    //returns an array [hand pick, pool pick]
     switch (AILEVEL) {
       case "巫炤":
         return this.pickLeft(this.player0);
@@ -380,12 +393,16 @@ class Model {
   makeOpponentPick() {
     var pick = this.aiPick();
     if (pick == null) {
-      var discard = this.aiDiscard();
-      this.discardCard(this.player0, discard);
+      if(this.needRedeal())
+        this.redeal();
+      else {
+        var discard = this.aiDiscard();
+        this.discardCard(this.player0, discard);
+      }
       this.makeOpponentPick();
     }
     else
-      this.pickCard(this.player0, pick[0], pick[1]);
+    this.pickCard(this.player0, pick[0], pick[1]);
   }
   pickCard(player, handChar, poolChar) {
     this.pool.removeChar(poolChar);

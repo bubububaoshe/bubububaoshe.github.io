@@ -149,6 +149,11 @@
 			this.player = player;
 			this.initCards(this.player.getHand().getChars(), "hidden");
 		}
+		showCard(card){
+			var id = getCardID(card);
+			var char = model.getPool().getChar(id);
+			card.style.backgroundImage = "url('" + char.getPortrait() + "')";
+		}
 	}
 	class Hand1Div extends DeckDiv {
 		constructor(div, player) {
@@ -204,6 +209,13 @@
 			for (var i = 0; i < INITCARDNUMPOOL*2; i++) {
 				this.rotates[i] = this.getRandomRotate();
 			}
+		}
+		updateRedeal(){
+			while(this.container.lastChild)
+				this.container.removeChild(this.container.lastChild);
+			this.initCards(this.pool.getChars(), "show");
+			reflow();
+			this.repaint();
 		}
 		getRandomRotate(){
 			var rand = Math.floor((Math.random() * MAXCARDROTATION * 2));
@@ -273,11 +285,27 @@
 			window.addEventListener("resize", this.repaint.bind(this));
 		}
 		updateDiscard(pid, oldChar, newChar){
-			var hand = pid==0?this.hand0Div:this.hand1Div;
-			var card = hand.removeCard(oldChar.id);
-			removeDiscardController(card);
-			this.poolDiv.addCard(card);
-			hand.addCard(createCardDiv(newChar, "show"));
+			if(pid == 0){
+				//hand0 --> pool: show-cover
+				//repo --> hand0: hide-cover
+				var hand = this.hand0Div;
+				var card = hand.removeCard(oldChar.id);
+				hand.showCard(card);
+				this.poolDiv.addCard(card);
+				card = createCardDiv(newChar, "hidden");
+				hand.addCard(card);
+			}
+			else{
+				//hand1 --> pool: remove discard listener
+				//repo --> hand1: show-cover, add discard listener
+				var hand = this.hand1Div;
+				var card = hand.removeCard(oldChar.id);
+				removeDiscardController(card);
+				this.poolDiv.addCard(card);
+				card = createCardDiv(newChar, "show");
+				addDiscardController(card);
+				hand.addCard(card);
+			}
 		}
 		updateDeal(char){
 			var card = createCardDiv(char, "show");
