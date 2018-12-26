@@ -20,9 +20,9 @@ class Controller{
     }, OPERATIONDELAY);
     setTimeout(function(){
       model.makeOpponentPick();
-    }, OPERATIONDELAY);
+    }, OPERATIONDELAY*2);
     setTimeout(function(){
       model.dealOne(null);
-    }, OPERATIONDELAY);
+    }, OPERATIONDELAY*3);
   }
 }

@@ -117,7 +117,7 @@
 		constructor(div, player) {
 			super(div);
 			this.player = player;
-			this.initCards(this.player.getHand().getChars(), "show");
+			this.initCards(this.player.getHand().getChars(), "hidden");
 		}
 	}
 	class Hand1Div extends DeckDiv {
@@ -165,7 +165,7 @@
 			if (i % 2 == 1)
 				card.style.top = top + diffTop;
 			else
-				card.style.top = top - diffTop;log(i)
+				card.style.top = top - diffTop;
 			cards.style.transform = 'rotate(' + this.rotate[i] + 'deg)';
 		}
 		updateMatch(oldChar, newChar) {
@@ -312,5 +312,4 @@
 	let model = new Model();
 	let controller = new Controller();
 	let view = new View();
-	var repository = document.querySelector("#repository");
 </script>

@@ -33,7 +33,13 @@ COMMONCHARLIST = [
   [31, "阿阮", 4, "春"],
   [32, "禺期", 4, "夏"],
   [33, "乐无异", 4, "夏"],
-  [34, "忘川", 4, "冬"]
+  [34, "忘川", 4, "冬"],
+  [35, "露草", 4, "春"],
+  [36, "紫榕林", 4, "秋"],
+  [37, "清和真人", 4, "秋"],
+  [38, "巽芳", 4, "春"],
+  [39, "古剑红玉", 4, "夏"],
+  [40, "青玉司南佩", 4, "春"]
 ];
 PLAYERSPECIALS = [
   [214],
@@ -297,7 +303,7 @@ class Model {
     var hand = this.player0.getHand();
     var poolChar = null,
       handChar = null;
-    for (var i = 0; i < poolChars.length; i++) {
+    for (var i = poolChars.length -1; i >= 0 ; i++) {
       handChar = hand.getMatch(poolChars[i]);
       if (handChar != null) {
         poolChar = poolChars[i];
@@ -323,7 +329,6 @@ class Model {
     view.updatePickPoolCard(player.id, handChar.id, poolChar.id);
     log(handChar.getDesc() + poolChar.getDesc());
   }
-
   setHand1Active(char) {
     if (this.activeChar == null || this.activeChar != char) {
       view.updateHand1Active(this.activeChar, char);
