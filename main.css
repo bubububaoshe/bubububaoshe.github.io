@@ -1,6 +1,6 @@
 :root {
   --page-background: #583e38;
-  --table-background: rgba(255, 255, 255, 0.5);
+  --gamezone-background: rgba(255, 255, 255, 0.5);
   --board-background: rgba(255, 255, 255, 0.4);
   --card-glow-color: #F9F56E;
   --transition-sec: 0.7s;
@@ -11,7 +11,7 @@
   --main-margin: 30px;
   --scoreboard-width: 200px;
   --specialboard-width: 200px;
-  --table-width: 802px;
+  --gamezone-width: 802px;
   --hand0-height: 200px;
   --hand1-height: 200px;
   --pool-height: 400px;
@@ -39,7 +39,7 @@ body {
 }
 
 #pool, #hand0, #hand1 {
-  background: var(--table-background);
+  background: var(--gamezone-background);
 }
 
 #scoreboard, #specialboard {
@@ -58,9 +58,9 @@ body {
   height: var(--main-height);
 }
 
-#table {
+#gamezone {
   float: left;
-  width: var(--table-width);
+  width: var(--gamezone-width);
   height: var(--main-height);
   margin: 0 var(--block-margin);
 }
@@ -119,6 +119,15 @@ body {
 }
 #hand1 .pop{
   top: var(--hand1-card-top3) !important;
+}
+#blocker{
+  display: none;
+  position: absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  height: 100%;
 }
 .glow{
   border: 2px solid var(--card-glow-color)
