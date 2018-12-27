@@ -17,12 +17,7 @@ class Controller{
     var hc = model.getActiveChar();
     model.setHand1Active(hc);
     model.pickCard(model.getPlayer1(), hc, pc);
-/*
-    model.dealOne(null);
-    model.makeOpponentPick();
-    model.dealOne(null);
-    model.handlePlayer1NoMatch();
-  */
+    blockGame();
     setTimeout(function(){
       model.dealOne(null);
     }, OPERATIONDELAY);
@@ -32,6 +27,7 @@ class Controller{
     setTimeout(function(){
       model.dealOne(null);
       model.handlePlayer1NoMatch();
+      unblockGame();
     }, OPERATIONDELAY*4);
   }
   discardCardClick(){

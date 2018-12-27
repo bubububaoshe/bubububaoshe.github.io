@@ -70,7 +70,6 @@ COMBOLIST = [
   [ [ "华月", "沈夜"], "护孤城", 4] ,
   [ [ "谢衣", "沈夜", "沈曦", "华月"], "烈山遗族", 20] ,
   [ [ "谢衣", "沈夜", "沈曦", "流月城", "华月"], "红月", 40] ,
-
   [ ["古剑晗光", "乐无异"], "家传宝贝", 5],
   [ ["禺期", "古剑晗光", "乐无异"], "剑主之谊", 10],
   [ ["长安", "乐无异"], "玉京游", 4],
@@ -97,7 +96,6 @@ COMBOLIST = [
   [ ["昭明", "无名之剑", "古剑晗光", "禺期"], "天地熔炉", 20],
   [ ["昭明", "无名之剑", "古剑焚寂", "古剑红玉", "古剑晗光"], "古剑奇谭", 40],
   [ ["夏夷则", "阿阮", "闻人羽", "乐无异"], "蓝衫偃师记", 20],
-
   [ ["欧阳少恭", "青玉坛"], "丹芷长老", 4],
   [ ["欧阳少恭", "凤来"], "揽琴独照", 4],
   [ ["巽芳", "欧阳少恭"], "仙山眷侣", 4],
@@ -349,6 +347,7 @@ class Player {
     this.hand.initDeck(INITCARDNUMHAND, commonRepo);
     this.table = new Deck();
     this.specials = new Deck();
+    this.score = 0;
     this.matchable = true;
     //this.specials.addRandom(1, specialRepo);
   }
@@ -361,9 +360,13 @@ class Player {
   addChar(char) {
     this.table.addChar(char);
     char.setOwner(this);
+    this.score += char.score;
   }
   getHand() {
     return this.hand;
+  }
+  getScore(){
+    return this.score;
   }
   getDesc() {
     var msg = "玩家" + this.id;
@@ -404,11 +407,15 @@ class Model {
     view.getPool().updateRedeal();
   }
   handlePlayer1NoMatch(){
-    if(!this.hasMatch(this.player1)){
+    if(this.player1.hand.characters.length == 0)
+      blockGame();
+    else if(!this.hasMatch(this.player1)){
       if(this.needRedeal()){
         setTimeout(function(){
+          blockGame();
           model.redeal();
           model.handlePlayer1NoMatch();
+          blockGame();
         }, OPERATIONDELAY*2);
         //this.redeal();
         //this.
@@ -492,6 +499,11 @@ class Model {
     player.addChar(handChar);
     view.updatePickPoolCard(player.id, handChar.id, poolChar.id);
     log((player==this.player0?"AI用「":"你用「")+handChar.name +"」吸引到一只「"+ poolChar.name+"」");
+    /*
+    if(this.checkGameEnd()){
+      this.player0.getScore
+    }
+    */
   }
   setHand1Active(char) {
     if (this.activeChar == null || this.activeChar != char) {

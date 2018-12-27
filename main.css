@@ -44,6 +44,7 @@ body {
 
 #scoreboard, #specialboard {
   background: var(--board-background);
+  position: relative;
 }
 
 #scoreboard {
@@ -119,6 +120,23 @@ body {
 }
 #hand1 .pop{
   top: var(--hand1-card-top3) !important;
+}
+#infobox{
+  transition: all 1s ease;
+  position: absolute;
+  top: 40%;
+  bottom: 40%;
+  left: 10%;
+  right: 10%;
+  background: var(--gamezone-background);
+  font-family: "Microsoft Yahei";
+  font-weight: bold;
+  font-size: 200%;
+  color: brown;
+  text-align: center;
+  vertical-align: middle;
+  white-space: pre;
+  padding-top: 20px;
 }
 #blocker{
   display: none;

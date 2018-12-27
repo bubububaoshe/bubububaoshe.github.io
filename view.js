@@ -17,6 +17,14 @@ var CARDBORDERRADIUSPERCENT = 0.04; //border radius of cards wrt card width
 var MAXCARDROTATION = 15; //max degree of rotation the pool cards turns
 var CARDBACKFILE = "img/back.jpg"; //file name of the back of a card
 
+function blockGame(){
+  var div = document.querySelector("#blocker");
+  div.style.display = "block";
+}
+function unblockGame(){
+  var div = document.querySelector("#blocker");
+  div.style.display = "none";
+}
 function log(msg) {
   var para = document.querySelector("#scoreboard");
   para.setAttribute('style', 'white-space: pre;');
@@ -24,14 +32,17 @@ function log(msg) {
 }
 
 function notifyNoMatch(display) {
-  var para = document.querySelector("#specialboard");
-  para.setAttribute('style', 'white-space: pre;');
+  var div = document.querySelector("#infobox");
   if (display == "show")
-    para.textContent = "无牌可匹配\n需背弃一张牌\n";
+    div.textContent = "无牌可匹配\n需抛弃一张牌\n";
   else
-    para.textContent = "";
+    div.textContent = "";
 }
 
+function notifyScore() {
+  var div = document.querySelector("#infobox");
+  div.textContent = model.getPlayer0().getScore()+"\n---\n"+model.getPlayer1().getScore();
+}
 function reflow() {
   document.getElementById('main').clientWidth;
 }
@@ -299,6 +310,7 @@ class View {
     removeHand1ClickController(card);
     card = this.poolDiv.removeCard(pcid);
     removePoolClickController(card);
+    notifyScore();
   }
   updateHand1Active(oldChar, newChar) {
     this.hand1Div.updateActive(oldChar, newChar);
