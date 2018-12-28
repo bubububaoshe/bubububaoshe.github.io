@@ -1,7 +1,6 @@
 //consts
 var MAINRATIO = 1920 / 1080; //width/height ratio of the main board
 var CARDRATIO = 182 / 240; //width/height ratio of a card
-var BLOCKMARGIN = 0; //margin in px between game blocks
 var MAINMARGINPERCENT = 0.0; //margin of the main board wrt window size
 var SCOREBOARDPERCENT = 0.333; //width of the score board wrt main width
 var SPECIALBOARDPERCENT = 0.3; //width of the special card board wrt main width
@@ -13,8 +12,10 @@ var HANDTOPPERCENT2 = 0.4; //top of onfocus cards at player1 hand board
 var HANDTOPPERCENT3 = 0.1; //top of active cards at player1 hand board
 var HANDCARDOVERLAPPERCENT = 0.44; //percent of neighboring cards that overlap in hand board
 var POOLCARDOVERLAPPERCENT = HANDCARDOVERLAPPERCENT * 0.9; //percent of neighboring cards that overlap in pool board
-var CARDBORDERRADIUSPERCENT = 0.04; //border radius of cards wrt card width
 var MAXCARDROTATION = 15; //max degree of rotation the pool cards turns
+var TABLETOPPERCENT = 0.1;//top margin of #table0 wrt scoreboard
+var SCOREHEIGHTPERCENT = 0.5; //height of #score0 wrt card height
+var SCOREBELOWTABLEPERCENT = 0.05; //distance of #score0 below #table0 in scoreboard wrt scoreboard height
 var CARDBACKFILE = "img/back.jpg"; //file name of the back of a card
 
 function blockGame(){
@@ -59,7 +60,7 @@ function setCSSInt(name, val) {
 function createCardDiv(char, display) {
   var div = document.createElement("div");
   div.classList.add("card");
-  div.id = "card" + char.getID();
+  div.id = char.getID();
   if (display == "show")
     div.style.backgroundImage = "url('" + char.getPortrait() + "')";
   else if (display == "hidden")
@@ -123,7 +124,7 @@ class DeckDiv {
     card.style.left = left + "px";
   }
   removeCard(cid) {
-    var card = this.container.querySelector("#card" + cid);
+    var card = this.container.querySelector("#" + cid);
     this.container.removeChild(card);
     this.repaint();
     return card;
@@ -184,12 +185,12 @@ class Hand1Div extends DeckDiv {
   }
   updateActive(oldChar, newChar) {
     if (oldChar != null) {
-      var card = this.container.querySelector("#card" + oldChar.getID());
+      var card = this.container.querySelector("#" + oldChar.getID());
       card.classList.remove("pop");
       card.classList.remove("glow");
     }
     if (newChar != null) {
-      var card = this.container.querySelector("#card" + newChar.getID());
+      var card = this.container.querySelector("#" + newChar.getID());
       card.classList.add("pop");
       card.classList.add("glow");
     }
@@ -336,24 +337,32 @@ class View {
     var tMargin = Math.floor((winH - mainH) / 2);
     var scbW = Math.floor(mainH * SCOREBOARDPERCENT);
     var spbW = Math.floor(mainH * SPECIALBOARDPERCENT);
-    var gamezoneW = mainW - scbW - spbW - BLOCKMARGIN * 2;
+    var gamezoneW = mainW - scbW - spbW;
     var player0H = Math.floor(mainH * PLAYER0PERCENT);
     var player1H = Math.floor(mainH * PLAYER1PERCENT);
-    var poolH = mainH - player0H - player1H - BLOCKMARGIN * 2;
+    var poolH = mainH - player0H - player1H;
     var cardW = Math.floor(gamezoneW * (1 - 3 * HANDLEFTPADDINGPERCENT) / (9 * (1 - HANDCARDOVERLAPPERCENT) + 1));
     var cardH = Math.floor(cardW / CARDRATIO);
-    var cardR = Math.floor(cardW * CARDBORDERRADIUSPERCENT);
     var cardIL = gamezoneW - Math.floor(cardW * 1.3);
     var hand0CT = Math.floor((player0H - cardH) / 2);
     var poolCT = Math.floor((poolH - cardH) / 2);
     var hand1CT = Math.floor((player1H - cardH) * HANDTOPPERCENT);
     var hand1CT2 = Math.floor((player1H - cardH) * HANDTOPPERCENT2);
     var hand1CT3 = Math.floor((player1H - cardH) * HANDTOPPERCENT3);
+
+    var scoreH = Math.floor(cardH*SCOREHEIGHTPERCENT);
+    var scbTT = Math.floor(mainH*TABLETOPPERCENT);
+    var scbTL = Math.floor((scbW-cardW)/2);
+    var scbST = scbTT+cardH+Math.floor(mainH*SCOREBELOWTABLEPERCENT);
+    setCSSInt("--score-height", scoreH);
+    setCSSInt("--scoreboard-table-top", scbTT);
+    setCSSInt("--scoreboard-table-left", scbTL);
+    setCSSInt("--scoreboard-score-top", scbST);
+
     var handOFS = Math.floor(cardW * (1 - HANDCARDOVERLAPPERCENT));
     var poolOFS = Math.floor(cardW * (1 - POOLCARDOVERLAPPERCENT));
     var blockLP = Math.floor(gamezoneW * HANDLEFTPADDINGPERCENT);
 
-    setCSSInt("--block-margin", BLOCKMARGIN);
     setCSSInt("--main-height", mainH);
     setCSSInt("--main-width", mainW);
     setCSSInt("--main-margin", tMargin);
@@ -365,7 +374,6 @@ class View {
     setCSSInt("--pool-height", poolH);
     setCSSInt("--card-width", cardW);
     setCSSInt("--card-height", cardH);
-    setCSSInt("--card-border-radius", cardR);
     setCSSInt("--card-init-left", cardIL);
     setCSSInt("--hand0-card-top", hand0CT);
     setCSSInt("--pool-card-top", poolCT);

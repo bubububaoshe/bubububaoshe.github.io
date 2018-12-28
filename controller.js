@@ -1,7 +1,7 @@
 var OPERATIONDELAY = 500; //delay in milliseconds between machine operations
 
 function getCardID(div){
-  return parseInt(div.id.substr(4));
+  return div.id;
 }
 class Controller{
   constructor(){

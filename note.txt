@@ -1,7 +1,8 @@
 model
-character: id改成拼音缩写
++character: id改成拼音缩写
 character里包含card
 
+-(test view)
 view
 所有card都在body里，计算它们的left和top来放置
 动画靠css（left/top)
@@ -26,7 +27,7 @@ controller
 		选牌，手牌-1，卡池-1
 		卡池补牌，卡池+1
 		结果：手牌-1， 卡池不变
-	-判断：手牌>0跳转[a],手牌为0，结束跳转[e]
+	+判断：手牌>0跳转[a],手牌为0，结束跳转[e]
 	+[c]不可选：
 	+判断：卡池<=9跳转[d],卡池=10，卡池重组：卡池8，跳转[a]
 	+[d]选牌入卡池，手牌-1，卡池+1
