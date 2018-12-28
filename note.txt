@@ -1,3 +1,18 @@
+model
+character: id改成拼音缩写
+character里包含card
+
+view
+所有card都在body里，计算它们的left和top来放置
+动画靠css（left/top)
+每次至少paint一个block
+每个block里放一个透明card来得到绝对位置
+card:维护action listener list
+每个model function对应一个view function
+
+controller
+更多代码在这里
+
 ﻿不明觉厉的CSS Transition：
 在js里调用clientWidth一定能触发transition(据说会令css reflow，有资源消耗)
 
