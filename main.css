@@ -1,7 +1,10 @@
 :root {
-  --page-background: #583e38;
-  --gamezone-background: rgba(255, 255, 255, 0.5);
-  --board-background: rgba(255, 255, 255, 0.4);
+  /*--page-background: #583e38;*/
+  --page-background: url("img/background.jpg");
+  --gamezone-background: rgba(114,90,64,0.7);
+  --board-background: rgba(114,90,64,0.6);
+  --nomatch-info-color: #AB4739;
+  --score-info-color: #AB4739;
   --card-glow-color: #F9F56E;
   --transition-sec: 0.7s;
   --card-border-radius: 3%;
@@ -22,43 +25,39 @@
   --pool-height: 400px;
   --card-width: 120px;
   --card-height: 133px;
-  --card-init-left: 300px;
+  --repository-left: 300px;
   --hand0-card-top: 30px;
   --pool-card-top: 30px;
   --hand1-card-top: 90px;
-  --hand1-card-top2: 20px;
-  --hand1-card-top2: 10px;
+  --card-hover-top: -10px;
+  --card-active-top: -20px;
   */
 }
 
 body {
   background: var(--page-background);
+  background-size: cover;
   margin: 0;
 }
-
 #main {
   margin: var(--main-margin) auto;
   height: var(--main-height);
   width: var(--main-width);
 }
-
 #scoreboard, #specialboard {
   background: var(--board-background);
   position: relative;
 }
-
 #scoreboard {
   float: left;
   width: var(--scoreboard-width);
   height: var(--main-height);
 }
-
 #specialboard {
   float: left;
   width: var(--specialboard-width);
   height: var(--main-height);
 }
-
 #gamezone {
   float: left;
   width: var(--gamezone-width);
@@ -66,35 +65,30 @@ body {
   background-color: var(--gamezone-background);
   margin: 0;
 }
-
 #hand0 {
   height: var(--hand0-height);
   position: relative;
 }
-
 #hand1 {
   height: var(--hand1-height);
   position: relative;
 }
-
 #pool {
   margin: 0;
   height: var(--pool-height);
   position: relative;
 }
-
 #repository,#table0, #table1, #score0, #score1 {
   position: absolute;
 }
-
 #repository,#table0, #table1{
-  background: pink;
+  /*background: pink;*/
   position: absolute;
   width: var(--card-width);
   height: var(--card-height);
 }
 #repository{
-  left: var(--card-init-left);
+  left: var(--repository-left);
   top: var(--pool-card-top);
 }
 #table0{
@@ -105,73 +99,20 @@ body {
     left: var(--scoreboard-table-left);
     bottom: var(--scoreboard-table-top);
 }
-#score0{
-  background-color: grey;
+#score0, #score1{
   width: var(--scoreboard-width);
   height: var(--score-height);
+  font-size: 3.5vw;
+  line-height: var(--score-height);
+  text-align: center;
+  font-family: fantasy;
+  color: var(--score-info-color);
+}
+#score0{
   top: var(--scoreboard-score-top);
 }
 #score1{
-  background-color: grey;
-  width: var(--scoreboard-width);
-  height: var(--score-height);
   bottom: var(--scoreboard-score-top);
-}
-.card {
-  width: var(--card-width);
-  height: var(--card-height);
-  background-size: var(--card-width) var(--card-height);
-  position: absolute;
-  transition: all var(--transition-sec);
-  /*transition-timing-function: ease-out;*/
-  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
-  border-radius: var(--card-border-radius);
-  left: var(--card-init-left);
-}
-
-.dummycard{
-  width: var(--card-width);
-  height: var(--card-height);
-  background-color: pink;
-  position: absolute;
-  border-radius: var(--card-border-radius);
-}
-#hand0 .dummycard {
-  top: var(--hand0-card-top);
-  left: var(--block-left-padding);
-}
-
-#pool .dummycard{
-  top: var(--pool-card-top);
-  left: var(--block-left-padding);
-}
-
-#hand1 .dummycard {
-  top: var(--hand1-card-top);
-  left: var(--block-left-padding);
-}
-#repository .dummycard, #table0 .dummycard, #table1 .dummycard{
-  top: 0;
-  left: 0;
-}
-
-#hand0 .card {
-  top: var(--hand0-card-top);
-}
-
-#pool .card{
-  top: var(--pool-card-top);
-}
-
-#hand1 .card {
-  top: var(--hand1-card-top);
-}
-
-#hand1 .card:hover {
-  top: var(--hand1-card-top2);
-}
-#hand1 .pop{
-  top: var(--hand1-card-top3) !important;
 }
 #infobox{
   transition: all 1s ease;
@@ -180,17 +121,54 @@ body {
   bottom: 37%;
   left: 8%;
   right: 8%;
-  background: var(--gamezone-background);
   font-family: "Microsoft Yahei";
   font-weight: bold;
   font-size: 200%;
-  color: brown;
+  color: var(--nomatch-info-color);
   text-align: center;
   vertical-align: middle;
   white-space: pre;
   padding-top: 20px;
 }
+.cardContainer{
+  position: absolute;
+  transition: all var(--transition-sec);
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.card {
+  width: var(--card-width);
+  height: var(--card-height);
+  position: relative;
+  border-radius: var(--card-border-radius);
+  background-size: var(--card-width) var(--card-height);
+}
+.dummycard {
+  width: var(--card-width);
+  height: var(--card-height);
+  position: absolute;
+  border-radius: var(--card-border-radius);
+}
+#hand0 .dummycard {
+  top: var(--hand0-card-top);
+  left: var(--block-left-padding);
+}
+#pool .dummycard{
+  top: var(--pool-card-top);
+  left: var(--block-left-padding);
+}
+#hand1 .dummycard {
+  top: var(--hand1-card-top);
+  left: var(--block-left-padding);
+}
+#repository .dummycard, #table0 .dummycard, #table1 .dummycard{
+  top: 0;
+  left: 0;
+}
+.faceup:hover {
+  top: var(--card-hover-top);
+}
 #blocker{
+  z-index: 999;
   display: none;
   position: absolute;
   top:0;
@@ -204,4 +182,7 @@ body {
   -webkit-box-shadow: 0px 0px 10px 5px var(--card-glow-color);
   -moz-box-shadow: 0px 0px 10px 5px var(--card-glow-color);
   box-shadow: 0px 0px 10px 5px var(--card-glow-color);
+}
+.pop{
+  top: var(--card-active-top) !important;
 }

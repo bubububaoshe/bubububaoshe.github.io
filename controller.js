@@ -6,6 +6,20 @@ function getCardID(div){
 class Controller{
   constructor(){
   }
+  activate(){
+    log("activate: " + this.id);
+    var char = model.player1.hand.getChar(this.id);
+    model.activate(char);
+  }
+  obtain(){
+    var handc = model.activeChar;
+    var poolc = model.pool.getChar(this.id);
+    model.activate(handc);
+    model.obtain(model.player1, handc, poolc);
+  }
+  discard(){
+    log("discard: " + this.id);
+  }
   hand1CardClick(){
     var id = getCardID(this);
     var hc = model.getPlayer1().getHand().getChar(id);

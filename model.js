@@ -1,5 +1,4 @@
 COMMONCHARLIST = [
-
   ["ly1", "陵越", 2, "冬"],
   ["qy1", "悭臾", 2, "夏"],
   ["fqx1", "风晴雪", 2, "春"],
@@ -32,6 +31,7 @@ COMMONCHARLIST = [
   ["ttzq2", "通天之器", 2, "秋"],
   ["ws2", "巫山", 2, "夏"],
   ["wry2", "闻人羽", 2, "秋"],
+  ["bcg2", "百草谷", 2, "夏"],
 
   ["sw3", "司危", 2, "春"],
   ["bl3", "北洛", 2, "春"],
@@ -54,7 +54,6 @@ COMMONCHARLIST = [
   ["fls3", "风里沙", 2, "秋"],
   ["lxj3", "凌星见", 2, "春"]
 ];
-
 COMBOLIST = [
   [ [ "风晴雪", "焦炭", "谢衣" ], "厨房功夫", 10],
   [ [ "谢衣", "乐无异"], "春风雨", 4],
@@ -132,10 +131,9 @@ COMBOLIST = [
   [ ["风晴雪", "幽都"], "幽都灵女", 4],
   [ ["风晴雪", "方兰生", "百里屠苏", "红玉", "尹千觞", "襄铃"], "黑衣少侠传", 60]
 ]
-
 PLAYERSPECIALS = [
-  [214],
-  [203, 200]
+  [],
+  []
 ];
 
 INITCARDNUMHAND = 10;
@@ -155,10 +153,11 @@ class Character {
   constructor(id, name, score, season) {
     this.id = id;
     this.name = name;
-    this.description = "img/" + id;
+    this.description = "";
     this.score = score;
     this.season = season;
-    this.owner = null;
+    this.card = null;//card class in view
+    this.owner = null;//player
   }
   isSpecial() {
     return false;
@@ -166,23 +165,12 @@ class Character {
   setOwner(owner) {
     this.owner = owner;
   }
-  getID() {
-    return this.id;
-  }
-  getName() {
-    return this.name;
-  }
-  getSeason() {
-    return this.season;
-  }
-  getScore() {
-    return this.score;
-  }
+
   getPortrait() {
     return "img/" + this.id + ".jpg";
   }
   getDesc() {
-    var msg = this.id + "：" + this.getName() + "，" + this.getScore() + "分，" + this.getSeason() + "季, 归属玩家" + (this.owner == null ? "-" : this.owner.id) + "\n";
+    var msg = this.id + "：" + this.name + "，" + this.score + "分，" + this.season + "季, 归属玩家" + (this.owner == null ? "-" : this.owner.id) + "\n";
     return msg;
   }
 }
@@ -213,17 +201,21 @@ class SpecialCharacter extends Character {
 class Deck {
   constructor() {
     this.characters = [];
-  }
-  addChar(char) {
-    this.characters.unshift(char);
+    this.container = null;
   }
   initDeck(size, repo) {
     for (var i = 0; i < size; i++)
       this.addChar(repo.removeRandom());
   }
+  getSize(){
+    return this.characters.length;
+  }
+  addChar(char) {
+    this.characters.push(char);
+  }
   addRandom(repo) {
     if (repo.characters.length == 0) {
-      log("Empty deck!!!!!!!!!!!!!!!!!");
+      alert("Empty deck!");
       return null;
     }
     var char = repo.removeRandom();
@@ -231,18 +223,14 @@ class Deck {
     return char;
   }
   getMatch(char) {
-    var s = char.getSeason();
-    var len = this.characters.length;
-    for (var i = 0; i < len; i++)
-      if (this.characters[i].getSeason() == s)
+    var s = char.season;
+    for (var i = 0; i < this.getSize(); i++)
+      if (this.characters[i].season == s)
         return this.characters[i];
     return null;
   }
   clear() {
     this.characters.length = 0;
-  }
-  getChars() {
-    return this.characters;
   }
   removeRandom() {
     var i = Math.floor((Math.random() * this.characters.length));
@@ -267,7 +255,7 @@ class Deck {
     var target = -1,
       clen = this.characters.length;
     for (var i = 0; i < clen; i++) {
-      if (this.characters[i].getID() == id) {
+      if (this.characters[i].id == id) {
         target = i;
         break;
       }
@@ -280,7 +268,7 @@ class Deck {
   getChar(id) {
     var clen = this.characters.length;
     for (var i = 0; i < clen; i++)
-      if (this.characters[i].getID() == id)
+      if (this.characters[i].id == id)
         return this.characters[i];
     return null;
   }
@@ -292,7 +280,6 @@ class Deck {
     }
     return msg;
   }
-
 }
 class Repository extends Deck {
   constructor(type) {
@@ -310,8 +297,6 @@ class Repository extends Deck {
       let char = new Character(COMMONCHARLIST[i][0], COMMONCHARLIST[i][1], COMMONCHARLIST[i][2], COMMONCHARLIST[i][3]);
       this.addChar(char);
     }
-    //let sx = new Character(1, "沈曦", 4, "春");
-    //let lyc = new Character(2,"流月城", 4, "冬");
   }
   initSpecialRepo() {
     let sp = new SpecialCharacter(200, "沈夜", 6, "冬");
@@ -346,12 +331,10 @@ class Player {
   constructor(id, commonRepo, specialRepo) {
     this.id = id;
     this.hand = new Deck();
-    this.hand.initDeck(INITCARDNUMHAND, commonRepo);
     this.table = new Deck();
     this.specials = new Deck();
     this.score = 0;
     this.matchable = true;
-    //this.specials.addRandom(1, specialRepo);
   }
   initSpecials(repo) {
     var slen = PLAYERSPECIALS[this.id].length;
@@ -363,12 +346,6 @@ class Player {
     this.table.addChar(char);
     char.setOwner(this);
     this.score += char.score;
-  }
-  getHand() {
-    return this.hand;
-  }
-  getScore(){
-    return this.score;
   }
   getDesc() {
     var msg = "玩家" + this.id;
@@ -385,10 +362,25 @@ class Model {
     this.player0 = new Player(0, this.commonRepository, this.specialRepository);
     this.player1 = new Player(1, this.commonRepository, this.specialRepository);
     this.pool = new Deck();
-    this.pool.initDeck(INITCARDNUMPOOL, this.commonRepository);
     this.activeChar = null;
   }
-  discardCard(player, char){
+  init(){
+    view.init();
+    this.initHand(this.player0);
+    this.initHand(this.player1);
+    this.initPool();
+    view.hand0.init();
+    view.hand1.init();
+    view.pool.init();
+    this.checkMatch1();
+  }
+  initHand(player){
+    player.hand.initDeck(INITCARDNUMHAND, this.commonRepository);
+  }
+  initPool(){
+    this.pool.initDeck(INITCARDNUMPOOL, this.commonRepository);
+  }
+  discard(player, char){
     if(char == null)
       char = player.hand.removeRandom();
     else
@@ -396,69 +388,56 @@ class Model {
     this.pool.addChar(char);
     var newChar = player.hand.addRandom(this.commonRepository);
     log((player==this.player0?"AI":"你") +"抛弃「"+char.name+"」换取一只「"+newChar.name+"」");
-    view.updateDiscard(player.id, char, newChar);
+    view.discard(player, char, newChar);
   }
   needRedeal(){
-    return this.pool.getChars().length>=INITCARDNUMPOOL+2;
+    return this.pool.getSize() >= INITCARDNUMPOOL + 2;
   }
   redeal(){
     var chars = this.commonRepository.characters;
-    this.commonRepository.characters = chars.concat(this.pool.getChars());
+    this.commonRepository.characters = chars.concat(this.pool.characters);
     this.pool.clear();
     this.pool.initDeck(INITCARDNUMPOOL, this.commonRepository);
-    view.getPool().updateRedeal();
+    view.pool.redeal();
   }
-  handlePlayer1NoMatch(){
-    if(this.player1.hand.characters.length == 0)
-      blockGame();
-    else if(!this.hasMatch(this.player1)){
-      if(this.needRedeal()){
-        setTimeout(function(){
-          blockGame();
-          model.redeal();
-          model.handlePlayer1NoMatch();
-          blockGame();
-        }, OPERATIONDELAY*2);
-        //this.redeal();
-        //this.
-      }
-      else if(this.player1.matchable){
-        this.player1.matchable = false;
-        notifyNoMatch("show");
-        view.getHand1().addDiscardController();
+  checkMatch1(){
+    var matchable = this.hasMatch(this.player1);
+    //matchable = false;
+    if(matchable) {
+      if(!this.player1.matchable){
+        this.player1.matchable = true;
+        view.checkMatch1();
       }
     }
-    else if(!this.player1.matchable){
-      notifyNoMatch("hidden");
-      this.player1.matchable = true;
-      view.getHand1().removeDiscardController();
+    else {
+      if(this.player1.matchable){
+        this.player1.matchable = false;
+        view.checkMatch1();
+      }
     }
   }
   hasMatch(player){
     var match = this.pickLeft(player);
-    return match!=null;
+    return match != null;
   }
   dealOne(char) {
     if (char == null)
       var char = this.pool.addRandom(this.commonRepository);
     else
-      this.pool.addChar(char);//log("发牌:"+char.getDesc());
-    view.updateDeal(char);
+      this.pool.addChar(char);
+    view.dealOne(char);
   }
   pickLeft(player){
-      var poolChars = this.pool.getChars();
-      var hand = player.getHand();
+      var poolChars = this.pool.characters;
       var poolChar = null;
       var handChar = null;
-      for (var i = poolChars.length -1; i >= 0 ; i--) {
-        handChar = hand.getMatch(poolChars[i]);
+      for (var i = 0; i < poolChars.length; i++) {
+        handChar = player.hand.getMatch(poolChars[i]);
         if (handChar != null) {
           poolChar = poolChars[i];
-          break;
+          return [handChar, poolChar];
         }
       }
-      if (handChar != null)
-        return [handChar, poolChar];
       return null;
   }
   aiPick() {
@@ -480,53 +459,22 @@ class Model {
         return null;
     }
   }
-  makeOpponentPick() {
-    var pick = this.aiPick();
-    if (pick == null) {
-      if(this.needRedeal())
-        this.redeal();
-      else {
-        var discard = this.aiDiscard();
-        this.discardCard(this.player0, discard);
-      }
-      this.makeOpponentPick();
-    }
-    else
-    this.pickCard(this.player0, pick[0], pick[1]);
-  }
-  pickCard(player, handChar, poolChar) {
+  obtain(player, handChar, poolChar) {
     this.pool.removeChar(poolChar);
     player.hand.removeChar(handChar);
     player.addChar(poolChar);
     player.addChar(handChar);
-    view.updatePickPoolCard(player.id, handChar.id, poolChar.id);
+    view.obtain(player, handChar, poolChar);
     log((player==this.player0?"AI用「":"你用「")+handChar.name +"」吸引到一只「"+ poolChar.name+"」");
-    /*
-    if(this.checkGameEnd()){
-      this.player0.getScore
-    }
-    */
   }
-  setHand1Active(char) {
+  activate(char) {//player1 set a card active
     if (this.activeChar == null || this.activeChar != char) {
-      view.updateHand1Active(this.activeChar, char);
+      view.activate(this.activeChar, char);
       this.activeChar = char;
     } else {
-      view.updateHand1Active(this.activeChar, null);
+      view.activate(this.activeChar, null);
       this.activeChar = null;
     }
-  }
-  getActiveChar() {
-    return this.activeChar;
-  }
-  getPlayer0() {
-    return this.player0;
-  }
-  getPlayer1() {
-    return this.player1;
-  }
-  getPool() {
-    return this.pool;
   }
   getDesc() {
     var msg = this.player0.getDesc();
