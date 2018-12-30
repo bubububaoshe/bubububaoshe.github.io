@@ -5,8 +5,9 @@
   --board-background: rgba(114,90,64,0.6);
   --nomatch-info-color: #AB4739;
   --score-info-color: #AB4739;
+  --final-info-color: #AB4739;
   --card-glow-color: #F9F56E;
-  --transition-sec: 0.7s;
+  --transition-sec: 1s;
   --card-border-radius: 3%;
   /*
   --specialboard-score-height: 30px;
@@ -82,7 +83,6 @@ body {
   position: absolute;
 }
 #repository,#table0, #table1{
-  /*background: pink;*/
   position: absolute;
   width: var(--card-width);
   height: var(--card-height);
@@ -119,11 +119,11 @@ body {
   position: absolute;
   top: 37%;
   bottom: 37%;
-  left: 8%;
-  right: 8%;
+  left: 10%;
+  right: 10%;
   font-family: "Microsoft Yahei";
   font-weight: bold;
-  font-size: 200%;
+  font-size: 2vw;
   color: var(--nomatch-info-color);
   text-align: center;
   vertical-align: middle;
@@ -131,16 +131,21 @@ body {
   padding-top: 20px;
 }
 .cardContainer{
+  width: var(--card-width);
+  height: var(--card-height);
   position: absolute;
-  transition: all var(--transition-sec);
+  transition-property: all;
+  transition-duration: var(--transition-sec);
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 .card {
-  width: var(--card-width);
-  height: var(--card-height);
   position: relative;
+  height: 100%;
   border-radius: var(--card-border-radius);
   background-size: var(--card-width) var(--card-height);
+  transition-property: transform;
+  transition-duration: var(--transition-sec);
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 .dummycard {
   width: var(--card-width);
@@ -164,8 +169,14 @@ body {
   top: 0;
   left: 0;
 }
-.faceup:hover {
-  top: var(--card-hover-top);
+.faceup:hover .card{
+  transform: translate(0,var(--card-hover-top)) !important;
+}
+.poolBottom:hover .card{
+  transform: translate(0,var(--poolbottom-hover-top)) !important;
+}
+.poolTop:hover .card{
+  transform: translate(0,var(--pooltop-hover-top)) !important;
 }
 #blocker{
   z-index: 999;
@@ -175,7 +186,11 @@ body {
   bottom:0;
   left:0;
   right:0;
-  height: 100%;
+  text-align: center;
+  padding-top: 40%;
+  white-space: pre;
+  font-size: 8vw;
+  color:var(--final-info-color);
 }
 .glow{
   border: 2px solid var(--card-glow-color)
@@ -184,5 +199,5 @@ body {
   box-shadow: 0px 0px 10px 5px var(--card-glow-color);
 }
 .pop{
-  top: var(--card-active-top) !important;
+  transform: translate(0,var(--card-active-top)) !important;
 }

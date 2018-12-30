@@ -1,4 +1,4 @@
-COMMONCHARLIST = [
+COMMON_CHAR_LIST = [
   ["ly1", "陵越", 2, "冬"],
   ["qy1", "悭臾", 2, "夏"],
   ["fqx1", "风晴雪", 2, "春"],
@@ -54,7 +54,7 @@ COMMONCHARLIST = [
   ["fls3", "风里沙", 2, "秋"],
   ["lxj3", "凌星见", 2, "春"]
 ];
-COMBOLIST = [
+COMBO_LIST = [
   [ [ "风晴雪", "焦炭", "谢衣" ], "厨房功夫", 10],
   [ [ "谢衣", "乐无异"], "春风雨", 4],
   [ [ "谢衣", "静水湖"], "重山隐", 4] ,
@@ -131,15 +131,16 @@ COMBOLIST = [
   [ ["风晴雪", "幽都"], "幽都灵女", 4],
   [ ["风晴雪", "方兰生", "百里屠苏", "红玉", "尹千觞", "襄铃"], "黑衣少侠传", 60]
 ]
-PLAYERSPECIALS = [
+PLAYER_SPECIALS = [
   [],
   []
 ];
 
-INITCARDNUMHAND = 10;
-INITCARDNUMPOOL = 8;
+INIT_CARD_NUM_HAND = 10;
+INIT_CARD_NUM_POOL = 8;
+POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
 //configurable settings
-var AILEVEL = "巫炤";
+var AI_LEVEL = "巫炤";
 
 class Trick {
   constructor(description) {
@@ -292,9 +293,9 @@ class Repository extends Deck {
       alert("Illegal Repository Type: " + type);
   }
   initCommonRepo() {
-    var len = COMMONCHARLIST.length;
+    var len = COMMON_CHAR_LIST.length;
     for (var i = 0; i < len; i++) {
-      let char = new Character(COMMONCHARLIST[i][0], COMMONCHARLIST[i][1], COMMONCHARLIST[i][2], COMMONCHARLIST[i][3]);
+      let char = new Character(COMMON_CHAR_LIST[i][0], COMMON_CHAR_LIST[i][1], COMMON_CHAR_LIST[i][2], COMMON_CHAR_LIST[i][3]);
       this.addChar(char);
     }
   }
@@ -337,9 +338,9 @@ class Player {
     this.matchable = true;
   }
   initSpecials(repo) {
-    var slen = PLAYERSPECIALS[this.id].length;
+    var slen = PLAYER_SPECIALS[this.id].length;
     for (var i = 0; i < slen; i++) {
-      this.specials.addChar(repo.removeCharacterByID(PLAYERSPECIALS[this.id][i]));
+      this.specials.addChar(repo.removeCharacterByID(PLAYER_SPECIALS[this.id][i]));
     }
   }
   addChar(char) {
@@ -375,43 +376,46 @@ class Model {
     this.checkMatch1();
   }
   initHand(player){
-    player.hand.initDeck(INITCARDNUMHAND, this.commonRepository);
+    player.hand.initDeck(INIT_CARD_NUM_HAND, this.commonRepository);
   }
   initPool(){
-    this.pool.initDeck(INITCARDNUMPOOL, this.commonRepository);
+    this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
   }
   discard(player, char){
     if(char == null)
       char = player.hand.removeRandom();
     else
       player.hand.removeChar(char);
-    this.pool.addChar(char);
-    var newChar = player.hand.addRandom(this.commonRepository);
-    log((player==this.player0?"AI":"你") +"抛弃「"+char.name+"」换取一只「"+newChar.name+"」");
+    model.pool.addChar(char);
+    var newChar = player.hand.addRandom(model.commonRepository);
+    //log((player==this.player0?"AI":"你") +"-["+char.name+"]+["+newChar.name+"]");
     view.discard(player, char, newChar);
   }
   needRedeal(){
-    return this.pool.getSize() >= INITCARDNUMPOOL + 2;
+    return this.pool.getSize() >= POOL_CAPACITY;
   }
   redeal(){
-    var chars = this.commonRepository.characters;
-    this.commonRepository.characters = chars.concat(this.pool.characters);
-    this.pool.clear();
-    this.pool.initDeck(INITCARDNUMPOOL, this.commonRepository);
-    view.pool.redeal();
+    view.pool.preRedeal();
+    model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
+    model.pool.clear();
+    model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
+    view.redeal();
   }
   checkMatch1(){
     var matchable = this.hasMatch(this.player1);
-    //matchable = false;
     if(matchable) {
-      if(!this.player1.matchable){
-        this.player1.matchable = true;
+      if(!model.player1.matchable){
+        model.player1.matchable = true;
         view.checkMatch1();
       }
     }
     else {
-      if(this.player1.matchable){
-        this.player1.matchable = false;
+      if(model.needRedeal()){
+        model.redeal();
+        model.checkMatch1();
+      }
+      else if(model.player1.matchable){
+        model.player1.matchable = false;
         view.checkMatch1();
       }
     }
@@ -422,13 +426,13 @@ class Model {
   }
   dealOne(char) {
     if (char == null)
-      var char = this.pool.addRandom(this.commonRepository);
+      var char = model.pool.addRandom(model.commonRepository);
     else
-      this.pool.addChar(char);
+      model.pool.addChar(char);
     view.dealOne(char);
   }
   pickLeft(player){
-      var poolChars = this.pool.characters;
+      var poolChars = model.pool.characters;
       var poolChar = null;
       var handChar = null;
       for (var i = 0; i < poolChars.length; i++) {
@@ -442,16 +446,16 @@ class Model {
   }
   aiPick() {
     //returns an array [hand pick, pool pick]
-    switch (AILEVEL) {
+    switch (AI_LEVEL) {
       case "巫炤":
-        return this.pickLeft(this.player0);
+        return model.pickLeft(this.player0);
         break;
       default: log("Invalid AI　Level!!!!!!!!");
         return null;
     }
   }
   aiDiscard(){
-    switch (AILEVEL) {
+    switch (AI_LEVEL) {
       case "巫炤":
         return null;
         break;
@@ -460,12 +464,12 @@ class Model {
     }
   }
   obtain(player, handChar, poolChar) {
-    this.pool.removeChar(poolChar);
+    model.pool.removeChar(poolChar);
     player.hand.removeChar(handChar);
     player.addChar(poolChar);
     player.addChar(handChar);
     view.obtain(player, handChar, poolChar);
-    log((player==this.player0?"AI用「":"你用「")+handChar.name +"」吸引到一只「"+ poolChar.name+"」");
+    //log((player==this.player0?"AI[":"你[")+handChar.name +"]["+ poolChar.name+"]");
   }
   activate(char) {//player1 set a card active
     if (this.activeChar == null || this.activeChar != char) {
