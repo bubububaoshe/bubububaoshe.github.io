@@ -151,11 +151,11 @@ COMBO_LIST = [
   [ ["风晴雪", "幽都"], "幽都灵女", 4],
   [ ["风晴雪", "方兰生", "百里屠苏", "红玉", "尹千觞", "襄铃"], "黑衣少侠传", 60],
   [ ["巫炤", "司危"], "西陵毒唯", 4],
-  [ ["巫炤", "西陵"], "炤不保西", 4],
-  [ ["巫炤", "无名之地"], "千年老尸", 4],
-  [ ["巫炤", "巫之国"], "梦乡", 4],
+  [ ["巫炤", "西陵"], "炤不保西", 3],
+  [ ["巫炤", "无名之地"], "千年老尸", 3],
+  [ ["巫炤", "巫之国"], "梦乡", 3],
   [ ["巫炤", "司危","半魂莲"], "搞事情", 10],
-  [ ["巫炤", "司危", "嫘祖", "西陵"], "倾城", 10],
+  [ ["巫炤", "司危", "嫘祖", "西陵"], "倾城", 20],
   [ ["巫炤", "缙云"], "意难平", 4],
   [ ["巫炤", "欧阳少恭"], "放弃治疗", 4]
 ]
@@ -259,6 +259,7 @@ class Deck {
     return null;
   }
   clear() {
+    this.container.reset();
     this.characters.length = 0;
   }
   removeRandom() {
@@ -424,6 +425,7 @@ class Combos{
     }
 }
 class Player {
+  //return: completed new combo?
   constructor(id, commonRepo, specialRepo) {
     this.id = id;
     this.hand = new Deck();
@@ -433,6 +435,13 @@ class Player {
     this.matchable = true;
     this.partialCombos = [];
     this.completeCombos = [];
+  }
+  reset(){
+    this.table.clear();
+    this.matchable = true;
+    this.partialCombos.length = 0;
+    this.completeCombos.length = 0;
+    this.score = 0;
   }
   initSpecials(repo) {
     var slen = PLAYER_SPECIALS[this.id].length;
@@ -445,9 +454,9 @@ class Player {
     char.setOwner(this);
     this.score += char.score;
     var comboCounts = combos.getNewCombos(this, char);
-
     for(var i = 0; i<comboCounts[1]; i++)
       view.notifyNoMatch(this.completeCombos[i].getDesc());
+    return comboCounts[1]>0;
   }
   getDesc() {
     var msg = "玩家" + this.id;
@@ -466,15 +475,31 @@ class Model {
     this.pool = new Deck();
     this.activeChar = null;
   }
+  reset(){
+    model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
+    model.pool.clear();
+    model.commonRepository.characters = model.commonRepository.characters.concat(model.player0.table.characters);
+    model.player0.reset();
+    model.commonRepository.characters = model.commonRepository.characters.concat(model.player1.table.characters);
+    model.player1.reset();
+    view.reset();
+  }
+  restart(){
+    model.initHand(model.player0);
+    model.initHand(model.player1);
+    model.initPool();
+    view.restart();
+    model.checkMatch1();
+  }
   init(){
     view.init();
-    this.initHand(this.player0);
-    this.initHand(this.player1);
-    this.initPool();
+    model.initHand(model.player0);
+    model.initHand(model.player1);
+    model.initPool();
     view.hand0.init();
     view.hand1.init();
     view.pool.init();
-    this.checkMatch1();
+    model.checkMatch1();
   }
   initHand(player){
     player.hand.initDeck(INIT_CARD_NUM_HAND, this.commonRepository);
@@ -496,7 +521,6 @@ class Model {
     return this.pool.getSize() >= POOL_CAPACITY;
   }
   redeal(){
-    view.pool.preRedeal();
     model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
     model.pool.clear();
     model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
@@ -569,9 +593,10 @@ class Model {
   obtain(player, handChar, poolChar) {
     model.pool.removeChar(poolChar);
     player.hand.removeChar(handChar);
-    player.addChar(poolChar);
-    player.addChar(handChar);
-    view.obtain(player, handChar, poolChar);
+    var hasCombo1 = player.addChar(poolChar);
+    var hasCombo2 = player.addChar(handChar);
+    view.obtain(player, handChar, poolChar, hasCombo1||hasCombo2);
+    //log((player==this.player0?"AI":"你")+player.hand.getSize());
     //log((player==this.player0?"AI[":"你[")+handChar.name +"]["+ poolChar.name+"]");
   }
   activate(char) {//player1 set a card active

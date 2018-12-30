@@ -60,6 +60,7 @@ body {
   height: var(--main-height);
 }
 #gamezone {
+  position: relative;
   float: left;
   width: var(--gamezone-width);
   height: var(--main-height);

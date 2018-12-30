@@ -10,7 +10,7 @@ HAND0_HEIGHT = 0.28; //height of player0 hand board wrt table height
 HAND1_HEIGHT = 0.345; //height of player1 hand board wrt table height
 HAND_LEFT_PADDING = 0.04; //left padding of the hand boards in percent
 HAND1_CARD_TOP = 0.7; //top of inactive cards at player1 hand board
-HAND1_HOVER_TOP = 0.4; //top of onfocus cards at player1 hand board
+HAND1_HOVER_TOP = 0.2; //top of onfocus cards at player1 hand board
 HAND1_ACTIVE_TOP = 0.4; //top of active cards at player1 hand board
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
 POOL_CARD_OVERLAP = HAND_CARD_OVERLAP * 1.1; //percent of neighboring cards that overlap in pool board
@@ -37,6 +37,22 @@ function log(msg) {
 function reflow() {
   document.getElementById('main').clientWidth;
 }
+class Sound{
+  constructor(){
+    this.ac = new Audio('mp3/activate.mp3');
+    this.de = new Audio('mp3/select.wav');
+    this.co = new Audio('mp3/combo.mp3');
+    this.wi = new Audio('mp3/win.mp3');
+    this.lo = new Audio('mp3/foolish.mp3');
+    this.di = new Audio('mp3/fool.mp3');
+  }
+  activate(){this.ac.play();}
+  deal(){this.de.play();}
+  combo(){this.co.play();}
+  win(){this.wi.play();}
+  lose(){this.lo.play();}
+  discard(){this.di.play();}
+}
 class Card{
   constructor(char) {
     this.controllers = [];
@@ -57,10 +73,12 @@ class Card{
     this.container.classList.remove("faceup");
   }
   activate(){
+    this.container.classList.remove("faceup");
     this.container.classList.add("pop");
     this.div.classList.add("glow");
   }
   deactivate(){
+    this.container.classList.add("faceup");
     this.container.classList.remove("pop");
     this.div.classList.remove("glow");
   }
@@ -129,11 +147,12 @@ class DeckDiv {
     var rect = this.firstCard.getBoundingClientRect();
     var left = rect.left;
     var top = rect.top;
-    for (var i = 0; i < this.deck.getSize(); i++) {
+    var len = this.deck.getSize();
+    for (var i = 0; i < len; i++) {
       var card = this.deck.characters[i].card;
       card.setLeft(left);
       card.setTop(top);
-      card.setZ(i);
+      card.setZ(len - i);
       left += this.offset;
     }
   }
@@ -183,8 +202,26 @@ class TableDiv extends DeckDiv {
   constructor(div, table) {
     super(div, table);
     this.rotates = [];
+    this.lefts = [];
+    this.tops = [];
+  }
+  reset(){
+    var rect = view.repository.firstCard.getBoundingClientRect();
+    var left = rect.left;
+    var top = rect.top;
+    for(var i=0; i<this.deck.getSize(); i++){
+      var card = this.deck.characters[i].card;
+      card.unRotate();
+      card.facedown();
+      card.setLeft(left);
+      card.setTop(top);
+    }
+  }
+  init(){
     for (var i = 0; i < INIT_CARD_NUM_HAND*2; i++) {
       this.rotates[i] = this.getRandomRotate(MAX_TABLE_CARD_ROTATION);
+        this.lefts[i] = Math.floor((Math.random()-0.5)*this.offset);
+        this.tops[i] = Math.floor((Math.random()-0.5)*this.offset);
     }
   }
   paint() {
@@ -193,14 +230,12 @@ class TableDiv extends DeckDiv {
     var top = rect.top;
     for (var i = 0; i < this.deck.getSize(); i++) {
       var card = this.deck.characters[i].card;
-      card.setLeft(left);
-      card.setTop(top);
+      card.setLeft(left+this.lefts[i]);
+      card.setTop(top+this.tops[i]);
       card.setZ(i);
       card.rotate(this.rotates[i]);
-      left += this.offset;
     }
   }
-
 }
 class PoolDiv extends DeckDiv {
   constructor(div, pool) {
@@ -214,6 +249,7 @@ class PoolDiv extends DeckDiv {
   init(){
     for(var i=0; i<this.deck.getSize(); i++){
       this.deck.characters[i].card.faceup();
+      //sound.deal();
     }
     this.paint();
   }
@@ -232,12 +268,17 @@ class PoolDiv extends DeckDiv {
       }
     }
   }
-  preRedeal(){
+  reset(){
+    var rect = view.repository.firstCard.getBoundingClientRect();
+    var left = rect.left;
+    var top = rect.top;
     for(var i=0; i<this.deck.getSize(); i++){
       var card = this.deck.characters[i].card;
       card.unRotate();
       card.removePoolClass();
       card.facedown();
+      card.setLeft(left);
+      card.setTop(top);
     }
   }
   paint() {
@@ -245,12 +286,13 @@ class PoolDiv extends DeckDiv {
     var left = rect.left;
     var top = rect.top;
     var diffT = this.diffTop;
-    for (var i = 0; i < this.deck.getSize(); i++) {
+    var len = this.deck.getSize();
+    for (var i = 0; i < len; i++) {
       var card = this.deck.characters[i].card;
       card.setLeft(left);
       card.setTop(top+diffT);
       card.setPoolClass(diffT);
-      card.setZ(i);
+      card.setZ(len - i);
       card.rotate(this.rotates[i]);
       left += this.offset;
       diffT = 0 - diffT;
@@ -270,8 +312,21 @@ class View {
     this.blocker = document.getElementById("blocker");
     this.info = document.getElementById("infobox");
   }
+  reset(){
+    //alert("aaa"+model.player0.score+"bbb");
+    view.blocker.removeEventListener("click", controller.restart);
+    this.notifyFinal("");
+    this.updateScore();
+  }
+  restart(){
+    view.hand0.init();
+    view.hand1.init();
+    view.pool.init();
+  }
   init(){
     this.setSizes();
+    this.table0.init();
+    this.table1.init();
     var repo = document.getElementById("repository");
     var gap = Math.floor(20/DUMMY_CARD_NUM);
     var left = DUMMY_CARD_NUM * gap;
@@ -283,6 +338,13 @@ class View {
       repo.appendChild(card.container);
     }
     this.repository.init();
+    model.commonRepository.container = this.repository;
+    model.player0.hand.container = this.hand0;
+    model.player0.table.container = this.table0;
+    model.player1.hand.container = this.hand1;
+    model.player1.table.container = this.table1;
+    model.pool.container = this.pool;
+
     window.addEventListener("resize", this.repaint.bind(this));
   }
   checkMatch1(){
@@ -301,6 +363,7 @@ class View {
         chars[i].card.removeController(controller.activate);
         chars[i].card.addController(controller.discard);
       }
+      sound.discard();
     }
   }
   notifyNoMatch(display) {
@@ -347,8 +410,9 @@ class View {
   dealOne(char) {//repo to pool: faceup
     char.card.faceup();
     view.pool.paint();
+    sound.deal();
   }
-  obtain(player, handChar, poolChar) {
+  obtain(player, handChar, poolChar, accomplished) {
     //handChar, poolChar -> table
     //handChar: faceup, remove controller: active
     //poolChar: unrotate
@@ -362,10 +426,14 @@ class View {
     this.pool.paint();
     table.paint();
     this.updateScore();
+    if(player.id ==1 && accomplished)
+      sound.combo();
   }
   activate(oldChar, newChar) {
     this.hand1.activate(oldChar, newChar);
     this.pool.updateMatch(oldChar, newChar);
+    if(newChar != null)
+      sound.activate();
   }
   repaint(){
     this.setSizes();
@@ -444,6 +512,9 @@ class View {
     var handOFS = Math.floor(cardW * (1 - HAND_CARD_OVERLAP));
     this.hand0.offset = handOFS;
     this.hand1.offset = handOFS;
+    handOFS = Math.floor(handOFS/3);
+    this.table0.offset = handOFS;
+    this.table1.offset = handOFS;
     var poolOFS = Math.floor((gamezoneW * (1 - 3 * HAND_LEFT_PADDING)-cardW*2.25)/(INIT_CARD_NUM_POOL+1));
     //poolOFS = Math.floor(cardW * (1 - POOL_CARD_OVERLAP));
     this.pool.offset = poolOFS;
@@ -455,15 +526,26 @@ class View {
   }
   final(){
     view.blockGame();
-    if(model.player1.score > model.player0.score)
-      view.notifyFinal("你赢了ヾ(^▽^*=)>");
-    else if(model.player1.score < model.player0.score)
-      view.notifyFinal("你输了(ノへ￣、=)>");
+    var msg;
+    if(model.player1.score > model.player0.score){
+      msg = "你赢了ヾ(^▽^*=)>";
+      sound.win();
+    }
+    else if(model.player1.score < model.player0.score){
+      msg = "你输了(ノへ￣、=)>";
+      sound.lose();
+    }
     else
-      view.notifyFinal("平手(;ﾟдﾟ)");
+      msg = "平手(;ﾟдﾟ)";
+    view.notifyFinal(msg);
+    delayedFunc(function(){
+      msg += "\n点击牌桌任意位置重新开始";
+      view.notifyFinal(msg);
+      view.blocker.addEventListener("click", controller.restart);
+    })
   }
 }
-
+let sound = new Sound();
 let combos = new Combos();
 let model = new Model();
 let controller = new Controller();
