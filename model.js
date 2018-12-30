@@ -338,16 +338,83 @@ class Repository extends Deck {
     this.addChar(sp);
   }
 }
-/*
-    class Combo{
-        constructor(name, score, characters){
-            this.name = name;
-            this.score = score;
-            this.characters = characters;
-        }
-       getCharList(){return this.characters;}
+class TabledCombo{
+  constructor(char, index){
+    this.characters = [char];
+    this.index = index;
+  }
+  addChar(char){
+    this.characters.push(char);
+  }
+  getSize(){
+    return this.characters.length;
+  }
+  getName(){
+    return COMBO_LIST[this.index][1];
+  }
+  getScore(){
+    return COMBO_LIST[this.index][2];
+  }
+  isComplete(){
+    return this.getSize()==COMBO_LIST[this.index][0].length;
+  }
+  getDesc(){
+    var msg = COMBO_LIST[this.index][1] + " : ";
+    msg +=  COMBO_LIST[this.index][2] + "\n";
+    for(var i=0; i<this.getSize(); i++)
+      msg += "[" + this.characters[i].name + "]\n";
+    return msg;
+  }
+}
+class Combos{
+    constructor(){
+      //data format:
+      //[[[char_name1, char_name2, ...], combo_name, score], ...]
     }
-*/
+    getSize(){
+      return COMBO_LIST.length;
+    }
+    getNewCombos(player, char){
+      //update player: partialCombos. completeCombos, score
+      //return type:
+      //[newcombocount, newcompletecombocount]
+      //the bombos are at the beginning of partialCombos, completeCombos
+      var chars = player.table;
+      var pcombos = player.partialCombos;
+      var ncount = 0, nccount = 0;
+      for(var i=0; i<this.getSize(); i++) {
+        var combo = COMBO_LIST[i];
+        for(var j=0; j<combo[0].length; j++) {
+          if(char.name == combo[0][j]) {
+            //combo contains char, find the pcombo
+            //log(combo[1]);
+            var pcombo = null;
+            for(var k=0; k<pcombos.length; k++){
+                if(pcombos[k].index == i) {
+                  pcombo = pcombos[k];
+                  pcombo.addChar(char);
+                  if(pcombo.isComplete()){
+                    //found a new complete combo, move it completeCombos
+                    nccount ++;
+                    pcombos.splice(k, 1);
+                    player.completeCombos.unshift(pcombo);
+                    player.score += pcombo.getScore();
+                  }
+                  break;
+                }
+            }
+            if(pcombo == null){
+              //find a new combo, must be partial
+              ncount ++;
+              let pcombo = new TabledCombo(char, i);
+              player.partialCombos.unshift(pcombo);
+            }
+          }
+        }
+      }
+      return [ncount, nccount];
+    }
+}
 class Player {
   constructor(id, commonRepo, specialRepo) {
     this.id = id;
@@ -356,6 +423,8 @@ class Player {
     this.specials = new Deck();
     this.score = 0;
     this.matchable = true;
+    this.partialCombos = [];
+    this.completeCombos = [];
   }
   initSpecials(repo) {
     var slen = PLAYER_SPECIALS[this.id].length;
@@ -367,6 +436,10 @@ class Player {
     this.table.addChar(char);
     char.setOwner(this);
     this.score += char.score;
+    var comboCounts = combos.getNewCombos(this, char);
+
+    for(var i = 0; i<comboCounts[1]; i++)
+      view.notifyNoMatch(this.completeCombos[i].getDesc());
   }
   getDesc() {
     var msg = "玩家" + this.id;
@@ -444,11 +517,13 @@ class Model {
     var match = this.pickLeft(player);
     return match != null;
   }
-  dealOne(char) {
-    if (char == null)
+  dealOne(cid) {
+    if (cid == null)
       var char = model.pool.addRandom(model.commonRepository);
-    else
+    else {
+      var char = model.commonRepository.removeCharByID(cid);
       model.pool.addChar(char);
+    }
     view.dealOne(char);
   }
   pickLeft(player){

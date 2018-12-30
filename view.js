@@ -10,7 +10,7 @@ HAND0_HEIGHT = 0.28; //height of player0 hand board wrt table height
 HAND1_HEIGHT = 0.345; //height of player1 hand board wrt table height
 HAND_LEFT_PADDING = 0.04; //left padding of the hand boards in percent
 HAND1_CARD_TOP = 0.7; //top of inactive cards at player1 hand board
-HAND1_HOVER_TOP = 0.1; //top of onfocus cards at player1 hand board
+HAND1_HOVER_TOP = 0.4; //top of onfocus cards at player1 hand board
 HAND1_ACTIVE_TOP = 0.4; //top of active cards at player1 hand board
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
 POOL_CARD_OVERLAP = HAND_CARD_OVERLAP * 1.1; //percent of neighboring cards that overlap in pool board
@@ -306,8 +306,11 @@ class View {
   notifyNoMatch(display) {
     if (display == "show")
       this.info.textContent = "无牌可匹配\n需抛弃一张牌\n";
-    else
+    else if(display == "hidden")
       this.info.textContent = "";
+    else {
+      this.info.textContent = display;
+    }
   }
   blockGame(){
     view.blocker.style.display = "block";
@@ -461,6 +464,7 @@ class View {
   }
 }
 
+let combos = new Combos();
 let model = new Model();
 let controller = new Controller();
 let view = new View();
