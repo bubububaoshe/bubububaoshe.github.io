@@ -1,0 +1,81 @@
+#infobox{
+  transition: all 1s ease;
+  position: absolute;
+  top: 37%;
+  bottom: 37%;
+  left: 10%;
+  right: 10%;
+  font-family: "Microsoft Yahei";
+  font-weight: bold;
+  font-size: 2vw;
+  color: var(--nomatch-info-color);
+  text-align: center;
+  vertical-align: middle;
+  white-space: pre;
+  padding-top: 20px;
+}
+#blocker, #testcombobanner{
+  z-index: 999;
+  display: none;
+  position: absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  text-align: center;
+}
+#testcombobanner{
+  top:0;left:0;right:0;bottom:0;
+  //display: block;
+  background-color: var(--banner-background);
+  overflow: hidden;
+  transition-property: all;
+  transition-duration: var(--transition-sec);
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.card{
+  box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.5);
+}
+#testcombobanner:active{
+  margin-right: 2999px;
+}
+#testcombotext{
+  text-align: center;
+  margin-top: 15%;
+  font-size: 2vw;
+  //color: rgb(202, 187, 178);
+  color: #735249;
+  font-family: "microsoft yahei";
+  padding-bottom: 15px;
+  background-color: #1E130A;
+  padding-top: 30px;
+}
+#testcombocards{
+  float: top;
+  background-color: #1E130A;
+  padding-bottom: 30px;
+  height: var(--card-height);
+  padding-left: 490px;
+}
+.testcombohl{
+  font-size: 3vw;
+  color: var(--congra-glow-color);
+  padding: 1%;
+}
+#testcomboscore{}
+.congra{
+  background-image: url("img/wz3.jpg");
+  width: var(--card-width);
+  height: var(--card-height);
+  float: left;
+  margin: 5px;
+  -webkit-box-shadow: 0px 0px 10px 2px var(--congra-glow-color);
+  -moz-box-shadow: 0px 0px 10px 5px var(--congra-glow-color);
+  box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
+}
+#blocker {
+  padding-top: 40%;
+  white-space: pre;
+  font-size: 5vw;
+  color:var(--final-info-color);
+}
