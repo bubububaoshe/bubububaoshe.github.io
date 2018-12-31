@@ -1,8 +1,8 @@
 //consts
 {
 MAX_MAIN_RATIO = 2;//max width/height ratio of the main board
-MIN_MAIN_RATIO = 1.5;//min width/height ratio of the main board
-CARD_RATIO = 182 / 240; //width/height ratio of a card
+MIN_MAIN_RATIO = 1.3;//min width/height ratio of the main board
+CARD_RATIO = 3 / 4; //width/height ratio of a card
 MAIN_MARGIN = 0.0; //margin of the main board wrt window size
 SCOREBOARD_WIDTH = 0.333; //width of the score board wrt main width
 SPECIALBOARD_WIDTH = 0.3; //width of the special card board wrt main width
@@ -10,7 +10,7 @@ HAND0_HEIGHT = 0.28; //height of player0 hand board wrt table height
 HAND1_HEIGHT = 0.345; //height of player1 hand board wrt table height
 HAND_LEFT_PADDING = 0.04; //left padding of the hand boards in percent
 HAND1_CARD_TOP = 0.7; //top of inactive cards at player1 hand board
-HAND1_HOVER_TOP = 0.2; //top of onfocus cards at player1 hand board
+HAND1_HOVER_TOP = 0.3; //top of onfocus cards at player1 hand board
 HAND1_ACTIVE_TOP = 0.4; //top of active cards at player1 hand board
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
 POOL_CARD_OVERLAP = HAND_CARD_OVERLAP * 1.1; //percent of neighboring cards that overlap in pool board
@@ -19,8 +19,10 @@ MAX_TABLE_CARD_ROTATION = 25; //max degree of rotation the table cards turns
 SCORE_HEIGHT = 0.5; //height of #score0 wrt card height
 TABLE_TOP = 0.7;//top margin of #table0 wrt scoreboard
 SCORE_BELOW_TABLE = 0.1; //distance of #score0 below #table0 in scoreboard wrt scoreboard
-CARD_BACK_FILE = "back"; //file name of the back of a card
 DUMMY_CARD_NUM = 5; //number of dummy cards in the repository div
+
+COMBO_TEXT_HEIGHT = 0.2;// height of text wrt combo badge height
+COMBO_CARDS_HEIGHT = 0.4;// height of cards wrt combo badge height
 }
 function getCSSInt(name) {
   var cv = getComputedStyle(document.documentElement).getPropertyValue(name);
@@ -39,12 +41,12 @@ function reflow() {
 }
 class Sound{
   constructor(){
-    this.ac = new Audio('mp3/activate.mp3');
+    this.ac = new Audio('mp3/sooth.mp3');
     this.de = new Audio('mp3/select.wav');
     this.co = new Audio('mp3/combo.mp3');
     this.wi = new Audio('mp3/win.mp3');
     this.lo = new Audio('mp3/foolish.mp3');
-    this.di = new Audio('mp3/fool.mp3');
+    this.di = new Audio('mp3/discard.mp3');
   }
   activate(){this.ac.play();}
   deal(){this.de.play();}
@@ -54,41 +56,56 @@ class Sound{
   discard(){this.di.play();}
 }
 class Card{
+  /*
+  container classes: (deck info)
+    faceup: all faceup cards except the active hand card
+    poolcardt, poolcardb: the top/bottom cards in pool
+    maybe:
+    hand1card, table0card, table1card
+  div: (effect info)
+    glow: active cards in hand1 and pool
+    pop: active card in hand1
+  */
   constructor(char) {
     this.controllers = [];
     this.container = document.createElement("div");
-    this.div = document.createElement("div");
-    this.container.appendChild(this.div);
+    this.card = document.createElement("div");
+    this.container.appendChild(this.card);
     this.container.classList.add("cardContainer");
-    this.div.classList.add("card");
-    this.div.id = char==null?"dummy":char.id;
+    this.card.classList.add("card");
+    this.card.id = char==null?"dummy":char.id;
     this.facedown();
-  }
-  faceup(){
-    this.div.style.backgroundImage = "url('img/" + this.div.id + ".jpg')";
-    this.container.classList.add("faceup");
-  }
-  facedown(){
-    this.div.style.backgroundImage = "url('img/" + CARD_BACK_FILE + ".jpg')";
-    this.container.classList.remove("faceup");
   }
   activate(){
     this.container.classList.remove("faceup");
     this.container.classList.add("pop");
-    this.div.classList.add("glow");
+    this.card.classList.add("glow");
   }
   deactivate(){
     this.container.classList.add("faceup");
     this.container.classList.remove("pop");
-    this.div.classList.remove("glow");
+    this.card.classList.remove("glow");
   }
   match(){
-    this.div.classList.add("glow");
+    this.card.classList.add("glow");
     this.addController(controller.obtain);
   }
   unmatch(){
-    this.div.classList.remove("glow");
+    this.card.classList.remove("glow");
     this.removeController(controller.obtain);
+  }
+  isa(cname){
+    if(this.container.classList.contains(cname))
+      return true;
+    return false;
+  }
+  faceup(){
+    this.card.style.backgroundImage = "url('img/" + this.card.id + ".jpg')";
+    this.container.classList.add("faceup");
+  }
+  facedown(){
+    this.card.style.backgroundImage = "url('img/back.jpg')";
+    this.container.classList.remove("faceup");
   }
   setPoolClass(diff){
     if(diff > 0){
@@ -111,10 +128,10 @@ class Card{
     this.container.classList.remove(name);
   }
   rotate(deg){
-    this.div.style.transform = 'rotate(' + deg + 'deg)';
+    this.card.style.transform = 'rotate(' + deg + 'deg)';
   }
   unRotate(){
-    this.div.style.transform = 'none';
+    this.card.style.transform = 'none';
   }
   setZ(z){
     this.container.style.zIndex = z;
@@ -126,10 +143,10 @@ class Card{
     this.container.style.top = t;
   }
   addController(func) {
-    this.div.addEventListener("click", func);
+    this.card.addEventListener("click", func);
   }
   removeController(func) {
-    this.div.removeEventListener("click", func);
+    this.card.removeEventListener("click", func);
   }
 }
 class DeckDiv {
@@ -148,10 +165,12 @@ class DeckDiv {
     var left = rect.left;
     var top = rect.top;
     var len = this.deck.getSize();
+    var dt = 1;
     for (var i = 0; i < len; i++) {
       var card = this.deck.characters[i].card;
       card.setLeft(left);
-      card.setTop(top);
+      card.setTop(top+dt);
+      dt = 0 - dt;
       card.setZ(len - i);
       left += this.offset;
     }
