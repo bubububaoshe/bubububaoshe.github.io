@@ -178,14 +178,16 @@ transform: rotateY(180deg);
   top: 0;
   left: 0;
 }
+
 .faceup:hover .card{
   top: var(--card-hover-top);
 }
-.poolBottom:hover .card{
-  top: var(--poolbottom-hover-top));
+
+.poolbottom:hover .card{
+  top: var(--poolbottom-hover-top);
 }
-.poolTop:hover .card{
-  top: var(--pooltop-hover-top));
+.pooltop:hover .card{
+  top: var(--pooltop-hover-top);
 }
 .glow{
   -webkit-box-shadow: 0px 0px 10px 5px var(--card-glow-color);
