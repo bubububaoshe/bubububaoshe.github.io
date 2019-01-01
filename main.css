@@ -1,145 +1,133 @@
 :root {
-  /*--page-background: #583e38;*/
-  --page-background: url("img/background.jpg");
+  --page-background-color: #583e38;
+  --page-background-image: url("img/background.jpg");
   --gamezone-background: rgba(114,90,64,0.7);
   --board-background: rgba(114,90,64,0.6);
   --banner-background: rgba(42, 25, 10,0.8);
   --nomatch-info-color: #AB4739;
   --score-info-color: #AB4739;
+  --score-glow-color: #FE9272;
   --final-info-color: #AB4739;
   --card-shadow-color: rgba(0,0,0,0.4);
   --card-glow-color: #F9F56E;
-  --congra-glow-color: #FFD9B5;
-  --transition-sec: 1s;
+  --congra-hl-color: #eadeaa;
+  --congra-glow-color: #FFF6CE;
+  --congra-text-color: #735249;
+  --congra-background-color: #1E130A;
+  --transition-sec: 0.7s;
   --card-border-radius: 3%;
   /*
-  --specialboard-score-height: 30px;
-  --specialboard-score-top: 30px;
-  --specialboard-table-top: 20px;
-  --specialboard-table-left: 20px;
-  --block-margin: 1px;
-  --main-height: 768px;
-  --main-width: 1202px;
-  --main-margin: 30px;
-  --scoreboard-width: 200px;
-  --specialboard-width: 200px;
-  --gamezone-width: 802px;
-  --hand0-height: 200px;
-  --hand1-height: 200px;
-  --pool-height: 400px;
   --card-width: 120px;
   --card-height: 133px;
-  --repository-left: 300px;
-  --hand0-card-top: 30px;
-  --pool-card-top: 30px;
-  --hand1-card-top: 90px;
-  --card-hover-top: -10px;
-  --card-active-top: -20px;
   */
 }
 
 body {
-  background: var(--page-background);
+  background-color: var(--page-background-color);
+  background-image: var(--page-background-image);
   background-size: cover;
   margin: 0;
+  overflow: hidden;
 }
 #main {
-  margin: var(--main-margin) auto;
-  height: var(--main-height);
-  width: var(--main-width);
+  margin: auto;
 }
-#scoreboard, #specialboard {
-  background: var(--board-background);
+#scoreboard, #specialboard, #gamezone {
   position: relative;
+  float: left;
+  height: 100%;
 }
 #scoreboard {
-  float: left;
-  width: var(--scoreboard-width);
-  height: var(--main-height);
+  width: 18.7%;
+  background: var(--board-background);
 }
 #specialboard {
-  float: left;
-  width: var(--specialboard-width);
-  height: var(--main-height);
+  width: 17%;
+  background: var(--board-background);
 }
 #gamezone {
-  position: relative;
-  float: left;
-  width: var(--gamezone-width);
-  height: var(--main-height);
+  width: 64.3%;
   background-color: var(--gamezone-background);
-  margin: 0;
 }
 #hand0 {
-  height: var(--hand0-height);
+  height: 28%;
   position: relative;
 }
 #hand1 {
-  height: var(--hand1-height);
+  height: 34.5%;
   position: relative;
 }
 #pool {
-  margin: 0;
-  height: var(--pool-height);
+  height: 37.5%;
   position: relative;
 }
 #repository,#table0, #table1, #score0, #score1 {
   position: absolute;
 }
 #repository,#table0, #table1{
-  position: absolute;
   width: var(--card-width);
   height: var(--card-height);
 }
 #repository{
-  left: var(--repository-left);
-  top: var(--pool-card-top);
+  right: calc(2.8% + var(--card-width)/4);
+  top: calc(50% - var(--card-height)/2);
 }
 #table0{
-    left: var(--scoreboard-table-left);
-    top: var(--scoreboard-table-top);
+    left: calc(50% - var(--card-width)/2);
+    top: calc(30% - var(--card-height));
 }
 #table1{
-    left: var(--scoreboard-table-left);
-    bottom: var(--scoreboard-table-top);
+  left: calc(50% - var(--card-width)/2);
+  bottom: calc(30% - var(--card-height));
 }
 #score0, #score1{
-  width: var(--scoreboard-width);
-  height: var(--score-height);
-  font-size: 3.5vw;
-  line-height: var(--score-height);
+  width: 100%;
+  font-size: 5vw;
   text-align: center;
-  font-family: fantasy;
+  font-family: georgia;
+  font-weight: bold;
   color: var(--score-info-color);
+  text-shadow: 0 0 15px var(--score-glow-color);
 }
 #score0{
-  top: var(--scoreboard-score-top);
+  top: 38%;
 }
 #score1{
-  bottom: var(--scoreboard-score-top);
+  bottom: 38%;
 }
-
-.cardContainer{
-  width: var(--card-width);
-  height: var(--card-height);
-  position: absolute;
-  transition-property: top, left;
-  transition-duration: var(--transition-sec);
+/*
+change card margin for hover and click
+*/
+.cardcontainer{
+    width: var(--card-width);
+    height: var(--card-height);
+    position: absolute;
+    perspective: 1000px;
+    transition-property: top, left, transform;
+    transition-duration: var(--transition-sec);
 }
-.card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
+.card{
   width: 100%;
-  border-radius: var(--card-border-radius);
-  background-size: 100% 100%;
-  transition-property: transform, top;
+  height: 100%;
+  position: relative;
+  transition-property: transform, margin-top;
   transition-duration: var(--transition-sec);
-  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
-  -webkit-box-shadow: 5px 5px 10px 0px var(--card-shadow-color);
-  -moz-box-shadow: 5px 5px 10px 0px var(--card-shadow-color);
-  box-shadow: 5px 5px 10px 0px var(--card-shadow-color);
+  transform-style: preserve-3d;
+}
+.cardfront, .cardback{
+  width: 100%;
+  height: 100%;
+  border-radius: 3%;
+  background-size: 100% 100%;
+  position: absolute;
+  backface-visibility: hidden;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+}
+.cardfront{
+  transform: rotateY(180deg);
+}
+.cardback{
+  background-image: url("img/back.jpg");
 }
 .cardfront, .cardback{
   width: 100%;
@@ -147,53 +135,42 @@ body {
   position: absolute;
   backface-visibility: hidden;
 }
-.front{
-background-image: url("img/wz3.jpg");
-background-size: 100% 100%;
-}
-.back{
-background-image: url("img/back.jpg");
-background-size: cover;
-transform: rotateY(180deg);
-}
 .dummycard {
   width: var(--card-width);
   height: var(--card-height);
   position: absolute;
   border-radius: var(--card-border-radius);
 }
-#hand0 .dummycard {
-  top: var(--hand0-card-top);
-  left: var(--block-left-padding);
-}
-#pool .dummycard{
-  top: var(--pool-card-top);
-  left: var(--block-left-padding);
+#hand0 .dummycard, #pool .dummycard{
+  top: calc(50% - var(--card-height)/2);
+  left: 2.8%;
 }
 #hand1 .dummycard {
-  top: var(--hand1-card-top);
-  left: var(--block-left-padding);
+  top: calc(50% - var(--card-height)*0.3);
+  left: 2.8%;
 }
 #repository .dummycard, #table0 .dummycard, #table1 .dummycard{
   top: 0;
   left: 0;
 }
-
 .faceup:hover .card{
-  top: var(--card-hover-top);
+  margin-top: calc(var(--card-height)*-0.3);
 }
-
+.faceup:hover, .poolbottom:hover, .pooltop:hover{
+  transform: none !important;
+}
 .poolbottom:hover .card{
-  top: var(--poolbottom-hover-top);
+  margin-top: calc(var(--card-height)/4);
 }
 .pooltop:hover .card{
-  top: var(--pooltop-hover-top);
+  margin-top: calc(var(--card-height)/-4);
 }
+
 .glow{
   -webkit-box-shadow: 0px 0px 10px 5px var(--card-glow-color);
   -moz-box-shadow: 0px 0px 10px 5px var(--card-glow-color);
   box-shadow: 0px 0px 10px 5px var(--card-glow-color);
 }
 .pop .card{
-  top: var(--card-active-top);
+  margin-top: calc(var(--card-height)*-0.4);
 }

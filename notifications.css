@@ -20,7 +20,7 @@
   font-size: 5vw;
   color:var(--final-info-color);
 }
-#blocker, #testcombobanner{
+#blocker, #combobanner{
   z-index: 999;
   display: none;
   position: absolute;
@@ -30,47 +30,45 @@
   right:0;
   text-align: center;
 }
-
-#testcombobanner{
-  top:0;left:0;right:0;bottom:0;
+/*
+card: 1.2h
+around card: 0.15h
+text: 3vw
+above text: 0.3h
+*/
+#combobanner{
   //display: block;
   background-color: var(--banner-background);
   overflow: hidden;
-  transition-property: all;
-  transition-duration: var(--transition-sec);
-  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: right calc(var(--transition-sec)*2);
 }
-#testcombobanner:active{
-  margin-right: 2999px;
+#cccccccccccccccombobanner:active{
+  right: 2999px;
 }
-#testcombotext{
-  text-align: center;
-  margin-top: 15%;
-  font-size: 2vw;
-  //color: rgb(202, 187, 178);
-  color: #735249;
+#combotext{
+  margin-top: calc(var(--card-height));
+  font-size: calc(var(--card-height)*0.3);
+  color: var(--congra-text-color);
   font-family: "microsoft yahei";
-  padding-bottom: 15px;
-  background-color: #1E130A;
-  padding-top: 30px;
+  background-color: var(--congra-background-color);
+  padding-top: calc(var(--card-height)*0.3);
+  padding-bottom: calc(var(--card-height)*0.15);
 }
-#testcombocards{
-  float: top;
-  background-color: #1E130A;
-  padding-bottom: 30px;
-  height: var(--card-height);
-  padding-left: 490px;
+#combocards{
+  height: calc(var(--card-height)*1.5);
+  background-color: var(--congra-background-color);
 }
-.testcombohl{
-  font-size: 3vw;
-  color: var(--congra-glow-color);
-  padding: 1%;
+.combohl{
+  font-size: calc(var(--card-height)/2);
+  color: var(--congra-hl-color);
+  text-shadow: 0 0 calc(var(--card-height)/10) var(--congra-glow-color);
+  padding: 2%;
 }
-#testcomboscore{}
 .congra{
   background-image: url("img/wz3.jpg");
-  width: var(--card-width);
-  height: var(--card-height);
+  width: calc(1.2*var(--card-width));
+  height: calc(1.2*var(--card-height));
+  background-size: 100% 100%;
   float: left;
   margin: 5px;
   -webkit-box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
