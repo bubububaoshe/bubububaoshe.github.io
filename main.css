@@ -16,10 +16,11 @@
   --congra-background-color: #1E130A;
   --final-background-color: rgba(40, 27, 17, 0.5);
   --transition-sec: 0.7s;
-  --card-border-radius: 3%;
   /*
-  --card-width: 120px;
-  --card-height: 133px;
+  --card-width
+  --card-height
+  --main-width
+  --main-height
   */
 }
 
@@ -104,8 +105,11 @@ change card margin for hover and click
     height: var(--card-height);
     position: absolute;
     perspective: 1000px;
-    transition-property: top, left, transform, width, height;
+    transition-property: top, left, transform;
     transition-duration: var(--transition-sec);
+    webkit-transition-property: top, left, transform;
+    webkit-transition-duration: var(--transition-sec);
+
 }
 .card{
   width: 100%;
@@ -114,6 +118,9 @@ change card margin for hover and click
   transition-property: transform, margin-top;
   transition-duration: var(--transition-sec);
   transform-style: preserve-3d;
+  webkit-transition-property: transform, margin-top;
+  webkit-transition-duration: var(--transition-sec);
+  webkit-transform-style: preserve-3d;
 }
 .cardfront, .cardback{
   width: 100%;
@@ -122,6 +129,7 @@ change card margin for hover and click
   background-size: 100% 100%;
   position: absolute;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
 }
 .cardfront{
@@ -140,7 +148,7 @@ change card margin for hover and click
   width: var(--card-width);
   height: var(--card-height);
   position: absolute;
-  border-radius: var(--card-border-radius);
+  border-radius: 3%;
 }
 #hand0 .dummycard, #pool .dummycard{
   top: calc(50% - var(--card-height)/2);

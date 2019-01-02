@@ -334,29 +334,29 @@ class PoolDiv extends DeckDiv {
 }
 class Messenger {
   constructor(){
-    this.banner = document.getElementById("combobanner");
-    this.headline =  document.getElementById("combotext");
-    this.poster = document.getElementById("combocards");
   }
-  vanish(){
-    //this.banner.style.right = WINW;
-    //this.banner.style.opacity = 0.5;
-    this.banner.style.transform = "rotateY(90deg)";
-  }
-  appear(){
-    //this.banner.style.right = 0;
-    this.banner.style.transform = "none";
-    //this.banner.style.opacity = 1;
+  notifyNoMatch(display) {
+    var info = document.getElementById("infobox");
+    if (display == "show")
+      info.textContent = "无牌可匹配\n需抛弃一张牌\n";
+    else if(display == "hidden")
+      info.textContent = "";
+    else {
+      info.textContent = display;
+    }
   }
   notifyCombo(comboCount, combos){
     if(comboCount > 0){
-      var combo = combos[comboCount-1];
+      var combo = combos[--comboCount];
       var chars = combo.characters;
       var count = chars.length;
       var offset = CARDW * 1.2 + 10;
       var totalw = CARDW * 1.2 * count + 10*(count -1);
       var left = (WINW - totalw)/2;
-      var pcards = this.poster.children;
+      var banner = document.getElementById("combobanner");
+      var headline =  document.getElementById("combotext");
+      var poster = document.getElementById("combocards");
+      var pcards = poster.children;
       pcards[0].style.marginLeft = left;
       for(var i=0; i<count; i++){
         pcards[i].style.display = "block";
@@ -364,18 +364,38 @@ class Messenger {
       }
       for(var i=count; i<6; i++)
         pcards[i].style.display = "none";
-      this.headline.firstElementChild.textContent = combo.getName();
-      this.headline.lastElementChild.textContent = combo.getScore();
-      this.appear();
+      headline.firstElementChild.textContent = combo.getName();
+      headline.lastElementChild.textContent = combo.getScore();
+      banner.style.display = "block";
+      reflow();
+      banner.style.opacity = 1;
       sound.combo();
       delayedFunc(function(){
-        view.messenger.vanish();
+        banner.style.display = "none";
+        banner.style.opacity = 0;
         delayedFunc(function(){
-          view.messenger.notifyCombo(comboCount-1, combos);
+          messenger.notifyCombo(comboCount, combos);
         }, 1.5);
       },2.5);
-
     }
+  }
+  notifyFinal(){
+    var msg = document.getElementById("finalmsg");
+    var div = document.getElementById("finalcontainer");
+    if(model.player1.score > model.player0.score){
+      msg.textContent = "你赢了";
+      sound.win();
+    }
+    else if(model.player1.score < model.player0.score){
+      msg.textContent = "你输了";
+      sound.lose();
+    }
+    else
+      msg.textContent = "平手";
+    reflow();
+    div.style.transform = "none";
+    div.style.webkitTransform = "none";
+    div.addEventListener("click", controller.restart);
   }
 }
 class View {
@@ -389,19 +409,19 @@ class View {
     this.score0 = document.getElementById("score0");
     this.score1 = document.getElementById("score1");
     this.blocker = document.getElementById("blocker");
-    this.info = document.getElementById("infobox");
-    this.messenger = new Messenger();
   }
   reset(){
-    //alert("aaa"+model.player0.score+"bbb");
-    view.blocker.removeEventListener("click", controller.restart);
+    var div = document.getElementById("finalcontainer");
+    div.removeEventListener("click", controller.restart);
+    div.style.transform = "translate(0,-"+WINH+"px)";
+    div.style.webkitTransform = "translate(0,-"+WINH+"px)";
     this.updateScore();
-    document.getElementById("finalcontainer").style.opacity = "0";
   }
   restart(){
     view.hand0.init();
     view.hand1.init();
     view.pool.init();
+    view.unblockGame();
   }
   init(){
     this.setSizes();
@@ -421,28 +441,19 @@ class View {
     var len = this.hand1.deck.getSize();
     var chars = this.hand1.deck.characters;
     if(model.player1.matchable){
-      this.notifyNoMatch("hidden");
+      messenger.notifyNoMatch("hidden");
       for (var i = 0; i < len; i++) {
         chars[i].card.removeController(controller.discard);
         chars[i].card.addController(controller.activate);
       }
     }
     else {
-      this.notifyNoMatch("show");
+      messenger.notifyNoMatch("show");
       for (var i = 0; i < len; i++) {
         chars[i].card.removeController(controller.activate);
         chars[i].card.addController(controller.discard);
       }
       sound.discard();
-    }
-  }
-  notifyNoMatch(display) {
-    if (display == "show")
-      this.info.textContent = "无牌可匹配\n需抛弃一张牌\n";
-    else if(display == "hidden")
-      this.info.textContent = "";
-    else {
-      this.info.textContent = display;
     }
   }
   blockGame(){
@@ -482,7 +493,7 @@ class View {
     view.pool.paint();
     sound.deal();
   }
-  obtain(player, handChar, poolChar) {
+  obtain(player, handChar, poolChar, comboCount) {
     //handChar, poolChar -> table
     //handChar: faceup, remove controller: active
     //poolChar: unrotate
@@ -496,6 +507,13 @@ class View {
     this.pool.paint();
     table.paint();
     this.updateScore();
+    if(comboCount > 0){
+      if(player.id == 0)
+        for(var i = 0; i<comboCount; i++)
+          messenger.notifyNoMatch("对方获得\n"+player.completeCombos[i].getDesc());
+      else
+          messenger.notifyCombo(comboCount, player.completeCombos);
+    }
   }
   activate(oldChar, newChar) {
     this.hand1.activate(oldChar, newChar);
@@ -541,6 +559,7 @@ class View {
     setCSSInt("--card-height", CARDH);
     setCSSInt("--main-height", MAINH);
     setCSSInt("--main-width", MAINW);
+    setCSSInt("--win-height", WINH);
     var handOFS = CARDW * (1 - HAND_CARD_OVERLAP);
     this.hand0.offset = handOFS;
     this.hand1.offset = handOFS;
@@ -552,46 +571,11 @@ class View {
     var diffT = CARDH / 4;
     this.pool.diffTop = diffT;
   }
-  final(){
-    view.blockGame();
-    var msg = document.getElementById("finalmsg");
-    var div = document.getElementById("finalcontainer");
-    if(model.player1.score > model.player0.score){
-      //para.setAttribute('style', 'white-space: pre;');
-      msg.textContent = "你赢了";
-      sound.win();
-    }
-    else if(model.player1.score < model.player0.score){
-      msg.textContent = "你输了";
-      sound.lose();
-    }
-    else
-      msg.textContent = "平手";
-//    div.style.display = "block";
-    div.style.opacity = "1";
-    view.blocker.addEventListener("click", controller.restart);
-  }
-  combo(combo){
-    this.messenger(combo);
-    delayedFunc(function(){
-      view.pool.paint();
-      view.hand1.paint();
-      view.table1.paint();
-    },3)
-  }
 }
 let sound = new Sound();
 let combos = new Combos();
 let model = new Model();
 let controller = new Controller();
+let messenger = new Messenger();
 let view = new View();
 model.init();
-/*
-var c = new TabledCombo(model.player1.hand.characters[0], 8);
-c.addChar(model.player1.hand.characters[1]);
-c.addChar(model.player1.hand.characters[2]);
-c.addChar(model.player1.hand.characters[3]);
-c.addChar(model.player1.hand.characters[5]);
-c.addChar(model.player1.hand.characters[7]);
-view.messenger.notifyCombo(c);
-*/

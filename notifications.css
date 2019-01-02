@@ -1,5 +1,4 @@
 #infobox{
-  transition: all 1s ease;
   position: absolute;
   top: 37%;
   bottom: 37%;
@@ -17,9 +16,8 @@
 #blocker {
   font-size: 5vw;
   color:var(--final-info-color);
-  display: none;
 }
-#blocker, #combobanner{
+.cover{
   z-index: 999;
   position: absolute;
   top:0;
@@ -27,15 +25,13 @@
   left:0;
   right:0;
   text-align: center;
+  display: none;
 }
 #combobanner{
-  transform: rotateY(90deg);
+  opacity: 0;
   background-color: var(--banner-background);
-  overflow: hidden;
-  transition: all calc(var(--transition-sec)*2) ease;
-}
-#combobanner:active{
-  transform: rotateY(90deg);
+  transition: all var(--transition-sec) ease;
+  webkit-transition: all var(--transition-sec) ease;
 }
 #combotext{
   margin-top: calc(var(--card-height));
@@ -69,35 +65,62 @@
   box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
 }
 #finalcontainer{
-  transition: opacity 2s ease;
-  opacity: 0;
+  transition: all 2s ease-out;
+  webkit-transition: all 2s ease-out;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  /*
+  bottom: var(--win-height);
+  */
+  top: 0;
+  left: 0;
+  transform: translate(0, calc(var(--win-height) * -1));
+  webkit-transform: translate(0, calc(var(--win-height) * -1));
+  z-index: 999;
+  text-align: center;
 }
-.finalbox{
+#finalcontainer>div{
   width: calc(var(--main-height)*0.35);
   height:  calc(var(--main-height)*0.35);
   position: absolute;
   left: calc(50% - var(--main-height)*0.175);
   top:  32.5%;
   background-color: var(--final-background-color);
-  border: 1px dotted rgba(255, 255, 255, 0.2);
+  border: 6px dashed rgba(0, 0, 0, 0.15);
   transform: rotate(22.5deg);
-  transition: transform 1s;
+  webkit-transform: rotate(22.5deg);
 }
-.finalbox:nth-child(2){transform: rotate(45deg);}
-.finalbox:nth-child(3){transform: rotate(67.5deg);}
-.finalbox:nth-child(4){transform: rotate(0);}
-.finalbox>p{
-    padding: 0;
-    margin: 0;
-    text-align: center;
+#finalcontainer>div:nth-child(2){
+  transform: rotate(45deg);
+  webkit-transform: rotate(45deg);
+}
+#finalcontainer>div:nth-child(3){
+  transform: rotate(67.5deg);
+  web-kittransform: rotate(67.5deg);
+}
+#finalcontainer>div:nth-child(4){
+  transform: rotate(0);
+  webkit-transform: rotate(0);
+}
+#finalcontainer>div>p{
     color: var(--congra-text-color);
     font-size: calc(var(--card-height)*0.15);
 }
-.finalbox>p:first-child{
-    margin: 28% auto 3%;
+#finalmsg{
+    margin-top: 25%;
     font-size: calc(var(--card-height)*0.45);
     color: var(--score-info-color);
     text-shadow: 0 0 calc(var(--card-height)*0.1) var(--score-glow-color);
     letter-spacing: -7px;
     font-weight: 700;
+}
+.string{
+  margin: 0;
+  height: 25.255%;
+  width: 0;
+  border-right: 6px dashed var(--final-background-color);
+  position: absolute;
+  left: calc(50% + 3px);
+  top: 0;
 }

@@ -14,7 +14,6 @@ class Controller{
     model.reset();
     delayedFunc(function(){
       model.restart();
-      view.unblockGame();
     });
   }
   activate(){
@@ -26,12 +25,6 @@ class Controller{
     var poolc = model.pool.getChar(this.id);
     model.activate(handc);
     model.obtain(model.player1, handc, poolc);
-    /*
-    model.dealOne();
-    controller.opponentObtain();
-    model.dealOne();
-    model.checkMatch1();
-    */
     view.blockGame();
     delayedFunc(function(){
       model.dealOne();
@@ -58,7 +51,7 @@ class Controller{
       delayedFunc(function(){
         if(model.player0.hand.getSize()+model.player1.hand.getSize() == 0)
           //game end
-          view.final();
+          messenger.notifyFinal();
         else{
           model.dealOne();
           model.checkMatch1();

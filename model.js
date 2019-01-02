@@ -593,15 +593,7 @@ class Model {
     model.pool.removeChar(poolChar);
     player.hand.removeChar(handChar);
     var comboCount = player.addChar(poolChar) + player.addChar(handChar);
-    view.obtain(player, handChar, poolChar);
-    if(player.id == 1){
-        view.messenger.notifyCombo(comboCount, player.completeCombos);
-    }
-    else
-      for(var i = 0; i<comboCount; i++)
-        view.notifyNoMatch("对方获得\n"+player.completeCombos[i].getDesc());
-    //log((player==this.player0?"AI":"你")+player.hand.getSize());
-    //log((player==this.player0?"AI[":"你[")+handChar.name +"]["+ poolChar.name+"]");
+    view.obtain(player, handChar, poolChar, comboCount);
   }
   activate(char) {//player1 set a card active
     if (this.activeChar == null || this.activeChar != char) {
