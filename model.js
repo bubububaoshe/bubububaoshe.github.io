@@ -197,9 +197,8 @@ class Character {
   setOwner(owner) {
     this.owner = owner;
   }
-
   getPortrait() {
-    return "img/" + this.id + ".jpg";
+    return "url('img/" + this.id + ".jpg')";
   }
   getDesc() {
     var msg = this.id + "：" + this.name + "，" + this.score + "分，" + this.season + "季, 归属玩家" + (this.owner == null ? "-" : this.owner.id) + "\n";
@@ -389,11 +388,11 @@ class Combos{
     getNewCombos(player, char){
       //update player: partialCombos. completeCombos, score
       //return type:
-      //[newcombocount, newcompletecombocount]
+      //completecombocount
       //the bombos are at the beginning of partialCombos, completeCombos
       var chars = player.table;
       var pcombos = player.partialCombos;
-      var ncount = 0, nccount = 0;
+      var nccount = 0;
       for(var i=0; i<this.getSize(); i++) {
         var combo = COMBO_LIST[i];
         for(var j=0; j<combo[0].length; j++) {
@@ -417,14 +416,13 @@ class Combos{
             }
             if(pcombo == null){
               //find a new combo, must be partial
-              ncount ++;
               let pcombo = new TabledCombo(char, i);
               player.partialCombos.unshift(pcombo);
             }
           }
         }
       }
-      return [ncount, nccount];
+      return nccount;
     }
 }
 class Player {
@@ -456,10 +454,8 @@ class Player {
     this.table.addChar(char);
     char.setOwner(this);
     this.score += char.score;
-    var comboCounts = combos.getNewCombos(this, char);
-    for(var i = 0; i<comboCounts[1]; i++)
-      view.notifyNoMatch(this.completeCombos[i].getDesc());
-    return comboCounts[1]>0;
+    var comboCount = combos.getNewCombos(this, char);
+    return comboCount;
   }
   getDesc() {
     var msg = "玩家" + this.id;
@@ -596,9 +592,14 @@ class Model {
   obtain(player, handChar, poolChar) {
     model.pool.removeChar(poolChar);
     player.hand.removeChar(handChar);
-    var hasCombo1 = player.addChar(poolChar);
-    var hasCombo2 = player.addChar(handChar);
-    view.obtain(player, handChar, poolChar, hasCombo1||hasCombo2);
+    var comboCount = player.addChar(poolChar) + player.addChar(handChar);
+    view.obtain(player, handChar, poolChar);
+    if(player.id == 1){
+        view.messenger.notifyCombo(comboCount, player.completeCombos);
+    }
+    else
+      for(var i = 0; i<comboCount; i++)
+        view.notifyNoMatch("对方获得\n"+player.completeCombos[i].getDesc());
     //log((player==this.player0?"AI":"你")+player.hand.getSize());
     //log((player==this.player0?"AI[":"你[")+handChar.name +"]["+ poolChar.name+"]");
   }

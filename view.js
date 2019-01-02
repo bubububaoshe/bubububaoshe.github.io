@@ -9,7 +9,7 @@ MAX_TABLE_CARD_ROTATION = 25; //max degree of rotation the table cards turns
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
 DUMMY_CARD_NUM = 5; //number of dummy cards in the repository div
 
-var CARDH, CARDW;
+var CARDH=0, CARDW=0, WINW=0, WINH=0, MAINW=0, MAINH=0;
 var maindiv = document.getElementById("main");
 
 function getCSSInt(name) {
@@ -68,6 +68,17 @@ class Card{
     var back = document.createElement("div");
     this.card.appendChild(back);
     back.classList.add("cardback");
+  }
+  onPoster(){
+    this.card.firstElementChild.classList.add("poster");
+    this.container.style.width = CARDW*1.2;
+    this.container.style.height = CARDH*1.2;
+    this.setZ(999);
+  }
+  offPoster(){
+    this.card.firstElementChild.classList.remove("poster");
+    this.container.style.width = CARDW;
+    this.container.style.height = CARDH;
   }
   activate(){
     this.container.classList.remove("faceup");
@@ -321,6 +332,52 @@ class PoolDiv extends DeckDiv {
     }
   }
 }
+class Messenger {
+  constructor(){
+    this.banner = document.getElementById("combobanner");
+    this.headline =  document.getElementById("combotext");
+    this.poster = document.getElementById("combocards");
+  }
+  vanish(){
+    //this.banner.style.right = WINW;
+    //this.banner.style.opacity = 0.5;
+    this.banner.style.transform = "rotateY(90deg)";
+  }
+  appear(){
+    //this.banner.style.right = 0;
+    this.banner.style.transform = "none";
+    //this.banner.style.opacity = 1;
+  }
+  notifyCombo(comboCount, combos){
+    if(comboCount > 0){
+      var combo = combos[comboCount-1];
+      var chars = combo.characters;
+      var count = chars.length;
+      var offset = CARDW * 1.2 + 10;
+      var totalw = CARDW * 1.2 * count + 10*(count -1);
+      var left = (WINW - totalw)/2;
+      var pcards = this.poster.children;
+      pcards[0].style.marginLeft = left;
+      for(var i=0; i<count; i++){
+        pcards[i].style.display = "block";
+        pcards[i].style.backgroundImage = chars[i].getPortrait();
+      }
+      for(var i=count; i<6; i++)
+        pcards[i].style.display = "none";
+      this.headline.firstElementChild.textContent = combo.getName();
+      this.headline.lastElementChild.textContent = combo.getScore();
+      this.appear();
+      sound.combo();
+      delayedFunc(function(){
+        view.messenger.vanish();
+        delayedFunc(function(){
+          view.messenger.notifyCombo(comboCount-1, combos);
+        }, 1.5);
+      },2.5);
+
+    }
+  }
+}
 class View {
   constructor() {
     this.hand0 = new DeckDiv(document.getElementById("hand0"), model.player0.hand);
@@ -333,12 +390,14 @@ class View {
     this.score1 = document.getElementById("score1");
     this.blocker = document.getElementById("blocker");
     this.info = document.getElementById("infobox");
+    this.messenger = new Messenger();
   }
   reset(){
     //alert("aaa"+model.player0.score+"bbb");
     view.blocker.removeEventListener("click", controller.restart);
     this.notifyFinal("");
     this.updateScore();
+    document.getElementById("finalcontainer").style.transform = "rotateY(180deg)";
   }
   restart(){
     view.hand0.init();
@@ -424,7 +483,7 @@ class View {
     view.pool.paint();
     sound.deal();
   }
-  obtain(player, handChar, poolChar, accomplished) {
+  obtain(player, handChar, poolChar) {
     //handChar, poolChar -> table
     //handChar: faceup, remove controller: active
     //poolChar: unrotate
@@ -438,8 +497,6 @@ class View {
     this.pool.paint();
     table.paint();
     this.updateScore();
-    if(player.id ==1 && accomplished)
-      sound.combo();
   }
   activate(oldChar, newChar) {
     this.hand1.activate(oldChar, newChar);
@@ -458,37 +515,40 @@ class View {
   }
   setSizes() {
     //cardh, cardw, handoffset, pooloffset
-    var mainW = window.innerWidth;
-    var mainH = window.innerHeight;
-    var winH = mainH;
-    if(mainW < MIN_MAIN_WIDTH)
-      mainW =  MIN_MAIN_WIDTH;
-    if(mainH < MIN_MAIN_WIDTH / MAX_MAIN_RATIO)
-      mainH = MIN_MAIN_WIDTH / MAX_MAIN_RATIO;
-    if (mainW / mainH > MAX_MAIN_RATIO)
-      mainW = mainH * MAX_MAIN_RATIO;
-    else if (mainW / mainH < MIN_MAIN_RATIO)
-      mainH = mainW / MIN_MAIN_RATIO;
-    maindiv.style.width = mainW;
-    maindiv.style.height = mainH;
-    maindiv.style.marginTop = (winH - mainH)/2;
+    MAINW = window.innerWidth;
+    MAINH = window.innerHeight;
+    WINH = MAINH;
+    WINW = MAINW;
+    if(MAINW < MIN_MAIN_WIDTH)
+      MAINW =  MIN_MAIN_WIDTH;
+    if(MAINH < MIN_MAIN_WIDTH / MAX_MAIN_RATIO)
+      MAINH = MIN_MAIN_WIDTH / MAX_MAIN_RATIO;
+    if (MAINW / MAINH > MAX_MAIN_RATIO)
+      MAINW = MAINH * MAX_MAIN_RATIO;
+    else if (MAINW / MAINH < MIN_MAIN_RATIO)
+      MAINH = MAINW / MIN_MAIN_RATIO;
+    maindiv.style.width = MAINW;
+    maindiv.style.height = MAINH;
+    maindiv.style.marginTop = (WINH - MAINH)/2;
 
-    CARDW = mainW * 0.611 / (9 * (1 - HAND_CARD_OVERLAP) + 1);
-    var maxCardH = mainH * 0.206;
-    var CARDH = Math.floor(CARDW / CARD_RATIO);
+    CARDW = MAINW * 0.611 / (9 * (1 - HAND_CARD_OVERLAP) + 1);
+    var maxCardH = MAINH * 0.206;
+    CARDH = CARDW / CARD_RATIO;
     if (CARDH > maxCardH) {
       CARDH = maxCardH;
-      CARDW = Math.floor(CARDH * CARD_RATIO);
+      CARDW = CARDH * CARD_RATIO;
     }
     setCSSInt("--card-width", CARDW);
     setCSSInt("--card-height", CARDH);
+    setCSSInt("--main-height", MAINH);
+    setCSSInt("--main-width", MAINW);
     var handOFS = CARDW * (1 - HAND_CARD_OVERLAP);
     this.hand0.offset = handOFS;
     this.hand1.offset = handOFS;
     handOFS = handOFS/3;
     this.table0.offset = handOFS;
     this.table1.offset = handOFS;
-    var poolOFS = (mainW*0.589-CARDW*2.25)/(INIT_CARD_NUM_POOL+1);
+    var poolOFS = (MAINW*0.589-CARDW*2.25)/(INIT_CARD_NUM_POOL+1);
     this.pool.offset = poolOFS;
     var diffT = CARDH / 4;
     this.pool.diffTop = diffT;
@@ -498,23 +558,30 @@ class View {
   }
   final(){
     view.blockGame();
-    var msg;
+    var msg = document.getElementById("finalmsg");
+    var div = document.getElementById("finalcontainer");
     if(model.player1.score > model.player0.score){
-      msg = "你赢了ヾ(^▽^*=)>";
+      //para.setAttribute('style', 'white-space: pre;');
+      msg.textContent = "你赢了";
       sound.win();
     }
     else if(model.player1.score < model.player0.score){
-      msg = "你输了(ノへ￣、=)>";
+      msg.textContent = "你输了";
       sound.lose();
     }
     else
-      msg = "平手(;ﾟдﾟ)";
-    view.notifyFinal(msg);
+      msg.textContent = "平手";
+//    div.style.display = "block";
+    div.style.transform = "none";
+    view.blocker.addEventListener("click", controller.restart);
+  }
+  combo(combo){
+    this.messenger(combo);
     delayedFunc(function(){
-      msg += "\n点击牌桌任意位置重新开始";
-      view.notifyFinal(msg);
-      view.blocker.addEventListener("click", controller.restart);
-    })
+      view.pool.paint();
+      view.hand1.paint();
+      view.table1.paint();
+    },3)
   }
 }
 let sound = new Sound();
@@ -523,3 +590,12 @@ let model = new Model();
 let controller = new Controller();
 let view = new View();
 model.init();
+/*
+var c = new TabledCombo(model.player1.hand.characters[0], 8);
+c.addChar(model.player1.hand.characters[1]);
+c.addChar(model.player1.hand.characters[2]);
+c.addChar(model.player1.hand.characters[3]);
+c.addChar(model.player1.hand.characters[5]);
+c.addChar(model.player1.hand.characters[7]);
+view.messenger.notifyCombo(c);
+*/

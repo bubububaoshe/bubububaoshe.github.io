@@ -15,14 +15,12 @@
   padding-top: 20px;
 }
 #blocker {
-  padding-top: 40%;
-  white-space: pre;
   font-size: 5vw;
   color:var(--final-info-color);
+  display: none;
 }
 #blocker, #combobanner{
   z-index: 999;
-  display: none;
   position: absolute;
   top:0;
   bottom:0;
@@ -30,20 +28,14 @@
   right:0;
   text-align: center;
 }
-/*
-card: 1.2h
-around card: 0.15h
-text: 3vw
-above text: 0.3h
-*/
 #combobanner{
-  //display: block;
+  transform: rotateY(90deg);
   background-color: var(--banner-background);
   overflow: hidden;
-  transition: right calc(var(--transition-sec)*2);
+  transition: all calc(var(--transition-sec)*2) ease;
 }
-#cccccccccccccccombobanner:active{
-  right: 2999px;
+#combobanner:active{
+  transform: rotateY(90deg);
 }
 #combotext{
   margin-top: calc(var(--card-height));
@@ -52,7 +44,7 @@ above text: 0.3h
   font-family: "microsoft yahei";
   background-color: var(--congra-background-color);
   padding-top: calc(var(--card-height)*0.3);
-  padding-bottom: calc(var(--card-height)*0.15);
+  padding-bottom: calc(var(--card-height)*0.2);
 }
 #combocards{
   height: calc(var(--card-height)*1.5);
@@ -64,14 +56,47 @@ above text: 0.3h
   text-shadow: 0 0 calc(var(--card-height)/10) var(--congra-glow-color);
   padding: 2%;
 }
-.congra{
-  background-image: url("img/wz3.jpg");
-  width: calc(1.2*var(--card-width));
-  height: calc(1.2*var(--card-height));
+
+.postercard{
+  width: calc(var(--card-width)*1.2);
+  height: calc(var(--card-height)*1.2);
   background-size: 100% 100%;
+  border-radius: 3%;
   float: left;
-  margin: 5px;
+  margin-right: 10px;
   -webkit-box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
   -moz-box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
   box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
+}
+#finalcontainer{
+  transition: all 2s ease;
+  transform: rotateY(180deg);
+}
+.finalbox{
+  width: calc(var(--main-height)*0.35);
+  height:  calc(var(--main-height)*0.35);
+  position: absolute;
+  left: calc(50% - var(--main-height)*0.175);
+  top:  32.5%;
+  background-color: var(--final-background-color);
+  border: 1px dotted rgba(255, 255, 255, 0.2);
+  transform: rotate(22.5deg);
+}
+.finalbox:nth-child(2){transform: rotate(45deg);}
+.finalbox:nth-child(3){transform: rotate(67.5deg);}
+.finalbox:nth-child(4){transform: rotate(0);}
+.finalbox>p{
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    color: var(--congra-text-color);
+    font-size: calc(var(--card-height)*0.15);
+}
+.finalbox>p:first-child{
+    margin-top: 28%;
+    font-size: calc(var(--card-height)*0.45);
+    color: var(--score-info-color);
+    text-shadow: 0 0 calc(var(--card-height)*0.1) var(--score-glow-color);
+    letter-spacing: -7px;
+    font-weight: 700;
 }
