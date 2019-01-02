@@ -395,9 +395,8 @@ class View {
   reset(){
     //alert("aaa"+model.player0.score+"bbb");
     view.blocker.removeEventListener("click", controller.restart);
-    this.notifyFinal("");
     this.updateScore();
-    document.getElementById("finalcontainer").style.transform = "rotateY(180deg)";
+    document.getElementById("finalcontainer").style.opacity = "0";
   }
   restart(){
     view.hand0.init();
@@ -553,9 +552,6 @@ class View {
     var diffT = CARDH / 4;
     this.pool.diffTop = diffT;
   }
-  notifyFinal(msg){
-    view.blocker.textContent=msg;
-  }
   final(){
     view.blockGame();
     var msg = document.getElementById("finalmsg");
@@ -572,7 +568,7 @@ class View {
     else
       msg.textContent = "平手";
 //    div.style.display = "block";
-    div.style.transform = "none";
+    div.style.opacity = "1";
     view.blocker.addEventListener("click", controller.restart);
   }
   combo(combo){
