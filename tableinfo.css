@@ -1,0 +1,43 @@
+.tableinfocontainer{
+  background-color: rgba(135, 112, 89,0.85);
+}
+.flexbox{
+  position: relative;
+  margin: auto;
+  overflow:auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 90%;
+}
+.tableinfocontainer .infoheader{
+  top: 5%;
+  height: 10%;
+  margin-bottom: 5%;
+  color: #eadeaa;
+  text-shadow:  0 0 calc(var(--card-height)/10) var(--congra-glow-color);
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.tableinfocontainer .ccomboinfocontainer{
+  display: none;
+}
+.infoheader div{
+  font-size: calc(var(--card-width) * 0.3);
+  padding: 0 calc(var(--card-width) * 0.1);
+}
+.smallcard {
+    margin: calc(var(--card-width)*0.08);
+}
+.smallcard>div{
+  width: calc(var(--card-width) * 0.7);
+  height: calc(var(--card-height) * 0.7);
+  background-size: 100% 100%;
+  border-radius: 3%;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+}
+.smallcard>p{
+  font-size: 1vw;
+  color: #303030;
+}

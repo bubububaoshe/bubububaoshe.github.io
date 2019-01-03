@@ -7,6 +7,7 @@
 	<link rel="stylesheet" type="text/css" href="main.css">
 	<link rel="stylesheet" type="text/css" href="decks.css">
 	<link rel="stylesheet" type="text/css" href="notifications.css">
+	<link rel="stylesheet" type="text/css" href="tableinfo.css">
 </head>
 
 <body>
@@ -17,26 +18,50 @@
 			<div id="score1" class="bignotice">0</div>
 			<div id="table1"></div>
 		</div>
-		<div id="gamezone">
-			<div id="hand0container"><div id="hand0"></div></div>
-			<div id="poolcontainer">
-				<div id="pool"></div>
-				<div id="repository"></div>
-			</div>
-			<div id="hand1container"><div id="hand1"></div></div>
-			<div id="blocker" class="cover"></div>
-			<div id="finalcontainer">
-				<div></div><div></div><div></div>
-				<div>
-					<div id="finalmsg" class="bignotice"></div>
-					<p>点击牌桌区域继续</p>
+		<div>
+			<div id="gamezone">
+				<div id="hand0container"><div id="hand0"></div></div>
+				<div id="poolcontainer">
+					<div id="pool"></div>
+					<div id="repository"></div>
 				</div>
-				<p class="string"></p>
+				<div id="hand1container"><div id="hand1"></div></div>
+				<div class="tableinfocontainer cover">
+					<div id="header0" class="infoheader flexbox">
+							<div>&#9830; 卡牌</div>
+							<div>&#9830; 完成组合</div>
+							<div>&#9830; 未完组合</div>
+						</ul>
+					</div>
+					<div class="charinfocontainer flexbox" ></div>
+					<div class="ccomboinfocontainer flexbox" ></div>
+					<div class="icomboinfocontainer flexbox" ></div>
+				</div>
+				<div class="tableinfocontainer cover">
+					<div  id="header1" class="infoheader flexbox">
+							<div>&#9830; 卡牌</div>
+							<div>&#9830; 完成组合</div>
+							<div>&#9830; 未完组合</div>
+						</ul>
+					</div>
+					<div class="charinfocontainer flexbox" ></div>
+					<div class="ccomboinfocontainer flexbox" ></div>
+					<div class="icomboinfocontainer flexbox" ></div>
+				</div>
+				<div id="blocker" class="cover"></div>
+				<div id="finalcontainer">
+					<div></div><div></div><div></div>
+					<div>
+						<div id="finalmsg" class="bignotice"></div>
+						<p>点击牌桌区域继续</p>
+					</div>
+					<p class="string"></p>
+				</div>
 			</div>
-		</div>
-		<div id="specialboard">
-			<p></p>
-			<div id="infobox"></div>
+			<div id="specialboard">
+				<p></p>
+				<div id="infobox"></div>
+			</div>
 		</div>
 	</div>
 	<div id="combobanner" class="cover transitform">
@@ -54,4 +79,5 @@
 </html>
 <script src="model.js"></script>
 <script src="controller.js"></script>
+<script src="tableinfoview.js"></script>
 <script src="view.js"></script>

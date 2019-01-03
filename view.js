@@ -1,7 +1,7 @@
 //consts
 
 MAX_MAIN_RATIO = 2;//max width/height ratio of the main board
-MIN_MAIN_RATIO = 1.5;//min width/height ratio of the main board
+MIN_MAIN_RATIO = 1.65;//min width/height ratio of the main board
 CARD_RATIO = 3 / 4; //width/height ratio of a card
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
 MOVE_DURATION = 2; //2 time units (500ms)
@@ -138,8 +138,14 @@ class DeckDiv {
   }
   clear(){
     var chars = this.deck.characters;
-    for(var i=0; i<chars.length; i++)
-      chars[i].card.moveto(view.repository);
+    for(var i=0; i<chars.length; i++){
+      var card = chars[i].card;
+      if(this == view.table0)
+        card.removeController(controller.checkOppoInfo);
+      else if(this == view.table1)
+        card.removeController(controller.checkPlayerInfo);
+      card.moveto(view.repository);
+    }
   }
   paint(){}
 }
@@ -199,20 +205,24 @@ class PoolDiv extends DeckDiv {
 }
 class Messenger {
   constructor(){
+    document.getElementById("finalcontainer").addEventListener("click", controller.restart);
   }
   reset(){
     this.notifyNoMatch("hidden");
     var div = document.getElementById("finalcontainer");
-    div.removeEventListener("click", controller.restart);
     div.style.transform = null;
     div.style.webkitTransform = null;
     delayedFunc(function(){
       div.style.display = null;}, 4);
   }
+  note(msg){
+    var info = document.getElementById("infobox");
+    info.textContent = msg;
+  }
   notifyNoMatch(display) {
     var info = document.getElementById("infobox");
     if (display == "show")
-      info.textContent = "无牌可匹配\n需抛弃一张牌\n";
+      info.textContent = "无牌可匹配\n需抛弃一张牌";
     else if(display == "hidden")
       info.textContent = "";
     else {
@@ -279,7 +289,6 @@ class Messenger {
     reflow();
     div.style.transform = "none";
     div.style.webkitTransform = "none";
-    div.addEventListener("click", controller.restart);
   }
 }
 class View {
@@ -296,6 +305,8 @@ class View {
   }
   reset(){
     messenger.reset();
+    playerinfo.reset();
+    oppoinfo.reset();
     this.updateScore();
   }
   restart(){
@@ -363,10 +374,19 @@ class View {
     view.updateScore();
     poolChar.card.moveto(player.table.view);
     handChar.card.moveto(player.table.view);
-    if(player.id == 0)
+    if(player.id == 0){
+      oppoinfo.addChar(handChar);
+      oppoinfo.addChar(poolChar);
+      handChar.card.addController(controller.checkOppoInfo);
+      poolChar.card.addController(controller.checkOppoInfo);
       messenger.notifyOppoCombo(comboCount, player.completeCombos);
+    }
     else {
+      playerinfo.addChar(handChar);
+      playerinfo.addChar(poolChar);
       handChar.card.removeController(controller.activate);
+      handChar.card.addController(controller.checkPlayerInfo)
+      poolChar.card.addController(controller.checkPlayerInfo)
       messenger.notifyPlayerCombo(comboCount, player.completeCombos);
     }
   }
@@ -408,10 +428,12 @@ class View {
     setCSSInt("--pool-margin", poolM);
   }
 }
-let sound = new Sound();
-let combos = new Combos();
-let model = new Model();
-let controller = new Controller();
-let messenger = new Messenger();
-let view = new View();
+var sound = new Sound();
+var combos = new Combos();
+var model = new Model();
+var controller = new Controller();
+var messenger = new Messenger();
+var view = new View();
+var oppoinfo = new TableInfoView(0);
+var playerinfo = new TableInfoView(1);
 model.init();

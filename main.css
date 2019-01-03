@@ -29,6 +29,8 @@ body {
   background-image: var(--page-background-image);
   background-size: cover;
   margin: 0;
+  font-family: "Microsoft Yahei";
+  text-align: center;
   overflow: hidden;
 }
 #main {
@@ -131,6 +133,7 @@ body {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+  -webkit-box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
 }
 .cardfront{
   transform: rotateY(180deg);
@@ -154,7 +157,6 @@ body {
 }
 .bignotice{
   font-size: calc(var(--card-height)*0.4);
-  text-align: center;
   font-family: georgia;
   font-weight: bold;
   color: var(--score-info-color);

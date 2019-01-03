@@ -4,11 +4,9 @@
   bottom: 37%;
   left: 10%;
   right: 10%;
-  font-family: "Microsoft Yahei";
   font-weight: bold;
   font-size: 2vw;
   color: var(--nomatch-info-color);
-  text-align: center;
   vertical-align: middle;
   white-space: pre;
   padding-top: 20px;
@@ -24,7 +22,6 @@
   bottom:0;
   left:0;
   right:0;
-  text-align: center;
   display: none;
 }
 #combobanner{
@@ -35,7 +32,6 @@
   margin-top: calc(var(--card-height));
   font-size: calc(var(--card-height)*0.3);
   color: var(--congra-text-color);
-  font-family: "microsoft yahei";
   background-color: var(--congra-background-color);
   padding-top: calc(var(--card-height)*0.3);
   padding-bottom: calc(var(--card-height)*0.2);
@@ -59,7 +55,6 @@
   float: left;
   margin-right: 10px;
   -webkit-box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
-  -moz-box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
   box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
 }
 #finalcontainer{
@@ -67,14 +62,13 @@
   -webkit-transition: transform 2s ease-out;
   height: 100%;
   width: 100%;
-  position: fixed;
+  position: absolute;
   transform: translate(0, calc(var(--win-height) * -1));
   -webkit-transform: translate(0, calc(var(--win-height) * -1));
   top: 0;
   left: 0;
   display: none;
   z-index: 999;
-  text-align: center;
 }
 #finalcontainer>div{
   width: calc(var(--main-height)*0.35);
@@ -105,7 +99,6 @@
 }
 #finalmsg{
     margin-top: 25%;
-    font-family: "Microsoft Yahei";
     animation: finalneo 2s infinite;
     -webkit-animation: finalneo 2s infinite;
 }
