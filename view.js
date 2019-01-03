@@ -200,6 +200,15 @@ class PoolDiv extends DeckDiv {
 class Messenger {
   constructor(){
   }
+  reset(){
+    this.notifyNoMatch("hidden");
+    var div = document.getElementById("finalcontainer");
+    div.removeEventListener("click", controller.restart);
+    div.style.transform = null;
+    div.style.webkitTransform = null;
+    delayedFunc(function(){
+      div.style.display = null;}, 4);
+  }
   notifyNoMatch(display) {
     var info = document.getElementById("infobox");
     if (display == "show")
@@ -241,12 +250,13 @@ class Messenger {
       headline.lastElementChild.textContent = combo.getScore();
       banner.style.display = "block";
       reflow();
-      banner.style.opacity = 1;
+      //banner.style.opacity = 1;
+      banner.style.transform = "none";
       sound.combo();
       delayedFunc(function(){
-        banner.style.display = "none";
-        banner.style.opacity = 0;
+          banner.style.transform = "rotateY(90deg)";
         delayedFunc(function(){
+          banner.style.display = "none";
           messenger.notifyPlayerCombo(comboCount, combos);
         }, 1.5);
       },2.5);
@@ -265,6 +275,7 @@ class Messenger {
     }
     else
       msg.textContent = "平手";
+    div.style.display = "block";
     reflow();
     div.style.transform = "none";
     div.style.webkitTransform = "none";
@@ -284,10 +295,7 @@ class View {
     this.blocker = document.getElementById("blocker");
   }
   reset(){
-    var div = document.getElementById("finalcontainer");
-    div.removeEventListener("click", controller.restart);
-    div.style.transform = "translate(0,-"+WINH+"px)";
-    div.style.webkitTransform = "translate(0,-"+WINH+"px)";
+    messenger.reset();
     this.updateScore();
   }
   restart(){

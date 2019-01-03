@@ -28,10 +28,8 @@
   display: none;
 }
 #combobanner{
-  opacity: 0;
+  transform: rotateY(90deg);
   background-color: var(--banner-background);
-  transition: all var(--transition-sec) ease;
-  webkit-transition: all var(--transition-sec) ease;
 }
 #combotext{
   margin-top: calc(var(--card-height));
@@ -65,18 +63,16 @@
   box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
 }
 #finalcontainer{
-  transition: all 2s ease-out;
-  webkit-transition: all 2s ease-out;
+  transition: transform 2s ease-out;
+  -webkit-transition: transform 2s ease-out;
   height: 100%;
   width: 100%;
   position: fixed;
-  /*
-  bottom: var(--win-height);
-  */
+  transform: translate(0, calc(var(--win-height) * -1));
+  -webkit-transform: translate(0, calc(var(--win-height) * -1));
   top: 0;
   left: 0;
-  transform: translate(0, calc(var(--win-height) * -1));
-  webkit-transform: translate(0, calc(var(--win-height) * -1));
+  display: none;
   z-index: 999;
   text-align: center;
 }
@@ -89,11 +85,11 @@
   background-color: var(--final-background-color);
   border: 6px dashed rgba(0, 0, 0, 0.15);
   transform: rotate(22.5deg);
-  webkit-transform: rotate(22.5deg);
+  -webkit-transform: rotate(22.5deg);
 }
 #finalcontainer>div:nth-child(2){
   transform: rotate(45deg);
-  webkit-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
 }
 #finalcontainer>div:nth-child(3){
   transform: rotate(67.5deg);
@@ -101,7 +97,7 @@
 }
 #finalcontainer>div:nth-child(4){
   transform: rotate(0);
-  webkit-transform: rotate(0);
+  -webkit-transform: rotate(0);
 }
 #finalcontainer>div>p{
     color: var(--congra-text-color);
@@ -109,13 +105,21 @@
 }
 #finalmsg{
     margin-top: 25%;
-    font-size: calc(var(--card-height)*0.45);
-    color: var(--score-info-color);
-    text-shadow: 0 0 calc(var(--card-height)*0.1) var(--score-glow-color);
-    letter-spacing: -7px;
-    font-weight: 700;
+    font-family: "Microsoft Yahei";
+    animation: finalneo 2s infinite;
+    -webkit-animation: finalneo 2s infinite;
 }
-.string{
+
+@keyframes finalneo{
+  from {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
+  50% {text-shadow: 0 0 calc(var(--card-width)*0.15) #FE9272;}
+  to {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
+}
+@-webkit-keyframes finalneo{
+  from {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
+  50% {text-shadow: 0 0 calc(var(--card-width)*0.15) #FE9272;}
+  to {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
+}.string{
   margin: 0;
   height: 25.255%;
   width: 0;

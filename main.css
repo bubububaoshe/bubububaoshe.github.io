@@ -91,12 +91,6 @@ body {
 }
 #score0, #score1{
   width: 100%;
-  font-size: 5vw;
-  text-align: center;
-  font-family: georgia;
-  font-weight: bold;
-  color: var(--score-info-color);
-  text-shadow: 0 0 15px var(--score-glow-color);
 }
 #score0{
   top: 38%;
@@ -112,21 +106,21 @@ body {
 .transitform{
   transition-property: transform;
   transition-duration: var(--transition-sec);
-  webkit-transition-property: transform;
-  webkit-transition-duration: var(--transition-sec);
+  -webkit-transition-property: transform;
+  -webkit-transition-duration: var(--transition-sec);
 }
 .transitall{
   transition-property: top, left, transform;
   transition-duration: var(--transition-sec);
-  webkit-transition-property: top, left, transform;
-  webkit-transition-duration: var(--transition-sec);
+  -webkit-transition-property: top, left, transform;
+  -webkit-transition-duration: var(--transition-sec);
 }
 .card{
   width: 100%;
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  webkit-transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
 }
 .cardfront, .cardback{
   width: 100%;
@@ -157,4 +151,12 @@ body {
 }
 .cardcontainer.pop{
   transform: translate(0, calc(var(--card-height)*-0.4)) !important;
+}
+.bignotice{
+  font-size: calc(var(--card-height)*0.4);
+  text-align: center;
+  font-family: georgia;
+  font-weight: bold;
+  color: var(--score-info-color);
+  text-shadow: 0 0 calc(var(--card-width)*0.1) #FE9272;
 }
