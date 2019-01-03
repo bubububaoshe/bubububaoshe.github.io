@@ -2,15 +2,11 @@
 
 MAX_MAIN_RATIO = 2;//max width/height ratio of the main board
 MIN_MAIN_RATIO = 1.5;//min width/height ratio of the main board
- MIN_MAIN_WIDTH = 500;
 CARD_RATIO = 3 / 4; //width/height ratio of a card
-MAX_POOL_CARD_ROTATION = 20; //max degree of rotation the pool cards turns
-MAX_TABLE_CARD_ROTATION = 25; //max degree of rotation the table cards turns
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
-DUMMY_CARD_NUM = 5; //number of dummy cards in the repository div
+MOVE_DURATION = 2; //2 time units (500ms)
 
 var CARDH=0, CARDW=0, WINW=0, WINH=0, MAINW=0, MAINH=0;
-var maindiv = document.getElementById("main");
 
 function getCSSInt(name) {
   var cv = getComputedStyle(document.documentElement).getPropertyValue(name);
@@ -45,22 +41,18 @@ class Sound{
 }
 class Card{
   /*
-  container classes: (deck info)
-    faceup: all faceup cards except the active hand card
-    poolcardt, poolcardb: the top/bottom cards in pool
-    maybe:
-    hand1card, table0card, table1card
-  div: (effect info)
-    glow: active cards in hand1 and pool
+  container classes:
     pop: active card in hand1
+  card classes:
+    glow: active cards in hand1 and pool
   */
   constructor(char) {
     this.container = document.createElement("div");
-    this.container.classList.add("cardcontainer");
+    this.container.classList.add("cardcontainer", "transitall");
     this.card = document.createElement("div");
     this.container.appendChild(this.card);
     this.card.id = char.id;
-    this.card.classList.add("card");
+    this.card.classList.add("card", "transitform");
     var front = document.createElement("div");
     this.card.appendChild(front);
     front.classList.add("cardfront");
@@ -69,24 +61,31 @@ class Card{
     this.card.appendChild(back);
     back.classList.add("cardback");
   }
-  onPoster(){
-    this.card.firstElementChild.classList.add("poster");
-    this.container.style.width = CARDW*1.2;
-    this.container.style.height = CARDH*1.2;
-    this.setZ(999);
-  }
-  offPoster(){
-    this.card.firstElementChild.classList.remove("poster");
-    this.container.style.width = CARDW;
-    this.container.style.height = CARDH;
+  moveto(deck){
+    var container = this.container;
+    container.style.transform = "none";
+    container.classList.remove("transitall");
+
+    var rect = container.getBoundingClientRect();
+    var l = rect.left;
+    var t = rect.top;
+    deck.container.appendChild(container);
+    rect = container.getBoundingClientRect();
+    l = l - rect.left;
+    t = t - rect.top;
+
+    container.style.zIndex = 99;
+    container.style.transform = "translate(" +l+ "px," +t+ "px)";
+    container.style.webkitTransform = "translate(" +l+ "px," +t+ "px)";
+    reflow();
+    container.classList.add("transitall");
+    container.style.transform = null;
   }
   activate(){
-    this.container.classList.remove("faceup");
     this.container.classList.add("pop");
     this.card.firstElementChild.classList.add("glow");
   }
   deactivate(){
-    this.container.classList.add("faceup");
     this.container.classList.remove("pop");
     this.card.firstElementChild.classList.remove("glow");
   }
@@ -100,31 +99,9 @@ class Card{
   }
   faceup(){
     this.card.style.transform = "rotateY(180deg)";
-    this.container.classList.add("faceup");
   }
   facedown(){
     this.card.style.transform = "none";
-    this.container.classList.remove("faceup");
-  }
-  setPoolClass(diff){
-    if(diff > 0){
-      this.container.classList.remove("pooltop");
-      this.container.classList.add("poolbottom");
-    }
-    else {
-      this.container.classList.remove("poolbottom");
-      this.container.classList.add("pooltop");
-    }
-  }
-  removePoolClass(){
-    this.container.classList.remove("pooltop");
-    this.container.classList.remove("poolbottom");
-  }
-  addClass(name){
-    this.container.classList.add(name);
-  }
-  removeClass(name){
-    this.container.classList.remove(name);
   }
   rotate(deg){
     this.container.style.transform = 'rotate(' + deg + 'deg)';
@@ -150,61 +127,31 @@ class Card{
 }
 class DeckDiv {
   constructor(div, deck) {
-    this.firstCard = div.firstElementChild;
-    this.offset = 0;
+    this.container = div;
     this.deck = deck;
   }
   init(){
-    for(var i=0; i<this.deck.getSize(); i++)
-      this.deck.characters[i].card.facedown();
-    this.paint();
+    var chars = this.deck.characters;
+    for(var i=0; i<chars.length; i++)
+      chars[i].card.moveto(this);
   }
-  paint() {
-    var rect = this.firstCard.getBoundingClientRect();
-    var left = rect.left;
-    var top = rect.top;
-    var len = this.deck.getSize();
-    var dt = 1;
-    for (var i = 0; i < len; i++) {
-      var card = this.deck.characters[i].card;
-      card.setLeft(left);
-      card.setTop(top+dt);
-      dt = 0 - dt;
-      card.setZ(len - i);
-      left += this.offset;
-    }
+  clear(){
+    var chars = this.deck.characters;
+    for(var i=0; i<chars.length; i++)
+      chars[i].card.moveto(view.repository);
   }
-  getRandomRotate(maxRotation) {
-    var rand = Math.floor((Math.random() * maxRotation * 2));
-    return (rand - maxRotation) % 360;
-  }
+  paint(){}
 }
 class RepoDiv extends DeckDiv{
   constructor(div, repo) {
     super(div, repo);
   }
   init(){
-    var root = document.querySelector("body");
-    for(var i=0; i<this.deck.getSize(); i++){
-      let card = new Card(this.deck.characters[i]);
+    var chars = this.deck.characters;
+    for(var i=0; i<chars.length; i++){
+      var card = new Card(this.deck.characters[i]);
       this.deck.characters[i].card = card;
-      root.appendChild(card.container);
-    }
-    this.paint();
-  }
-  paint(){
-    //shift the first few cards,
-    var rect = this.firstCard.getBoundingClientRect();
-    var left = rect.left;
-    var top = rect.top;
-    var len = this.deck.getSize();
-    this.offset = CARDW/3/(this.deck.getSize());
-    for (var i = len-1; i >= 0; i--) {
-      var card = this.deck.characters[i].card;
-      card.setLeft(left);
-      left += this.offset;
-      card.setTop(top);
-      card.setZ(i);
+      this.container.appendChild(chars[i].card.container);
     }
   }
 }
@@ -213,12 +160,10 @@ class Hand1Div extends DeckDiv {
     super(div, hand);
   }
   init(){
+    super.init();
     for(var i=0; i<this.deck.getSize(); i++){
-      var card = this.deck.characters[i].card;
-      card.faceup();
-      card.addController(controller.activate);
+      this.deck.characters[i].card.addController(controller.activate);
     }
-    this.paint();
   }
   activate(oldChar, newChar) {
     if (oldChar != null) {
@@ -231,60 +176,9 @@ class Hand1Div extends DeckDiv {
     }
   }
 }
-class TableDiv extends DeckDiv {
-  constructor(div, table) {
-    super(div, table);
-    this.rotates = [];
-    this.lefts = [];
-    this.tops = [];
-  }
-  reset(){
-    var rect = view.repository.firstCard.getBoundingClientRect();
-    var left = rect.left;
-    var top = rect.top;
-    for(var i=0; i<this.deck.getSize(); i++){
-      var card = this.deck.characters[i].card;
-      card.unRotate();
-      card.facedown();
-      card.setLeft(left);
-      card.setTop(top);
-    }
-  }
-  init(){
-    for (var i = 0; i < INIT_CARD_NUM_HAND*2; i++) {
-      this.rotates[i] = this.getRandomRotate(MAX_TABLE_CARD_ROTATION);
-        this.lefts[i] = Math.floor((Math.random()-0.5)*this.offset);
-        this.tops[i] = Math.floor((Math.random()-0.5)*this.offset);
-    }
-  }
-  paint() {
-    var rect = this.firstCard.getBoundingClientRect();
-    var left = rect.left;
-    var top = rect.top;
-    for (var i = 0; i < this.deck.getSize(); i++) {
-      var card = this.deck.characters[i].card;
-      card.setLeft(left+this.lefts[i]);
-      card.setTop(top+this.tops[i]);
-      card.setZ(i);
-      card.rotate(this.rotates[i]);
-    }
-  }
-}
 class PoolDiv extends DeckDiv {
   constructor(div, pool) {
     super(div, pool);
-    this.diffTop = 0;
-    this.rotates = [];
-    for (var i = 0; i < INIT_CARD_NUM_POOL + 5; i++) {
-      this.rotates[i] = this.getRandomRotate(MAX_POOL_CARD_ROTATION);
-    }
-  }
-  init(){
-    for(var i=0; i<this.deck.getSize(); i++){
-      this.deck.characters[i].card.faceup();
-      //sound.deal();
-    }
-    this.paint();
   }
   updateMatch(oldChar, newChar) {
     //update card matchs in pool according to seasons
@@ -301,36 +195,6 @@ class PoolDiv extends DeckDiv {
       }
     }
   }
-  reset(){
-    var rect = view.repository.firstCard.getBoundingClientRect();
-    var left = rect.left;
-    var top = rect.top;
-    for(var i=0; i<this.deck.getSize(); i++){
-      var card = this.deck.characters[i].card;
-      card.unRotate();
-      card.removePoolClass();
-      card.facedown();
-      card.setLeft(left);
-      card.setTop(top);
-    }
-  }
-  paint() {
-    var rect = this.firstCard.getBoundingClientRect();
-    var left = rect.left;
-    var top = rect.top;
-    var diffT = this.diffTop;
-    var len = this.deck.getSize();
-    for (var i = 0; i < len; i++) {
-      var card = this.deck.characters[i].card;
-      card.setLeft(left);
-      card.setTop(top+diffT);
-      card.setPoolClass(diffT);
-      card.setZ(len - i);
-      card.rotate(this.rotates[i]);
-      left += this.offset;
-      diffT = 0 - diffT;
-    }
-  }
 }
 class Messenger {
   constructor(){
@@ -345,7 +209,15 @@ class Messenger {
       info.textContent = display;
     }
   }
-  notifyCombo(comboCount, combos){
+  notifyOppoCombo(comboCount, combos){
+    if(comboCount > 0){
+      messenger.notifyNoMatch("对方获得\n"+combos[--comboCount].getDesc());
+      delayedFunc(function(){
+          messenger.notifyOppoCombo(comboCount, combos);
+      });
+    }
+  }
+  notifyPlayerCombo(comboCount, combos){
     if(comboCount > 0){
       var combo = combos[--comboCount];
       var chars = combo.characters;
@@ -374,7 +246,7 @@ class Messenger {
         banner.style.display = "none";
         banner.style.opacity = 0;
         delayedFunc(function(){
-          messenger.notifyCombo(comboCount, combos);
+          messenger.notifyPlayerCombo(comboCount, combos);
         }, 1.5);
       },2.5);
     }
@@ -403,8 +275,8 @@ class View {
     this.hand0 = new DeckDiv(document.getElementById("hand0"), model.player0.hand);
     this.hand1 = new Hand1Div(document.getElementById("hand1"), model.player1.hand);
     this.pool = new PoolDiv(document.getElementById("pool"), model.pool);
-    this.table0 = new TableDiv(document.getElementById("table0"), model.player0.table);
-    this.table1 = new TableDiv(document.getElementById("table1"), model.player1.table);
+    this.table0 = new DeckDiv(document.getElementById("table0"), model.player0.table);
+    this.table1 = new DeckDiv(document.getElementById("table1"), model.player1.table);
     this.repository = new RepoDiv(document.getElementById("repository"), model.commonRepository);
     this.score0 = document.getElementById("score0");
     this.score1 = document.getElementById("score1");
@@ -425,17 +297,15 @@ class View {
   }
   init(){
     this.setSizes();
-    this.table0.init();
-    this.table1.init();
     this.repository.init();
-    model.commonRepository.container = this.repository;
-    model.player0.hand.container = this.hand0;
-    model.player0.table.container = this.table0;
-    model.player1.hand.container = this.hand1;
-    model.player1.table.container = this.table1;
-    model.pool.container = this.pool;
+    model.commonRepository.view = this.repository;
+    model.player0.hand.view = this.hand0;
+    model.player0.table.view = this.table0;
+    model.player1.hand.view = this.hand1;
+    model.player1.table.view = this.table1;
+    model.pool.view = this.pool;
 
-    window.addEventListener("resize", this.repaint.bind(this));
+    window.addEventListener("resize", this.setSizes);
   }
   checkMatch1(){
     var len = this.hand1.deck.getSize();
@@ -467,52 +337,28 @@ class View {
     this.score1.textContent = model.player1.score;
   }
   discard(player, oldChar, newChar) {
-    var hand;
-    if (player.id == 0) {
-      //hand0 --> pool: show-cover
-      //repo --> hand0:
-      oldChar.card.faceup();
-      hand = view.hand0;
-    } else {
+    if (player.id == 1) {
       //hand1 --> pool: remove discard listener
-      //repo --> hand1: show-cover, add discard listener
-      oldChar.card.removeController(controller.discard);
-      newChar.card.addController(controller.discard);
-      newChar.card.faceup();
-      hand = view.hand1;
+      //repo --> hand1: add discard listener
+        oldChar.card.removeController(controller.discard);
+        newChar.card.addController(controller.discard);
     }
-    view.pool.paint();
-    hand.paint();
+    oldChar.card.moveto(this.pool);
+    newChar.card.moveto(player.hand.view);
   }
-  redeal(){
-    view.pool.init();
-    view.repository.paint();
-  }
-  dealOne(char) {//repo to pool: faceup
-    char.card.faceup();
-    view.pool.paint();
+  dealOne(char) {
+    char.card.moveto(view.pool);
     sound.deal();
   }
   obtain(player, handChar, poolChar, comboCount) {
-    //handChar, poolChar -> table
-    //handChar: faceup, remove controller: active
-    //poolChar: unrotate
-    var hand = player.id == 0 ? this.hand0 : this.hand1;
-    var table = player.id == 0 ? this.table0 : this.table1;
-    handChar.card.faceup();
-    handChar.card.removeController(controller.activate);
-    poolChar.card.unRotate();
-    poolChar.card.removePoolClass();
-    hand.paint();
-    this.pool.paint();
-    table.paint();
-    this.updateScore();
-    if(comboCount > 0){
-      if(player.id == 0)
-        for(var i = 0; i<comboCount; i++)
-          messenger.notifyNoMatch("对方获得\n"+player.completeCombos[i].getDesc());
-      else
-          messenger.notifyCombo(comboCount, player.completeCombos);
+    view.updateScore();
+    poolChar.card.moveto(player.table.view);
+    handChar.card.moveto(player.table.view);
+    if(player.id == 0)
+      messenger.notifyOppoCombo(comboCount, player.completeCombos);
+    else {
+      handChar.card.removeController(controller.activate);
+      messenger.notifyPlayerCombo(comboCount, player.completeCombos);
     }
   }
   activate(oldChar, newChar) {
@@ -521,34 +367,23 @@ class View {
     if(newChar != null)
       sound.activate();
   }
-  repaint(){
-    this.setSizes();
-    this.hand0.paint();
-    this.hand1.paint();
-    this.pool.paint();
-    this.repository.paint();
-    this.table0.paint();
-    this.table1.paint();
-  }
   setSizes() {
     //cardh, cardw, handoffset, pooloffset
+    var maindiv = document.getElementById("main");
     MAINW = window.innerWidth;
     MAINH = window.innerHeight;
     WINH = MAINH;
     WINW = MAINW;
-    if(MAINW < MIN_MAIN_WIDTH)
-      MAINW =  MIN_MAIN_WIDTH;
-    if(MAINH < MIN_MAIN_WIDTH / MAX_MAIN_RATIO)
-      MAINH = MIN_MAIN_WIDTH / MAX_MAIN_RATIO;
     if (MAINW / MAINH > MAX_MAIN_RATIO)
       MAINW = MAINH * MAX_MAIN_RATIO;
     else if (MAINW / MAINH < MIN_MAIN_RATIO)
       MAINH = MAINW / MIN_MAIN_RATIO;
     maindiv.style.width = MAINW;
     maindiv.style.height = MAINH;
-    maindiv.style.marginTop = (WINH - MAINH)/2;
+    maindiv.style.top = (WINH - MAINH)/2;
+    maindiv.style.left = (WINW - MAINW)/2;
 
-    CARDW = MAINW * 0.611 / (9 * (1 - HAND_CARD_OVERLAP) + 1);
+    CARDW = MAINW *0.643*(1-2*0.028) / (9 * (1 - HAND_CARD_OVERLAP) + 1);
     var maxCardH = MAINH * 0.206;
     CARDH = CARDW / CARD_RATIO;
     if (CARDH > maxCardH) {
@@ -560,16 +395,8 @@ class View {
     setCSSInt("--main-height", MAINH);
     setCSSInt("--main-width", MAINW);
     setCSSInt("--win-height", WINH);
-    var handOFS = CARDW * (1 - HAND_CARD_OVERLAP);
-    this.hand0.offset = handOFS;
-    this.hand1.offset = handOFS;
-    handOFS = handOFS/3;
-    this.table0.offset = handOFS;
-    this.table1.offset = handOFS;
-    var poolOFS = (MAINW*0.589-CARDW*2.25)/(INIT_CARD_NUM_POOL+1);
-    this.pool.offset = poolOFS;
-    var diffT = CARDH / 4;
-    this.pool.diffTop = diffT;
+    var poolM = (MAINW*0.643*(1-2*0.028)-CARDW*2.5)/(INIT_CARD_NUM_POOL+1)- CARDW;
+    setCSSInt("--pool-margin", poolM);
   }
 }
 let sound = new Sound();

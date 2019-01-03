@@ -32,7 +32,7 @@ body {
   overflow: hidden;
 }
 #main {
-  margin: auto;
+  position: fixed;
 }
 #scoreboard, #specialboard, #gamezone {
   position: relative;
@@ -51,17 +51,24 @@ body {
   width: 64.3%;
   background-color: var(--gamezone-background);
 }
-#hand0 {
+#hand0container, #poolcontainer, #hand1container{
+  position: relative;
+}
+#hand0container {
   height: 28%;
-  position: relative;
 }
-#hand1 {
-  height: 34.5%;
-  position: relative;
-}
-#pool {
+#poolcontainer {
   height: 37.5%;
-  position: relative;
+}
+#hand1container {
+  height: 34.5%;
+}
+#hand0, #pool, #hand1{
+  position: absolute;
+  height: var(--card-height);
+  width: 94.5%;
+  left: 2.8%;
+  top: calc(50% - var(--card-height)/2);
 }
 #repository,#table0, #table1, #score0, #score1 {
   position: absolute;
@@ -97,29 +104,28 @@ body {
 #score1{
   bottom: 38%;
 }
-/*
-change card margin for hover and click
-*/
 .cardcontainer{
     width: var(--card-width);
     height: var(--card-height);
-    position: absolute;
     perspective: 1000px;
-    transition-property: top, left, transform;
-    transition-duration: var(--transition-sec);
-    webkit-transition-property: top, left, transform;
-    webkit-transition-duration: var(--transition-sec);
-
+}
+.transitform{
+  transition-property: transform;
+  transition-duration: var(--transition-sec);
+  webkit-transition-property: transform;
+  webkit-transition-duration: var(--transition-sec);
+}
+.transitall{
+  transition-property: top, left, transform;
+  transition-duration: var(--transition-sec);
+  webkit-transition-property: top, left, transform;
+  webkit-transition-duration: var(--transition-sec);
 }
 .card{
   width: 100%;
   height: 100%;
   position: relative;
-  transition-property: transform, margin-top;
-  transition-duration: var(--transition-sec);
   transform-style: preserve-3d;
-  webkit-transition-property: transform, margin-top;
-  webkit-transition-duration: var(--transition-sec);
   webkit-transform-style: preserve-3d;
 }
 .cardfront, .cardback{
@@ -144,42 +150,11 @@ change card margin for hover and click
   position: absolute;
   backface-visibility: hidden;
 }
-.dummycard {
-  width: var(--card-width);
-  height: var(--card-height);
-  position: absolute;
-  border-radius: 3%;
-}
-#hand0 .dummycard, #pool .dummycard{
-  top: calc(50% - var(--card-height)/2);
-  left: 2.8%;
-}
-#hand1 .dummycard {
-  top: calc(50% - var(--card-height)*0.3);
-  left: 2.8%;
-}
-#repository .dummycard, #table0 .dummycard, #table1 .dummycard{
-  top: 0;
-  left: 0;
-}
-.faceup:hover .card{
-  margin-top: calc(var(--card-height)*-0.3);
-}
-.faceup:hover, .poolbottom:hover, .pooltop:hover{
-  transform: none !important;
-}
-.poolbottom:hover .card{
-  margin-top: calc(var(--card-height)/4);
-}
-.pooltop:hover .card{
-  margin-top: calc(var(--card-height)/-4);
-}
-
 .glow{
   -webkit-box-shadow: 0px 0px 10px 5px var(--card-glow-color);
   -moz-box-shadow: 0px 0px 10px 5px var(--card-glow-color);
   box-shadow: 0px 0px 10px 5px var(--card-glow-color);
 }
-.pop .card{
-  margin-top: calc(var(--card-height)*-0.4);
+.cardcontainer.pop{
+  transform: translate(0, calc(var(--card-height)*-0.4)) !important;
 }

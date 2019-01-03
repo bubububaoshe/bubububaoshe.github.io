@@ -69,7 +69,7 @@
   webkit-transition: all 2s ease-out;
   height: 100%;
   width: 100%;
-  position: absolute;
+  position: fixed;
   /*
   bottom: var(--win-height);
   */

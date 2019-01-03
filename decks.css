@@ -1,0 +1,132 @@
+/* z-index */
+#hand0>.cardcontainer:nth-child(1), #pool>.cardcontainer:nth-child(1), #hand1>.cardcontainer:nth-child(1){
+  z-index: 9;
+}
+#hand0>.cardcontainer:nth-child(2), #pool>.cardcontainer:nth-child(2), #hand1>.cardcontainer:nth-child(2){
+  z-index: 8;
+}
+#hand0>.cardcontainer:nth-child(3), #pool>.cardcontainer:nth-child(3), #hand1>.cardcontainer:nth-child(3){
+  z-index: 7;
+}
+#hand0>.cardcontainer:nth-child(4), #pool>.cardcontainer:nth-child(4), #hand1>.cardcontainer:nth-child(4){
+  z-index: 6;
+}
+#hand0>.cardcontainer:nth-child(5), #pool>.cardcontainer:nth-child(5), #hand1>.cardcontainer:nth-child(5){
+  z-index: 5;
+}
+#hand0>.cardcontainer:nth-child(6), #pool>.cardcontainer:nth-child(6), #hand1>.cardcontainer:nth-child(6){
+  z-index: 4;
+}
+#hand0>.cardcontainer:nth-child(7), #pool>.cardcontainer:nth-child(7), #hand1>.cardcontainer:nth-child(7){
+  z-index: 3;
+}
+#hand0>.cardcontainer:nth-child(8), #pool>.cardcontainer:nth-child(8), #hand1>.cardcontainer:nth-child(8){
+  z-index: 2;
+}
+#hand0>.cardcontainer:nth-child(9), #pool>.cardcontainer:nth-child(9), #hand1>.cardcontainer:nth-child(9){
+  z-index: 1;
+}
+#hand0>.cardcontainer:nth-child(10), #pool>.cardcontainer:nth-child(10), #hand1>.cardcontainer:nth-child(10){
+  z-index: 0;
+}
+#repository>.cardcontainer, #table0>.cardcontainer, #table1>.cardcontainer{
+  z-index: 0;
+}
+
+/* flip */
+#pool>.cardcontainer .card, #hand1 .card, #table0 .card, #table1 .card{
+  transform: rotateY(180deg);
+}
+
+/* array positioning */
+#table0>.cardcontainer, #table1>.cardcontainer, #repository>.cardcontainer {
+  position: absolute;
+}
+#hand0>.cardcontainer, #pool>.cardcontainer, #hand1>.cardcontainer{
+  position: relative;
+  float: left;
+}
+#hand0>.cardcontainer:not(:first-child), #hand1>.cardcontainer:not(:first-child){
+  margin-left: calc(var(--card-width)*-0.44);
+}
+#pool>.cardcontainer:not(:first-child){
+  margin-left: var(--pool-margin);
+}
+
+/* repository deck effect */
+#repository .cardcontainer:nth-child(n+5){
+  visibility: hidden;
+}
+#repository .cardcontainer:first-child{
+  left: calc(var(--card-width) / 4);
+  top: calc(var(--card-height) /30);
+}
+#repository .cardcontainer:nth-child(2){
+  left: calc(var(--card-width) / 4 * 0.67);
+  top: calc(var(--card-height) /30 * 0.67);
+}
+#repository .cardcontainer:nth-child(3){
+  left: calc(var(--card-width) / 4 * 0.33);
+  top: calc(var(--card-height) /30 * 0.33);
+}
+
+/* hand0, hand1, pool top-variance */
+#hand0>.cardcontainer:nth-child(odd), #hand1>.cardcontainer:nth-child(odd){
+  top: 1px;
+}
+#hand0>.cardcontainer:nth-child(even), #hand1>.cardcontainer:nth-child(even){
+  top: -1px;
+}
+#pool>.cardcontainer:nth-child(odd){
+  top: calc(var(--card-height)/4);
+}
+#pool>.cardcontainer:nth-child(even){
+  top: calc(var(--card-height)/-4);
+}
+
+/* pool card rotation */
+#pool>.cardcontainer:nth-child(2){transform: rotate(-15deg);}
+#pool>.cardcontainer:nth-child(4){transform: rotate(-5deg);}
+#pool>.cardcontainer:nth-child(6){transform: rotate(-21deg);}
+#pool>.cardcontainer:nth-child(8){transform: rotate(-9deg);}
+#pool>.cardcontainer:nth-child(10){transform: rotate(18deg);}
+#pool>.cardcontainer:nth-child(1){transform: rotate(8deg);}
+#pool>.cardcontainer:nth-child(3){transform: rotate(-12deg);}
+#pool>.cardcontainer:nth-child(5){transform: rotate(12deg);}
+#pool>.cardcontainer:nth-child(7){transform: rotate(25deg);}
+#pool>.cardcontainer:nth-child(9){transform: rotate(-6deg);}
+
+/* table card rotation: only rotate the last 5 */
+#table0>.cardcontainer:nth-last-child(1), #table1>.cardcontainer:nth-last-child(5) {
+  transform: rotate(-15deg);
+  top: 6%;
+  left: 4%;
+}
+#table0>.cardcontainer:nth-last-child(2), #table1>.cardcontainer:nth-last-child(4) {
+  transform: rotate(25deg);
+  top: -3%;
+  left: 2%;
+}
+#table0>.cardcontainer:nth-last-child(3), #table1>.cardcontainer:nth-last-child(3) {
+  transform: rotate(-21deg);
+  top: 1%;
+  left: -13%;
+}
+#table0>.cardcontainer:nth-last-child(4), #table1>.cardcontainer:nth-last-child(2) {
+  transform: rotate(13deg);
+  top: -2%;
+  left: 7%;
+}
+#table0>.cardcontainer:nth-last-child(5), #table1>.cardcontainer:nth-last-child(1) {
+  transform: rotate(6deg);
+  top: 5%;
+  left: -11%;
+}
+
+/* hover effects */
+#table0>.cardcontainer:hover, #table1>.cardcontainer:hover, #pool>.cardcontainer:hover, #hand1>.cardcontainer:hover{
+  transform: translate(0, calc(var(--card-height)/-3));
+}
+#pool>.cardcontainer:nth-child(odd):hover{
+  transform: translate(0, calc(var(--card-height)/3));
+}

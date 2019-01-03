@@ -232,7 +232,7 @@ class SpecialCharacter extends Character {
 class Deck {
   constructor() {
     this.characters = [];
-    this.container = null;
+    this.view = null;
   }
   initDeck(size, repo) {
     for (var i = 0; i < size; i++)
@@ -261,7 +261,7 @@ class Deck {
     return null;
   }
   clear() {
-    this.container.reset();
+    this.view.clear();
     this.characters.length = 0;
   }
   removeRandom() {
@@ -523,7 +523,7 @@ class Model {
     model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
     model.pool.clear();
     model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
-    view.redeal();
+    view.pool.init();
   }
   checkMatch1(){
     var matchable = this.hasMatch(this.player1);
