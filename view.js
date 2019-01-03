@@ -80,6 +80,7 @@ class Card{
     reflow();
     container.classList.add("transitall");
     container.style.transform = null;
+    container.style.zIndex = null;
   }
   activate(){
     this.container.classList.add("pop");
