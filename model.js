@@ -1,3 +1,8 @@
+/*
+maximum combo name size: 8
+maximum combo size: 6
+*/
+
 COMMON_CHAR_LIST = [
   ["ly1", "陵越", 2, "冬"],
   ["qy1", "悭臾", 2, "夏"],

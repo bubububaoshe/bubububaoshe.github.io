@@ -222,7 +222,7 @@ class Messenger {
   notifyNoMatch(display) {
     var info = document.getElementById("infobox");
     if (display == "show")
-      info.textContent = "无牌可匹配<br>需抛弃一张牌";
+      info.textContent = "无牌可匹配\n需抛弃一张牌";
     else if(display == "hidden")
       info.textContent = "";
     else {

@@ -29,17 +29,18 @@
   opacity: 0;
   background-color: var(--banner-background);
 }
+#combobanner>div{
+background-color: var(--congra-background-color);
+}
 #combotext{
   margin-top: calc(var(--card-height));
   font-size: calc(var(--card-height)*0.3);
   color: var(--congra-text-color);
-  background-color: var(--congra-background-color);
   padding-top: calc(var(--card-height)*0.3);
   padding-bottom: calc(var(--card-height)*0.2);
 }
 #combocards{
   height: calc(var(--card-height)*1.5);
-  background-color: var(--congra-background-color);
 }
 .combohl{
   font-size: calc(var(--card-height)/2);
@@ -115,4 +116,7 @@
   position: absolute;
   left: calc(50% - calc(var(--main-height)*0.01));
   top: 0;
+}
+#versionpicker{
+  display: block;
 }
