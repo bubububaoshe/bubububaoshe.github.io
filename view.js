@@ -84,18 +84,18 @@ class Card{
   }
   activate(){
     this.container.classList.add("pop");
-    this.card.firstElementChild.classList.add("glow");
+    this.card.classList.add("glow");
   }
   deactivate(){
     this.container.classList.remove("pop");
-    this.card.firstElementChild.classList.remove("glow");
+    this.card.classList.remove("glow");
   }
   match(){
-    this.card.firstElementChild.classList.add("glow");
+    this.card.classList.add("glow");
     this.addController(controller.obtain);
   }
   unmatch(){
-    this.card.firstElementChild.classList.remove("glow");
+    this.card.classList.remove("glow");
     this.removeController(controller.obtain);
   }
   faceup(){
@@ -222,7 +222,7 @@ class Messenger {
   notifyNoMatch(display) {
     var info = document.getElementById("infobox");
     if (display == "show")
-      info.textContent = "无牌可匹配\n需抛弃一张牌";
+      info.textContent = "无牌可匹配<br>需抛弃一张牌";
     else if(display == "hidden")
       info.textContent = "";
     else {
@@ -260,11 +260,12 @@ class Messenger {
       headline.lastElementChild.textContent = combo.getScore();
       banner.style.display = "block";
       reflow();
-      //banner.style.opacity = 1;
-      banner.style.transform = "none";
+      banner.style.opacity = 1;
+      //banner.style.transform = "none";
       sound.combo();
       delayedFunc(function(){
-          banner.style.transform = "rotateY(90deg)";
+          banner.style.opacity = 0;
+          //banner.style.transform = "rotateY(90deg)";
         delayedFunc(function(){
           banner.style.display = "none";
           messenger.notifyPlayerCombo(comboCount, combos);
@@ -305,8 +306,6 @@ class View {
   }
   reset(){
     messenger.reset();
-    playerinfo.reset();
-    oppoinfo.reset();
     this.updateScore();
   }
   restart(){
@@ -375,15 +374,11 @@ class View {
     poolChar.card.moveto(player.table.view);
     handChar.card.moveto(player.table.view);
     if(player.id == 0){
-      oppoinfo.addChar(handChar);
-      oppoinfo.addChar(poolChar);
       handChar.card.addController(controller.checkOppoInfo);
       poolChar.card.addController(controller.checkOppoInfo);
       messenger.notifyOppoCombo(comboCount, player.completeCombos);
     }
     else {
-      playerinfo.addChar(handChar);
-      playerinfo.addChar(poolChar);
       handChar.card.removeController(controller.activate);
       handChar.card.addController(controller.checkPlayerInfo)
       poolChar.card.addController(controller.checkPlayerInfo)
@@ -428,12 +423,17 @@ class View {
     setCSSInt("--pool-margin", poolM);
   }
 }
-var sound = new Sound();
-var combos = new Combos();
-var model = new Model();
-var controller = new Controller();
-var messenger = new Messenger();
-var view = new View();
-var oppoinfo = new TableInfoView(0);
-var playerinfo = new TableInfoView(1);
-model.init();
+
+var sound, combos, model, controller, messenger, view, oppoinfo, playerinfo;
+function gameinit(){
+  sound = new Sound();
+  combos = new Combos();
+  model = new Model();
+  controller = new Controller();
+  messenger = new Messenger();
+  view = new View();
+  oppoinfo = new TableInfoView(model.player0);
+  playerinfo = new TableInfoView(model.player1);
+  model.init();
+}
+gameinit();

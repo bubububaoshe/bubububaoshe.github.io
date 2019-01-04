@@ -8,8 +8,8 @@
   font-size: 2vw;
   color: var(--nomatch-info-color);
   vertical-align: middle;
-  white-space: pre;
   padding-top: 20px;
+  white-space: pre;
 }
 #blocker {
   font-size: 5vw;
@@ -25,7 +25,8 @@
   display: none;
 }
 #combobanner{
-  transform: rotateY(90deg);
+  /*transform: rotateY(90deg);*/
+  opacity: 0;
   background-color: var(--banner-background);
 }
 #combotext{
@@ -60,24 +61,17 @@
 #finalcontainer{
   transition: transform 2s ease-out;
   -webkit-transition: transform 2s ease-out;
-  height: 100%;
-  width: 100%;
-  position: absolute;
   transform: translate(0, calc(var(--win-height) * -1));
   -webkit-transform: translate(0, calc(var(--win-height) * -1));
-  top: 0;
-  left: 0;
-  display: none;
-  z-index: 999;
 }
 #finalcontainer>div{
   width: calc(var(--main-height)*0.35);
   height:  calc(var(--main-height)*0.35);
   position: absolute;
-  left: calc(50% - var(--main-height)*0.175);
+  left: calc(50% - var(--main-height)*0.195);
   top:  32.5%;
   background-color: var(--final-background-color);
-  border: 6px dashed rgba(0, 0, 0, 0.15);
+  border: calc(var(--main-height)*0.02) dashed rgba(0, 0, 0, 0.1);
   transform: rotate(22.5deg);
   -webkit-transform: rotate(22.5deg);
 }
@@ -112,12 +106,13 @@
   from {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
   50% {text-shadow: 0 0 calc(var(--card-width)*0.15) #FE9272;}
   to {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
-}.string{
+}
+.string{
   margin: 0;
   height: 25.255%;
   width: 0;
-  border-right: 6px dashed var(--final-background-color);
+  border-right: calc(var(--main-height)*0.02) dashed var(--final-background-color);
   position: absolute;
-  left: calc(50% + 3px);
+  left: calc(50% - calc(var(--main-height)*0.01));
   top: 0;
 }

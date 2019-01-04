@@ -357,6 +357,15 @@ class TabledCombo{
   addChar(char){
     this.characters.push(char);
   }
+  getCompleteSize(){
+    return COMBO_LIST[this.index][0].length;
+  }
+  getChar(name){
+    for(var i=0; i<this.characters.length; i++)
+      if(this.characters[i].name == name)
+        return this.characters[i];
+    return null;
+  }
   getSize(){
     return this.characters.length;
   }
@@ -368,6 +377,9 @@ class TabledCombo{
   }
   isComplete(){
     return this.getSize()==COMBO_LIST[this.index][0].length;
+  }
+  getCompleteList(){
+    return COMBO_LIST[this.index][0];
   }
   getDesc(){
     var msg = COMBO_LIST[this.index][1] + " : ";
@@ -410,6 +422,11 @@ class Combos{
                     pcombos.splice(k, 1);
                     player.completeCombos.unshift(pcombo);
                     player.score += pcombo.getScore();
+                  }
+                  else{
+                    //the combo is not complete, move it to the partiallist cardfront
+                    pcombos.splice(k, 1);
+                    pcombos.unshift(pcombo);
                   }
                   break;
                 }

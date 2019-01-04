@@ -1,5 +1,7 @@
 .tableinfocontainer{
   background-color: rgba(135, 112, 89,0.85);
+  font-family: "FangSong";
+  color: #eadeaa;
 }
 .flexbox{
   position: relative;
@@ -14,30 +16,107 @@
   top: 5%;
   height: 10%;
   margin-bottom: 5%;
-  color: #eadeaa;
-  text-shadow:  0 0 calc(var(--card-height)/10) var(--congra-glow-color);
+  text-shadow:  0 0 calc(var(--card-height)/10) var(--congra-hl-color);
   justify-content: space-between;
   overflow: hidden;
+  color: #dbc66d;
 }
 
-.tableinfocontainer .ccomboinfocontainer{
+.tableinfocontainer .ccomboinfocontainer, .tableinfocontainer .icomboinfocontainer{
   display: none;
+  max-height: 85%;
+  overflow: auto;
 }
 .infoheader div{
   font-size: calc(var(--card-width) * 0.3);
   padding: 0 calc(var(--card-width) * 0.1);
+  cursor: pointer;
 }
 .smallcard {
-    margin: calc(var(--card-width)*0.08);
+    margin: calc(var(--card-width)*0.05);
 }
 .smallcard>div{
-  width: calc(var(--card-width) * 0.7);
-  height: calc(var(--card-height) * 0.7);
+  width: calc(var(--card-width) * 0.78);
+  height: calc(var(--card-height) * 0.78);
   background-size: 100% 100%;
   border-radius: 3%;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
 }
 .smallcard>p{
-  font-size: 1vw;
-  color: #303030;
+  font-family: "Microsoft Yahei";
+  color: #252120;
+  font-size: 1.3vw;
+}
+.smallcard>p::before{
+  content: "基础分：";
+}
+.combocard{
+  height: calc(var(--card-height)*0.6);
+  width: calc(var(--card-width)*6);
+  margin-bottom: 1%;
+  background-image : linear-gradient(to left,
+                      rgba(58,46,35,0) 8%,
+                      rgba(58,46,35,1)50%,
+                      rgba(58,46,35, 0) 92%);
+}
+.combocard>div{
+  float: left;
+  height: calc(var(--card-height)*0.5);
+  padding: calc(var(--card-height)*0.05) 0;
+}
+.combocard>div:first-child{
+  width: 37%;
+}
+.combocard>div:last-child{
+  width: 60%;
+  text-align: left;
+  padding-left: 3%;
+}
+
+.combocard .thumbnailcard{
+  width: calc(var(--card-width) * 0.5);
+  height: calc(var(--card-height) * 0.5);
+  background-size: 100% 100%;
+  border-radius: 3%;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.4);
+  float: right;
+  }
+
+.combocard .thumbnailcard:not(:first-child){
+  margin-right: calc(var(--card-width) * -0.22);
+}
+
+.combocard #combocardinfo{
+  overflow: auto;
+  width: 100%;
+  font-size: 1.8vw;
+  padding-bottom: 1%;
+  margin-bottom: 2%;
+  border-width: 0 0 0.5px 0;
+  border-style: solid;
+  border-image: linear-gradient(to right,
+    rgba(210,199,153,1),
+    rgba(210,199,153,0) 60%) 1;
+}
+.combocard #combocardinfo div:first-child{
+  float: left;
+  width: 55%;
+}
+.combocard #combocardinfo div:last-child{
+  float: left;
+}
+.combocard #combocardinfo div:last-child::after{
+  content: "分";
+}
+.combocard #combocardchars span{
+  font-size: 1.3vw;
+  padding: 0;
+  margin: 0;
+  letter-spacing: -1px;
+}
+.combocard #combocardchars span.notmine{
+  color: #DB4D3D;
+}
+.combocard #combocardchars span:not(:last-child)::after{
+  content:"、";
 }

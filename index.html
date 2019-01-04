@@ -11,6 +11,7 @@
 </head>
 
 <body>
+	<!--<div id="versionpicker" class="banner cover"></div>-->
 	<div id="main">
 		<div id="scoreboard">
 			<div id="table0"></div>
@@ -18,7 +19,6 @@
 			<div id="score1" class="bignotice">0</div>
 			<div id="table1"></div>
 		</div>
-		<div>
 			<div id="gamezone">
 				<div id="hand0container"><div id="hand0"></div></div>
 				<div id="poolcontainer">
@@ -26,45 +26,64 @@
 					<div id="repository"></div>
 				</div>
 				<div id="hand1container"><div id="hand1"></div></div>
-				<div class="tableinfocontainer cover">
-					<div id="header0" class="infoheader flexbox">
-							<div>&#9830; 卡牌</div>
-							<div>&#9830; 完成组合</div>
-							<div>&#9830; 未完组合</div>
-						</ul>
-					</div>
-					<div class="charinfocontainer flexbox" ></div>
-					<div class="ccomboinfocontainer flexbox" ></div>
-					<div class="icomboinfocontainer flexbox" ></div>
-				</div>
-				<div class="tableinfocontainer cover">
-					<div  id="header1" class="infoheader flexbox">
-							<div>&#9830; 卡牌</div>
-							<div>&#9830; 完成组合</div>
-							<div>&#9830; 未完组合</div>
-						</ul>
-					</div>
-					<div class="charinfocontainer flexbox" ></div>
-					<div class="ccomboinfocontainer flexbox" ></div>
-					<div class="icomboinfocontainer flexbox" ></div>
-				</div>
 				<div id="blocker" class="cover"></div>
-				<div id="finalcontainer">
+				<div id="finalcontainer" class="cover">
 					<div></div><div></div><div></div>
 					<div>
-						<div id="finalmsg" class="bignotice"></div>
+						<div id="finalmsg" class="bignotice">你赢了</div>
 						<p>点击牌桌区域继续</p>
 					</div>
 					<p class="string"></p>
+				</div>
+				<div class="tableinfocontainer cover">
+					<div class="infoheader flexbox">
+							<div>&#9830; 卡牌</div>
+							<div>&#9830; 完成组合</div>
+							<div>&#9830; 未完组合</div>
+						</ul>
+					</div>
+					<div class="charinfocontainer flexbox" ></div>
+					<div class="ccomboinfocontainer flexbox"></div>
+					<div class="icomboinfocontainer flexbox" ></div>
+				</div>
+				<div class="tableinfocontainer cover">
+					<div class="infoheader flexbox">
+							<div>&#9830; 卡牌</div>
+							<div>&#9830; 完成组合</div>
+							<div>&#9830; 未完组合</div>
+						</ul>
+					</div>
+					<div class="charinfocontainer flexbox" ></div>
+					<div class="ccomboinfocontainer flexbox"><!--
+						<div class="combocard">
+							<div>
+								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
+								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
+								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
+								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
+								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
+								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
+							</div>
+							<div>
+								<div id="combocardinfo">
+									<div>老板</div>
+									<div>90</div>
+								</div>
+								<div id="combocardchars">
+									<span class="ismine">巫炤</span><span class="ismine">欧阳少恭</span><span class="notmine">沈夜</span><span class="ismine">巫炤</span>
+								</div>
+							</div>
+						</div>-->
+					</div>
+					<div class="icomboinfocontainer flexbox" ></div>
 				</div>
 			</div>
 			<div id="specialboard">
 				<p></p>
 				<div id="infobox"></div>
 			</div>
-		</div>
 	</div>
-	<div id="combobanner" class="cover transitform">
+	<div id="combobanner" class="cover transitopacity">
 		<div id="combotext">完成组合<span class="combohl"></span>，获得<span class="combohl"></span>分</div>
 		<div id="combocards">
 			<div class="postercard"></div>

@@ -73,17 +73,17 @@ class Controller{
     playerinfo.hide();
     oppoinfo.show();
   }
-  hideInfo(){
-    playerinfo.hide();
-    oppoinfo.hide();
+  exitInfo(){
+    playerinfo.exit();
+    oppoinfo.exit();
   }
   selectInfo(){
     var header = this.parentNode;
     var nodes = header.children;
     var idx = 0;
     for(;nodes[idx]!=this; idx++);
-    if(header.id == "header0")
-      oppoinfo.setPane(idx);
+    if(header == document.getElementsByClassName("infoheader")[0])
+      oppoinfo.setPane(idx+1);
     else
       playerinfo.setPane(idx+1);
   }
