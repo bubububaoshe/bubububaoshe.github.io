@@ -25,19 +25,29 @@ function reflow() {
 }
 class Sound{
   constructor(){
-    this.ac = new Audio('mp3/sooth.mp3');
-    this.de = new Audio('mp3/select.wav');
+    this.ac = new Audio('mp3/activate.mp3');
+    this.de = new Audio('mp3/deal.wav');
     this.co = new Audio('mp3/combo.mp3');
-    this.wi = new Audio('mp3/win.mp3');
-    this.lo = new Audio('mp3/foolish.mp3');
-    this.di = new Audio('mp3/discard.mp3');
   }
   activate(){this.ac.play();}
   deal(){this.de.play();}
   combo(){this.co.play();}
-  win(){this.wi.play();}
-  lose(){this.lo.play();}
-  discard(){this.di.play();}
+  win(){
+    var wi = new Audio('mp3/win.mp3');
+    wi.play();
+  }
+  lose(){
+    var lo = new Audio('mp3/fool.mp3');
+    lo.play();
+  }
+  discard(){
+    var di = new Audio('mp3/discard.mp3');
+    di.play();
+  }
+  draw(){
+    var dr = new Audio('mp3/draw.mp3');
+    dr.play();
+  }
 }
 class Card{
   /*
@@ -284,8 +294,10 @@ class Messenger {
       msg.textContent = "你输了";
       sound.lose();
     }
-    else
+    else {
       msg.textContent = "平手";
+      sound.draw();
+    }
     div.style.display = "block";
     reflow();
     div.style.transform = "none";

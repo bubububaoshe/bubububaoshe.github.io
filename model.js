@@ -464,32 +464,46 @@ class Combos{
       }
       return nccount;
     }
-    evaluateChar(char, partialCombos, oppoPartialCombos){
-      //returns the weight of char
-      //weight: base score + combo weight
-      // combo weight = (combo score)/(char # to be obtained) (including this char)
+    evaluateChar(char, partialCombos, oppoPartialCombos, considerOppo){
+      /*
+         considerOppo: weather or not to sabotage the opponent's potential combos
+         returns the weight of char
+         weight: base score + combo weight
+           for each mathing combo:
+           when opponent doesn't have the combo:
+            combo weight += (combo score)/(char # to be obtained) (including this char)
+           when opponent has part of the combo:
+             not consider opponent:
+               combo weight += 0, because u cannot complete this combo
+             consider opponent:
+                when u have part of the combo:
+                  combo weight += 0, because neither of u can complete this combo
+                when u don't have this combo:
+                  combo weight += (combo score)/(char # to be obtained by opponent)
+      */
       var weight = char.score;
       var len = COMBO_LIST.length;
-      var reside = new Array(len).fill(-1);
+      var reside = new Array(len).fill(0);
+      var oppoReside = new Array(len).fill(0);
       for(var i=0; i<partialCombos.length; i++)
-        reside[partialCombos[i].index] = i;
+        reside[partialCombos[i].index] = partialCombos[i].getSize();
       for(var i=0; i<oppoPartialCombos.length; i++)
-        reside[oppoPartialCombos[i].index] = -2;
+        oppoReside[oppoPartialCombos[i].index] = oppoPartialCombos[i].getSize();
       for(var i=0; i<len; i++){
-        if(reside[i] > -2){
-          // -2: combo partially obtained by opponent, don't count it
-          var combo = COMBO_LIST[i];
-          var size = combo[0].length;
-          for(var j=0; j<size; j++)
-            if(char.name == combo[0][j]){
-            // a matching combo
-              if(reside[i]>=0)
-                //partially obtained
-                weight += combo[2]/(size - partialCombos[reside[i]].getSize());
-              else
-                weight += combo[2]/size;
+        var combo = COMBO_LIST[i];
+        var size = combo[0].length;
+        for(var j=0; j<size; j++)
+          if(char.name == combo[0][j]){
+          // a matching combo
+            if(oppoReside[i] == 0)
+              // opponent has none of the combo chars
+                weight += combo[2]/(size - reside[i]);
+            else {
+              //opponent has part of the combo
+              if(considerOppo && reside[i]==0)
+                weight += combo[2]/(size - oppoReside[i])+1;
             }
-        }
+          }
       }
       return weight;
     }
@@ -640,7 +654,7 @@ class Model {
       return null;
   }
 
-  pickOptimal(player, oppo){
+  pickOptimal(player, oppo, considerOppo){
     //return the optimal [handchar, poolchar] according to combos.evaluateChar()
     var poolChars = model.pool.characters;
     var poolChar = null, handChar = null;
@@ -649,7 +663,7 @@ class Model {
       handChar = player.hand.getMatch(poolChars[i]);
       if (handChar != null) {
         poolChar = poolChars[i];
-        var weight = combos.evaluateChar(poolChar, player.partialCombos, oppo.partialCombos);
+        var weight = combos.evaluateChar(poolChar, player.partialCombos, oppo.partialCombos, considerOppo);
         if(weight > maxWeight) {
           maxWeight = weight;
           optimalPoolChar = poolChar;
@@ -661,6 +675,19 @@ class Model {
       return [optimalHandChar, optimalPoolChar];
     return null;
   }
+  discardOptimal(player, oppo, considerOppo){
+    var minWeight = 9999;
+    var pick = null;
+    var chars = player.hand.characters;
+    for(var i=0; i<chars.length; i++) {
+      var weight = combos.evaluateChar(chars[i], player.partialCombos, oppo.partialCombos, considerOppo);
+      if(weight < minWeight) {
+        minWeight = weight;
+        pick = chars[i];
+      }
+    }
+    return pick;
+  }
   aiPick() {
     //returns an array [hand pick, pool pick]
     switch (AI_LEVEL) {
@@ -668,7 +695,10 @@ class Model {
         return model.pickLeft(this.player0);
         break;
       case "ai2":
-        return model.pickOptimal(this.player0, this.player1);
+        return model.pickOptimal(this.player0, this.player1, false);
+        break;
+      case "ai3":
+        return model.pickOptimal(this.player0, this.player1, true);
         break;
       default: log("Invalid AI　Level!!!!!!!!");
         return null;
@@ -679,17 +709,9 @@ class Model {
       case "ai1":
         return null;
       case "ai2":
-        var minWeight = 9999;
-        var pick = null;
-        var chars = model.player0.hand.characters;
-        for(var i=0; i<chars.length; i++) {
-          var weight = combos.evaluateChar(chars[i], model.player0.partialCombos, model.player1.partialCombos);
-          if(weight < minWeight) {
-            minWeight = weight;
-            pick = chars[i];
-          }
-        }
-        return pick;
+        return this.discardOptimal(model.player0, this.player1, false);
+      case "ai3":
+        return this.discardOptimal(model.player0, this.player1, true);
       default: log("Invalid AI　Level!!!!!!!!");
         return null;
     }
