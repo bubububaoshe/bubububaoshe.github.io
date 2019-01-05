@@ -421,7 +421,7 @@ class View {
     maindiv.style.left = (WINW - MAINW)/2;
 
     CARDW = MAINW *0.643*(1-2*0.028) / (9 * (1 - HAND_CARD_OVERLAP) + 1);
-    var maxCardH = MAINH * 0.206;
+    var maxCardH = MAINH * 0.2;
     CARDH = CARDW / CARD_RATIO;
     if (CARDH > maxCardH) {
       CARDH = maxCardH;
@@ -432,7 +432,8 @@ class View {
     setCSSInt("--main-height", MAINH);
     setCSSInt("--main-width", MAINW);
     setCSSInt("--win-height", WINH);
-    var poolM = (MAINW*0.643*(1-2*0.028)-CARDW*2.5)/(INIT_CARD_NUM_POOL+1)- CARDW;
+    //var poolM = (MAINW*0.643*(1-2*0.028)-CARDW*2.5)/(INIT_CARD_NUM_POOL+1)- CARDW;
+    var poolM = (MAINW*0.643*(1-2*0.028)-CARDW*1.3)/(INIT_CARD_NUM_POOL+1)- CARDW;
     setCSSInt("--pool-margin", poolM);
   }
 }

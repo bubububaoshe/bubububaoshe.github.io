@@ -49,7 +49,7 @@
   font-size: 1.3vw;
 }
 .smallcard>p::before{
-  content: "基础分：";
+  content: "基础分:";
 }
 .combocard{
   height: calc(var(--card-height)*0.6);

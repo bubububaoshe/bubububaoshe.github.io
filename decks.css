@@ -1,33 +1,33 @@
 /* z-index */
 #hand0>.cardcontainer:nth-child(1), #pool>.cardcontainer:nth-child(1), #hand1>.cardcontainer:nth-child(1){
-  z-index: 9;
+  z-index: 10;
 }
 #hand0>.cardcontainer:nth-child(2), #pool>.cardcontainer:nth-child(2), #hand1>.cardcontainer:nth-child(2){
-  z-index: 8;
+  z-index: 9;
 }
 #hand0>.cardcontainer:nth-child(3), #pool>.cardcontainer:nth-child(3), #hand1>.cardcontainer:nth-child(3){
-  z-index: 7;
+  z-index: 8;
 }
 #hand0>.cardcontainer:nth-child(4), #pool>.cardcontainer:nth-child(4), #hand1>.cardcontainer:nth-child(4){
-  z-index: 6;
+  z-index: 7;
 }
 #hand0>.cardcontainer:nth-child(5), #pool>.cardcontainer:nth-child(5), #hand1>.cardcontainer:nth-child(5){
-  z-index: 5;
+  z-index: 6;
 }
 #hand0>.cardcontainer:nth-child(6), #pool>.cardcontainer:nth-child(6), #hand1>.cardcontainer:nth-child(6){
-  z-index: 4;
+  z-index: 5;
 }
 #hand0>.cardcontainer:nth-child(7), #pool>.cardcontainer:nth-child(7), #hand1>.cardcontainer:nth-child(7){
-  z-index: 3;
+  z-index: 4;
 }
 #hand0>.cardcontainer:nth-child(8), #pool>.cardcontainer:nth-child(8), #hand1>.cardcontainer:nth-child(8){
-  z-index: 2;
+  z-index: 3;
 }
 #hand0>.cardcontainer:nth-child(9), #pool>.cardcontainer:nth-child(9), #hand1>.cardcontainer:nth-child(9){
-  z-index: 1;
+  z-index: 2;
 }
 #hand0>.cardcontainer:nth-child(10), #pool>.cardcontainer:nth-child(10), #hand1>.cardcontainer:nth-child(10){
-  z-index: 0;
+  z-index: 1;
 }
 #repository>.cardcontainer, #table0>.cardcontainer, #table1>.cardcontainer{
   z-index: 0;
@@ -78,18 +78,18 @@
   top: -1px;
 }
 #pool>.cardcontainer:nth-child(odd){
-  top: calc(var(--card-height)/4);
+  top: calc(var(--card-height)/8);
 }
 #pool>.cardcontainer:nth-child(even){
-  top: calc(var(--card-height)/-4);
+  top: calc(var(--card-height)/-8);
 }
 
 /* pool card rotation */
 #pool>.cardcontainer:nth-child(2){transform: rotate(-15deg);}
 #pool>.cardcontainer:nth-child(4){transform: rotate(-5deg);}
-#pool>.cardcontainer:nth-child(6){transform: rotate(-21deg);}
+#pool>.cardcontainer:nth-child(6){transform: rotate(3deg);}
 #pool>.cardcontainer:nth-child(8){transform: rotate(-9deg);}
-#pool>.cardcontainer:nth-child(10){transform: rotate(18deg);}
+#pool>.cardcontainer:nth-child(10){transform: rotate(5deg);}
 #pool>.cardcontainer:nth-child(1){transform: rotate(8deg);}
 #pool>.cardcontainer:nth-child(3){transform: rotate(-12deg);}
 #pool>.cardcontainer:nth-child(5){transform: rotate(12deg);}
