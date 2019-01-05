@@ -66,16 +66,24 @@ class Controller{
     model.checkMatch1();
   }
   checkPlayerInfo(){
-    oppoinfo.hide();
-    playerinfo.show();
+    if(playerinfo.visible()){
+      playerinfo.exit();
+      oppoinfo.exit();
+    }
+    else {
+      oppoinfo.hide();
+      playerinfo.show();
+    }
   }
   checkOppoInfo(){
-    playerinfo.hide();
-    oppoinfo.show();
-  }
-  exitInfo(){
-    playerinfo.exit();
-    oppoinfo.exit();
+    if(oppoinfo.visible()){
+      playerinfo.exit();
+      oppoinfo.exit();
+    }
+    else {
+      playerinfo.hide();
+      oppoinfo.show();
+    }
   }
   selectInfo(){
     var header = this.parentNode;

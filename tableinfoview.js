@@ -84,8 +84,7 @@ class TableInfoView{
   show(){
     if(!this.on){
       if(tableviewcount == 0){
-        document.getElementById("specialboard").addEventListener("click", controller.exitInfo);
-        messenger.note("点击此处\n返回牌局");
+        messenger.note("再次点击牌\n组返回牌局");
       }
       this.on = true;
       tableviewcount ++;
@@ -98,11 +97,13 @@ class TableInfoView{
   hide(){
     this.container.style.display = null;
   }
+  visible(){
+    return this.container.style.display != "";
+  }
   exit(){
     this.hide();
     if(this.on){
       if(tableviewcount == 1){
-        document.getElementById("specialboard").removeEventListener("click", controller.exitInfo);
         messenger.note("");
       }
       this.on = false;
@@ -111,6 +112,7 @@ class TableInfoView{
       this.container.getElementsByClassName("charinfocontainer")[0].textContent="";
       this.container.getElementsByClassName("ccomboinfocontainer")[0].textContent="";
       this.container.getElementsByClassName("icomboinfocontainer")[0].textContent="";
+      this.setPane(1);
     }
   }
   setPane(idx){
