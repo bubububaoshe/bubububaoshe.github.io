@@ -30,7 +30,12 @@
   background-color: var(--banner-background);
 }
 .banner>div{
-background-color: var(--congra-background-color);
+//background-color: var(--congra-background-color);
+background-image : linear-gradient(to right,
+                    rgb(30,19,10, 0) 8%,
+                    rgb(30,19,10, 1) 40%,
+                    rgb(30,19,10, 1) 60%,
+                    rgb(30,19,10, 0) 92%);
 }
 #combotext{
   margin-top: calc(var(--card-height));

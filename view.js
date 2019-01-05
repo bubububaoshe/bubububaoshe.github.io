@@ -215,11 +215,11 @@ class PoolDiv extends DeckDiv {
 }
 class Messenger {
   constructor(){
-    document.getElementById("finalcontainer").addEventListener("click", controller.restart);
   }
   reset(){
     this.notifyNoMatch("hidden");
     var div = document.getElementById("finalcontainer");
+    div.removeEventListener("click", controller.restart);
     div.style.transform = null;
     div.style.webkitTransform = null;
     delayedFunc(function(){
@@ -298,6 +298,7 @@ class Messenger {
       msg.textContent = "平手";
       sound.draw();
     }
+    div.addEventListener("click", controller.restart);
     div.style.display = "block";
     reflow();
     div.style.transform = "none";
