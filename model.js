@@ -4,6 +4,7 @@ maximum combo size: 6
 */
 
 COMMON_CHAR_LIST = [
+[
   ["ly1", "陵越", 2, "冬"],
   ["qy1", "悭臾", 2, "夏"],
   ["fqx1", "风晴雪", 2, "春"],
@@ -29,8 +30,9 @@ COMMON_CHAR_LIST = [
   ["yd1", "幽都", 2, "冬"],
   ["jt1", "焦炭", 2, "夏"],
   ["fl1", "凤来", 2, "春"],
-  ["bsd1", "百胜刀", 2, "冬"],
-
+  ["bsd1", "百胜刀", 2, "冬"]
+],
+[
   ["sy2", "沈夜", 2, "冬"],
   ["sx2", "沈曦", 2, "春"],
   ["lyc2", "流月城", 2, "冬"],
@@ -56,8 +58,9 @@ COMMON_CHAR_LIST = [
   ["xy2", "谢衣", 2, "夏"],
   ["jsh2", "静水湖", 2, "春"],
   ["snm2", "神女墓", 2, "冬"],
-  ["hykh2", "华月箜篌", 2, "冬"],
-/*
+  ["hykh2", "华月箜篌", 2, "冬"]
+],
+[
   ["sw3", "司危", 2, "春"],
   ["bl3", "北洛", 2, "春"],
   ["ywy3", "云无月", 2, "冬"],
@@ -77,8 +80,16 @@ COMMON_CHAR_LIST = [
   ["xl3", "西陵", 2, "春"],
   ["lz3", "嫘祖", 2, "夏"],
   ["fls3", "风里沙", 2, "秋"],
-  ["lxj3", "凌星见", 2, "春"]
-  */
+  ["lxj3", "凌星见", 2, "春"],
+  ["wyzl3", "乌衣长老", 2, "春"],
+  ["sj3", "鸤鸠", 2, "冬"],
+  ["yts3", "原天柿", 2, "秋"],
+  ["ycg3", "夜长庚", 2, "冬"],
+  ["gd3", "骨笛", 2, "冬"],
+  ["z3", "磔", 2, "夏"],
+  ["ys3", "玉梳", 2, "冬"],
+  ["mhz3", "梦魂枝", 2, "秋"],
+]
 ];
 COMBO_LIST = [
   [ [ "风晴雪", "焦炭", "谢衣" ], "厨房功夫", 10],
@@ -152,10 +163,10 @@ COMBO_LIST = [
   [ ["百里屠苏", "欧阳少恭"], "琴心剑魄", 3],
   [ ["尹千觞", "欧阳少恭"], "醉梦江湖", 4],
   [ ["尹千觞", "幽都"], "幽都巫咸", 4],
-  [ ["风晴雪", "尹千觞", "幽都"], "永夜苍茫", 10],
+  [ ["风晴雪", "尹千觞", "幽都"], "幽夜苍茫", 10],
   [ ["风晴雪", "尹千觞"], "陌相逢", 4],
   [ ["风晴雪", "幽都"], "幽都灵女", 4],
-  [ ["风晴雪", "方兰生", "百里屠苏", "红玉", "尹千觞", "襄铃"], "黑衣少侠传", 60],
+  [ ["风晴雪", "方兰生", "百里屠苏", "红玉", "尹千觞", "襄铃"], "黑衣少侠传", 60]
   /*
   [ ["巫炤", "司危"], "西陵毒唯", 4],
   [ ["巫炤", "西陵"], "炤不保西", 3],
@@ -176,7 +187,7 @@ INIT_CARD_NUM_HAND = 10;
 INIT_CARD_NUM_POOL = 8;
 POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
 //configurable settings
-var AI_LEVEL = "巫炤";
+var AI_LEVEL = "ai1";
 
 class Trick {
   constructor(description) {
@@ -319,23 +330,30 @@ class Deck {
   }
 }
 class Repository extends Deck {
-  constructor(type) {
+  constructor(type, p1, p2) {
     super();
     if (type == "common")
-      this.initCommonRepo();
-    else if (type == "special")
-      this.initSpecialRepo();
+    {
+      this.initCommonRepo(p1);
+        this.initCommonRepo(p2);
+    }
+    else if (type == "special"){
+      this.initSpecialRepo(p1);
+      this.initSpecialRepo(p2);
+    }
     else
       alert("Illegal Repository Type: " + type);
   }
-  initCommonRepo() {
-    var len = COMMON_CHAR_LIST.length;
+  initCommonRepo(version) {
+    var pack = COMMON_CHAR_LIST[version-1];
+    var len = pack.length;
+
     for (var i = 0; i < len; i++) {
-      let char = new Character(COMMON_CHAR_LIST[i][0], COMMON_CHAR_LIST[i][1], COMMON_CHAR_LIST[i][2], COMMON_CHAR_LIST[i][3]);
+      let char = new Character(pack[i][0], pack[i][1], pack[i][2], pack[i][3]);
       this.addChar(char);
     }
   }
-  initSpecialRepo() {
+  initSpecialRepo(pack) {
     let sp = new SpecialCharacter(200, "沈夜", 6, "冬");
     let t1 = new Trick("打徒弟"),
       t2 = new Trick("打徒孙");
@@ -446,6 +464,35 @@ class Combos{
       }
       return nccount;
     }
+    evaluateChar(char, partialCombos, oppoPartialCombos){
+      //returns the weight of char
+      //weight: base score + combo weight
+      // combo weight = (combo score)/(char # to be obtained) (including this char)
+      var weight = char.score;
+      var len = COMBO_LIST.length;
+      var reside = new Array(len).fill(-1);
+      for(var i=0; i<partialCombos.length; i++)
+        reside[partialCombos[i].index] = i;
+      for(var i=0; i<oppoPartialCombos.length; i++)
+        reside[oppoPartialCombos[i].index] = -2;
+      for(var i=0; i<len; i++){
+        if(reside[i] > -2){
+          // -2: combo partially obtained by opponent, don't count it
+          var combo = COMBO_LIST[i];
+          var size = combo[0].length;
+          for(var j=0; j<size; j++)
+            if(char.name == combo[0][j]){
+            // a matching combo
+              if(reside[i]>=0)
+                //partially obtained
+                weight += combo[2]/(size - partialCombos[reside[i]].getSize());
+              else
+                weight += combo[2]/size;
+            }
+        }
+      }
+      return weight;
+    }
 }
 class Player {
   //return: completed new combo?
@@ -488,9 +535,9 @@ class Player {
   }
 }
 class Model {
-  constructor() {
-    this.commonRepository = new Repository("common");
-    this.specialRepository = new Repository("special");
+  constructor(p1, p2) {
+    this.commonRepository = new Repository("common", p1, p2);
+    this.specialRepository = new Repository("special", p1, p2);
     this.player0 = new Player(0, this.commonRepository, this.specialRepository);
     this.player1 = new Player(1, this.commonRepository, this.specialRepository);
     this.pool = new Deck();
@@ -592,11 +639,36 @@ class Model {
       }
       return null;
   }
+
+  pickOptimal(player, oppo){
+    //return the optimal [handchar, poolchar] according to combos.evaluateChar()
+    var poolChars = model.pool.characters;
+    var poolChar = null, handChar = null;
+    var maxWeight = 0, optimalPoolChar = null, optimalHandChar = null;
+    for (var i = 0; i < poolChars.length; i++) {
+      handChar = player.hand.getMatch(poolChars[i]);
+      if (handChar != null) {
+        poolChar = poolChars[i];
+        var weight = combos.evaluateChar(poolChar, player.partialCombos, oppo.partialCombos);
+        if(weight > maxWeight) {
+          maxWeight = weight;
+          optimalPoolChar = poolChar;
+          optimalHandChar = handChar;
+        }
+      }
+    }
+    if(optimalPoolChar != null)
+      return [optimalHandChar, optimalPoolChar];
+    return null;
+  }
   aiPick() {
     //returns an array [hand pick, pool pick]
     switch (AI_LEVEL) {
-      case "巫炤":
+      case "ai1":
         return model.pickLeft(this.player0);
+        break;
+      case "ai2":
+        return model.pickOptimal(this.player0, this.player1);
         break;
       default: log("Invalid AI　Level!!!!!!!!");
         return null;
@@ -604,9 +676,20 @@ class Model {
   }
   aiDiscard(){
     switch (AI_LEVEL) {
-      case "巫炤":
+      case "ai1":
         return null;
-        break;
+      case "ai2":
+        var minWeight = 9999;
+        var pick = null;
+        var chars = model.player0.hand.characters;
+        for(var i=0; i<chars.length; i++) {
+          var weight = combos.evaluateChar(chars[i], model.player0.partialCombos, model.player1.partialCombos);
+          if(weight < minWeight) {
+            minWeight = weight;
+            pick = chars[i];
+          }
+        }
+        return pick;
       default: log("Invalid AI　Level!!!!!!!!");
         return null;
     }

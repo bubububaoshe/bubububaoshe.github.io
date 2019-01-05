@@ -23,7 +23,6 @@
   --main-height
   */
 }
-
 body {
   background-color: var(--page-background-color);
   background-image: var(--page-background-image);
@@ -35,6 +34,7 @@ body {
 }
 #main {
   position: fixed;
+  document
 }
 #scoreboard, #specialboard, #gamezone {
   position: relative;
@@ -139,8 +139,8 @@ body {
   position: absolute;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
-  -webkit-box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+  box-shadow: 4px 4px 8px 0 rgba(0,0,0,0.4);
+  -webkit-box-shadow: 4px 4px 8px 0 rgba(0,0,0,0.4);
 }
 .cardfront{
   transform: rotateY(180deg);
@@ -155,8 +155,8 @@ body {
   backface-visibility: hidden;
 }
 .glow{
-  -webkit-box-shadow: 0px 0px 0.6vw 0.6vw var(--card-glow-color);
-  box-shadow: 0px 0px 0.6vw 0.6vw var(--card-glow-color);
+  -webkit-box-shadow: 0px 0px 0.6vw 0.4vw var(--card-glow-color);
+  //box-shadow: 0px 0px 0.6vw 0.2vw var(--card-glow-color);
 }
 .cardcontainer.pop{
   transform: translate(0, calc(var(--card-height)*-0.4)) !important;

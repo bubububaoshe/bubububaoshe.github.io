@@ -323,7 +323,7 @@ class View {
     model.player1.hand.view = this.hand1;
     model.player1.table.view = this.table1;
     model.pool.view = this.pool;
-
+    this.updateScore();
     window.addEventListener("resize", this.setSizes);
   }
   checkMatch1(){
@@ -426,9 +426,26 @@ class View {
 
 var sound, combos, model, controller, messenger, view, oppoinfo, playerinfo;
 function gameinit(){
+  var inputs = document.getElementById("packinput").getElementsByTagName("input");
+  var pack, p1, p2;
+  for(var i=0; i<inputs.length; i++)
+    if(inputs[i].checked){
+      pack = inputs[i].id;
+      break;
+    }
+  p1 = pack.charAt(1);
+  p2 = pack.charAt(2);
+  inputs = document.getElementById("aiinput").getElementsByTagName("input");
+  for(var i=0; i<inputs.length; i++)
+    if(inputs[i].checked){
+      AI_LEVEL = inputs[i].id;
+      break;
+    }
+  document.getElementById("main").style.display = "block";
+  document.getElementById("configurator").style.display = "none";
   sound = new Sound();
   combos = new Combos();
-  model = new Model();
+  model = new Model(p1, p2);
   controller = new Controller();
   messenger = new Messenger();
   view = new View();
@@ -436,4 +453,5 @@ function gameinit(){
   playerinfo = new TableInfoView(model.player1);
   model.init();
 }
-gameinit();
+//gameinit();
+document.getElementById("gamestart").addEventListener("click", gameinit);

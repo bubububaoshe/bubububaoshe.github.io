@@ -8,7 +8,7 @@
   font-size: 2vw;
   color: var(--nomatch-info-color);
   vertical-align: middle;
-  padding-top: 20px;
+  margin-top: 20px;
   white-space: pre;
 }
 #blocker {
@@ -24,12 +24,12 @@
   right:0;
   display: none;
 }
-#combobanner{
+.banner{
   /*transform: rotateY(90deg);*/
   opacity: 0;
   background-color: var(--banner-background);
 }
-#combobanner>div{
+.banner>div{
 background-color: var(--congra-background-color);
 }
 #combotext{
@@ -117,6 +117,48 @@ background-color: var(--congra-background-color);
   left: calc(50% - calc(var(--main-height)*0.01));
   top: 0;
 }
-#versionpicker{
-  display: block;
+
+#configurator {
+  position: relative;
+  height: 50%;
+  width: 50%;
+  top: 25%;
+  align-items: center;
 }
+#configurator div{
+  display: inline-block;
+  font-size: 2vw;
+}
+#configurator div label{
+  text-overflow: clip;
+}
+
+#gamestart{
+  border: 1px solid  #281B11;
+  width: 25%;
+  padding: 0.71em;
+  cursor: pointer;
+}
+#gamestart:hover, #gamestart:active{
+  background-color: #281B11;
+  color: white;
+}
+/*
+#configurator>.flexbox>div{
+  width: 80%;
+  background-color: var(--congra-background-color);
+  box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.4);
+  margin: 10%;
+  padding: 10%;
+}
+#configurator>.flexbox>div>div:first-child{
+  float: left;
+  font-size: 4vw;
+  color: var(--congra-hl-color);
+}
+#configurator>.flexbox>div>div:last-child{
+  float: left;
+  font-size: 2vw;
+  color: var(--congra-hl-color);
+}
+*/
