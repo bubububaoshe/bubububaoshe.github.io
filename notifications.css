@@ -134,36 +134,14 @@ background-image : linear-gradient(to right,
   display: inline-block;
   font-size: 2vw;
 }
-#configurator div label{
-  text-overflow: clip;
-}
 
 #gamestart{
   border: 1px solid  #281B11;
   width: 25%;
-  padding: 0.71em;
+  padding: 1vw 0;
   cursor: pointer;
 }
 #gamestart:hover, #gamestart:active{
   background-color: #281B11;
   color: white;
 }
-/*
-#configurator>.flexbox>div{
-  width: 80%;
-  background-color: var(--congra-background-color);
-  box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.4);
-  margin: 10%;
-  padding: 10%;
-}
-#configurator>.flexbox>div>div:first-child{
-  float: left;
-  font-size: 4vw;
-  color: var(--congra-hl-color);
-}
-#configurator>.flexbox>div>div:last-child{
-  float: left;
-  font-size: 2vw;
-  color: var(--congra-hl-color);
-}
-*/

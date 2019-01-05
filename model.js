@@ -186,8 +186,7 @@ PLAYER_SPECIALS = [
 INIT_CARD_NUM_HAND = 10;
 INIT_CARD_NUM_POOL = 8;
 POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
-//configurable settings
-var AI_LEVEL = "ai1";
+
 
 class Trick {
   constructor(description) {
@@ -599,8 +598,24 @@ class Model {
     //log((player==this.player0?"AI":"你") +"-["+char.name+"]+["+newChar.name+"]");
     view.discard(player, char, newChar);
   }
-  needRedeal(){
+  overSize(){
     return this.pool.getSize() >= POOL_CAPACITY;
+  }
+  overSeason(){
+    var count = 0;;
+    var chars = this.pool.characters;
+    var seasons = ["春", "夏", "秋", "冬"];
+    for(var i=0; i<seasons.length; i++){
+      count = 0;
+      for(var j=0; j<chars.length; j++)
+        if(chars[j].season == seasons[i])
+        {
+          count ++;
+          if(count == 6)
+            return true;
+        }
+    }
+    return false;
   }
   redeal(){
     model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
@@ -609,7 +624,9 @@ class Model {
     view.pool.init();
   }
   checkMatch1(){
-    var matchable = this.hasMatch(this.player1);
+    while(model.overSeason())
+      model.redeal();
+    var matchable = model.hasMatch(model.player1);
     if(matchable) {
       if(!model.player1.matchable){
         model.player1.matchable = true;
@@ -617,7 +634,7 @@ class Model {
       }
     }
     else {
-      if(model.needRedeal()){
+      if(model.overSize()){
         model.redeal();
         model.checkMatch1();
       }

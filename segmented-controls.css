@@ -177,10 +177,10 @@
       transform: translateX(500%); }
   .segmented-control > label {
     display: inline-block;
-    padding: 0 .71em;
+    padding: 1vw 0;
     cursor: pointer;
     float: left;
-    line-height: 3em;
+    line-height: 4vw;
     font-style: inherit;
     font-weight: inherit;
     text-decoration: inherit;

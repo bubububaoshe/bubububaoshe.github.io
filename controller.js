@@ -35,9 +35,11 @@ class Controller{
   );
   };
   opponentObtain(){
+    while(model.overSeason())
+      model.redeal();
     var pick = model.aiPick();
     if(pick == null){
-      if(model.needRedeal()){
+      if(model.overSize()){
         model.redeal();
         controller.opponentObtain();
       }

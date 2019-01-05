@@ -439,6 +439,7 @@ class View {
 }
 
 var sound, combos, model, controller, messenger, view, oppoinfo, playerinfo;
+var AI_LEVEL;
 function gameinit(){
   var inputs = document.getElementById("packinput").getElementsByTagName("input");
   var pack, p1, p2;
