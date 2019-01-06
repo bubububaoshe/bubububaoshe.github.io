@@ -28,25 +28,25 @@ class Sound{
     this.ac = new Audio('mp3/activate.mp3');
     this.de = new Audio('mp3/deal.wav');
     this.co = new Audio('mp3/combo.mp3');
+    this.wi = new Audio('mp3/win.mp3');
+    this.lo = new Audio('mp3/fool.mp3');
+    this.di = new Audio('mp3/discard.mp3');
+    this.dr = new Audio('mp3/draw.mp3');
   }
   activate(){this.ac.play();}
   deal(){this.de.play();}
   combo(){this.co.play();}
   win(){
-    var wi = new Audio('mp3/win.mp3');
-    wi.play();
+    this.wi.play();
   }
   lose(){
-    var lo = new Audio('mp3/fool.mp3');
-    lo.play();
+    this.lo.play();
   }
   discard(){
-    var di = new Audio('mp3/discard.mp3');
-    di.play();
+    this.di.play();
   }
   draw(){
-    var dr = new Audio('mp3/draw.mp3');
-    dr.play();
+    this.dr.play();
   }
 }
 class Card{

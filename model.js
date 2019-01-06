@@ -500,7 +500,7 @@ class Combos{
             else {
               //opponent has part of the combo
               if(considerOppo && reside[i]==0)
-                weight += combo[2]/(size - oppoReside[i])+1;
+                weight += combo[2]/(size - oppoReside[i] + 1);
             }
           }
       }
@@ -602,6 +602,8 @@ class Model {
     return this.pool.getSize() >= POOL_CAPACITY;
   }
   overSeason(){
+    //returns true:
+    //if >= 6 cards of a certain season in pool and >= 3 cards of other seasons in pool+repository
     var count = 0;;
     var chars = this.pool.characters;
     var seasons = ["春", "夏", "秋", "冬"];
@@ -612,7 +614,19 @@ class Model {
         {
           count ++;
           if(count == 6)
-            return true;
+          {
+            var others = 0;
+            for(var k=0; k<chars.length; k++)
+              if(chars[k].season != seasons[i])
+                others ++;
+            for(var k=0; k<model.commonRepository.getSize(); k++)
+              if(model.commonRepository.characters[k] != seasons[i]) {
+                others ++;
+                if(others > 2)
+                  return true;
+              }
+            return false;
+          }
         }
     }
     return false;
