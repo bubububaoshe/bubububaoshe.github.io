@@ -1,7 +1,7 @@
 {
-  "name": "qianqiuxi_text",
+  "name": "qianqiuxi",
   "version": "0.0.1",
-  "description": "my first socket.io app",
+  "description": "Qianqiuxi game from Gujian3",
   "dependencies": {
     "express": "^4.15.2",
     "forever": "^0.15.3",

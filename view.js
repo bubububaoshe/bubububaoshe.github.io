@@ -304,6 +304,16 @@ class Messenger {
     div.style.transform = "none";
     div.style.webkitTransform = "none";
   }
+  
+  notifyMyTurn() {
+    var info = document.getElementById("infobox1");
+    info.innerHTML = '';
+  }
+  
+  notifyOpponentTurn() {
+    var info = document.getElementById("infobox1");
+    info.innerHTML = '对方行动中';
+  }
 }
 class View {
   constructor() {

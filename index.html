@@ -40,11 +40,11 @@
 			当前在线人数：未知
 			</div>
 		</div>
-			<div id="match_buttons" style="width: 100%">
-				<div id="start_match" style="">开始匹配</div>
-				<div id="confirm_match" style="display:none">确认匹配</div>
-				<div id="cancel_match" style="display:none">放弃匹配</div>
-			</div>
+		<div id="match_buttons" style="width: 100%">
+			<div id="start_match" style="">开始匹配</div>
+			<div id="confirm_match" style="display:none">确认匹配</div>
+			<div id="cancel_match" style="display:none">放弃匹配</div>
+		</div>
 		<div id="gamestart">开始游戏</div>
 	</div>
 	<div id="main">
@@ -60,7 +60,7 @@
 					<div id="pool"></div>
 					<div id="repository"></div>
 				</div>
-				<div id="hand1container"><div id="hand1"></div></div>
+				<div id="hand1container"><div id="hand1"></div><div id="infobox1"></div></div>
 				<div id="blocker" class="cover"></div>
 				<div id="finalcontainer" class="cover">
 					<div></div><div></div><div></div>
@@ -165,7 +165,7 @@
   });
   socket.on('Match_ReadyToMatchAck', function() {
     document.getElementById("start_match").style.display = "none";
-    document.getElementById("confirm_match").style.display = "inline-block";
+    document.getElementById("confirm_match").style.display = "none";
     document.getElementById("cancel_match").style.display = "inline-block";
     lobby_status.innerHTML = "正在寻找同伴中";
   });
@@ -226,11 +226,12 @@
   
   socket.on('Game_MakeTurn', () => {
     controller.onMyTurn();
+    messenger.notifyMyTurn();
   });
   
   socket.on('Game_OpponentTurn', () => {
     controller.onOpponentTurn();
-    messenger.note('对方回合');
+    messenger.notifyOpponentTurn();
   });
   
   socket.on('Game_OpponentObtainPair', (handc_id, poolc_id) => {

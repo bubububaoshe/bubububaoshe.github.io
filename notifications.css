@@ -11,6 +11,15 @@
   margin-top: 20px;
   white-space: pre;
 }
+#infobox1{
+  position: absolute;
+  bottom: 3%;
+  width: 100%;
+  font-size: 2vw;
+  color: #33A;
+  margin-top: 0px;
+  white-space: pre;
+}
 #blocker {
   font-size: 5vw;
   color:var(--final-info-color);
@@ -134,13 +143,17 @@ background-image : linear-gradient(to right,
   font-size: 2vw;
 }
 
-#gamestart{
+#gamestart, #start_match, #confirm_match, #cancel_match {
   border: 1px solid  #281B11;
   width: 25%;
   padding: 1vw 0;
   cursor: pointer;
 }
-#gamestart:hover, #gamestart:active{
+#gamestart:hover, #gamestart:active,
+#start_match:hover, #start_match:active,
+#confirm_match:hover, #confirm_match:active,
+#cancel_match:hover, #cancel_match:active
+{
   background-color: #281B11;
   color: white;
 }

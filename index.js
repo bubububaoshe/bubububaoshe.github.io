@@ -154,7 +154,7 @@ class Game {
       if (this.players[0] != undefined)
         console.log('player0 id is ' + this.players[0].player_id);
       if (this.players[1] != undefined)
-        console.log('player0 id is ' + this.players[1].player_id);
+        console.log('player1 id is ' + this.players[1].player_id);
       return -1;
     }
   }
@@ -226,13 +226,17 @@ io.on('connection', function(socket) {
 	socket.match_confirmed = false;
 	g_serial += 1;
 	socket.emit('Info_OnlinePlayerCount', g_all_sockets.length);
-	console.log("player " + socket.player_id + " joined");
+	console.log("player " + socket.player_id + " joined, " +
+	  g_all_sockets.length + " sockets, " + g_all_games.length + " games");
 
 	// 离线
 	socket.on('disconnect', () => {
-		console.log("player " + socket.player_id + " left");
 		g_playermatcher.OnPlayerCancelsMatch(socket);
 		g_all_sockets.remove(socket);
+		var g = FindGameBySocket(socket);
+	  g_all_games.remove(g);
+		console.log("player " + socket.player_id + " left, " +
+		  g_all_sockets.length + " sockets, " + g_all_games.length + " games");
 	});
 
 	socket.on('Match_ReadyToMatch', () => {
