@@ -539,6 +539,14 @@ class Player {
     var comboCount = combos.getNewCombos(this, char);
     return comboCount;
   }
+  // Server has no access to global variable 'combos' so ...
+  addChar_server(char, _combos) {
+    this.table.addChar(char);
+    char.setOwner(this);
+    this.score += char.score;
+    var comboCount = _combos.getNewCombos(this, char);
+    return comboCount;
+  }
   getDesc() {
     var msg = "玩家" + this.id;
     msg += "\n手牌：\n" + this.hand.getDesc();
@@ -555,6 +563,8 @@ class Model {
     this.player1 = new Player(1, this.commonRepository, this.specialRepository);
     this.pool = new Deck();
     this.activeChar = null;
+    this.isMultiplayer = false;
+    this.isMultiplayerServer = false;
   }
   reset(){
     model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
@@ -582,11 +592,41 @@ class Model {
     view.pool.init();
     model.checkMatch1();
   }
+  init_server() {
+    this.isMultiplayer = true;
+    this.isMultiplayerServer = true;
+    this.initHand(this.player0);
+    this.initHand(this.player1);
+    this.initPool();
+    this.combos = new Combos();
+  }
+  initCombos_server() {
+    return new Combos();
+  }
+  initAsClient() {
+    console.log('[model.initAsClient]');
+  }
   initHand(player){
     player.hand.initDeck(INIT_CARD_NUM_HAND, this.commonRepository);
   }
+  initHandByRemoteState(player, player_remote) {
+    var x = player_remote.hand.characters;
+    for (var i=0; i<x.length; i++) {
+      var cid = x[i].id;
+      var char = model.commonRepository.removeCharByID(cid);
+      player.hand.addChar(char);
+    }
+  }
   initPool(){
     this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
+  }
+  initPoolByRemoteState(pool, pool_remote) {
+    var x = pool_remote.characters;
+    for (var i=0; i<pool_remote.characters.length; i++) {
+      var cid = x[i].id;
+      var char = model.commonRepository.removeCharByID(cid);
+      this.pool.addChar(char);
+    }
   }
   discard(player, char){
     if(char == null)
@@ -597,6 +637,33 @@ class Model {
     var newChar = player.hand.addRandom(model.commonRepository);
     //log((player==this.player0?"AI":"你") +"-["+char.name+"]+["+newChar.name+"]");
     view.discard(player, char, newChar);
+    
+    if (model.isMultiplayer) {
+      var local_player_id = 0;
+      if (player == model.player1) local_player_id = 1;
+      console.log("emitting discard, "+char.id+", "+newChar.id);
+      socket.emit('Game_Discard', local_player_id, char.id, newChar.id);
+    }
+  }
+  oppoDiscard_client(char_id, newchar_id) {
+    var player = model.player0;
+    var char = player.hand.getChar(char_id);
+    var newchar = model.commonRepository.getChar(newchar_id);
+    model.commonRepository.removeChar(newchar);
+    model.pool.addChar(char);
+    if (newchar != null) {
+      player.hand.addChar(newchar);
+    } else {
+      console.log('[oppoDiscard_client] newchar is null');
+    }
+    view.discard(player, char, newchar);
+  }
+  discard_server(player, char, newchar) {
+    console.log("[discard_server] "+char+","+newchar);
+    player.hand.removeChar(char);
+    this.pool.addChar(char);
+    this.commonRepository.removeChar(newchar);
+    player.hand.addChar(newchar);
   }
   overSize(){
     return this.pool.getSize() >= POOL_CAPACITY;
@@ -670,6 +737,17 @@ class Model {
       model.pool.addChar(char);
     }
     view.dealOne(char);
+  }
+  dealOne_server(cid) { // Same except no view changes
+    var ret = null;
+    if (cid == null) {
+      var char = this.pool.addRandom(this.commonRepository);
+      ret = char.id;
+    } else {
+      var char = this.commonRepository.removeCharById(cid);
+      this.pool.addChar(char);
+    }
+    return ret;
   }
   pickLeft(player){
       var poolChars = model.pool.characters;
@@ -753,12 +831,25 @@ class Model {
     var comboCount = player.addChar(poolChar) + player.addChar(handChar);
     view.obtain(player, handChar, poolChar, comboCount);
   }
+  obtain_server(player, handChar, poolChar) {
+    this.pool.removeChar(poolChar);
+    player.hand.removeChar(handChar);
+    var comboCount = player.addChar_server(poolChar, this.combos) + 
+                     player.addChar_server(handChar, this.combos);
+  }
   activate(char) {//player1 set a card active
     if (this.activeChar == null || this.activeChar != char) {
       view.activate(this.activeChar, char);
       this.activeChar = char;
     } else {
       view.activate(this.activeChar, null);
+      this.activeChar = null;
+    }
+  }
+  activate_server(char) {
+    if (this.activeChar == null || this.activeChar != char) {
+      this.activeChar = char;
+    } else {
       this.activeChar = null;
     }
   }
@@ -769,3 +860,4 @@ class Model {
     return msg;
   }
 }
+module.exports = Model; // This is for NodeJS

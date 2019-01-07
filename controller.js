@@ -26,14 +26,22 @@ class Controller{
     model.activate(handc);
     model.obtain(model.player1, handc, poolc);
     view.blockGame();
-    delayedFunc(function(){
-      model.dealOne();
+    
+    if (model.isMultiplayer == false) {
       delayedFunc(function(){
-        controller.opponentObtain();
-      }, 2);
+        model.dealOne();
+        delayedFunc(function(){
+          controller.opponentObtain();
+        }, 2);
+      });
+    } else {
+      console.log('Will emit now');
+      var handc_id = handc.id;
+      var poolc_id = poolc.id;
+      socket.emit('Game_ObtainPair', handc_id, poolc_id);
     }
-  );
   };
+  // opponentObtain may not need 2 be called in multiplayer, does it
   opponentObtain(){
     while(model.overSeason())
       model.redeal();
@@ -61,6 +69,25 @@ class Controller{
         }
       });
     }
+  }
+  opponentObtainMultiplayer(handc_id, poolc_id) {
+    var handc = model.player0.hand.getChar(handc_id),
+        poolc = model.pool.getChar(poolc_id);
+    model.obtain(model.player0, handc, poolc);
+    if (model.player0.hand.getSize() + model.player1.hand.getSize() == 0) {
+      messenger.notifyFinal();
+    } else {
+      model.checkMatch1();
+      view.unblockGame();
+    }
+  }
+  onOpponentTurn() {
+    view.blockGame();
+    console.log("对方回合");
+  }
+  onMyTurn() {
+    view.unblockGame();
+    console.log("我方回合");
   }
   discard(){
     var char = model.player1.hand.getChar(this.id);
