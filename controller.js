@@ -38,6 +38,10 @@ class Controller{
       console.log('Will emit now');
       var handc_id = handc.id;
       var poolc_id = poolc.id;
+      // If I am the last one to make a move ..
+      if (model.player0.hand.getSize() + model.player1.hand.getSize() == 0) {
+        messenger.notifyFinal();
+      }
       socket.emit('Game_ObtainPair', handc_id, poolc_id);
     }
   };

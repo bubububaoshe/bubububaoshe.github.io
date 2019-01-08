@@ -168,12 +168,16 @@ class Game {
       var other_socket = this.players[1-pidx];
       this.model.activate_server(handc);
       
-      console.log("modelplayer'shand:");
+      console.log("[OnPlayerObtain] modelplayer'shand:");
       console.log(this.model_players[pidx].hand)
       
       var handc = this.model_players[pidx].hand.getChar(handc_id);
       var poolc = this.model.pool.getChar(poolc_id);
       
+      console.log('[OnPlayerObtain] handc:');
+      console.log(handc);
+      console.log('[OnPlayerObtain] poolc:');
+      console.log(poolc);
       
       this.model.obtain_server(this.model_players[pidx], handc, poolc);
       
@@ -207,6 +211,20 @@ class Game {
       } else {
         console.log('[OnPlayerSeesDiscard] Do not know how to deal with this case')
       }
+    }
+  }
+  
+  OnPlayerRedeal(p, pool_cids) {
+    var pidx = this.GetPlayerIndexBySocket(p);
+    console.log('[OnPlayerRedeal] pidx=' + pidx);
+    if (pidx != -1) {
+      
+      { // Server-side bookkeeping.
+        this.model.oppoRedeal_server(pool_cids);
+      }
+      
+      var other_socket = this.players[1-pidx];
+      other_socket.emit('Game_OppoRedeal', pool_cids);
     }
   }
 };
@@ -263,6 +281,16 @@ io.on('connection', function(socket) {
 	    g.OnPlayerSeesDiscard(socket, local_player_id, char_id, newchar_id);
 	  } else {
 	    console.log('[Game_Discard] [Error] game is null');
+	  }
+	});
+	
+	// One player has redeal'ed, sync the redeal'ed pool to the other player
+	socket.on('Game_Redeal', (pool_cids) => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) {
+	    g.OnPlayerRedeal(socket, pool_cids);
+	  } else {
+	    console.log('[Game_Redeal] [Error] game is null');
 	  }
 	});
 });

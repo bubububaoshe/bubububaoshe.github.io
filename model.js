@@ -649,6 +649,7 @@ class Model {
     var player = model.player0;
     var char = player.hand.getChar(char_id);
     var newchar = model.commonRepository.getChar(newchar_id);
+    player.hand.removeChar(char);
     model.commonRepository.removeChar(newchar);
     model.pool.addChar(char);
     if (newchar != null) {
@@ -699,10 +700,40 @@ class Model {
     return false;
   }
   redeal(){
+    console.log('Redeal');
     model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
     model.pool.clear();
     model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
     view.pool.init();
+    if (model.isMultiplayer) {
+      var cids = [], c = model.pool.characters;
+      for (var i=0; i<c.length; i++) cids.push(c[i].id);
+      console.log('Emitting redealt CIDs to remote');
+      socket.emit('Game_Redeal', cids);
+    }
+  }
+  oppoRedeal(pool_cids) {
+    console.log('Opponent redeal');
+    model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
+    model.pool.clear();
+    for (var i=0; i<pool_cids.length; i++) {
+      var cid = pool_cids[i];
+      var ch = model.commonRepository.getChar(cid);
+      model.commonRepository.removeChar(ch);
+      model.pool.addChar(ch);
+    }
+    view.pool.init();
+  }
+  oppoRedeal_server(pool_cids) {
+    this.commonRepository.characters = this.commonRepository.characters.concat(
+      this.pool.characters);
+    this.pool.characters.length = 0;
+    for (var i=0; i<pool_cids.length; i++) {
+      var cid = pool_cids[i];
+      var ch = this.commonRepository.getChar(cid);
+      this.commonRepository.removeChar(ch);
+      this.pool.addChar(ch);
+    }
   }
   checkMatch1(){
     while(model.overSeason())

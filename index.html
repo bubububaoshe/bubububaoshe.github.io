@@ -246,4 +246,8 @@
   socket.on('Game_OppoDiscard', (char_id, newchar_id) => {
     model.oppoDiscard_client(char_id, newchar_id); 
   });
+  
+  socket.on('Game_OppoRedeal', (pool_cids) => {
+    model.oppoRedeal(pool_cids);
+  });
 </script>
