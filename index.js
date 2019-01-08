@@ -131,11 +131,15 @@ class Game {
   Start() {
     // TODO: pack 1 selection (in room?)
     var pack = [1, 2];
+    if (this.model != undefined) {
+      this.model.reset_server();
+    }
     this.model = new Model(pack[0], pack[1]);
     var m = this.model;
     {
       m.init_server();
       // Check match 1 ??
+      this.model_players = [];
       this.model_players.push(m.player0);
       this.model_players.push(m.player1);
     }
@@ -292,6 +296,15 @@ io.on('connection', function(socket) {
 	  } else {
 	    console.log('[Game_Redeal] [Error] game is null');
 	  }
+	});
+	
+	socket.on('Game_StartNewRound', () => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) {
+	    g.Start();
+	  } else {
+	    console.log('[Game_StartNewRound] [Error] game is null');
+	  } 
 	});
 });
 

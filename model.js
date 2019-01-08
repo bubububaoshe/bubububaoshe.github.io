@@ -575,6 +575,14 @@ class Model {
     model.player1.reset();
     view.reset();
   }
+  reset_server() {
+    this.commonRepository.characters = this.commonRepository.characters.concat(this.pool.characters);
+    this.pool.characters.length = 0;
+    this.commonRepository.characters = this.commonRepository.characters.concat(this.player0.table.characters);
+    this.player0.table.characters.length = 0;
+    this.commonRepository.characters = this.commonRepository.characters.concat(this.player1.table.characters);
+    this.player1.table.characters.length = 0;
+  }
   restart(){
     model.initHand(model.player0);
     model.initHand(model.player1);

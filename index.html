@@ -198,7 +198,7 @@
     
     // Client-side 'model.init()'
     // replicate the behavior of initHand here
-    
+    if (model != undefined) model.reset();
     model = new Model(pack[0], pack[1]);
     model.isMultiplayer = true;
     view = new View();

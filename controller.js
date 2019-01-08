@@ -11,10 +11,14 @@ class Controller{
   constructor(){
   }
   restart(){
-    model.reset();
-    delayedFunc(function(){
-      model.restart();
-    });
+    if (model.isMultiplayer == false) {
+      model.reset();
+      delayedFunc(function(){
+        model.restart();
+      });
+    } else {
+      socket.emit('Game_StartNewRound');
+    }
   }
   activate(){
     var char = model.player1.hand.getChar(this.id);
