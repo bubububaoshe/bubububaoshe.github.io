@@ -39,6 +39,9 @@
 			<div id="lobbystatus">
 			当前在线人数：未知
 			</div>
+			<div id="refresh_lobbystatus">
+			[刷新]
+			</div>
 		</div>
 		<div id="match_buttons" style="width: 100%">
 			<div id="start_match" style="">开始匹配</div>
@@ -60,7 +63,10 @@
 					<div id="pool"></div>
 					<div id="repository"></div>
 				</div>
-				<div id="hand1container"><div id="hand1"></div><div id="infobox1"></div></div>
+				<div id="hand1container"><div id="hand1"></div>
+				  <div id="infobox1"></div>
+				  <div id="BOOM" onclick="autotest()">BOOM</div>
+				</div>
 				<div id="blocker" class="cover"></div>
 				<div id="finalcontainer" class="cover">
 					<div></div><div></div><div></div>
@@ -79,7 +85,7 @@
 					</div>
 					<div class="charinfocontainer flexbox" ></div>
 					<div class="ccomboinfocontainer flexbox"></div>
-					<div class="icomboinfocontainer flexbox" ></div>
+					<div class="icomboinfocontainer flexbox"></div>
 				</div>
 				<div class="tableinfocontainer cover">
 					<div class="infoheader flexbox">
@@ -137,6 +143,10 @@
 <script src="view.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
+  var is_my_move = false;
+  document.getElementById("refresh_lobbystatus").addEventListener("click", function() {
+    socket.emit('Info_RefreshOnlinePlayerCount');
+  });
   // 按键事件
   function ShowAIInput() {
     document.getElementById("aiinput").style.display="inline-block";
@@ -182,6 +192,7 @@
     lobby_status.innerHTML = "对方玩家已确认";
   });
 
+  var AUTOTEST = true;
   socket.on('Match_GameStart', function(player_self, player_oppo, pool, pack) {
     console.log("player_self:");
     console.log(player_self)
@@ -222,16 +233,23 @@
     console.log(model.player0)
     console.log("Player 1:")
     console.log(model.player1)
+    
+    if (AUTOTEST) {
+      document.getElementById("BOOM").textContent = "AUTO TESTING"
+      autotest(); 
+    }
   });
   
   socket.on('Game_MakeTurn', () => {
     controller.onMyTurn();
     messenger.notifyMyTurn();
+    is_my_move = true;
   });
   
   socket.on('Game_OpponentTurn', () => {
     controller.onOpponentTurn();
     messenger.notifyOpponentTurn();
+    is_my_move = false;
   });
   
   socket.on('Game_OpponentObtainPair', (handc_id, poolc_id) => {
@@ -250,4 +268,84 @@
   socket.on('Game_OppoRedeal', (pool_cids) => {
     model.oppoRedeal(pool_cids);
   });
+  
+  // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
+  // StressTesting
+  async function ScanMyHand() {
+    var cc = model.player1.hand.characters;
+    var h_cand = undefined, p_cand = null, h_cand_idx = -999;
+    var done = false;
+    for (var i=0; i<cc.length; i++) {
+      c = cc[i];
+      
+      if (c.card.card.classList.contains("glow")) {
+        c.card.card.click();
+        await sleep(733);
+      }
+      
+      await sleep(233);
+      c.card.card.click();
+      var pc = model.pool.characters;
+      for (var j=0; j<pc.length; j++) {
+        if (pc[j].card.card.classList.contains("glow")) {
+          if (h_cand == undefined) {
+            h_cand = c;
+            p_cand = pc[j];
+            if (!is_my_move) return;
+            await sleep(233);
+            p_cand.card.card.click();
+            done = true;
+            break;
+          }
+        }
+      }
+      if(done) {
+        break;
+      } else {
+        c.card.card.click();
+        await sleep(233);
+      }
+    }
+    
+    console.log(h_cand)
+    console.log(p_cand)
+    
+    if (done) {
+    } else { // 置换？
+      var card1 = model.player1.hand.characters[0];
+      await sleep(300);
+      card1.card.card.click();
+      await sleep(300);
+    }
+  }
+  var interval = null;
+  async function autotest() {
+    if (document.getElementById('finalcontainer').style.display == "block")
+      await sleep(2666); // 等游戏结束通知消失
+    while (true) {
+      await sleep(1000);
+      if (is_my_move) {
+        if (document.getElementsByClassName('tableinfocontainer')[1].style.display == "block") {
+          await sleep(200);
+          model.player1.hand.characters[0].card.card.click();
+          await sleep(200);
+        }
+        if (document.getElementById('combobanner').style.display == "block") {
+          await sleep(100);
+          continue;
+        } else if (document.getElementById('finalcontainer').style.display == "block") {
+          document.getElementById('finalcontainer').click();
+          return;
+        } else {
+          await sleep(300);
+          await ScanMyHand();
+        }
+      }
+    }
+  }
+  
 </script>

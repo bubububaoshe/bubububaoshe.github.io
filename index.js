@@ -143,6 +143,10 @@ class Game {
       this.model_players.push(m.player0);
       this.model_players.push(m.player1);
     }
+    
+    this.players[0].game = this;
+    this.players[1].game = this;
+    
     this.players[0].emit('Match_GameStart', m.player0, m.player1, m.pool, pack);
     this.players[1].emit('Match_GameStart', m.player1, m.player0, m.pool, pack);
     
@@ -154,7 +158,8 @@ class Game {
     if (socket == this.players[0]) return 0;
     else if (socket == this.players[1]) return 1;
     else {
-      console.log('Error: GetPlayerIndexBySocket returns -1');
+      console.log('Error: GetPlayerIndexBySocket returns -1; socket.player_id='
+        + socket.player_id);
       if (this.players[0] != undefined)
         console.log('player0 id is ' + this.players[0].player_id);
       if (this.players[1] != undefined)
@@ -172,16 +177,13 @@ class Game {
       var other_socket = this.players[1-pidx];
       this.model.activate_server(handc);
       
-      console.log("[OnPlayerObtain] modelplayer'shand:");
-      console.log(this.model_players[pidx].hand)
-      
       var handc = this.model_players[pidx].hand.getChar(handc_id);
       var poolc = this.model.pool.getChar(poolc_id);
       
-      console.log('[OnPlayerObtain] handc:');
-      console.log(handc);
-      console.log('[OnPlayerObtain] poolc:');
-      console.log(poolc);
+      //console.log('[OnPlayerObtain] handc:');
+      //console.log(handc);
+      //console.log('[OnPlayerObtain] poolc:');
+      //console.log(poolc);
       
       this.model.obtain_server(this.model_players[pidx], handc, poolc);
       
@@ -234,11 +236,7 @@ class Game {
 };
 
 FindGameBySocket = function(socket) {
-  for (var i=0; i<g_all_games.length; i++) {
-    var g = g_all_games[i];
-    if (g.GetPlayerIndexBySocket(socket) != -999) return g;
-  }
-  return null;
+  return socket.game;
 }
 
 // 抓到一个新连接
@@ -247,7 +245,11 @@ io.on('connection', function(socket) {
 	socket.player_id = g_serial;
 	socket.match_confirmed = false;
 	g_serial += 1;
+	
+	var bcast = true;
 	socket.emit('Info_OnlinePlayerCount', g_all_sockets.length);
+	if (bcast) socket.broadcast.emit('Info_OnlinePlayerCount', g_all_sockets.length);
+	
 	console.log("player " + socket.player_id + " joined, " +
 	  g_all_sockets.length + " sockets, " + g_all_games.length + " games");
 
@@ -305,6 +307,10 @@ io.on('connection', function(socket) {
 	  } else {
 	    console.log('[Game_StartNewRound] [Error] game is null');
 	  } 
+	});
+	
+	socket.on('Info_RefreshOnlinePlayerCount', () => {
+	  socket.emit('Info_OnlinePlayerCount', g_all_sockets.length);
 	});
 });
 
