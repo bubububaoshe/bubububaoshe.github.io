@@ -619,7 +619,7 @@ class Model {
               if(chars[k].season != seasons[i])
                 others ++;
             for(var k=0; k<model.commonRepository.getSize(); k++)
-              if(model.commonRepository.characters[k] != seasons[i]) {
+              if(model.commonRepository.characters[k].season != seasons[i]) {
                 others ++;
                 if(others > 2)
                   return true;
