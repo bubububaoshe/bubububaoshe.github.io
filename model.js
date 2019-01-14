@@ -423,7 +423,7 @@ class Combos{
       //update player: partialCombos. completeCombos, score
       //return type:
       //completecombocount
-      //the bombos are at the beginning of partialCombos, completeCombos
+      //the updated bombos are at the beginning of partialCombos, completeCombos
       var chars = player.table;
       var pcombos = player.partialCombos;
       var nccount = 0;
@@ -500,7 +500,7 @@ class Combos{
             else {
               //opponent has part of the combo
               if(considerOppo && reside[i]==0)
-                weight += combo[2]/(size - oppoReside[i] + 1);
+                weight += combo[2]/(size - oppoReside[i] + 1)*0.9;
             }
           }
       }
@@ -508,7 +508,6 @@ class Combos{
     }
 }
 class Player {
-  //return: completed new combo?
   constructor(id, commonRepo, specialRepo) {
     this.id = id;
     this.hand = new Deck();
@@ -697,7 +696,7 @@ class Model {
               if(chars[k].season != seasons[i])
                 others ++;
             for(var k=0; k<model.commonRepository.getSize(); k++)
-              if(model.commonRepository.characters[k] != seasons[i]) {
+              if(model.commonRepository.characters[k].season != seasons[i]) {
                 others ++;
                 if(others > 2)
                   return true;

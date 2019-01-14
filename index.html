@@ -26,10 +26,16 @@
 			<input type="radio" name="gamemode" id="vs_player" onclick="HideAIInput();">
 			<label for="vs_ai"     data-value="独享的快乐">单人游戏</label>
 			<label for="vs_player" data-value="双倍的快乐">双人对战</label>
+	  </div>
+		<div id="voiceinput" class="segmented-control" style="width: 100%; color: #281B11">
+			<input type="radio" name="voice" id="voiceon" checked>
+			<input type="radio" name="voice" id="voiceoff">
+			<label for="voiceon" data-value="完成组合时播放语音">语音</label>
+			<label for="voiceoff" data-value="完成组合时咕噜咕噜">无语音</label>
 		</div>
 		<div id="aiinput" class="segmented-control" style="width: 100%; color: #281B11">
-			<input type="radio" name="ai" id="ai1" checked>
-			<input type="radio" name="ai" id="ai2" >
+			<input type="radio" name="ai" id="ai1">
+			<input type="radio" name="ai" id="ai2" checked>
 			<input type="radio" name="ai" id="ai3" >
 			<label for="ai1" data-value="十分智障的AI">AI 一级</label>
 			<label for="ai2" data-value="沉迷种田的AI">AI 二级</label>

@@ -48,6 +48,10 @@ class Sound{
   draw(){
     this.dr.play();
   }
+  combovoice(name){
+    var mp3 = new Audio('combomp3/' + name +'.mp3');
+    mp3.play();
+  }
 }
 class Card{
   /*
@@ -272,7 +276,10 @@ class Messenger {
       reflow();
       banner.style.opacity = 1;
       //banner.style.transform = "none";
-      sound.combo();
+      if(COMBO_VOICE == "voiceoff")
+        sound.combo();
+      else
+        sound.combovoice(combo.getName());
       delayedFunc(function(){
           banner.style.opacity = 0;
           //banner.style.transform = "rotateY(90deg)";
@@ -449,7 +456,7 @@ class View {
 }
 
 var sound, combos, model, controller, messenger, view, oppoinfo, playerinfo;
-var AI_LEVEL;
+var AI_LEVEL, COMBO_VOICE;
 function gameinit(){
   var inputs = document.getElementById("packinput").getElementsByTagName("input");
   var pack, p1, p2;
@@ -464,6 +471,12 @@ function gameinit(){
   for(var i=0; i<inputs.length; i++)
     if(inputs[i].checked){
       AI_LEVEL = inputs[i].id;
+      break;
+    }
+  inputs = document.getElementById("voiceinput").getElementsByTagName("input");
+  for(var i=0; i<inputs.length; i++)
+    if(inputs[i].checked){
+      COMBO_VOICE = inputs[i].id;
       break;
     }
   document.getElementById("main").style.display = "block";
