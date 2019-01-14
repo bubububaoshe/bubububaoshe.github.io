@@ -540,6 +540,7 @@ class Player {
     return comboCount;
   }
   // Server has no access to global variable 'combos' so ...
+  // FIXME: char may be NULL
   addChar_server(char, _combos) {
     this.table.addChar(char);
     char.setOwner(this);

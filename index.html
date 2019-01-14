@@ -276,19 +276,27 @@
   
   // StressTesting
   async function ScanMyHand() {
+    console.log("ScanMyHand()");
     var cc = model.player1.hand.characters;
-    var h_cand = undefined, p_cand = null, h_cand_idx = -999;
+    var h_cand = undefined, p_cand = undefined, h_cand_idx = -999;
     var done = false;
+    if (!is_my_move) return;
+    
     for (var i=0; i<cc.length; i++) {
-      c = cc[i];
-      
+      var c = cc[i];
       if (c.card.card.classList.contains("glow")) {
         c.card.card.click();
-        await sleep(733);
+        await sleep(233);
       }
+    }
+    
+    for (var i=0; i<cc.length; i++) {
+      var c = cc[i];
       
+      if (!is_my_move) return;
       await sleep(233);
       c.card.card.click();
+      await sleep(233);
       var pc = model.pool.characters;
       for (var j=0; j<pc.length; j++) {
         if (pc[j].card.card.classList.contains("glow")) {
@@ -306,7 +314,9 @@
       if(done) {
         break;
       } else {
-        c.card.card.click();
+        if (c.card.card.classList.contains("glow")) {
+          c.card.card.click();
+        }
         await sleep(233);
       }
     }
@@ -315,15 +325,25 @@
     console.log(p_cand)
     
     if (done) {
-    } else { // 置换？
-      var card1 = model.player1.hand.characters[0];
-      await sleep(300);
-      card1.card.card.click();
-      await sleep(300);
+    } else if(false) { // 置换？
+      
+      if (h_cand != undefined && p_cand != undefined) {
+        h_cand.card.card.click();
+        p_cand.card.card.click();
+        await sleep(700);
+      } else {
+        
+        var card1 = model.player1.hand.characters[0];
+        await sleep(300);
+        card1.card.card.click();
+        await sleep(300);
+      }
     }
   }
-  var interval = null;
+  var is_autotesting = false;
   async function autotest() {
+    if (is_autotesting) return;
+    else is_autotesting = true;
     if (document.getElementById('finalcontainer').style.display == "block")
       await sleep(2666); // 等游戏结束通知消失
     while (true) {
@@ -331,21 +351,46 @@
       if (is_my_move) {
         if (document.getElementsByClassName('tableinfocontainer')[1].style.display == "block") {
           await sleep(200);
-          model.player1.hand.characters[0].card.card.click();
+          model.player1.table.characters[0].card.card.click();
           await sleep(200);
         }
         if (document.getElementById('combobanner').style.display == "block") {
           await sleep(100);
           continue;
         } else if (document.getElementById('finalcontainer').style.display == "block") {
+          await sleep(2666); // 等游戏结束通知消失
           document.getElementById('finalcontainer').click();
-          return;
         } else {
           await sleep(300);
           await ScanMyHand();
         }
       }
     }
+  }
+  
+  var AutoStartAutoTest = true;
+  async function autostart() {
+    while (true) {
+      await sleep(1000);
+      var x = document.getElementById('start_match'); 
+      if (x.style.visibility == '') {
+        x.click();
+        console.log("Start clicked");
+        while (true) {
+          await sleep(1000);
+          var y = document.getElementById('confirm_match');
+          if (y.style.display != 'none') {
+            y.click();
+            console.log("Confirm clicked");
+            return;
+          }
+        }
+      }
+    }
+  }
+  
+  if (AutoStartAutoTest) {
+    autostart();
   }
   
 </script>
