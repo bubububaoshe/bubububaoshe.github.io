@@ -1,79 +1,96 @@
 #infobox{
-  position: absolute;
-  top: 37%;
-  bottom: 37%;
-  left: 10%;
-  right: 10%;
-  font-weight: bold;
+  height: calc(var(--card-height)*1.5);
+  margin: calc(var(--card-height)*0.25) 0;
   font-size: calc(var(--main-width)*0.02);
-  color: var(--nomatch-info-color);
-  vertical-align: middle;
-  margin-top: 20px;
   white-space: pre;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  padding: 0 5%;
 }
 #blocker {
   font-size: calc(var(--main-width)*0.05);
-  color:var(--final-info-color);
-}
-.cover{
-  z-index: 999;
-  position: absolute;
-  top:0;
-  bottom:0;
-  left:0;
-  right:0;
-  display: none;
 }
 .banner{
-  /*transform: rotateY(90deg);*/
   opacity: 0;
   background-color: var(--banner-background);
+  align-items: center;
 }
 .banner>div{
-background-image : linear-gradient(to right,
-                    rgb(30,19,10, 0) 8%,
-                    rgb(30,19,10, 1) 40%,
-                    rgb(30,19,10, 1) 60%,
-                    rgb(30,19,10, 0) 92%);
+  width: 100%;
+  padding: calc(var(--card-height)*0.3) 0;
+  background-image : linear-gradient(to right,
+                      rgb(30,19,10, 0) 10%,
+                      rgb(30,19,10, 0.7) 40%,
+                      rgb(30,19,10, 0.7) 60%,
+                      rgb(30,19,10, 0) 90%);
 }
-#combotext{
-  margin-top: calc(var(--win-height)/2 - var(--card-height)*1.25);
-  font-size: calc(var(--card-height)*0.3);
-  color: var(--congra-text-color);
-  padding-top: calc(var(--card-height)*0.3);
-  padding-bottom: calc(var(--card-height)*0.2);
+.banner .bannertext{
+  margin-bottom: calc(var(--card-height)*0.1);
+  width: 100%;
+  font-size: calc(var(--card-height)*0.2);
+  color: var(--text-color);
 }
-#combocards{
-  height: calc(var(--card-height)*1.5);
+.banner .bannercards{
+  display: flex;
+  justify-content: center;
 }
-.combohl{
-  font-size: calc(var(--card-height)/2);
-  color: var(--congra-hl-color);
-  text-shadow: 0 0 calc(var(--card-height)/10) var(--congra-glow-color);
-  padding: 0 2%;
+.bannerhl{
+  font-size: calc(var(--card-height)*0.4);
+  color: var(--text-hl-color);
+  text-shadow: 0 0 calc(var(--card-height)/20) var(--text-glow-color);
+  padding: 0 calc(var(--card-width)*0.1);
 }
-
 .postercard{
   width: calc(var(--card-width)*1.2);
   height: calc(var(--card-height)*1.2);
   background-size: 100% 100%;
   border-radius: 3%;
-  float: left;
-  margin-right: 10px;
-  -webkit-box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
-  box-shadow: 0px 0px 10px 1px var(--congra-glow-color);
+  margin: 0 calc(var(--card-width)*0.05);
+  -webkit-box-shadow: 0px 0px 10px 1px var(--text-glow-color);
+  box-shadow: 0px 0px 10px 1px var(--text-glow-color);
 }
+.swapposter{
+  position: relative;
+  margin: calc(var(--card-width)*0.35) calc(var(--card-width)*0.05);
+}
+.swapposter .postercard{
+  border: var(--text-glow-color) 5px solid;
+}
+.swapposter>div:first-child{
+  width: 0;
+  height: 0;
+  position: absolute;
+  left: calc(50% - var(--card-width)*0.2);
+  border-left: calc(var(--card-width)*0.2) solid transparent;
+  border-right: calc(var(--card-width)*0.2) solid transparent;
+}
+.swapposter:last-child>div:first-child{
+  top: calc(var(--card-width)*-0.15);
+  border-bottom: calc(var(--card-width)*0.15) solid var(--text-glow-color);
+}
+.swapposter:first-child>div:first-child{
+  bottom: calc(var(--card-width)*-0.15);
+  border-top: calc(var(--card-width)*0.15) solid var(--text-glow-color);
+}
+
 #finalcontainer{
+  visibility: hidden;
+  display: block;
   transition: transform 2s ease-out;
   -webkit-transition: transform 2s ease-out;
   transform: translate(0, calc(var(--win-height) * -1));
   -webkit-transform: translate(0, calc(var(--win-height) * -1));
 }
+#finalcontainer.notransform{
+  transform: none;
+  -webkit-transform: none;
+}
 #finalcontainer>div{
   width: calc(var(--main-height)*0.35);
   height:  calc(var(--main-height)*0.35);
   position: absolute;
-  left: calc(50% - var(--main-height)*0.195);
+  left: calc(60% - var(--main-height)*0.195);
   top:  32.5%;
   background-color: var(--final-background-color);
   border: calc(var(--main-height)*0.02) dashed rgba(0, 0, 0, 0.1);
@@ -93,7 +110,7 @@ background-image : linear-gradient(to right,
   -webkit-transform: rotate(0);
 }
 #finalcontainer>div>p{
-    color: var(--congra-text-color);
+    color: var(--text-color);
     font-size: calc(var(--card-height)*0.15);
 }
 #finalmsg{
@@ -103,9 +120,9 @@ background-image : linear-gradient(to right,
 }
 
 @keyframes finalneo{
-  from {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
-  50% {text-shadow: 0 0 calc(var(--card-width)*0.15) #FE9272;}
-  to {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
+  from {text-shadow: 0 0 calc(var(--card-width)*0.05) var(--text-glow-color);}
+  50% {text-shadow: 0 0 calc(var(--card-width)*0.15) var(--text-glow-color);}
+  to {text-shadow: 0 0 calc(var(--card-width)*0.05) var(--text-glow-color);}
 }
 @-webkit-keyframes finalneo{
   from {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
@@ -116,9 +133,9 @@ background-image : linear-gradient(to right,
   margin: 0;
   height: 25.255%;
   width: 0;
-  border-right: calc(var(--main-height)*0.02) dashed var(--final-background-color);
+  border-right: calc(var(--main-height)*0.02) dotted var(--final-background-color);
   position: absolute;
-  left: calc(50% - calc(var(--main-height)*0.01));
+  left: calc(60% - calc(var(--main-height)*0.01));
   top: 0;
 }
 
@@ -128,6 +145,7 @@ background-image : linear-gradient(to right,
   width: 50%;
   top: 25%;
   align-items: center;
+  overflow: visible;
 }
 #configurator div{
   display: inline-block;
@@ -143,4 +161,53 @@ background-image : linear-gradient(to right,
 #gamestart:hover, #gamestart:active{
   background-color: #281B11;
   color: white;
+}
+
+.cover{
+  z-index: 999;
+  position: absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  display: none;
+}
+
+.combobonus::before {
+    content: "+";
+    margin-left: -100%;
+}
+.combobonus::after {
+    content: "";
+    margin-right: -100%;
+}
+.combobonus{
+  width: 100%;
+  height: 0;
+  overflow: visible;
+  position: absolute;
+  font-size: 0;
+  color: #514d38;
+  z-index: 1999;
+}
+.combobonus.animebonus{
+  animation: flyup var(--transition-sec) ease-in;
+  -webkit-animation: flyup var(--transition-sec) ease-in;
+}
+.textoverflowcenter{
+    margin-left: -100%;
+    margin-right: -100%;
+    text-align: center;
+}
+@keyframes flyup{
+  0% {
+    font-size: calc(var(--card-height)*0.4);
+    top: calc(var(--card-height)*-0.05);
+    opacity: 1;
+  }
+  100% {
+    font-size: calc(var(--card-height)*0.4);
+    top: calc(var(--card-height)*-0.25);
+    opacity: 0;
+  }
 }

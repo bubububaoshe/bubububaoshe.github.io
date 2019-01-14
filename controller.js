@@ -11,10 +11,7 @@ class Controller{
   constructor(){
   }
   restart(){
-    model.reset();
-    delayedFunc(function(){
-      model.restart();
-    });
+    model.init();
   }
   activate(){
     var char = model.player1.hand.getChar(this.id);
@@ -22,44 +19,42 @@ class Controller{
   }
   obtain(){
     var handc = model.activeChar;
-    var poolc = model.pool.getChar(this.id);
     model.activate(handc);
-    model.obtain(model.player1, handc, poolc);
+    var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
+    obtainVector.reset();
+    obtainVector.setChars(handc, poolc);
+    if(!obtainVector.swapSelector())
+      controller.swappedObtain();
+  }
+
+  swappedObtain(){
+    model.obtain(model.player1);
     view.blockGame();
-    delayedFunc(function(){
-      model.dealOne();
-      delayedFunc(function(){
-        controller.opponentObtain();
-      }, 2);
-    }
-  );
-  };
+  }
   opponentObtain(){
     while(model.overSeason())
       model.redeal();
-    var pick = model.aiPick();
+    var pick = model.aiSelectObtain();
     if(pick == null){
       if(model.overSize()){
         model.redeal();
         controller.opponentObtain();
       }
       else {
-        model.discard(model.player0, model.aiDiscard());
+        model.discard(model.player0, model.aiSelectDiscard());
         controller.opponentObtain();
       }
     }
     else {
-      model.obtain(model.player0, pick[0], pick[1]);
-      delayedFunc(function(){
-        if(model.player0.hand.getSize()+model.player1.hand.getSize() == 0)
-          //game end
-          messenger.notifyFinal();
-        else{
-          model.dealOne();
-          model.checkMatch1();
-          view.unblockGame();
-        }
-      });
+      //check swap
+      var hc = pick[0];
+      var pc = model.pool.removeChar(pick[1]).getSpecial(model.player0.specials);
+      obtainVector.reset();
+      obtainVector.setChars(hc, pc);
+      var swapnum = obtainVector.getTrickCount("SwapTrick");
+      for(var i=0; i<swapnum; i++)
+        obtainVector.setSwapTarget(model.player1.removeTableChar(model.aiSelectSwap()).getSpecial(model.player0.specials));
+      model.obtain(model.player0);
     }
   }
   discard(){
@@ -96,5 +91,18 @@ class Controller{
       oppoinfo.setPane(idx+1);
     else
       playerinfo.setPane(idx+1);
+  }
+  selectSwap(){
+    // player swaps with the opponent
+    oppoinfo.exitSelectionPanel();
+    var oppoChar = model.player0.table.getChar(this.id);
+    model.player0.removeTableChar(oppoChar);
+    obtainVector.setSwapTarget(oppoChar.getSpecial(model.player1.specials));
+    if(!obtainVector.swapSelector())
+      controller.swappedObtain();
+  }
+  selectBan(){
+    oppoinfo.exitSelectionPanel();
+    console.log(this.id);
   }
 }

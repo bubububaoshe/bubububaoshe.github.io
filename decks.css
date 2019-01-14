@@ -29,17 +29,14 @@
 #hand0>.cardcontainer:nth-child(10), #pool>.cardcontainer:nth-child(10), #hand1>.cardcontainer:nth-child(10){
   z-index: 1;
 }
-#repository>.cardcontainer, #table0>.cardcontainer, #table1>.cardcontainer{
-  z-index: 0;
-}
 
 /* flip */
-#pool>.cardcontainer .card, #hand1 .card, #table0 .card, #table1 .card{
+#pool .card, #hand1 .card, #table0 .card, #table1 .card, #specials1 .card, #hand0 .card{
   transform: rotateY(180deg);
 }
 
 /* array positioning */
-#table0>.cardcontainer, #table1>.cardcontainer, #repository>.cardcontainer {
+.cardstack>.cardcontainer, #repository>.cardcontainer {
   position: absolute;
 }
 #hand0>.cardcontainer, #pool>.cardcontainer, #hand1>.cardcontainer{
@@ -96,35 +93,35 @@
 #pool>.cardcontainer:nth-child(7){transform: rotate(25deg);}
 #pool>.cardcontainer:nth-child(9){transform: rotate(-6deg);}
 
-/* table card rotation: only rotate the last 5 */
-#table0>.cardcontainer:nth-last-child(1), #table1>.cardcontainer:nth-last-child(5) {
+/* table & sp card rotation: only rotate the last 5 */
+#table0>.cardcontainer:nth-last-child(1),#table1>.cardcontainer:nth-last-child(5), #specials0>.cardcontainer:nth-last-child(3),#specials1>.cardcontainer:nth-last-child(2) {
   transform: rotate(-15deg);
   top: 6%;
   left: 4%;
 }
-#table0>.cardcontainer:nth-last-child(2), #table1>.cardcontainer:nth-last-child(4) {
+#table0>.cardcontainer:nth-last-child(2),#table1>.cardcontainer:nth-last-child(4), #specials0>.cardcontainer:nth-last-child(5),#specials1>.cardcontainer:nth-last-child(3) {
   transform: rotate(25deg);
   top: -3%;
   left: 2%;
 }
-#table0>.cardcontainer:nth-last-child(3), #table1>.cardcontainer:nth-last-child(3) {
+#table0>.cardcontainer:nth-last-child(3),#table1>.cardcontainer:nth-last-child(3), #specials0>.cardcontainer:nth-last-child(1),#specials1>.cardcontainer:nth-last-child(5) {
   transform: rotate(-21deg);
   top: 1%;
-  left: -13%;
+  left: -3%;
 }
-#table0>.cardcontainer:nth-last-child(4), #table1>.cardcontainer:nth-last-child(2) {
+#table0>.cardcontainer:nth-last-child(4),#table1>.cardcontainer:nth-last-child(2), #specials0>.cardcontainer:nth-last-child(4),#specials1>.cardcontainer:nth-last-child(1) {
   transform: rotate(13deg);
   top: -2%;
   left: 7%;
 }
-#table0>.cardcontainer:nth-last-child(5), #table1>.cardcontainer:nth-last-child(1) {
+#table0>.cardcontainer:nth-last-child(5),#table1>.cardcontainer:nth-last-child(1), #specials0>.cardcontainer:nth-last-child(2),#specials1>.cardcontainer:nth-last-child(4) {
   transform: rotate(6deg);
   top: 5%;
-  left: -11%;
+  left: -7%;
 }
 
 /* hover effects */
-#table0>.cardcontainer:hover, #table1>.cardcontainer:hover, #pool>.cardcontainer:hover, #hand1>.cardcontainer:hover{
+#table0>.cardcontainer:hover, #table1>.cardcontainer:hover, #specials1>.cardcontainer:hover, #pool>.cardcontainer:hover, #hand1>.cardcontainer:hover{
   transform: translate(0, calc(var(--card-height)/-3));
 }
 #pool>.cardcontainer:nth-child(odd):hover{

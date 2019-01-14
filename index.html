@@ -3,7 +3,10 @@
 <head>
 	<title>千秋戏</title>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="height=device-height,
+                      width=device-width, initial-scale=1.0,
+                      minimum-scale=1.0, maximum-scale=1.0,
+                      user-scalable=no">
 	<link rel="stylesheet" type="text/css" href="segmented-controls.css">
 	<link rel="stylesheet" type="text/css" href="main.css">
 	<link rel="stylesheet" type="text/css" href="decks.css">
@@ -25,7 +28,7 @@
 			<input type="radio" name="voice" id="voiceon" checked>
 			<input type="radio" name="voice" id="voiceoff">
 			<label for="voiceon" data-value="完成组合时播放语音">语音</label>
-			<label for="voiceoff" data-value="完成组合时咕噜咕噜">无语音</label>
+			<label for="voiceoff" data-value="完成组合时BlueBlue">无语音</label>
 		</div>
 		<div id="aiinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="ai" id="ai1">
@@ -39,89 +42,103 @@
 	</div>
 	<div id="main">
 		<div id="scoreboard">
-			<div id="table0"></div>
-			<div id="score0" class="bignotice"></div>
-			<div id="score1" class="bignotice"></div>
-			<div id="table1"></div>
+			<div id="table0" class="cardstack"></div>
+			<div id="score0" class="bignotice">
+				<div></div>
+				<div class="combobonus">
+				</div>
+			</div>
+			<div id="score1" class="bignotice">
+				<div></div>
+				<div class="combobonus"></div>
+			</div>
+			<div id="table1" class="cardstack"></div>
 		</div>
-			<div id="gamezone">
-				<div id="hand0container"><div id="hand0"></div></div>
-				<div id="poolcontainer">
-					<div id="pool"></div>
-					<div id="repository"></div>
-				</div>
-				<div id="hand1container"><div id="hand1"></div></div>
-				<div id="blocker" class="cover"></div>
-				<div id="finalcontainer" class="cover">
-					<div></div><div></div><div></div>
-					<div>
-						<div id="finalmsg" class="bignotice">你赢了</div>
-						<p>点击牌桌区域继续</p>
-					</div>
-					<p class="string"></p>
-				</div>
-				<div class="tableinfocontainer cover">
-					<div class="infoheader flexbox">
-							<div>&#9830; 卡牌</div>
-							<div>&#9830; 完成组合</div>
-							<div>&#9830; 未完组合</div>
-						</ul>
-					</div>
-					<div class="charinfocontainer flexbox" ></div>
-					<div class="ccomboinfocontainer flexbox"></div>
-					<div class="icomboinfocontainer flexbox" ></div>
-				</div>
-				<div class="tableinfocontainer cover">
-					<div class="infoheader flexbox">
-							<div>&#9830; 卡牌</div>
-							<div>&#9830; 完成组合</div>
-							<div>&#9830; 未完组合</div>
-						</ul>
-					</div>
-					<div class="charinfocontainer flexbox" ></div>
-					<div class="ccomboinfocontainer flexbox"><!--
-						<div class="combocard">
-							<div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-							</div>
-							<div>
-								<div id="combocardinfo">
-									<div>老板</div>
-									<div>90</div>
-								</div>
-								<div id="combocardchars">
-									<span class="ismine">巫炤</span><span class="ismine">欧阳少恭</span><span class="notmine">沈夜</span><span class="ismine">巫炤</span>
-								</div>
-							</div>
-						</div>-->
-					</div>
-					<div class="icomboinfocontainer flexbox" ></div>
-				</div>
+		<div id="gamezone">
+			<div id="hand0container"><div id="hand0"></div></div>
+			<div id="poolcontainer">
+				<div id="pool"></div>
+				<div id="repository"></div>
 			</div>
-			<div id="specialboard">
-				<p></p>
-				<div id="infobox"></div>
+			<div id="hand1container"><div id="hand1"></div></div>
+			<div id="blocker" class="cover"></div>
+			<div id="finalcontainer" class="cover">
+				<div></div><div></div><div></div>
+				<div>
+					<div id="finalmsg" class="bignotice">你赢了</div>
+					<p>点击牌桌区域继续</p>
+				</div>
+				<p class="string"></p>
 			</div>
+			<div class="tableinfocontainer cover">
+				<div class="charinfocontainer flexbox"></div>
+				<div class="charinfocontainer flexbox"></div>
+			</div>
+			<div class="tableinfocontainer cover">
+				<div class="infoheader bignotice">
+						<div>&#9830; 卡牌</div>
+						<div>&#9830; 完成组合</div>
+						<div>&#9830; 未完组合</div>
+					</ul>
+				</div>
+				<div class="charinfocontainer flexbox"></div>
+				<div class="ccomboinfocontainer flexbox"></div>
+				<div class="icomboinfocontainer flexbox"></div>
+			</div>
+			<div class="tableinfocontainer cover">
+				<div class="infoheader bignotice">
+						<div>&#9830; 卡牌</div>
+						<div>&#9830; 完成组合</div>
+						<div>&#9830; 未完组合</div>
+					</ul>
+				</div>
+				<div class="charinfocontainer flexbox"></div>
+				<div class="ccomboinfocontainer flexbox"><!--
+					<div class="combocard">
+						<div>
+							<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
+						</div>
+						<div>
+							<div id="combocardinfo">
+								<div>老板</div>
+								<div>90</div>
+							</div>
+							<div id="combocardchars">
+								<span class="ismine">欧阳少恭</span><span class="notmine">沈夜</span>
+							</div>
+						</div>
+					</div>-->
+				</div>
+				<div class="icomboinfocontainer flexbox"></div>
+			</div>
+		</div>
+		<div id="specialboard">
+			<div id="specials0" class="cardstack"></div>
+			<div id="infobox" class="bignotice"><div></div></div>
+			<div id="specials1" class="cardstack"></div>
+		</div>
 	</div>
-	<div id="combobanner" class="cover transitopacity banner">
-		<div id="combotext">完成组合<span class="combohl"></span>，获得<span class="combohl"></span>分</div>
-		<div id="combocards">
-			<div class="postercard"></div>
-			<div class="postercard"></div>
-			<div class="postercard"></div>
-			<div class="postercard"></div>
-			<div class="postercard"></div>
-			<div class="postercard"></div>
+	<div id="infobanner" class="cover transitopacity banner">
+		<div>
+			<div class="bannertext">
+				<span></span><span class="bannerhl">haha </span><span></span><span class="bannerhl"></span><span></span>
+			</div>
+			<div class="bannercards"><!--
+				<div class="swapposter">
+				<div></div>
+					<div class="postercard"></div>
+				</div>
+				<div class="swapposter">
+					<div></div>
+					<div class="postercard" style="background-image:url(img/wz3.jpg)"></div>
+				</div>-->
+			</div>
 		</div>
 	</div>
 </body>
 </html>
 <script src="model.js"></script>
 <script src="controller.js"></script>
+<script src="spmanager.js"></script>
 <script src="tableinfoview.js"></script>
 <script src="view.js"></script>
