@@ -77,24 +77,24 @@
 #hand0>.cardcontainer:nth-child(even), #hand1>.cardcontainer:nth-child(even){
   top: -1px;
 }
-#pool>.cardcontainer:nth-child(odd){
+#pool>.cardcontainer:nth-of-type(odd){
   top: calc(var(--card-height)/8);
 }
-#pool>.cardcontainer:nth-child(even){
+#pool>.cardcontainer:nth-of-type(even){
   top: calc(var(--card-height)/-8);
 }
 
 /* pool card rotation */
-#pool>.cardcontainer:nth-child(2){transform: rotate(-15deg);}
-#pool>.cardcontainer:nth-child(4){transform: rotate(-5deg);}
-#pool>.cardcontainer:nth-child(6){transform: rotate(3deg);}
-#pool>.cardcontainer:nth-child(8){transform: rotate(-9deg);}
-#pool>.cardcontainer:nth-child(10){transform: rotate(5deg);}
-#pool>.cardcontainer:nth-child(1){transform: rotate(8deg);}
-#pool>.cardcontainer:nth-child(3){transform: rotate(-12deg);}
-#pool>.cardcontainer:nth-child(5){transform: rotate(12deg);}
-#pool>.cardcontainer:nth-child(7){transform: rotate(25deg);}
-#pool>.cardcontainer:nth-child(9){transform: rotate(-6deg);}
+#pool>.cardcontainer:nth-of-type(2){transform: rotate(-15deg);}
+#pool>.cardcontainer:nth-of-type(4){transform: rotate(-5deg);}
+#pool>.cardcontainer:nth-of-type(6){transform: rotate(3deg);}
+#pool>.cardcontainer:nth-of-type(8){transform: rotate(-9deg);}
+#pool>.cardcontainer:nth-of-type(10){transform: rotate(5deg);}
+#pool>.cardcontainer:nth-of-type(1){transform: rotate(8deg);}
+#pool>.cardcontainer:nth-of-type(3){transform: rotate(-12deg);}
+#pool>.cardcontainer:nth-of-type(5){transform: rotate(12deg);}
+#pool>.cardcontainer:nth-of-type(7){transform: rotate(25deg);}
+#pool>.cardcontainer:nth-of-type(9){transform: rotate(-6deg);}
 
 /* table card rotation: only rotate the last 5 */
 #table0>.cardcontainer:nth-last-child(1), #table1>.cardcontainer:nth-last-child(5) {

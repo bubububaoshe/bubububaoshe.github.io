@@ -80,6 +80,20 @@ class Card{
     container.style.transform = "none";
     container.classList.remove("transitall");
 
+    // nth-child skipping technique: https://www.sitepoint.com/community/t/can-nth-child-skip-elements-and-resume-the-count/236393
+    var phantom = null; // will be an <element></element> to skip nth-child counting
+    var phantom_inner = null;
+
+    // Smooth vertical movement
+    if ((deck.container == view.table1.container) ||
+        (deck.container == view.table0.container)) {
+      phantom_inner = document.createElement("div");
+      phantom = document.createElement("element");
+      phantom_inner.classList.add("cardcontainer_phantom");
+      phantom.appendChild(phantom_inner);
+      container.parentElement.insertBefore(phantom, container);
+    }
+
     var rect = container.getBoundingClientRect();
     var l = rect.left;
     var t = rect.top;
@@ -95,6 +109,13 @@ class Card{
     container.classList.add("transitall");
     container.style.transform = null;
     container.style.zIndex = null;
+    
+    // Remove the phantom once its width shrinks to 0
+    if (phantom != null) {
+      phantom_inner.style.width = "0px";
+      delayedFunc(function(){
+      phantom.remove()}, 0.7);
+    }
   }
   activate(){
     this.container.classList.add("pop");

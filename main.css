@@ -105,6 +105,14 @@ body {
     height: var(--card-height);
     perspective: 1000px;
 }
+.cardcontainer_phantom {
+  width: var(--card-width);
+  height: var(--card-height);
+  perspective: 1000px;
+  transition: width 0.7s;
+  -webkit-transition: width 0.7s;
+  float: left;
+}
 .transitform{
   transition-property: transform;
   transition-duration: var(--transition-sec);
