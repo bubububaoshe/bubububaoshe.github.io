@@ -37,6 +37,7 @@ class TableInfoView{
   exitSelectionPanel(controllerFunc){
     var container = document.getElementsByClassName("tableinfocontainer")[0];
     container.style.display = null;
+    this.fadeGameZone(false);
     container.getElementsByClassName('charinfocontainer')[0].textContent = "";
     container.getElementsByClassName('charinfocontainer')[1].textContent = "";
   }
@@ -52,6 +53,7 @@ class TableInfoView{
     for(var i=0; i<cards.length; i++)
       cards[i].addEventListener("click", controllerFunc);
     container.style.display = "block";
+    this.fadeGameZone(true);
   }
   addCombo(combo){
     var div = document.createElement("div");
@@ -118,10 +120,15 @@ class TableInfoView{
       this.createCharView();
       this.createComboView();
     }
+    this.fadeGameZone(true);
     this.container.style.display = "block";
   }
   hide(){
     this.container.style.display = null;
+  }
+  fadeGameZone(fade){
+    var opacity = fade?0.2:1;
+    document.getElementById("gamezone").style.opacity = opacity;
   }
   visible(){
     return this.container.style.display != "";
@@ -139,6 +146,7 @@ class TableInfoView{
       this.container.getElementsByClassName("ccomboinfocontainer")[0].textContent="";
       this.container.getElementsByClassName("icomboinfocontainer")[0].textContent="";
       this.setPane(1);
+      this.fadeGameZone(false);
     }
   }
   setPane(idx){

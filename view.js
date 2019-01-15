@@ -655,4 +655,4 @@ function gameinit(){
   model.setup();
 }
 document.getElementById("gamestart").addEventListener("click", gameinit);
-//gameinit();
+gameinit();

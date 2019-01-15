@@ -1,7 +1,6 @@
 .tableinfocontainer{
   font-family: "FangSong";
   color: var(--text-hl-color);
-  background-color:rgba(145, 117, 88,0.85)
 }
 .flexbox{
   position: relative;

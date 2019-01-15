@@ -11,7 +11,6 @@
   --text-warnning-color: #DB4D3D;
   --card-shadow-color: rgba(0,0,0,0.4);
   --card-glow-color: #F9F56E;
-  --congra-background-color: #1E130A;
   --final-background-color: rgba(40, 27, 17, 0.5);
   --transition-sec: 0.5s;
   /*
@@ -33,7 +32,7 @@ body {
 #main {
   position: fixed;
 }
-#scoreboard, #specialboard, #gamezone {
+#scoreboard, #specialboard, #gamezonecontainer {
   position: relative;
   float: left;
   height: 100%;
@@ -51,9 +50,12 @@ body {
 #specialboard {
   width: 17%;
 }
-#gamezone {
-  width: 65%;
+#gamezonecontainer{
   background-color: var(--gamezone-background);
+  width: 65%;
+}
+#gamezone {
+  height: 100%;
 }
 #score0, #score1{
   margin: calc(var(--card-height)*0.2) 0 calc(var(--card-height)*0.1);
