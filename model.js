@@ -339,8 +339,8 @@ class Deck {
     var s = char.season;
 
     /////////!!!!!!!!!!!!!!!!!!!!!Modified for testingggggggg!!!!!!!!!!!!!!!!!
-    for (var i = 0; i < this.getSize(); i++)
-    //for (var i = this.getSize()-1; i >= 0; i--)
+    //for (var i = 0; i < this.getSize(); i++)
+    for (var i = this.getSize()-1; i >= 0; i--)
       if (this.characters[i].season == s)
         return this.characters[i];
     return null;

@@ -172,7 +172,7 @@ body {
 
 
 /*---------------------for testing----------------------
+*/
 #hand0 .cardcontainer:hover .card{
   transform: rotateY(180deg);
 }
-*/

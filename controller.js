@@ -91,8 +91,12 @@ class Controller{
     else {
       var trick = obtainVector.getNextTrick(type);
       if(trick != null){
-        obtainVector.setTrickTarget(type, model.aiSelectCopy(trick));
-        messenger.notifyOppoAction(type, "复制", controller.confirmCopy);
+        var target = model.aiSelectCopy(trick);
+        obtainVector.setTrickTarget(type, target);
+        if(target != null)
+          messenger.notifyOppoAction(type, "复制", controller.confirmCopy);
+        else
+          controller.handleCopies();
       }
       else
         controller.handleSwaps();
@@ -106,8 +110,12 @@ class Controller{
     }
     else {
       if(obtainVector.getNextTrick(type) != null){
-        obtainVector.setTrickTarget(type, model.aiSelectSwap());
-        messenger.notifyOppoAction(type, "换走", controller.confirmSwap);
+        var target = model.aiSelectSwap();
+        obtainVector.setTrickTarget(type, target);
+        if(target != null)
+          messenger.notifyOppoAction(type, "换走", controller.confirmSwap);
+        else
+          controller.handleSwaps();
       }
       else
         model.obtain();
@@ -122,8 +130,12 @@ class Controller{
     else {
       var trick = obtainVector.getNextTrick(type);
       if(trick != null){
-        obtainVector.setTrickTarget(type, model.aiSelectBan(trick));
-        messenger.notifyOppoAction(type, "禁用", controller.confirmBan);
+        var target = model.aiSelectBan(trick);
+        obtainVector.setTrickTarget(type, target);
+        if(target != null)
+          messenger.notifyOppoAction(type, "禁用", controller.confirmBan);
+        else
+          controller.handleBans();
       }
       else
         view.obtain();
