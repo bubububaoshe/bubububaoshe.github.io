@@ -389,7 +389,7 @@ class Messenger {
       var count = chars.length;
       var banner = document.getElementById("infobanner");
       var posters = banner.querySelector(".bannercards");
-      messenger.setBannerHeadline(["对方用", chars[0].name, "换走了你的", chars[1].name, ""]);
+      messenger.setBannerHeadline(["对方用 "+chars[0].name+" ", "换走了你的", chars[1].name, ""]);
       for(var i=0; i<count; i++){
         var swapposter = document.createElement("div");
         posters.appendChild(swapposter);
@@ -410,15 +410,22 @@ class Messenger {
       },6);
     }
   }
-  notifyOppoAction(type, msg, nextFunc){
+  notifyOppoAction(type, nextFunc){
     var chars = obtainVector.getLastTrickPair(type);
     var count = chars.length;
     var banner = document.getElementById("infobanner");
     var posters = banner.querySelector(".bannercards");
-    if(type == "CopyTrick")
-      messenger.setBannerHeadline(["对方用", chars[0].name, msg+"了你家", chars[1].name, "的所有技能"]);
-    else
-      messenger.setBannerHeadline(["对方用", chars[0].name, msg+"了你家", chars[1].name, ""]);
+    switch (type) {
+      case "CopyTrick":
+        messenger.setBannerHeadline(["对方用", chars[0].name + " 复制", "了你家", chars[1].name, "的所有技能"]);
+        break;
+      case "SwapTrick":
+        messenger.setBannerHeadline(["对方用", chars[0].name + " 换走", "了你的", chars[1].name, ""]);
+        break;
+      case "UnnamedBanTrick":
+        messenger.setBannerHeadline(["对方用", chars[0].name + " 禁用", "了你家", chars[1].name, "的所有加分技能"]);
+        break;
+    }
     for(var i=0; i<count; i++){
       var swapposter = document.createElement("div");
       posters.appendChild(swapposter);
