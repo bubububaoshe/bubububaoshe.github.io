@@ -6,7 +6,8 @@ id：普通角色名首字母+游戏代数+字母
 1.swaptrick, copytrick交换后必然无效。（否则可能死循环）
 这两个技能自带交换后无效技能
 1.1 swaptrick没有除“交换后无效”之外的其它功能
-2.copytrick,bantrick只触发一次。（即使在触发时无可作用对象）
+2.copytrick,unnamedbantrick只触发一次。（即使在触发时无可作用对象）
+2.1 但namedbantrick永远锁定对方XDD
 3.copytrick不能copy copytrick哈哈。
 
 

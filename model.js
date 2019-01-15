@@ -195,6 +195,9 @@ class Character {
     this.season = season;
     this.card = null;//card class in view
     this.owner = null;//player
+    this.disabled = false;
+    this.swapped = false;
+    this.noswap = false;
   }
   isSpecial() {
     return false;
@@ -207,6 +210,7 @@ class Character {
       if(sps[i].name == this.name){
         sps[i].card = this.card;
         this.card.setChar(sps[i]);
+        sps[i].disabled = this.disabled;
         return sps[i];
       }
     return this;
@@ -230,9 +234,6 @@ class SpecialCharacter extends Character {
     super(id, name, score, season);
     this.nameSuffix = nameSuffix;
     this.description = description;
-    this.noswap = false;
-    this.swapped = false;
-    this.disabled = false;
     this.tricks = [];
   }
   enabled(){

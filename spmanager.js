@@ -1,11 +1,12 @@
 PLAYER_SPECIALS = [
   [[],[]],
   [
-    ["ly1a", "hy2a", "ywy2b", "xyz2b", "qhzr2a", "hy1a", "oysg1a", "fqx1a", "blts1b", "qy1a", "sy2a", "sx2a",  "xy2a", "wry2b", "ywy2a", "xyz2a"],
-    ["ly1a", "hy2a", "ywy2a", "xyz2a", "qhzr2a", "hy1a", "oysg1a", "fqx1a", "blts1b", "qy1a", "sy2a", "sx2a",  "xy2a", "wry2b", "ywy2b", "xyz2b"]
+    ["hy2a", "xyz2b", "oysg1a", "fqx1a", "blts1b", "wry2b", "ywy2a", "xy2a"],
+    ["ly1a", "ywy2b", "xyz2a", "qhzr2a", "hy1a", "qy1a", "sx2a", "sy2a"]
 
   ]
 ];
+//["ly1a", "hy2a", "ywy2b", "xyz2b", "qhzr2a", "hy1a", "oysg1a", "fqx1a", "blts1b", "qy1a", "sy2a", "sx2a",  "xy2a", "wry2b", "ywy2a", "xyz2a"],
 class SPManager{
   constructor(){}
   initRepository(repo, pack) {

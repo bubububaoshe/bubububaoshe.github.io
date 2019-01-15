@@ -328,10 +328,10 @@ class NamedBanTrick extends Trick{
     this.targetName = name;
   }
   performTrick(char){
-    if(char.name == this.targetName) {
+    if(char.name == this.targetName && !char.disabled) {
       console.log(this.owner.name +" 禁用 " + char.name);
       char.disabled = true;
-      this.disabled = true;
+      //this.disabled = true;
       char.owner.recalculate();
       return true;
     }

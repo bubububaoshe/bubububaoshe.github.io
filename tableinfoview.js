@@ -37,7 +37,7 @@ class TableInfoView{
   exitSelectionPanel(controllerFunc){
     var container = document.getElementsByClassName("tableinfocontainer")[0];
     container.style.display = null;
-    this.fadeGameZone(false);
+    this.fadeUnder("selectionpanel", false);
     container.getElementsByClassName('charinfocontainer')[0].textContent = "";
     container.getElementsByClassName('charinfocontainer')[1].textContent = "";
   }
@@ -53,7 +53,7 @@ class TableInfoView{
     for(var i=0; i<cards.length; i++)
       cards[i].addEventListener("click", controllerFunc);
     container.style.display = "block";
-    this.fadeGameZone(true);
+    this.fadeUnder("selectionpanel", true);
   }
   addCombo(combo){
     var div = document.createElement("div");
@@ -120,15 +120,25 @@ class TableInfoView{
       this.createCharView();
       this.createComboView();
     }
-    this.fadeGameZone(true);
+    this.fadeUnder("tableinfo", true);
     this.container.style.display = "block";
   }
   hide(){
     this.container.style.display = null;
   }
-  fadeGameZone(fade){
+  fadeUnder(myslef, fade){
     var opacity = fade?0.2:1;
-    document.getElementById("gamezone").style.opacity = opacity;
+    switch (myslef) {
+      case "tableinfo":
+        document.getElementById("gamezone").style.opacity = opacity;
+        break;
+      case "selectionpanel":
+        document.getElementById("hand0container").style.opacity = opacity;
+        document.getElementById("poolcontainer").style.opacity = opacity;
+        document.getElementById("hand1container").style.opacity = opacity;
+        break;
+      default:
+    }
   }
   visible(){
     return this.container.style.display != "";
@@ -146,7 +156,7 @@ class TableInfoView{
       this.container.getElementsByClassName("ccomboinfocontainer")[0].textContent="";
       this.container.getElementsByClassName("icomboinfocontainer")[0].textContent="";
       this.setPane(1);
-      this.fadeGameZone(false);
+      this.fadeUnder("tableinfo", false);
     }
   }
   setPane(idx){
