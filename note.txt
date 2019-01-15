@@ -16,7 +16,7 @@ copy?
 swap?
 model.obtain
 addchar
-user ban?(select)
+ban?
 user reveal?(flip card)
 view.obtain: oppo swap?ban?copy?
 (info banner disappear upon user clicks)
