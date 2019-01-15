@@ -1,7 +1,7 @@
 //consts
 
 MAX_MAIN_RATIO = 2;//max width/height ratio of the main board
-MIN_MAIN_RATIO = 1.65;//min width/height ratio of the main board
+MIN_MAIN_RATIO = 1.7;//min width/height ratio of the main board
 CARD_RATIO = 3 / 4; //width/height ratio of a card
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
 MOVE_DURATION = 2; //2 time units (500ms)
@@ -14,11 +14,6 @@ function getCSSInt(name) {
 }
 function setCSSInt(name, val) {
   document.documentElement.style.setProperty(name, val + "px");
-}
-function log(msg) {
-  var para = document.querySelector("#specialboard").firstElementChild;
-  para.setAttribute('style', 'white-space: pre;');
-  para.textContent += msg + "\n";
 }
 function reflow() {
   document.getElementById('main').clientWidth;
@@ -70,10 +65,15 @@ class Card{
     var front = document.createElement("div");
     this.card.appendChild(front);
     front.classList.add("cardfront");
-    front.style.backgroundImage = "url('img/" + char.id + ".jpg')";
+    front.style.backgroundImage = char.getPortrait();
     var back = document.createElement("div");
     this.card.appendChild(back);
     back.classList.add("cardback");
+  }
+  setChar(char){
+    this.card.id = char.id;
+    var front = this.card.querySelector(".cardfront");
+    front.style.backgroundImage = char.getPortrait();
   }
   moveto(deck){
     var container = this.container;
@@ -113,10 +113,13 @@ class Card{
     this.removeController(controller.obtain);
   }
   faceup(){
-    this.card.style.transform = "rotateY(180deg)";
+    this.card.classList.add("faceup");
   }
   facedown(){
-    this.card.style.transform = "none";
+    this.card.classList.remove("faceup");
+  }
+  isFaceup(){
+    this.card.classList.contains("faceup");
   }
   rotate(deg){
     this.container.style.transform = 'rotate(' + deg + 'deg)';
@@ -150,18 +153,36 @@ class DeckDiv {
     for(var i=0; i<chars.length; i++)
       chars[i].card.moveto(this);
   }
+  toSpecial(char, sp){
+    char.card.setChar(sp);
+    sp.card = char.card;
+    var me = this;
+    delayedFunc(function(){
+      sp.card.moveto(me);
+    });
+  }
+  reset(player){
+    var chars = this.deck.characters;
+    for(var i=0; i<chars.length; i++)
+      if(chars[i].isSpecial())
+        chars[i].card.moveto(player.specials.view);
+  }
   clear(){
     var chars = this.deck.characters;
     for(var i=0; i<chars.length; i++){
       var card = chars[i].card;
-      if(this == view.table0)
+      if(this == view.table0){
         card.removeController(controller.checkOppoInfo);
+        card.facedown();
+      }
       else if(this == view.table1)
         card.removeController(controller.checkPlayerInfo);
       card.moveto(view.repository);
     }
   }
-  paint(){}
+  destroy(){
+    this.container.textContent = "";
+  }
 }
 class RepoDiv extends DeckDiv{
   constructor(div, repo) {
@@ -170,9 +191,28 @@ class RepoDiv extends DeckDiv{
   init(){
     var chars = this.deck.characters;
     for(var i=0; i<chars.length; i++){
-      var card = new Card(this.deck.characters[i]);
-      this.deck.characters[i].card = card;
-      this.container.appendChild(chars[i].card.container);
+      var card = new Card(chars[i]);
+      chars[i].card = card;
+      this.container.appendChild(card.container);
+    }
+  }
+}
+class Hand0Div extends DeckDiv{
+  constructor(div, hand){
+    super(div, hand);
+  }
+  reveal(number){
+    var hiddenChars = [];
+    var chars = this.deck.characters;
+    for(var i=0; i<chars.length; i++)
+      if(!chars[i].card.isFaceup())
+        hiddenChars.push(chars[i]);
+    if(hiddenChars.length<number)
+      number = hiddenChars.length;
+    for(var i=0; i<number; i++){
+      var idx = getRandom(hiddenChars.length);
+      hiddenChars[idx].card.faceup();
+      hiddenChars.splice(idx, 1);
     }
   }
 }
@@ -220,75 +260,108 @@ class PoolDiv extends DeckDiv {
 class Messenger {
   constructor(){
   }
-  reset(){
-    this.notifyNoMatch("hidden");
+  init(){
+    this.note("");
     var div = document.getElementById("finalcontainer");
     div.removeEventListener("click", controller.restart);
-    div.style.transform = null;
-    div.style.webkitTransform = null;
+    div.classList.remove("notransform");
     delayedFunc(function(){
-      div.style.display = null;}, 4);
+      div.style.visibility = null;}, 4);
   }
   note(msg){
-    var info = document.getElementById("infobox");
+    var info = document.getElementById("infobox").firstElementChild;
     info.textContent = msg;
   }
   notifyNoMatch(display) {
-    var info = document.getElementById("infobox");
     if (display == "show")
-      info.textContent = "无牌可匹配\n需抛弃一张牌";
+      messenger.note("无牌可匹配\n需抛弃一张牌");
     else if(display == "hidden")
-      info.textContent = "";
-    else {
-      info.textContent = display;
-    }
+      messenger.note("");
+    else
+      console.log("Invalid notifyNoMatch mode:" + display);
   }
   notifyOppoCombo(comboCount, combos){
-    if(comboCount > 0){
-      messenger.notifyNoMatch("对方获得\n"+combos[--comboCount].getDesc());
-      delayedFunc(function(){
-          messenger.notifyOppoCombo(comboCount, combos);
-      });
-    }
+    delayedFunc(function(){
+      if(comboCount > 0){
+        var combo = combos[--comboCount];
+        var inc = combo.getFullScore();
+        model.player0.score += inc;
+        view.updateScore(0);
+        messenger.note("对方完成组合\n"+combo.getDesc());
+        reflow();
+        messenger.animeComboScore(0, inc);
+        delayedFunc(function(){
+            messenger.notifyOppoCombo(comboCount, combos);
+        });
+      }
+      else{
+        if(model.player0.hand.getSize()+model.player1.hand.getSize() == 0)
+          //game end
+          messenger.notifyFinal();
+        else {
+          model.dealOne(model.player0);
+          model.checkMatch1();
+          view.unblockGame();
+        }
+      }
+    });
+  }
+  setBannerHeadline(msgs){
+    var spans = document.querySelector("#infobanner .bannertext").children;
+    for(var i=0; i<5; i++)
+      spans[i].textContent = msgs[i];
+  }
+  createBannerPoster(char){
+    var poster = document.createElement("div");
+    poster.classList.add("postercard");
+    poster.style.backgroundImage = char.getPortrait();
+    return poster;
+  }
+  animeComboScore(pid, inc){
+    var div = document.getElementsByClassName("combobonus")[pid];
+    div.textContent = inc;
+    div.classList.add("animebonus");
+    delayedFunc(function(){
+      div.classList.remove("animebonus");
+    });
   }
   notifyPlayerCombo(comboCount, combos){
-    if(comboCount > 0){
-      var combo = combos[--comboCount];
-      var chars = combo.characters;
-      var count = chars.length;
-      var offset = CARDW * 1.2 + 10;
-      var totalw = CARDW * 1.2 * count + 10*(count -1);
-      var left = (WINW - totalw)/2;
-      var banner = document.getElementById("combobanner");
-      var headline =  document.getElementById("combotext");
-      var poster = document.getElementById("combocards");
-      var pcards = poster.children;
-      pcards[0].style.marginLeft = left;
-      for(var i=0; i<count; i++){
-        pcards[i].style.display = "block";
-        pcards[i].style.backgroundImage = chars[i].getPortrait();
-      }
-      for(var i=count; i<6; i++)
-        pcards[i].style.display = "none";
-      headline.firstElementChild.textContent = combo.getName();
-      headline.lastElementChild.textContent = combo.getScore();
-      banner.style.display = "block";
-      reflow();
-      banner.style.opacity = 1;
-      //banner.style.transform = "none";
-      if(COMBO_VOICE == "voiceoff")
-        sound.combo();
-      else
-        sound.combovoice(combo.getName());
-      delayedFunc(function(){
-          banner.style.opacity = 0;
-          //banner.style.transform = "rotateY(90deg)";
+    delayedFunc(function(){
+      if(comboCount > 0){
+        var combo = combos[--comboCount];
+        var inc = combo.getFullScore();
+        model.player1.score += inc;
+        view.updateScore(1);
+        var chars = combo.characters;
+        var banner = document.getElementById("infobanner");
+        var posters = banner.querySelector(".bannercards");
+        messenger.setBannerHeadline(["完成组合", combo.getName(), "，获得", inc, "分"]);
+        for(var i=0; i<chars.length; i++)
+          posters.appendChild(messenger.createBannerPoster(chars[i]));
+        banner.style.display = "flex";
+        reflow();
+        banner.style.opacity = 1;
+        messenger.animeComboScore(1, inc);
+        if(COMBO_VOICE == "voiceoff")
+          sound.combo();
+        else
+          sound.combovoice(combo.getName());
         delayedFunc(function(){
-          banner.style.display = "none";
-          messenger.notifyPlayerCombo(comboCount, combos);
-        }, 1.5);
-      },2.5);
-    }
+            banner.style.opacity = 0;
+          delayedFunc(function(){
+            banner.style.display = null;
+            posters.textContent = "";
+            messenger.notifyPlayerCombo(comboCount, combos);
+          });
+        },2);
+      }
+      else{
+        model.dealOne(model.player1);
+        delayedFunc(function(){
+          controller.opponentObtain();
+        }, 2);
+      }
+    });
   }
   notifyFinal(){
     var msg = document.getElementById("finalmsg");
@@ -306,44 +379,112 @@ class Messenger {
       sound.draw();
     }
     div.addEventListener("click", controller.restart);
-    div.style.display = "block";
+    div.style.visibility = "visible";
+    div.classList.add("notransform");
+  }
+  notifyOppoSwap(swapCount){
+    if(swapCount > 0){
+      var type = "SwapTrick";
+      var chars = obtainVector.getTrickPair(type, --swapCount);
+      var count = chars.length;
+      var banner = document.getElementById("infobanner");
+      var posters = banner.querySelector(".bannercards");
+      messenger.setBannerHeadline(["对方用", chars[0].name, "换走了你的", chars[1].name, ""]);
+      for(var i=0; i<count; i++){
+        var swapposter = document.createElement("div");
+        posters.appendChild(swapposter);
+        swapposter.classList.add("swapposter");
+        swapposter.appendChild(document.createElement("div"));
+        swapposter.appendChild(messenger.createBannerPoster(chars[i]));
+      }
+      banner.style.display = "flex";
+      reflow();
+      banner.style.opacity = 1;
+      delayedFunc(function(){
+          banner.style.opacity = 0;
+        delayedFunc(function(){
+          banner.style.display = null;
+          posters.textContent = "";
+          messenger.notifyOppoSwap(swapCount);
+        }, 1);
+      },6);
+    }
+  }
+  notifyOppoAction(type, msg, nextFunc){
+    var chars = obtainVector.getLastTrickPair(type);
+    var count = chars.length;
+    var banner = document.getElementById("infobanner");
+    var posters = banner.querySelector(".bannercards");
+    if(type == "CopyTrick")
+      messenger.setBannerHeadline(["对方用", chars[0].name, msg+"了你家", chars[1].name, "的所有技能"]);
+    else
+      messenger.setBannerHeadline(["对方用", chars[0].name, msg+"了你家", chars[1].name, ""]);
+    for(var i=0; i<count; i++){
+      var swapposter = document.createElement("div");
+      posters.appendChild(swapposter);
+      swapposter.classList.add("swapposter");
+      swapposter.appendChild(document.createElement("div"));
+      swapposter.appendChild(messenger.createBannerPoster(chars[i]));
+    }
+
+    banner.addEventListener("click", nextFunc);
+    banner.style.display = "flex";
     reflow();
-    div.style.transform = "none";
-    div.style.webkitTransform = "none";
+    banner.style.opacity = 1;
+  }
+  exitNotifyOppoAction(nextFunc){
+    var banner = document.getElementById("infobanner");
+    banner.removeEventListener("click", nextFunc);
+    banner.style.opacity = 0;
+    banner.style.display = null;
+    banner.querySelector(".bannercards").textContent = "";
   }
 }
 class View {
   constructor() {
-    this.hand0 = new DeckDiv(document.getElementById("hand0"), model.player0.hand);
+    this.hand0 = new Hand0Div(document.getElementById("hand0"), model.player0.hand);
     this.hand1 = new Hand1Div(document.getElementById("hand1"), model.player1.hand);
     this.pool = new PoolDiv(document.getElementById("pool"), model.pool);
     this.table0 = new DeckDiv(document.getElementById("table0"), model.player0.table);
     this.table1 = new DeckDiv(document.getElementById("table1"), model.player1.table);
     this.repository = new RepoDiv(document.getElementById("repository"), model.commonRepository);
+    this.specials0 = new RepoDiv(document.getElementById("specials0"), model.player0.specials);
+    this.specials1 = new RepoDiv(document.getElementById("specials1"), model.player1.specials);
     this.score0 = document.getElementById("score0");
     this.score1 = document.getElementById("score1");
     this.blocker = document.getElementById("blocker");
+    this.setup();
   }
-  reset(){
-    messenger.reset();
-    this.updateScore();
-  }
-  restart(){
+  start(){
+    view.specials0.init();
+    view.specials1.init();
     view.hand0.init();
     view.hand1.init();
     view.pool.init();
     view.unblockGame();
   }
   init(){
-    this.setSizes();
+    view.blockGame();
+    messenger.init();
+    this.pool.destroy();
+    this.table0.destroy();
+    this.table1.destroy();
+    this.repository.destroy();
+    this.specials0.destroy();
+    this.specials1.destroy();
     this.repository.init();
+    view.updateScore();
+  }
+  setup(){
+    this.setSizes();
     model.commonRepository.view = this.repository;
     model.player0.hand.view = this.hand0;
     model.player0.table.view = this.table0;
+    model.player0.specials.view = this.specials0;
     model.player1.hand.view = this.hand1;
     model.player1.table.view = this.table1;
+    model.player1.specials.view = this.specials1;
     model.pool.view = this.pool;
-    this.updateScore();
     window.addEventListener("resize", this.setSizes);
   }
   checkMatch1(){
@@ -371,9 +512,11 @@ class View {
   unblockGame(){
     view.blocker.style.display = "none";
   }
-  updateScore() {
-    this.score0.textContent = model.player0.score;
-    this.score1.textContent = model.player1.score;
+  updateScore(pid) {
+    if(pid !== 1)
+      this.score0.firstElementChild.textContent = model.player0.score;
+    if(pid !== 0)
+      this.score1.firstElementChild.textContent = model.player1.score;
   }
   discard(player, oldChar, newChar) {
     if (player.id == 1) {
@@ -382,6 +525,10 @@ class View {
         oldChar.card.removeController(controller.discard);
         newChar.card.addController(controller.discard);
     }
+    else {
+      //reset revealed cards
+      oldChar.card.facedown();
+    }
     oldChar.card.moveto(this.pool);
     newChar.card.moveto(player.hand.view);
   }
@@ -389,19 +536,44 @@ class View {
     char.card.moveto(view.pool);
     sound.deal();
   }
-  obtain(player, handChar, poolChar, comboCount) {
+  swappedObtain(player, char, swapChar){
+    var oppo, playerinfo, oppoinfo;
+    if(player.id==0){
+      oppo = model.player1;
+      playerinfo = controller.checkOppoInfo;
+      oppoinfo = controller.checkPlayerInfo;
+    }
+    else {
+      oppo = model.player0;
+      playerinfo = controller.checkPlayerInfo;
+      oppoinfo = controller.checkOppoInfo;
+    }
+    if(swapChar != null){
+      swapChar.card.moveto(player.table.view);
+      swapChar.card.removeController(oppoinfo);
+      swapChar.card.addController(playerinfo);
+      char.card.moveto(oppo.table.view);
+      char.card.addController(oppoinfo);
+    }
+    else{
+      char.card.moveto(player.table.view);
+      char.card.addController(playerinfo);
+    }
+  }
+  obtain() {
+    var player = obtainVector.player;
+    var baseInc = player.score - obtainVector.preScore;
+    var comboCount = obtainVector.comboCount;
+    view.swappedObtain(player, obtainVector.chars[0], obtainVector.swapChars[0]);
+    view.swappedObtain(player, obtainVector.chars[1], obtainVector.swapChars[1]);
     view.updateScore();
-    poolChar.card.moveto(player.table.view);
-    handChar.card.moveto(player.table.view);
+    messenger.animeComboScore(player.id, baseInc);
     if(player.id == 0){
-      handChar.card.addController(controller.checkOppoInfo);
-      poolChar.card.addController(controller.checkOppoInfo);
+      //messenger.notifyOppoSwap(obtainVector.getTrickCount("SwapTrick"));
       messenger.notifyOppoCombo(comboCount, player.completeCombos);
     }
     else {
-      handChar.card.removeController(controller.activate);
-      handChar.card.addController(controller.checkPlayerInfo)
-      poolChar.card.addController(controller.checkPlayerInfo)
+      obtainVector.getHandChar().card.removeController(controller.activate);
       messenger.notifyPlayerCombo(comboCount, player.completeCombos);
     }
   }
@@ -414,10 +586,10 @@ class View {
   setSizes() {
     //cardh, cardw, handoffset, pooloffset
     var maindiv = document.getElementById("main");
-    MAINW = window.innerWidth;
-    MAINH = window.innerHeight;
-    WINH = MAINH;
-    WINW = MAINW;
+    WINW = document.documentElement.clientWidth;
+    WINH =document.documentElement.clientHeight;
+    MAINW = WINW;
+    MAINH = WINH;
     if (MAINW / MAINH > MAX_MAIN_RATIO)
       MAINW = MAINH * MAX_MAIN_RATIO;
     else if (MAINW / MAINH < MIN_MAIN_RATIO)
@@ -427,8 +599,8 @@ class View {
     maindiv.style.top = (WINH - MAINH)/2;
     maindiv.style.left = (WINW - MAINW)/2;
 
-    CARDW = MAINW *0.643*(1-2*0.028) / (9 * (1 - HAND_CARD_OVERLAP) + 1);
-    var maxCardH = MAINH * 0.2;
+    CARDW = MAINW *0.65*(1-2*0.028) / (9 * (1 - HAND_CARD_OVERLAP) + 1);
+    var maxCardH = MAINH * 0.41 * 12/23;
     CARDH = CARDW / CARD_RATIO;
     if (CARDH > maxCardH) {
       CARDH = maxCardH;
@@ -440,46 +612,40 @@ class View {
     setCSSInt("--main-width", MAINW);
     setCSSInt("--win-height", WINH);
     //var poolM = (MAINW*0.643*(1-2*0.028)-CARDW*2.5)/(INIT_CARD_NUM_POOL+1)- CARDW;
-    var poolM = (MAINW*0.643*(1-2*0.028)-CARDW*1.3)/(INIT_CARD_NUM_POOL+1)- CARDW;
+    var poolM = (MAINW*0.65*(1-2*0.028)-CARDW*1.3)/(INIT_CARD_NUM_POOL+1)- CARDW;
     setCSSInt("--pool-margin", poolM);
   }
 }
 
-var sound, combos, model, controller, messenger, view, oppoinfo, playerinfo;
-var AI_LEVEL, COMBO_VOICE;
+var sound, combos, model, controller, spmanager, messenger, view, oppoinfo, playerinfo, obtainVector;
+var AI_LEVEL, COMBO_VOICE, SP_CARDS;
+function getInput(inputsID){
+  var inputs = document.getElementById(inputsID).getElementsByTagName("input");
+  for(var i=0; i<inputs.length; i++)
+    if(inputs[i].checked){
+      return inputs[i].id;
+    }
+}
 function gameinit(){
-  var inputs = document.getElementById("packinput").getElementsByTagName("input");
-  var pack, p1, p2;
-  for(var i=0; i<inputs.length; i++)
-    if(inputs[i].checked){
-      pack = inputs[i].id;
-      break;
-    }
-  p1 = pack.charAt(1);
-  p2 = pack.charAt(2);
-  inputs = document.getElementById("aiinput").getElementsByTagName("input");
-  for(var i=0; i<inputs.length; i++)
-    if(inputs[i].checked){
-      AI_LEVEL = inputs[i].id;
-      break;
-    }
-  inputs = document.getElementById("voiceinput").getElementsByTagName("input");
-  for(var i=0; i<inputs.length; i++)
-    if(inputs[i].checked){
-      COMBO_VOICE = inputs[i].id;
-      break;
-    }
+  var pack = getInput("packinput");
+  var p1 = pack.charAt(1);
+  var p2 = pack.charAt(2);
+  AI_LEVEL = getInput("aiinput");
+  COMBO_VOICE = getInput("voiceinput");
+  SP_CARDS = parseInt(getInput("spinput").charAt(2));
   document.getElementById("main").style.display = "block";
   document.getElementById("configurator").style.display = "none";
   sound = new Sound();
   combos = new Combos();
   model = new Model(p1, p2);
+  obtainVector = new ObtainVector();
   controller = new Controller();
+  spmanager = new SPManager();
   messenger = new Messenger();
   view = new View();
   oppoinfo = new TableInfoView(model.player0);
   playerinfo = new TableInfoView(model.player1);
-  model.init();
+  model.setup();
 }
-//gameinit();
 document.getElementById("gamestart").addEventListener("click", gameinit);
+//gameinit();

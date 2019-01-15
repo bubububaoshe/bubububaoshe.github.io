@@ -1,7 +1,7 @@
 .tableinfocontainer{
-  background-color: rgba(135, 112, 89,0.85);
   font-family: "FangSong";
-  color: #eadeaa;
+  color: var(--text-hl-color);
+  background-color:rgba(145, 117, 88,0.85)
 }
 .flexbox{
   position: relative;
@@ -13,13 +13,13 @@
   width: 90%;
 }
 .tableinfocontainer .infoheader{
-  top: 5%;
-  height: 10%;
-  margin-bottom: 5%;
-  text-shadow:  0 0 calc(var(--card-height)/10) var(--congra-hl-color);
-  justify-content: space-between;
-  overflow: hidden;
-  color: #dbc66d;
+  width: 80%;
+  height: 15%;
+  margin: auto;
+  justify-content: space-around;
+  align-items: center;
+  display: flex;
+  overflow: visible;
 }
 
 .tableinfocontainer .ccomboinfocontainer, .tableinfocontainer .icomboinfocontainer{
@@ -29,11 +29,14 @@
 }
 .infoheader div{
   font-size: calc(var(--card-width) * 0.3);
-  padding: 0 calc(var(--card-width) * 0.1);
   cursor: pointer;
+  border-top-right-radius: 100%;
+  border-bottom-left-radius: 100%;
+  background-color: rgba(255, 246, 206, 0.2);
+  box-shadow: 0 0 4px 2px rgba(255, 246, 206, 0.2);
 }
 .smallcard {
-    margin: calc(var(--card-width)*0.05);
+    margin: calc(var(--card-width)*0.05) calc(var(--card-width)*0.05) calc(var(--card-width)*0.15);
 }
 .smallcard>div{
   width: calc(var(--card-width) * 0.78);
@@ -45,11 +48,10 @@
 }
 .smallcard>p{
   font-family: "Microsoft Yahei";
-  color: #252120;
+  color: var(--text-shadow-color);
   font-size: calc(var(--main-width)*0.013);
-}
-.smallcard>p::before{
-  content: "基础分:";
+  padding: 0;
+  margin: calc(var(--main-width)*0.003) 0 0 0;
 }
 .combocard{
   height: calc(var(--card-height)*0.6);
@@ -122,8 +124,21 @@
   letter-spacing: -1px;
 }
 .combocard #combocardchars span.notmine{
-  color: #DB4D3D;
+  color: var(--text-warnning-color);
 }
 .combocard #combocardchars span:not(:last-child)::after{
   content:"、";
+}
+.tableinfocontainer>.charinfocontainer:first-child>.smallcard>div{
+  -webkit-box-shadow: 0px 0px 10px 1px var(--text-glow-color);
+  box-shadow: 0px 0px 10px 1px var(--text-glow-color);
+  margin-left: calc(50% - var(--card-width) * 0.39);
+}
+.tableinfocontainer>.charinfocontainer:first-child>.smallcard>p{
+  color: var(--text-hl-color);
+  font-size: calc(var(--main-width)*0.017);
+  margin-top: calc(var(--card-height)*0.1);
+}
+.tableinfocontainer>.charinfocontainer:first-child{
+  margin: calc(var(--card-height)*0.1) auto 0;
 }

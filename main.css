@@ -3,19 +3,17 @@
   --page-background-image: url("img/background.jpg");
   --gamezone-background: rgba(114,90,64,0.7);
   --board-background: rgba(114,90,64,0.6);
-  --banner-background: rgba(42, 25, 10,0.8);
-  --nomatch-info-color: #AB4739;
-  --score-info-color: #AB4739;
-  --score-glow-color: #FE9272;
-  --final-info-color: #AB4739;
+  --banner-background: rgba(42, 25, 10,0.5);
+  --text-color: #7a614f;
+  --text-hl-color:#eadeaa;
+  --text-glow-color: #FFF6CE;
+  --text-shadow-color: #252120;
+  --text-warnning-color: #DB4D3D;
   --card-shadow-color: rgba(0,0,0,0.4);
   --card-glow-color: #F9F56E;
-  --congra-hl-color: #eadeaa;
-  --congra-glow-color: #FFF6CE;
-  --congra-text-color: #735249;/*#8f8c74;*/
   --congra-background-color: #1E130A;
   --final-background-color: rgba(40, 27, 17, 0.5);
-  --transition-sec: 0.7s;
+  --transition-sec: 0.5s;
   /*
   --card-width
   --card-height
@@ -34,71 +32,74 @@ body {
 }
 #main {
   position: fixed;
-  document
 }
 #scoreboard, #specialboard, #gamezone {
   position: relative;
   float: left;
   height: 100%;
 }
-#scoreboard {
-  width: 18.7%;
+#scoreboard, #specialboard {
   background: var(--board-background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#scoreboard{
+  width: 18%;
 }
 #specialboard {
   width: 17%;
-  background: var(--board-background);
 }
 #gamezone {
-  width: 64.3%;
+  width: 65%;
   background-color: var(--gamezone-background);
+}
+#score0, #score1{
+  margin: calc(var(--card-height)*0.2) 0 calc(var(--card-height)*0.1);
+  position: relative;
+  height: calc(var(--card-height)*0.45);
+  vertical-align: center;
+}
+#score1{
+  margin: calc(var(--card-height)*0.1) 0 calc(var(--card-height)*0.2);
+}
+#score0>div:first-child, #score1>div:first-child{
+  line-height: 100%;
 }
 #hand0container, #poolcontainer, #hand1container{
   position: relative;
 }
 #hand0container {
-  height: 28%;
+  height: 26.5%;
 }
 #poolcontainer {
-  height: 37.5%;
+  height: 41%;
 }
 #hand1container {
-  height: 34.5%;
+  height: 32.5%;
 }
 #hand0, #pool, #hand1{
   position: absolute;
   height: var(--card-height);
   width: 94.5%;
   left: 2.8%;
-  top: calc(50% - var(--card-height)/2);
+  top: calc(50% - var(--card-height)*0.5);
 }
-#repository,#table0, #table1, #score0, #score1 {
-  position: absolute;
-}
-#repository,#table0, #table1{
-  width: var(--card-width);
-  height: var(--card-height);
+#hand1{
+  top: calc(1% + var(--card-height)*0.386);
 }
 #repository{
+  position: absolute;
+  width: var(--card-width);
+  height: var(--card-height);
   right: calc(2.8% + var(--card-width)/4);
   top: calc(50% - var(--card-height)/2);
 }
-#table0{
-    left: calc(50% - var(--card-width)/2);
-    top: calc(30% - var(--card-height));
-}
-#table1{
-  left: calc(50% - var(--card-width)/2);
-  bottom: calc(30% - var(--card-height));
-}
-#score0, #score1{
-  width: 100%;
-}
-#score0{
-  top: 38%;
-}
-#score1{
-  bottom: 38%;
+.cardstack{
+  position: relative;
+  width: var(--card-width);
+  height: var(--card-height);
 }
 .cardcontainer{
     width: var(--card-width);
@@ -144,15 +145,10 @@ body {
 }
 .cardfront{
   transform: rotateY(180deg);
+  transition: background-image var(--transition-sec);
 }
 .cardback{
   background-image: url("img/back.jpg");
-}
-.cardfront, .cardback{
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  backface-visibility: hidden;
 }
 .glow{
   box-shadow: 0px 0px 0.6vw 0.4vw var(--card-glow-color);
@@ -160,11 +156,23 @@ body {
 }
 .cardcontainer.pop{
   transform: translate(0, calc(var(--card-height)*-0.4)) !important;
+  -webkit-transform: translate(0, calc(var(--card-height)*-0.4)) !important;
 }
 .bignotice{
   font-size: calc(var(--card-height)*0.45);
   font-family: georgia, "KaiTi";
   font-weight: bold;
-  color: var(--score-info-color);
-  text-shadow: 0 0 calc(var(--card-width)*0.1) #FE9272;
+  color: var(--text-hl-color);
+  text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
+  -webkit-text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
 }
+.faceup{
+  transform: rotateY(180deg);
+}
+
+
+/*---------------------for testing----------------------
+#hand0 .cardcontainer:hover .card{
+  transform: rotateY(180deg);
+}
+*/
