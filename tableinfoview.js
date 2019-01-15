@@ -34,7 +34,7 @@ class TableInfoView{
       if(trick == null || trick.isValidTarget(chars[i]))
         this.addSmallCard(chars[i], container);
   }
-  exitSelectionPanel(){
+  exitSelectionPanel(controllerFunc){
     var container = document.getElementsByClassName("tableinfocontainer")[0];
     container.style.display = null;
     container.getElementsByClassName('charinfocontainer')[0].textContent = "";

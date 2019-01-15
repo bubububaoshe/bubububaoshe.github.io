@@ -187,257 +187,6 @@ function getRandom(max){
   return Math.floor((Math.random()*max));
 }
 
-class ObtainVector{
-  constructor(){
-    this.reset();
-  }
-  reset(){
-    // note: player is the one who plays the current turn. it may be AI
-    // if player is AI, then oppo is the user
-    // user refer to user player of the client
-      this.swapChars = [null, null];
-      this.playerBanChars = [null, null];
-      this.oppoBanChars = [null, null];
-      this.playerCopyChars = [null, null];
-      this.oppoCopyChars = [null, null];
-  }
-  getTrickCount(type){
-    return (this.chars[0].getTricks(type)==null?0:1) + (this.chars[1].getTricks(type)==null?0:1);
-  }
-  swapSelector(){
-    // only cards obtained by user may invoke a selection panel, AI would just select by algorithm
-    // only called upon user obtain, so this.chars are user chars
-    return this.trickSelector("SwapTrick", this.chars, this.swapChars);
-  }
-  banSelector(){
-    // only cards obtained by user may invoke a selection panel,AI would just select by algorithm
-    // called upon user/AI obtain, after addTableChar. So chars has owner info
-    var subjects = [];
-    for(var i=0, idx=0; i<2; i++){
-      if(this.chars[i].owner == model.player1)
-        subjects[idx++] = this.chars[i];
-      if(this.swapChars[i].owner == model.player1)
-        subjects[idx++] = this.swapChars;
-    }
-    return this.trickSelector("UnnamedBanTrick", subjects, this.banChars);
-  }
-  copySelector(){
-    return false;
-    //return this.trickSelector("CopyTrick", this.copyChars);
-  }
-  trickSelector(type, subjects, objects){
-    // show unfinished selector for tricks of <type>
-    // return true if selector is invoked, false otherwise.
-    var trick;
-    for(var i=0; i<2; i++){
-      trick = subjects[i].getTricks(type);
-      if(trick != null && objects[i] == null)
-        break;
-      trick = null;
-    }
-    if(trick == null) return false;
-    return trick.selectTarget();
-  }
-  getHandChar(){return this.chars[0];}
-  getPoolChar(){return this.chars[1];}
-  getSwapPair(idx){return this.getTrickPair(this.swapChars, idx);}
-  getBanPair(idx){return this.getTrickPair(this.banChars, idx);}
-  getCopyPair(idx){return this.getTrickPair(this.copyChars, idx);}
-  getTrickPair(targets, idx){
-    // preassumption: idx is valid
-    if(idx == 0)
-      if(targets[0] != null)
-        return [this.chars[0], targets[0]];
-      else
-        return [this.chars[1], targets[1]];
-    else
-      return [this.chars[1], targets[1]];;
-  }
-  setSwapTarget(char){this.setTrickTarget("SwapTrick", this.swapChars, char);}
-  setBanTarget(char){this.setTrickTarget("UnnamedBanTrick", this.banChars, char);}
-  setCopyTarget(char){this.setTrickTarget("CopyTrick", this.copyChars, char);}
-  setTrickTarget(type, targets, target){
-    if(this.chars[0].getTricks(type) && targets[0] == null)
-      targets[0] = target;
-    else
-      targets[1] = target;
-  }
-}
-class Trick {
-  constructor(description) {
-    this.description = description;
-    this.disabled = false;
-  }
-  enabled(){return !this.disabled;}
-  performTrick(player) {
-    console.log(this.description);
-  }
-  getDesc(){
-    return this.description;
-  }
-  recalculate(player){}
-  setOwner(char){this.owner = char;}
-  selectTarget(msg, controllerFunc){
-    //show target selection panel
-    //returns false if no valid target is found
-    if(this.hasValidTarget(model.player0)) {
-      oppoinfo.showSelectionPanel(this, msg, controllerFunc);
-      return true;
-    }
-    return false;
-  }
-}
-class SwapTrick extends Trick{
-  constructor(){
-    super("交换对方任意一张牌。");
-  }
-  hasValidTarget(oppo){
-    if(oppo.table.getSize() > 0)
-      return true;
-    return false;
-  }
-  selectTarget(){return super.selectTarget("与之交换", controller.selectSwap);}
-  isValidTarget(char){
-    return true;
-  }
-}
-class RevealTrick extends Trick{
-  // reveal cardNumber of cards in opponent's hand
-  constructor(number){
-    super("随机翻开对手手牌"+number+"张。");
-    this.cardNumber = number; //number of cards to reveal
-  }
-  performTrick(player) {
-    //if player performs reveal trick, opponent's hand cards are revealed
-    //if opponent performs reveal trick, player doesn't feel a thing
-    if(player == model.player1)
-      model.player0.hand.view.reveal(this.cardNumber);
-  }
-}
-class DealTrick extends Trick{
-  /*  definite =  true:
-        the next deal is definitely one from <names> (if applicable)
-      definite = false;
-        the possibility that the next deal is from <names> is added by 1/2
-  */
-
-  constructor(description, names, definite){
-    super(description);
-    this.names = names;
-    this.definite = definite;
-  }
-  performTrick(player) {
-    //returns a char from <names> with <probility>
-    var cans = [];
-    var repo = model.commonRepository.characters;
-    for(var i=0; i<this.names.length; i++)
-      for(var j=0; j<repo.length; j++)
-        if(this.names[i] == repo[j].name)
-          cans.push(repo[j]);
-    if(this.definite || getRandom(2)==1){
-      return cans[getRandom(cans.length)];
-    }
-    return null;
-  }
-}
-class ComboTrick extends Trick{
-  // add <bonus> to combo with <cname>
-  constructor(cname, bonus){
-    if(cname != null)
-      super(cname + "的分数增加" + bonus + "分。");
-    else
-      super("自身能组成的组合每个增加" + bonus + "分。");
-    this.comboName = cname;
-    this.bonus = bonus;
-  }
-  performTrick(combo) {
-    // add bonus to <combo> if applicable
-    // preassumption: this combo contains the trick owner
-    if(this.comboName == null || this.comboName == combo.getName())
-      return this.bonus;
-    return 0;
-  }
-}
-class CharTrick extends Trick{
-  // add <bonus> to tabled char with <cname>
-  // note: only benefit chars on one's own side
-  constructor(cname, bonus){
-    super(cname + "的分数增加" + bonus + "分。");
-    this.charName = cname;
-    this.bonus = bonus;
-  }
-  performTrick(player) {
-    /* check the players latest tabled char
-      if it's me, check all previous tabled chars and add bonus if applicable
-      if it's not me, check the last tabled char and add bonus if applicable
-    */
-    var chars = player.table.characters;
-    var last = chars[chars.length -1];
-    if(last == this.owner) {
-      for(var i=0; i<chars.length-1; i++)
-        if(chars[i].name == this.charName){
-          player.score += this.bonus;
-          return;
-        }
-    }
-    else {
-      if(last.name == this.charName)
-        player.score += this.bonus;
-    }
-  }
-  recalculate(player){
-    var chars = player.table.characters;
-    for(var i=0; i<chars.length; i++)
-      if(chars[i].name == this.charName){
-        player.score += this.bonus;
-        return;
-      }
-  }
-}
-class UnnamedBanTrick extends Trick{
-  constructor(){
-    super("禁用对方任意一张珍稀牌的技能。");
-  }
-  isValidTarget(char){
-    return char.getTricks("ComboTrick,CharTrick") != null;
-  }
-  hasValidTarget(oppo){
-    var chars = oppo.table.characters;
-    for(var i=0; i<chars.length; i++)
-      if(this.isValidTarget(chars[i]))
-        return true;
-    return false;
-  }
-  selectTarget(){return super.selectTarget("禁用其加分技能", controller.selectBan);}
-  ban(char){
-    if(char != null){
-      char.disabled = true;
-      char.owner.recalculate();
-    }
-    this.disabled = true; //only works once
-  }
-}
-class NamedBanTrick extends Trick{
-  constructor(name){
-    super("禁用对方"+name+"珍稀牌的技能。");
-    this.targetName = name;
-  }
-}
-class CopyTrick extends Trick{
-  constructor(){
-    super("复制对方任意一张珍稀牌的技能");
-  }
-  isValidTarget(char){
-    return char.isSpecial();
-  }
-  selectTarget(){
-    if(model.player0.table.getSize() > 0) {////////////////////////////check how many!
-      oppoinfo.showSelectionPanel(this, "复制其所有技能", controller.selectCopy);
-      return this.owner;
-    }
-    return null;
-  }
-}
 class Character {
   constructor(id, name, score, season) {
     this.id = id;
@@ -451,9 +200,11 @@ class Character {
     return false;
   }
   getSpecial(specials){
+    // special cards won't be upgraded once more
+    if(this.isSpecial()) return this;
     var sps = specials.characters;
     for(var i=0; i<sps.length; i++)
-      if(sps[i].name == this.name && sps[i].score > this.score){
+      if(sps[i].name == this.name){
         sps[i].card = this.card;
         this.card.setChar(sps[i]);
         return sps[i];
@@ -470,9 +221,9 @@ class Character {
     var msg = this.id + "：" + this.name + "，" + this.score + "分，" + this.season + "季, 归属玩家" + (this.owner == null ? "-" : this.owner.id) + "\n";
     return msg;
   }
-  performTricks(player, type) {return null;}
+  performTricks(type, para) {return null;}
   getTricks(type){return null;}
-  recalculate(player){return null;}
+  recalculate(player){}
 }
 class SpecialCharacter extends Character {
   constructor(id, name, nameSuffix, score, season, description) {
@@ -492,6 +243,9 @@ class SpecialCharacter extends Character {
   addTrick(trick) {
     this.tricks.push(trick);
     trick.setOwner(this);
+    var noswaps = "SwapTrick,CopyTrick";
+    if(noswaps.includes(trick.constructor.name))
+      this.noSwap = true;
   }
   isSpecial() {
     return true;
@@ -506,13 +260,13 @@ class SpecialCharacter extends Character {
   setNoswap(){
     this.noswap = true;
   }
-  performTricks(player, type) {
+  performTricks(type, para) {
     //perform a trick of <type>, only performs one trick
     if(!this.enabled())
       return null;
     for(var i=0; i<this.tricks.length; i++)
-      if(type.includes(this.tricks[i].constructor.name) && this.tricks[i].enabled())
-        return this.tricks[i].performTrick(player);
+      if(this.tricks[i].enabled() && type.includes(this.tricks[i].constructor.name))
+        return this.tricks[i].performTrick(para);
     return null;
   }
   getTricks(type) {
@@ -525,8 +279,11 @@ class SpecialCharacter extends Character {
     return null;
   }
   recalculate(player){
-    for(var i=0; i<this.tricks.length; i++)
-      this.tricks[i].recalculate(player);
+    if(!this.enabled()) return;
+    for(var i=0; i<this.tricks.length; i++){
+      if(this.tricks[i].enabled())
+        this.tricks[i].recalculate(player);
+    }
   }
   getDesc() {
     var msg = super.getDesc();
@@ -580,7 +337,10 @@ class Deck {
   }
   getMatch(char) {
     var s = char.season;
+
+    /////////!!!!!!!!!!!!!!!!!!!!!Modified for testingggggggg!!!!!!!!!!!!!!!!!
     for (var i = 0; i < this.getSize(); i++)
+    //for (var i = this.getSize()-1; i >= 0; i--)
       if (this.characters[i].season == s)
         return this.characters[i];
     return null;
@@ -657,6 +417,8 @@ class Repository extends Deck {
     else if (this.type == "special"){
       spmanager.initRepository(this, model.p1);
       spmanager.initRepository(this, model.p2);
+      spmanager.initRepository(this, model.p1);
+      spmanager.initRepository(this, model.p2);
     }
     else
       console.log("Illegal Repository Type: " + this.type);
@@ -697,7 +459,7 @@ class TabledCombo{
   getFullScore(){
     var score = COMBO_LIST[this.index][2];
     for(var i=0; i<this.getSize(); i++){
-      var res = this.characters[i].performTricks(this, "ComboTrick");
+      var res = this.characters[i].performTricks("ComboTrick", this);
       if(res != null)
         score += res;
     }
@@ -727,8 +489,8 @@ class TabledCombo{
     return null;
   }
   getDesc(){
-    var msg = COMBO_LIST[this.index][1] + " : ";
-    msg +=  COMBO_LIST[this.index][2]
+    var msg = COMBO_LIST[this.index][1];
+    // + " : " + COMBO_LIST[this.index][2]
     /* + "\n";
     for(var i=0; i<this.getSize(); i++)
       msg += "[" + this.characters[i].name + "]\n";
@@ -851,9 +613,9 @@ class Player {
     this.score = 0;
   }
   start(){
-    var len = PLAYER_SPECIALS[this.id].length;
+    var len = PLAYER_SPECIALS[SP_CARDS][this.id].length;
     for (var i = 0; i < len; i++) {
-      this.specials.addChar(model.specialRepository.getChar(PLAYER_SPECIALS[this.id][i]));
+      this.specials.addChar(model.specialRepository.getChar(PLAYER_SPECIALS[SP_CARDS][this.id][i]));
     }
     this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
   }
@@ -861,8 +623,19 @@ class Player {
     //add a char to player's table
     this.table.addChar(char);
     char.setOwner(this);
-    for(var i=0; i<this.table.getSize(); i++)
-      this.table.characters[i].performTricks(this, "CharTrick");
+    var oppo = this.id==0?model.player1:model.player0;
+    for(var i=0; i<oppo.table.getSize(); i++){
+      oppo.table.characters[i].performTricks("NamedBanTrick", char);
+    }
+    var trick = char.getTricks("NamedBanTrick");
+    if(trick != null)
+      for(var i=0; i<oppo.table.getSize(); i++){
+        if(trick.performTrick(oppo.table.characters[i]))
+          oppo.recalculate();
+      }
+    for(var i=0; i<this.table.getSize(); i++){
+      this.table.characters[i].performTricks("CharTrick", this);
+    }
     this.score += char.score;
     var comboCount = combos.getNewCombos(this, char);
     return comboCount;
@@ -895,6 +668,7 @@ class Player {
   }
   recalculate(){
     //calculate score for the player
+    console.log(this.id+"号重新算分");
     this.score = 0;
     //base score & special card bonus
     var chars = this.table.characters;
@@ -904,6 +678,7 @@ class Player {
     }
     for(var i=0; i<this.completeCombos.length; i++)
       this.score += this.completeCombos[i].getFullScore();
+    view.updateScore(this.id);
   }
   getDesc() {
     var msg = "玩家" + this.id;
@@ -1022,31 +797,17 @@ class Model {
       }
     }
   }
-  handleUnnamedBan(player, char){
-    var trick = char.getTricks("UnnamedBanTrick");
-    if(trick == null)
-      return false;
-    if(player.id == 0){
-      var target = model.aiSelectBan();
-      trick.ban(target);
-      if(target != null){
-        messenger.notifyOppoBan(trick.owner, char);
-      }
-    }
-    else{
-        trick.selectTarget();
-        //////////////////////////////////tbd
-    }
-  }
   hasMatch(player){
     var match = this.pickLeft(player);
     return match != null;
   }
-  dealOne(player) {
+  dealOne(player) {/*
     var chars = player.table.characters;
-    var char = chars[chars.length -1].performTricks(player, "DealTrick");
+    var char = chars[chars.length -1].performTricks("DealTrick", player);
     if(char == null)
-      char = chars[chars.length -2].performTricks(player, "DealTrick");
+      char = chars[chars.length -2].performTricks("DealTrick", player);
+      */
+    var char = obtainVector.performDeal();
     if(char == null)
       char = model.pool.addRandom(model.commonRepository);
     else {
@@ -1118,6 +879,16 @@ class Model {
         return null;
     }
   }
+  aiSelectCopy(trick){
+      var cans = [];
+      var chars = model.player1.table.characters;
+      for(var i=0; i<chars.length; i++)
+        if(trick.isValidTarget(chars[i]))
+          cans.push(chars[i]);
+      var size = cans.length;
+      if(size == 0) return null;
+      return cans[getRandom(size)];
+  }
   aiSelectSwap(){
     var size = model.player1.table.getSize();
     if(size == 0) return null;
@@ -1125,7 +896,7 @@ class Model {
   }
   aiSelectBan(trick){
     var cans = [];
-    var chars = model.player1.table;
+    var chars = model.player1.table.characters;
     for(var i=0; i<chars.length; i++)
       if(trick.isValidTarget(chars[i]))
         cans.push(chars[i]);
@@ -1145,14 +916,13 @@ class Model {
         return null;
     }
   }
-  obtain(player) {
+  obtain() {
   // controller: pc is upgraded by player.specials and is removed from pool
   // controller: hs, ps are both upgraded by player.specials and are removed from oppo's table
   // hc/pc are specialchars if hs/ps are not null
-    var score0 = player.score;
+    var player = obtainVector.player;
     var oppo = player.id==0? model.player1:model.player0;
-    var chars = [obtainVector.chars[0], obtainVector.chars[1]];
-    player.hand.removeChar(chars[0]);
+    /*player.hand.removeChar(chars[0]);
     //which of the four are new chars? : obtainVector.chars[]
     //where are these two chars added? : swapchar==null?player:oppo
     //when is UnnamedBanTrick performed? : after addTableChar, before view
@@ -1161,17 +931,13 @@ class Model {
         chars[i].swapped = true;
         obtainVector.swapChars[i].swapped = true;
         oppo.addTableChar(chars[i]);
-        chars[i].performTricks(oppo, "RevealTrick");
-        model.handleUnnamedBan(oppo, chars[i]);
         chars[i] = obtainVector.swapChars[i];
       }
-    }
-    var comboCount = player.addTableChar(chars[0]) + player.addTableChar(chars[1]);
-    for(var i=0; i<2; i++){
-      chars[i].performTricks(player, "RevealTrick");
-      model.handleUnnamedBan(player, chars[i]);
-    }
-    view.obtain(player, player.score-score0, comboCount);
+    }*/
+
+    console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
+    obtainVector.comboCount = player.addTableChar(obtainVector.playerTableChars[0]) + player.addTableChar(obtainVector.playerTableChars[1]);
+    controller.handleBans();
   }
   activate(char) {//player1 set a card active
     if (this.activeChar == null || this.activeChar != char) {

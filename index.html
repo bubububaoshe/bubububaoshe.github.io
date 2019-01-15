@@ -38,6 +38,12 @@
 			<label for="ai2" data-value="沉迷种田的AI">AI 二级</label>
 			<label for="ai3" data-value="恶意满满的AI">AI 三级</label>
 		</div>
+		<div id="spinput" class="segmented-control" style="width: 100%; color: #281B11">
+			<input type="radio" name="sp" id="sp0">
+			<input type="radio" name="sp" id="sp1" checked>
+			<label for="sp0" data-value="你和AI都不想使用珍稀牌">不含珍稀牌</label>
+			<label for="sp1" data-value="可使用所有珍稀牌 [测试中]">包含珍稀牌</label>
+		</div>
 		<div id="gamestart">开始游戏</div>
 	</div>
 	<div id="main">
@@ -48,6 +54,7 @@
 				<div class="combobonus">
 				</div>
 			</div>
+			<div id="infobox" class="bignotice"><div></div></div>
 			<div id="score1" class="bignotice">
 				<div></div>
 				<div class="combobonus"></div>
@@ -114,7 +121,7 @@
 		</div>
 		<div id="specialboard">
 			<div id="specials0" class="cardstack"></div>
-			<div id="infobox" class="bignotice"><div></div></div>
+			<div id="hoverinfobox" class="bignotice"><div></div></div>
 			<div id="specials1" class="cardstack"></div>
 		</div>
 	</div>
@@ -137,6 +144,7 @@
 	</div>
 </body>
 </html>
+<script src="tricks.js"></script>
 <script src="model.js"></script>
 <script src="controller.js"></script>
 <script src="spmanager.js"></script>

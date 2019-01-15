@@ -56,10 +56,16 @@ body {
   background-color: var(--gamezone-background);
 }
 #score0, #score1{
-  margin: calc(var(--card-height)*0.2) 0 calc(var(--card-height)*0.35);
+  margin: calc(var(--card-height)*0.2) 0 calc(var(--card-height)*0.1);
   position: relative;
   height: calc(var(--card-height)*0.45);
   vertical-align: center;
+}
+#score1{
+  margin: calc(var(--card-height)*0.1) 0 calc(var(--card-height)*0.2);
+}
+#score0>div:first-child, #score1>div:first-child{
+  line-height: 100%;
 }
 #hand0container, #poolcontainer, #hand1container{
   position: relative;
@@ -163,3 +169,10 @@ body {
 .faceup{
   transform: rotateY(180deg);
 }
+
+
+/*---------------------for testing----------------------
+#hand0 .cardcontainer:hover .card{
+  transform: rotateY(180deg);
+}
+*/

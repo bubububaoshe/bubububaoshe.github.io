@@ -1,12 +1,15 @@
-#infobox{
-  height: calc(var(--card-height)*1.5);
-  margin: calc(var(--card-height)*0.25) 0;
+#infobox, #hoverinfobox{
+  height: calc(var(--card-height)*0.5);
   font-size: calc(var(--main-width)*0.02);
   white-space: pre;
   display: flex;
   overflow: hidden;
   align-items: center;
   padding: 0 5%;
+}
+#hoverinfobox{
+  margin: calc(var(--card-height)*0.25) 0;
+  height: calc(var(--card-height)*1.5);
 }
 #blocker {
   font-size: calc(var(--main-width)*0.05);
@@ -65,11 +68,11 @@
   border-left: calc(var(--card-width)*0.2) solid transparent;
   border-right: calc(var(--card-width)*0.2) solid transparent;
 }
-.swapposter:last-child>div:first-child{
+.swapposter:first-child>div:first-child{
   top: calc(var(--card-width)*-0.15);
   border-bottom: calc(var(--card-width)*0.15) solid var(--text-glow-color);
 }
-.swapposter:first-child>div:first-child{
+.swapposter:last-child>div:first-child{
   bottom: calc(var(--card-width)*-0.15);
   border-top: calc(var(--card-width)*0.15) solid var(--text-glow-color);
 }

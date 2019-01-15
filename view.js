@@ -1,7 +1,7 @@
 //consts
 
 MAX_MAIN_RATIO = 2;//max width/height ratio of the main board
-MIN_MAIN_RATIO = 1.65;//min width/height ratio of the main board
+MIN_MAIN_RATIO = 1.7;//min width/height ratio of the main board
 CARD_RATIO = 3 / 4; //width/height ratio of a card
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
 MOVE_DURATION = 2; //2 time units (500ms)
@@ -287,7 +287,7 @@ class Messenger {
         var inc = combo.getFullScore();
         model.player0.score += inc;
         view.updateScore(0);
-        messenger.note("对方获得\n"+combo.getDesc());
+        messenger.note("对方完成组合\n"+combo.getDesc());
         reflow();
         messenger.animeComboScore(0, inc);
         delayedFunc(function(){
@@ -384,7 +384,8 @@ class Messenger {
   }
   notifyOppoSwap(swapCount){
     if(swapCount > 0){
-      var chars = obtainVector.getSwapPair(--swapCount);
+      var type = "SwapTrick";
+      var chars = obtainVector.getTrickPair(type, --swapCount);
       var count = chars.length;
       var banner = document.getElementById("infobanner");
       var posters = banner.querySelector(".bannercards");
@@ -409,8 +410,34 @@ class Messenger {
       },6);
     }
   }
-  notifyOppoBan(oppoChar, myChar){
-    console.log("对方用" + oppoChar.name + "禁用了你的" + myChar.name);
+  notifyOppoAction(type, msg, nextFunc){
+    var chars = obtainVector.getLastTrickPair(type);
+    var count = chars.length;
+    var banner = document.getElementById("infobanner");
+    var posters = banner.querySelector(".bannercards");
+    if(type == "CopyTrick")
+      messenger.setBannerHeadline(["对方用", chars[0].name, msg+"了你家", chars[1].name, "的所有技能"]);
+    else
+      messenger.setBannerHeadline(["对方用", chars[0].name, msg+"了你家", chars[1].name, ""]);
+    for(var i=0; i<count; i++){
+      var swapposter = document.createElement("div");
+      posters.appendChild(swapposter);
+      swapposter.classList.add("swapposter");
+      swapposter.appendChild(document.createElement("div"));
+      swapposter.appendChild(messenger.createBannerPoster(chars[i]));
+    }
+
+    banner.addEventListener("click", nextFunc);
+    banner.style.display = "flex";
+    reflow();
+    banner.style.opacity = 1;
+  }
+  exitNotifyOppoAction(nextFunc){
+    var banner = document.getElementById("infobanner");
+    banner.removeEventListener("click", nextFunc);
+    banner.style.opacity = 0;
+    banner.style.display = null;
+    banner.querySelector(".bannercards").textContent = "";
   }
 }
 class View {
@@ -533,19 +560,22 @@ class View {
       char.card.addController(playerinfo);
     }
   }
-  obtain(player, baseInc, comboCount) {
+  obtain() {
+    var player = obtainVector.player;
+    var baseInc = player.score - obtainVector.preScore;
+    var comboCount = obtainVector.comboCount;
+    view.swappedObtain(player, obtainVector.chars[0], obtainVector.swapChars[0]);
+    view.swappedObtain(player, obtainVector.chars[1], obtainVector.swapChars[1]);
     view.updateScore();
     messenger.animeComboScore(player.id, baseInc);
     if(player.id == 0){
-      messenger.notifyOppoSwap(obtainVector.getTrickCount("SwapTrick"));
+      //messenger.notifyOppoSwap(obtainVector.getTrickCount("SwapTrick"));
       messenger.notifyOppoCombo(comboCount, player.completeCombos);
     }
     else {
       obtainVector.getHandChar().card.removeController(controller.activate);
       messenger.notifyPlayerCombo(comboCount, player.completeCombos);
     }
-    view.swappedObtain(player, obtainVector.chars[0], obtainVector.swapChars[0]);
-    view.swappedObtain(player, obtainVector.chars[1], obtainVector.swapChars[1]);
   }
   activate(oldChar, newChar) {
     this.hand1.activate(oldChar, newChar);
@@ -588,29 +618,21 @@ class View {
 }
 
 var sound, combos, model, controller, spmanager, messenger, view, oppoinfo, playerinfo, obtainVector;
-var AI_LEVEL, COMBO_VOICE;
+var AI_LEVEL, COMBO_VOICE, SP_CARDS;
+function getInput(inputsID){
+  var inputs = document.getElementById(inputsID).getElementsByTagName("input");
+  for(var i=0; i<inputs.length; i++)
+    if(inputs[i].checked){
+      return inputs[i].id;
+    }
+}
 function gameinit(){
-  var inputs = document.getElementById("packinput").getElementsByTagName("input");
-  var pack, p1, p2;
-  for(var i=0; i<inputs.length; i++)
-    if(inputs[i].checked){
-      pack = inputs[i].id;
-      break;
-    }
-  p1 = pack.charAt(1);
-  p2 = pack.charAt(2);
-  inputs = document.getElementById("aiinput").getElementsByTagName("input");
-  for(var i=0; i<inputs.length; i++)
-    if(inputs[i].checked){
-      AI_LEVEL = inputs[i].id;
-      break;
-    }
-  inputs = document.getElementById("voiceinput").getElementsByTagName("input");
-  for(var i=0; i<inputs.length; i++)
-    if(inputs[i].checked){
-      COMBO_VOICE = inputs[i].id;
-      break;
-    }
+  var pack = getInput("packinput");
+  var p1 = pack.charAt(1);
+  var p2 = pack.charAt(2);
+  AI_LEVEL = getInput("aiinput");
+  COMBO_VOICE = getInput("voiceinput");
+  SP_CARDS = parseInt(getInput("spinput").charAt(2));
   document.getElementById("main").style.display = "block";
   document.getElementById("configurator").style.display = "none";
   sound = new Sound();
@@ -626,4 +648,4 @@ function gameinit(){
   model.setup();
 }
 document.getElementById("gamestart").addEventListener("click", gameinit);
-gameinit();
+//gameinit();

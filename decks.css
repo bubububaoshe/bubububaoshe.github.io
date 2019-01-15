@@ -31,7 +31,7 @@
 }
 
 /* flip */
-#pool .card, #hand1 .card, #table0 .card, #table1 .card, #specials1 .card, #hand0 .card{
+#pool .card, #hand1 .card, #table0 .card, #table1 .card, #specials1 .card{
   transform: rotateY(180deg);
 }
 
@@ -96,17 +96,17 @@
 /* table & sp card rotation: only rotate the last 5 */
 #table0>.cardcontainer:nth-last-child(1),#table1>.cardcontainer:nth-last-child(5), #specials0>.cardcontainer:nth-last-child(3),#specials1>.cardcontainer:nth-last-child(2) {
   transform: rotate(-15deg);
-  top: 6%;
+  top: -4%;
   left: 4%;
 }
 #table0>.cardcontainer:nth-last-child(2),#table1>.cardcontainer:nth-last-child(4), #specials0>.cardcontainer:nth-last-child(5),#specials1>.cardcontainer:nth-last-child(3) {
   transform: rotate(25deg);
-  top: -3%;
-  left: 2%;
+  top: 2%;
+  left: 4%;
 }
 #table0>.cardcontainer:nth-last-child(3),#table1>.cardcontainer:nth-last-child(3), #specials0>.cardcontainer:nth-last-child(1),#specials1>.cardcontainer:nth-last-child(5) {
   transform: rotate(-21deg);
-  top: 1%;
+  top: 3%;
   left: -3%;
 }
 #table0>.cardcontainer:nth-last-child(4),#table1>.cardcontainer:nth-last-child(2), #specials0>.cardcontainer:nth-last-child(4),#specials1>.cardcontainer:nth-last-child(1) {
@@ -121,8 +121,11 @@
 }
 
 /* hover effects */
-#table0>.cardcontainer:hover, #table1>.cardcontainer:hover, #specials1>.cardcontainer:hover, #pool>.cardcontainer:hover, #hand1>.cardcontainer:hover{
+#pool>.cardcontainer:hover, #hand1>.cardcontainer:hover{
   transform: translate(0, calc(var(--card-height)/-3));
+}
+#table0>.cardcontainer:hover, #table1>.cardcontainer:hover,  #specials1>.cardcontainer:hover{
+  transform: translate(0, calc(var(--card-height)/-4));
 }
 #pool>.cardcontainer:nth-child(odd):hover{
   transform: translate(0, calc(var(--card-height)/3));

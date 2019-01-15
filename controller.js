@@ -18,18 +18,13 @@ class Controller{
     model.activate(char);
   }
   obtain(){
+    view.blockGame();
     var handc = model.activeChar;
     model.activate(handc);
+    model.player1.hand.removeChar(handc);
     var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
-    obtainVector.reset();
-    obtainVector.setChars(handc, poolc);
-    if(!obtainVector.swapSelector())
-      controller.swappedObtain();
-  }
-
-  swappedObtain(){
-    model.obtain(model.player1);
-    view.blockGame();
+    obtainVector.init(model.player1, handc, poolc);
+    controller.handleCopies();
   }
   opponentObtain(){
     while(model.overSeason())
@@ -46,15 +41,10 @@ class Controller{
       }
     }
     else {
-      //check swap
-      var hc = pick[0];
+      var hc = model.player0.hand.removeChar(pick[0]);
       var pc = model.pool.removeChar(pick[1]).getSpecial(model.player0.specials);
-      obtainVector.reset();
-      obtainVector.setChars(hc, pc);
-      var swapnum = obtainVector.getTrickCount("SwapTrick");
-      for(var i=0; i<swapnum; i++)
-        obtainVector.setSwapTarget(model.player1.removeTableChar(model.aiSelectSwap()).getSpecial(model.player0.specials));
-      model.obtain(model.player0);
+      obtainVector.init(model.player0, hc, pc);
+      controller.handleCopies();
     }
   }
   discard(){
@@ -92,17 +82,86 @@ class Controller{
     else
       playerinfo.setPane(idx+1);
   }
-  selectSwap(){
-    // player swaps with the opponent
+  handleCopies(){
+    var type = "CopyTrick";
+    if(obtainVector.player.id == 1){
+      if(!obtainVector.trickSelector(type))
+        controller.handleSwaps();
+    }
+    else {
+      var trick = obtainVector.getNextTrick(type);
+      if(trick != null){
+        obtainVector.setTrickTarget(type, model.aiSelectCopy(trick));
+        messenger.notifyOppoAction(type, "复制", controller.confirmCopy);
+      }
+      else
+        controller.handleSwaps();
+    }
+  }
+  handleSwaps(){
+    var type = "SwapTrick";
+    if(obtainVector.player.id == 1){
+      if(!obtainVector.trickSelector(type))
+        model.obtain();
+    }
+    else {
+      if(obtainVector.getNextTrick(type) != null){
+        obtainVector.setTrickTarget(type, model.aiSelectSwap());
+        messenger.notifyOppoAction(type, "换走", controller.confirmSwap);
+      }
+      else
+        model.obtain();
+    }
+  }
+  handleBans(){
+    var type = "UnnamedBanTrick";
+    if(obtainVector.player.id == 1){
+      if(!obtainVector.trickSelector(type))
+        controller.handleReveals();
+    }
+    else {
+      var trick = obtainVector.getNextTrick(type);
+      if(trick != null){
+        obtainVector.setTrickTarget(type, model.aiSelectBan(trick));
+        messenger.notifyOppoAction(type, "禁用", controller.confirmBan);
+      }
+      else
+        view.obtain();
+    }
+  }
+  handleReveals(){
+    obtainVector.performReveal();
+    view.obtain();
+  }
+  confirmCopy(){
+    messenger.exitNotifyOppoAction(controller.confirmCopy);
+    controller.handleCopies();
+  }
+  confirmSwap(){
+    messenger.exitNotifyOppoAction(controller.confirmSwap);
+    controller.handleSwaps();
+  }
+  confirmBan(){
+    messenger.exitNotifyOppoAction(controller.confirmBan);
+    controller.handleBans();
+  }
+  selectCopy(){
     oppoinfo.exitSelectionPanel();
-    var oppoChar = model.player0.table.getChar(this.id);
-    model.player0.removeTableChar(oppoChar);
-    obtainVector.setSwapTarget(oppoChar.getSpecial(model.player1.specials));
-    if(!obtainVector.swapSelector())
-      controller.swappedObtain();
+    var type = "CopyTrick";
+    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
+    controller.handleCopies();
+  }
+  selectSwap(){
+    // user swaps with the opponent
+    oppoinfo.exitSelectionPanel();
+    var type = "SwapTrick";
+    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
+    controller.handleSwaps();
   }
   selectBan(){
     oppoinfo.exitSelectionPanel();
-    console.log(this.id);
+    var type = "UnnamedBanTrick";
+    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
+    controller.handleBans();
   }
 }

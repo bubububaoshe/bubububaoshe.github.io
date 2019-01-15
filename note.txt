@@ -2,13 +2,22 @@
 id：普通角色名首字母+游戏代数+字母
 	e.g.,如果存在3张沈夜特殊牌，则分别为sy2a,sy2b,sy2c
 
+假设：
+1.swaptrick, copytrick交换后必然无效。（否则可能死循环）
+这两个技能自带交换后无效技能
+1.1 swaptrick没有除“交换后无效”之外的其它功能
+2.copytrick,bantrick只触发一次。（即使在触发时无可作用对象）
+3.copytrick不能copy copytrick哈哈。
+
+
+哈哈哈错了，copy才应该是最早用的，因为copy可能引发其他任何技能。给除copy以外的技能搞一个clone吧。
 obtain整体流程
+copy?
 swap?
 model.obtain
 addchar
-user reveal?(flip card)
 user ban?(select)
-user copy?(select)
+user reveal?(flip card)
 view.obtain: oppo swap?ban?copy?
 (info banner disappear upon user clicks)
 
@@ -35,7 +44,7 @@ BanTrick：
 -被BanTrick禁用
 
 CopyTrick:
-就算它可以选定禁用角色吧。全技能可复制
+就算它可以选定禁用角色吧,全技能可复制。
 
 测试角色：艄公，
 
