@@ -24,7 +24,7 @@ class TableInfoView{
     if(container == null)
       this.container.querySelector('.charinfocontainer').appendChild(sc);
     else
-      // this char view is for selection when a swaptrick is performed
+      // this char view is for selection when a trick is performed
       container.appendChild(sc);
     return sc;
   }
@@ -36,7 +36,7 @@ class TableInfoView{
   }
   exitSelectionPanel(controllerFunc){
     var container = document.getElementsByClassName("tableinfocontainer")[0];
-    container.style.display = null;
+    showOpacity(container, false);
     this.fadeUnder("selectionpanel", false);
     container.getElementsByClassName('charinfocontainer')[0].textContent = "";
     container.getElementsByClassName('charinfocontainer')[1].textContent = "";
@@ -52,7 +52,8 @@ class TableInfoView{
     var cards = chartable.children;
     for(var i=0; i<cards.length; i++)
       cards[i].addEventListener("click", controllerFunc);
-    container.style.display = "block";
+    //container.style.display = "block";
+    showOpacity(container, true);
     this.fadeUnder("selectionpanel", true);
   }
   addCombo(combo){
@@ -121,13 +122,16 @@ class TableInfoView{
       this.createComboView();
     }
     this.fadeUnder("tableinfo", true);
-    this.container.style.display = "block";
+    showOpacity(this.container, true);
   }
   hide(){
-    this.container.style.display = null;
+    showOpacity(this.container, false);
+  }
+  visible(){
+    return this.container.style.opacity != 0;
   }
   fadeUnder(myslef, fade){
-    var opacity = fade?0.2:1;
+    var opacity = fade?0.1:1;
     switch (myslef) {
       case "tableinfo":
         document.getElementById("gamezone").style.opacity = opacity;
@@ -139,9 +143,6 @@ class TableInfoView{
         break;
       default:
     }
-  }
-  visible(){
-    return this.container.style.display != "";
   }
   exit(){
     this.hide();

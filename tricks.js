@@ -6,6 +6,7 @@ class ObtainVector{
   init(player, handChar, poolChar){
     this.player = player;
     this.preScore = player.score;
+    this.charScoreInc = 0;
     this.comboCount = 0;
     this.chars = [handChar, poolChar];
     this.copyChars =[null, null];
@@ -218,7 +219,7 @@ class RevealTrick extends Trick{
     if(this.owner.owner == model.player1)
       model.player0.hand.view.reveal(this.cardNumber);
   }
-  clone(){return new RevealTrick(this.number);}
+  clone(){return new RevealTrick(this.cardNumber);}
 }
 class DealTrick extends Trick{
   /*  definite =  true:
@@ -331,7 +332,7 @@ class NamedBanTrick extends Trick{
     if(char.name == this.targetName && !char.disabled) {
       console.log(this.owner.name +" 禁用 " + char.name);
       char.disabled = true;
-      //this.disabled = true;
+      this.disabled = true;
       char.owner.recalculate();
       return true;
     }

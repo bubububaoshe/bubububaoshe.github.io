@@ -18,34 +18,54 @@ function setCSSInt(name, val) {
 function reflow() {
   document.getElementById('main').clientWidth;
 }
+function showOpacity(div, show){
+  if(show){
+    //banner.style.zIndex = 999;
+    div.style.visibility = "visible";
+    div.style.opacity = 1;
+  }
+  else{
+    div.style.opacity = null;
+    div.style.visibility = null;
+  }
+}
 class Sound{
   constructor(){
-    this.ac = new Audio('mp3/activate.mp3');
+    this.audio = document.getElementById("soundeffect");
+    this.ac = new Audio('mp3/activate.mp3');/*
     this.de = new Audio('mp3/deal.wav');
-    this.co = new Audio('mp3/combo.mp3');
     this.wi = new Audio('mp3/win.mp3');
     this.lo = new Audio('mp3/fool.mp3');
     this.di = new Audio('mp3/discard.mp3');
-    this.dr = new Audio('mp3/draw.mp3');
+    this.dr = new Audio('mp3/draw.mp3');*/
   }
-  activate(){this.ac.play();}
-  deal(){this.de.play();}
-  combo(){this.co.play();}
-  win(){
-    this.wi.play();
+  play(name){
+    sound.audio.src = "mp3/" + name + ".mp3";
+    sound.promisedPlay();
   }
-  lose(){
-    this.lo.play();
+  promisedPlay(){
+    //I don't a thing about promises, maybe i will learn about it someday
+    const playPromise = sound.audio.play();
+    if (playPromise !== null){
+        playPromise.catch(() => {//sound.audio.play();
+        })
+    }
   }
-  discard(){
-    this.di.play();
-  }
-  draw(){
-    this.dr.play();
-  }
-  combovoice(name){
-    var mp3 = new Audio('combomp3/' + name +'.mp3');
-    mp3.play();
+  activate(){this.play("activate");}
+  deal(){this.play("deal");}
+  win(){this.play("win");}
+  lose(){this.play("fool");}
+  discard(){this.play("discard");}
+  draw(){this.play("draw");}
+  combovoice(nextFunc,name){
+    var onetimeFunc=function(){
+      nextFunc.call();
+      sound.audio.removeEventListener("ended", onetimeFunc);
+    }
+    this.audio.addEventListener("ended", onetimeFunc);
+    this.audio.addEventListener("error", onetimeFunc);
+    this.audio.src = "combomp3/" + name + ".mp3";
+    this.promisedPlay();
   }
 }
 class Card{
@@ -262,6 +282,8 @@ class Messenger {
   }
   init(){
     this.note("");
+    document.querySelector("#score0 div").textContent = 0;
+    document.querySelector("#score1 div").textContent = 0;
     var div = document.getElementById("finalcontainer");
     div.removeEventListener("click", controller.restart);
     div.classList.remove("notransform");
@@ -280,32 +302,6 @@ class Messenger {
     else
       console.log("Invalid notifyNoMatch mode:" + display);
   }
-  notifyOppoCombo(comboCount, combos){
-    delayedFunc(function(){
-      if(comboCount > 0){
-        var combo = combos[--comboCount];
-        var inc = combo.getFullScore();
-        model.player0.score += inc;
-        view.updateScore(0);
-        messenger.note("对方完成组合\n"+combo.getDesc());
-        reflow();
-        messenger.animeComboScore(0, inc);
-        delayedFunc(function(){
-            messenger.notifyOppoCombo(comboCount, combos);
-        });
-      }
-      else{
-        if(model.player0.hand.getSize()+model.player1.hand.getSize() == 0)
-          //game end
-          messenger.notifyFinal();
-        else {
-          model.dealOne(model.player0);
-          model.checkMatch1();
-          view.unblockGame();
-        }
-      }
-    });
-  }
   setBannerHeadline(msgs){
     var spans = document.querySelector("#infobanner .bannertext").children;
     for(var i=0; i<5; i++)
@@ -317,51 +313,58 @@ class Messenger {
     poster.style.backgroundImage = char.getPortrait();
     return poster;
   }
-  animeComboScore(pid, inc){
-    var div = document.getElementsByClassName("combobonus")[pid];
-    div.textContent = inc;
-    div.classList.add("animebonus");
+  animeScoreInc(pid, preScore, inc){
+    // anime score and score inc
+    document.querySelector("#score" + pid +  " div").textContent = preScore + inc;
+    var incdiv = document.getElementsByClassName("combobonus")[pid];
+    incdiv.textContent = inc;
+    incdiv.classList.add("animebonus");
     delayedFunc(function(){
-      div.classList.remove("animebonus");
+      incdiv.classList.remove("animebonus");
     });
   }
-  notifyPlayerCombo(comboCount, combos){
-    delayedFunc(function(){
-      if(comboCount > 0){
-        var combo = combos[--comboCount];
-        var inc = combo.getFullScore();
-        model.player1.score += inc;
-        view.updateScore(1);
-        var chars = combo.characters;
-        var banner = document.getElementById("infobanner");
-        var posters = banner.querySelector(".bannercards");
-        messenger.setBannerHeadline(["完成组合", combo.getName(), "，获得", inc, "分"]);
-        for(var i=0; i<chars.length; i++)
-          posters.appendChild(messenger.createBannerPoster(chars[i]));
-        banner.style.display = "flex";
-        reflow();
-        banner.style.opacity = 1;
-        messenger.animeComboScore(1, inc);
-        if(COMBO_VOICE == "voiceoff")
-          sound.combo();
-        else
-          sound.combovoice(combo.getName());
+  notifyPlayerCombo(preScore, comboCount, combos){
+    if(comboCount > 0){
+      var combo = combos[--comboCount];
+      var inc = combo.getFullScore();
+      messenger.animeScoreInc(1, preScore, inc);
+      var chars = combo.characters;
+      var banner = document.getElementById("infobanner");
+      var posters = banner.querySelector(".bannercards");
+      messenger.setBannerHeadline(["完成组合", combo.getName(), "，获得", inc, "分"]);
+      for(var i=0; i<chars.length; i++)
+        posters.appendChild(messenger.createBannerPoster(chars[i]));
+      showOpacity(banner, true);
+      var nextFunc = function(){
+        banner.style.opacity = 0;
         delayedFunc(function(){
-            banner.style.opacity = 0;
-          delayedFunc(function(){
-            banner.style.display = null;
-            posters.textContent = "";
-            messenger.notifyPlayerCombo(comboCount, combos);
-          });
-        },2);
+          banner.style.visibility = "hidden";
+          posters.textContent = "";
+          messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
+        },1);
       }
-      else{
+      sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getName());
+    }
+    else{
+      delayedFunc(function(){
         model.dealOne(model.player1);
         delayedFunc(function(){
           controller.opponentObtain();
         }, 2);
-      }
-    });
+      });
+    }
+  }
+  notifyOppoCombo(preScore, comboCount, combos){
+    if(comboCount > 0){
+      var combo = combos[--comboCount];
+      var inc = combo.getFullScore();
+      messenger.animeScoreInc(0, preScore, inc);
+      messenger.note("对方完成组合\n"+combo.getDesc());
+      /////////////////////////////////////////////reflow();
+      delayedFunc(function(){
+        messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
+      });
+    }
   }
   notifyFinal(){
     var msg = document.getElementById("finalmsg");
@@ -381,34 +384,6 @@ class Messenger {
     div.addEventListener("click", controller.restart);
     div.style.visibility = "visible";
     div.classList.add("notransform");
-  }
-  notifyOppoSwap(swapCount){
-    if(swapCount > 0){
-      var type = "SwapTrick";
-      var chars = obtainVector.getTrickPair(type, --swapCount);
-      var count = chars.length;
-      var banner = document.getElementById("infobanner");
-      var posters = banner.querySelector(".bannercards");
-      messenger.setBannerHeadline(["对方用 "+chars[0].name+" ", "换走了你的", chars[1].name, ""]);
-      for(var i=0; i<count; i++){
-        var swapposter = document.createElement("div");
-        posters.appendChild(swapposter);
-        swapposter.classList.add("swapposter");
-        swapposter.appendChild(document.createElement("div"));
-        swapposter.appendChild(messenger.createBannerPoster(chars[i]));
-      }
-      banner.style.display = "flex";
-      reflow();
-      banner.style.opacity = 1;
-      delayedFunc(function(){
-          banner.style.opacity = 0;
-        delayedFunc(function(){
-          banner.style.display = null;
-          posters.textContent = "";
-          messenger.notifyOppoSwap(swapCount);
-        }, 1);
-      },6);
-    }
   }
   notifyOppoAction(type, nextFunc){
     var chars = obtainVector.getLastTrickPair(type);
@@ -435,15 +410,16 @@ class Messenger {
     }
 
     banner.addEventListener("click", nextFunc);
-    banner.style.display = "flex";
-    reflow();
-    banner.style.opacity = 1;
+    //reflow();
+    //banner.style.opacity = 1;
+    showOpacity(banner, true);
   }
   exitNotifyOppoAction(nextFunc){
     var banner = document.getElementById("infobanner");
     banner.removeEventListener("click", nextFunc);
-    banner.style.opacity = 0;
-    banner.style.display = null;
+    //banner.style.opacity = 0;
+    //banner.style.display = null;
+    showOpacity(banner, false);
     banner.querySelector(".bannercards").textContent = "";
   }
 }
@@ -457,9 +433,6 @@ class View {
     this.repository = new RepoDiv(document.getElementById("repository"), model.commonRepository);
     this.specials0 = new RepoDiv(document.getElementById("specials0"), model.player0.specials);
     this.specials1 = new RepoDiv(document.getElementById("specials1"), model.player1.specials);
-    this.score0 = document.getElementById("score0");
-    this.score1 = document.getElementById("score1");
-    this.blocker = document.getElementById("blocker");
     this.setup();
   }
   start(){
@@ -480,7 +453,6 @@ class View {
     this.specials0.destroy();
     this.specials1.destroy();
     this.repository.init();
-    view.updateScore();
   }
   setup(){
     this.setSizes();
@@ -514,16 +486,10 @@ class View {
     }
   }
   blockGame(){
-    view.blocker.style.display = "block";
+    document.getElementById("blocker").style.display = "block";
   }
   unblockGame(){
-    view.blocker.style.display = "none";
-  }
-  updateScore(pid) {
-    if(pid !== 1)
-      this.score0.firstElementChild.textContent = model.player0.score;
-    if(pid !== 0)
-      this.score1.firstElementChild.textContent = model.player1.score;
+    document.getElementById("blocker").style.display = "none";
   }
   discard(player, oldChar, newChar) {
     if (player.id == 1) {
@@ -569,19 +535,28 @@ class View {
   }
   obtain() {
     var player = obtainVector.player;
-    var baseInc = player.score - obtainVector.preScore;
+    var charInc = obtainVector.charScoreInc;
     var comboCount = obtainVector.comboCount;
     view.swappedObtain(player, obtainVector.chars[0], obtainVector.swapChars[0]);
     view.swappedObtain(player, obtainVector.chars[1], obtainVector.swapChars[1]);
-    view.updateScore();
-    messenger.animeComboScore(player.id, baseInc);
+    messenger.animeScoreInc(player.id, obtainVector.preScore, charInc);
     if(player.id == 0){
       //messenger.notifyOppoSwap(obtainVector.getTrickCount("SwapTrick"));
-      messenger.notifyOppoCombo(comboCount, player.completeCombos);
+      messenger.notifyOppoCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
+      delayedFunc(function(){
+        if(model.player0.hand.getSize()+model.player1.hand.getSize() == 0)
+          //game end
+          messenger.notifyFinal();
+        else {
+          model.dealOne(model.player0);
+          model.checkMatch1();
+          view.unblockGame();
+        }
+      });
     }
     else {
       obtainVector.getHandChar().card.removeController(controller.activate);
-      messenger.notifyPlayerCombo(comboCount, player.completeCombos);
+      messenger.notifyPlayerCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
     }
   }
   activate(oldChar, newChar) {
@@ -655,4 +630,4 @@ function gameinit(){
   model.setup();
 }
 document.getElementById("gamestart").addEventListener("click", gameinit);
-//gameinit();
+gameinit();

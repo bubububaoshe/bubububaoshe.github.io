@@ -13,9 +13,10 @@
 }
 #blocker {
   font-size: calc(var(--main-width)*0.05);
+  display: none;
 }
 .banner{
-  opacity: 0;
+  display: flex;
   background-color: var(--banner-background);
   align-items: center;
 }
@@ -167,13 +168,12 @@
 }
 
 .cover{
-  z-index: 999;
   position: absolute;
   top:0;
   bottom:0;
   left:0;
   right:0;
-  display: none;
+  z-index: 999;
 }
 
 .combobonus::before {
@@ -213,4 +213,26 @@
     top: calc(var(--card-height)*-0.25);
     opacity: 0;
   }
+}
+
+
+.transitform{
+  transition-property: transform;
+  transition-duration: var(--transition-sec);
+  -webkit-transition-property: transform;
+  -webkit-transition-duration: var(--transition-sec);
+}
+.transitopacity{
+  opacity: 0;
+  visibility: hidden;
+  transition-property: opacity;
+  transition-duration: var(--transition-sec);
+  -webkit-transition-property: opacity;
+  -webkit-transition-duration: var(--transition-sec);
+}
+.transitall{
+  transition-property: top, left, transform;
+  transition-duration: var(--transition-sec);
+  -webkit-transition-property: top, left, transform;
+  -webkit-transition-duration: var(--transition-sec);
 }

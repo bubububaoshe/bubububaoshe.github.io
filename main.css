@@ -108,24 +108,6 @@ body {
     height: var(--card-height);
     perspective: 1000px;
 }
-.transitform{
-  transition-property: transform;
-  transition-duration: var(--transition-sec);
-  -webkit-transition-property: transform;
-  -webkit-transition-duration: var(--transition-sec);
-}
-.transitopacity{
-  transition-property: opacity;
-  transition-duration: var(--transition-sec);
-  -webkit-transition-property: opacity;
-  -webkit-transition-duration: var(--transition-sec);
-}
-.transitall{
-  transition-property: top, left, transform;
-  transition-duration: var(--transition-sec);
-  -webkit-transition-property: top, left, transform;
-  -webkit-transition-duration: var(--transition-sec);
-}
 .card{
   width: 100%;
   height: 100%;

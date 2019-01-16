@@ -457,14 +457,17 @@ class TabledCombo{
   getName(){
     return COMBO_LIST[this.index][1];
   }
-  getFullScore(){
-    var score = COMBO_LIST[this.index][2];
+  calculateFullScore(){
+    this.fullScore = COMBO_LIST[this.index][2];
     for(var i=0; i<this.getSize(); i++){
       var res = this.characters[i].performTricks("ComboTrick", this);
       if(res != null)
-        score += res;
+        this.fullScore += res;
     }
-    return score;
+    return this.fullScore;
+  }
+  getFullScore(){
+    return this.fullScore;
   }
   getBaseScore(){
     return COMBO_LIST[this.index][2];
@@ -531,6 +534,7 @@ class Combos{
                     nccount ++;
                     pcombos.splice(k, 1);
                     player.completeCombos.unshift(pcombo);
+                    player.score += pcombo.calculateFullScore();
                   }
                   else{
                     //the combo is not complete, move it to the partiallist cardfront
@@ -622,6 +626,8 @@ class Player {
   }
   addTableChar(char) {
     //add a char to player's table
+    //return: [char score increment, combo count] (weird I know that)
+    var prescore = this.score;
     this.table.addChar(char);
     char.setOwner(this);
     var oppo = this.id==0?model.player1:model.player0;
@@ -638,8 +644,9 @@ class Player {
       this.table.characters[i].performTricks("CharTrick", this);
     }
     this.score += char.score;
+    var charinc = this.score - prescore;
     var comboCount = combos.getNewCombos(this, char);
-    return comboCount;
+    return [charinc, comboCount];
   }
   removeTableChar(char){
     //remove a char from player's table
@@ -670,6 +677,7 @@ class Player {
   recalculate(){
     //calculate score for the player
     console.log(this.id+"号重新算分");
+    var preScore = this.score;
     this.score = 0;
     //base score & special card bonus
     var chars = this.table.characters;
@@ -678,8 +686,9 @@ class Player {
       chars[i].recalculate(this); //recalculate char bonus
     }
     for(var i=0; i<this.completeCombos.length; i++)
-      this.score += this.completeCombos[i].getFullScore();
-    view.updateScore(this.id);
+      this.score += this.completeCombos[i].calculateFullScore();
+    if(preScore != this.score)
+      messenger.animeScoreInc(this.id, preScore, this.score - preScore);
   }
   getDesc() {
     var msg = "玩家" + this.id;
@@ -937,7 +946,10 @@ class Model {
     }*/
 
     console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
-    obtainVector.comboCount = player.addTableChar(obtainVector.playerTableChars[0]) + player.addTableChar(obtainVector.playerTableChars[1]);
+    var ac0 = player.addTableChar(obtainVector.playerTableChars[0]);
+    var ac1 = player.addTableChar(obtainVector.playerTableChars[1]);
+    obtainVector.charScoreInc = ac0[0] + ac1[0];
+    obtainVector.comboCount =  ac0[1] + ac1[1];
     controller.handleBans();
   }
   activate(char) {//player1 set a card active
