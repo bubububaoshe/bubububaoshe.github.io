@@ -318,6 +318,7 @@ class Messenger {
     document.querySelector("#score" + pid +  " div").textContent = preScore + inc;
     var incdiv = document.getElementsByClassName("combobonus")[pid];
     incdiv.textContent = inc;
+    reflow();
     incdiv.classList.add("animebonus");
     delayedFunc(function(){
       incdiv.classList.remove("animebonus");
@@ -360,7 +361,6 @@ class Messenger {
       var inc = combo.getFullScore();
       messenger.animeScoreInc(0, preScore, inc);
       messenger.note("对方完成组合\n"+combo.getDesc());
-      /////////////////////////////////////////////reflow();
       delayedFunc(function(){
         messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
       });
