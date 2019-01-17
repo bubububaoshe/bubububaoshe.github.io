@@ -5,11 +5,11 @@
   --board-background: rgba(114,90,64,0.6);
   --banner-background: rgba(42, 25, 10,0.5);
   --text-color: #7a614f;
-  --text-hl-color:#eadeaa;
+  --text-hl-color:#f9ebae;/*eadeaa*/
   --text-heading-color: #f9ebae;
-  --text-glow-color: #FFF6CE;
+  --text-glow-color: #eadeaa;/*FFF6CE*/
   --text-shadow-color: #252120;
-  --text-warnning-color: #DB4D3D;
+  --text-warning-color: #DB4D3D;
   --card-shadow-color: rgba(0,0,0,0.4);
   --card-glow-color: #fceba4;
   --final-background-color: rgba(40, 27, 17, 0.5);
@@ -46,14 +46,14 @@ body {
   justify-content: center;
 }
 #scoreboard{
-  width: 18%;
+  width: 17%;
 }
 #specialboard {
   width: 17%;
 }
 #gamezonecontainer{
   background-color: var(--gamezone-background);
-  width: 65%;
+  width: 66%;
 }
 #gamezone {
   height: 100%;

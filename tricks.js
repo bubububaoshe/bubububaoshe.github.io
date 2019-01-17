@@ -22,7 +22,7 @@ class ObtainVector{
     var so = this.getTrickSubjectObjectArrays(type);
     var subjects = so[0], objects = so[1];
     for(var i=0; i<subjects.length; i++){
-      var trick = subjects[i].getTricks(type);
+      var trick = subjects[i].getTrick(type);
       if(trick != null && objects[i] == null){console.log("[计划释放技能]"+subjects[i].name+":"+trick.constructor.name);
           return trick;
       }
@@ -74,7 +74,7 @@ class ObtainVector{
     var so = this.getTrickSubjectObjectArrays(type);
     var subjects = so[0], objects = so[1];
     for(var i=0; i<subjects.length; i++){
-      var trick = subjects[i].getTricks(type);
+      var trick = subjects[i].getTrick(type);
       if(trick != null && objects[i] == null)
         if(trick.selectTarget())
           return true;
@@ -110,38 +110,26 @@ class ObtainVector{
     var objects = this.getTrickSubjectObjectArrays(type)[1];
     return (objects[0]==null?0:1) (objects[1]==null?0:1);
   }
-  /*
-  setCopyTarget(target){
-    //it's a noswap trick, so the trickplayer must be the current player
-    this.setTrickTarget("CopyTrick", this.chars, this.copyChars, target);
-  }
-  setSwapTarget(target){
-    if(this.chars[0].getTricks("SwapTrick") && this.swapChars[0] == null)
-      this.swapChars[0] = target;
-    else
-      this.swapChars[1] = target;
-  }
-  setBanTarget(target){
-    var pid = 1-target.owner.id;
-    this.setTrickTarget("UnnamedBanTrick", this.groupedChars[pid], this.banChars[pid], target);
-  }
-  */
   setTrickTarget(type, target){
     var so = this.getTrickSubjectObjectArrays(type);
     var subjects = so[0], objects = so[1];
     var trick = null;
     for(var i=0; i<subjects.length; i++){
-      trick = subjects[i].getTricks(type);
+      trick = subjects[i].getTrick(type);
       if(trick != null && objects[i] == null){
-        objects[i] = trick.performTrick(target);
-        if(type == "SwapTrick"){
+        if(type == "SwapTrick" && target != null){
+          var oppo = target.owner;
+          var preScore = oppo.score;
+          objects[i] = trick.performTrick(target);
           this.playerTableChars[i] = objects[i];
           this.allChars.unshift(objects[i]);
           subjects[i].swapped = true;
           objects[i].swapped = true;
-          var oppo = obtainVector.player.id==0?model.player1:model.player0;
           oppo.addTableChar(subjects[i]);
+          messenger.animeScoreInc(oppo.id, preScore, oppo.score-preScore);
         }
+        else
+          objects[i] = trick.performTrick(target);
         return;
       }
     }
@@ -186,7 +174,7 @@ class Trick {
 }
 class SwapTrick extends Trick{
   constructor(){
-    super("交换对方任意一张牌。");
+    super("交换对方任意一张牌");
   }
   hasValidTarget(oppo){
     if(oppo.table.getSize() > 0)
@@ -210,7 +198,8 @@ class SwapTrick extends Trick{
 class RevealTrick extends Trick{
   // reveal cardNumber of cards in opponent's hand
   constructor(number){
-    super("随机翻开对手手牌"+number+"张。");
+    var nos = ["零", "一", "两", "三", "四", "五", "六", "七", "八", "九", "十"];
+    super("随机翻开对手手牌"+nos[number]+"张");
     this.cardNumber = number; //number of cards to reveal
   }
   performTrick() {console.log(this.owner.name+" 翻牌");
@@ -252,9 +241,9 @@ class ComboTrick extends Trick{
   // add <bonus> to combo with <cname>
   constructor(cname, bonus){
     if(cname != null)
-      super(cname + "的分数增加" + bonus + "分。");
+      super(cname + "的分数增加" + bonus + "分");
     else
-      super("自身能组成的组合每个增加" + bonus + "分。");
+      super("自身能组成的组合每个增加" + bonus + "分");
     this.comboName = cname;
     this.bonus = bonus;
   }
@@ -271,7 +260,7 @@ class CharTrick extends Trick{
   // add <bonus> to tabled char with <cname>
   // note: only benefit chars on one's own side
   constructor(cname, bonus){
-    super(cname + "的分数增加" + bonus + "分。");
+    super(cname + "的分数增加" + bonus + "分");
     this.charName = cname;
     this.bonus = bonus;
   }
@@ -306,17 +295,20 @@ class CharTrick extends Trick{
 }
 class UnnamedBanTrick extends Trick{
   constructor(){
-    super("禁用对方任意一张珍稀牌的技能。");
+    super("禁用对方任意一张珍稀牌的技能");
   }
   isValidTarget(char){
-    return char.getTricks("ComboTrick,CharTrick") != null;
+    return char.getTrick("ComboTrick,CharTrick,NamedBanTrick")!=null;
   }
-  selectTarget(){return super.selectTarget("禁用其加分技能", controller.selectBan);}
+  selectTarget(){return super.selectTarget("禁用其技能", controller.selectBan);}
   performTrick(char){
     if(char != null){
       console.log(this.owner.name + " 禁用 " + char.name);
       char.disabled = true;
-      char.owner.recalculate();
+      char.owner.recalculate(true);
+    }
+    else {
+      console.log(this.owner.name + " 无禁用对象");
     }
     this.disabled = true; //only works once
     return char;
@@ -325,15 +317,14 @@ class UnnamedBanTrick extends Trick{
 }
 class NamedBanTrick extends Trick{
   constructor(name){
-    super("禁用对方"+name+"珍稀牌的技能。");
+    super("禁用对方"+name+"珍稀牌的技能");
     this.targetName = name;
   }
   performTrick(char){
     if(char.name == this.targetName && !char.disabled) {
       console.log(this.owner.name +" 禁用 " + char.name);
       char.disabled = true;
-      this.disabled = true;
-      char.owner.recalculate();
+      this.disabled = true; //disabled after it ban's the target
       return true;
     }
     return false;
@@ -345,7 +336,13 @@ class CopyTrick extends Trick{
     super("复制对方任意一张珍稀牌的技能");
   }
   isValidTarget(char){
-    return char.isSpecial() && char.getTricks("CopyTrick")==null;
+    if(!char.isSpecial())
+      return false;
+    var noncopy = 0;
+    for(var i=0; i<char.tricks.length; i++)
+      if(char.tricks[i].constructor.name != "CopyTrick")
+        noncopy ++;
+    return noncopy > 0;
   }
   selectTarget(){return super.selectTarget("复制其所有技能", controller.selectCopy);}
   performTrick(char){

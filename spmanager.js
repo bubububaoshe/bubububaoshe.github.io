@@ -1,12 +1,11 @@
 PLAYER_SPECIALS = [
   [[],[]],
   [
-    ["hy2a", "xyz2b", "oysg1a", "fqx1a", "blts1b", "wry2b", "ywy2a", "xy2a"],
-    ["ly1a", "ywy2b", "xyz2a", "qhzr2a", "hy1a", "qy1a", "sx2a", "sy2a"]
-
+    ["blts1b", "fqx1a", "hy2a", "oysg1a", "wry2b", "xy2a", "xyz2b", "ywy2a"],
+    ["hy1a", "ly1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "xyz2a", "ywy2b"]
   ]
 ];
-//["ly1a", "hy2a", "ywy2b", "xyz2b", "qhzr2a", "hy1a", "oysg1a", "fqx1a", "blts1b", "qy1a", "sy2a", "sx2a",  "xy2a", "wry2b", "ywy2a", "xyz2a"],
+COMPLETE_SPECIALS = ["blts1b", "fqx1a", "hy1a", "hy2a", "ly1a", "oysg1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "wry2b", "xy2a", "xyz2a", "xyz2b", "ywy2a", "ywy2b"];
 class SPManager{
   constructor(){}
   initRepository(repo, pack) {
@@ -34,13 +33,13 @@ class SPManager{
         char.addTrick(trick);
         char.setNoswap();
         repo.addChar(char);
-        char = new SpecialCharacter("oysg1a", "欧阳少恭", "蓬莱", 4, "秋", "眼底无故人，\n偏有漏长惊永夜，\n梦魂又觉第几生。");
+        char = new SpecialCharacter("oysg1a", "欧阳少恭", "蓬莱", 4, "秋", "偏有漏长惊永夜，\n梦魂又觉第几生。");
         trick = new UnnamedBanTrick();
         char.addTrick(trick);
         trick = new ComboTrick("芳华如梦", 20);
         char.addTrick(trick);
         repo.addChar(char);
-        char = new SpecialCharacter("hy1a", "红玉", "道服", 4, "秋", "长霜雪凝精神，\n桃花铸肌骨。\n还报一寸心，\n愿同尘与土。");
+        char = new SpecialCharacter("hy1a", "红玉", "道服", 4, "秋", "霜雪凝精神，\n桃花铸肌骨。\n还报一寸心，\n愿同尘与土。");
         trick = new CopyTrick();
         char.addTrick(trick);
         char.setNoswap();
@@ -104,12 +103,43 @@ class SPManager{
       break;
     }
   }
+  getPlayerSpecialsArray(pid){
+    if(pid == 0)
+      return PLAYER_SPECIALS[SP_CARDS][pid];
+    if(SP_CARDS == 0)
+      return [];
+    return getCookie("qqxspecials");
+  }
+  initPlayerSpecials(player){
+    var sps = this.getPlayerSpecialsArray(player.id);
+    for (var i = 0; i < sps.length; i++)
+      player.specials.addChar(model.specialRepository.getChar(sps[i]));
+  }
+  awardSpecials(){
+    var minscore = BONUS_THRESHOLDS[AI_LEVEL-1];
+    if(model.player1.score >= minscore){
+      var pspecials = this.getPlayerSpecialsArray(1);
+      var clen = COMPLETE_SPECIALS.length;
+      if(pspecials.length < clen){
+        var rand = getRandom(clen - pspecials.length);
+        var award;
+        for(var i=0, idx=-1; i<clen; i++)
+          if(!pspecials.includes(COMPLETE_SPECIALS[i]) && ++idx == rand){
+              award = COMPLETE_SPECIALS[i];
+              break;
+            }
+        pspecials.push(award);
+        setCookie("qqxspecials", pspecials);
+        messenger.notifyAward(minscore, award);
+      }
+    }
+  }
 }
-function setCookie(cname, cvalue, exdays = 9999) {
+function setCookie(cname, carray, exdays = 9999) {
     var d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     var expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=" + cvalue + "; " + expires;
+    document.cookie = cname + "=" + carray.toString() + "; " + expires;
 }
 function getCookie(cname) {
     var name = cname + "=";
@@ -120,8 +150,8 @@ function getCookie(cname) {
             c = c.substring(1);
         }
         if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
+            return c.substring(name.length, c.length).split(",");
         }
     }
-    return "";
+    return [];
 }

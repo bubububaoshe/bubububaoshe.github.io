@@ -2,7 +2,7 @@
 maximum combo name size: 8
 maximum combo size: 6
 */
-
+DEFAULT_CHAR_POEM = "角色诗未录入\n珍稀牌也不太全\n牌面也截得不好...\n如果您可以帮忙\n请微博联系我\n@眉毛分你一半\n谢谢～";
 COMMON_CHAR_LIST = [
 [
   ["ly1", "陵越", 2, "冬"],
@@ -181,6 +181,7 @@ COMBO_LIST = [
 INIT_CARD_NUM_HAND = 10;
 INIT_CARD_NUM_POOL = 8;
 POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
+BONUS_THRESHOLDS = [200, 170, 140];
 
 function getRandom(max){
   //returns random in [0, max-1]
@@ -188,12 +189,12 @@ function getRandom(max){
 }
 
 class Character {
-  constructor(id, name, score, season, description) {
+  constructor(id, name, score, season, poem) {
     this.id = id;
     this.name = name;
     this.score = score;
     this.season = season;
-    this.description = description;
+    this.poem = poem;
     this.card = null;//card class in view
     this.owner = null;//player
     this.disabled = false;
@@ -205,14 +206,18 @@ class Character {
   }
   getSpecial(specials){
     // special cards won't be upgraded once more
+    // note: it does not only get the special, it does everything of an upgrade except assigning the new char
     if(this.isSpecial()) return this;
     var sps = specials.characters;
     for(var i=0; i<sps.length; i++)
       if(sps[i].name == this.name){
-        sps[i].card = this.card;
-        this.card.setChar(sps[i]);
-        sps[i].disabled = this.disabled;
-        return sps[i];
+        var sp = sps[i];
+        sp.card = this.card;
+        this.card.setChar(sp);
+        sp.disabled = this.disabled;
+        sps.splice(i, 1);
+        specials.view.deleteSpecial(i);
+        return sp;
       }
     return this;
   }
@@ -227,17 +232,18 @@ class Character {
     return msg;
   }
   performTricks(type, para) {return null;}
-  getTricks(type){return null;}
+  getTrick(type){return null;}
+  enabled(){return false;}//common chars has no tricks
   recalculate(player){}
 }
 class SpecialCharacter extends Character {
-  constructor(id, name, nameSuffix, score, season, description) {
-    super(id, name, score, season, description);
+  constructor(id, name, nameSuffix, score, season, poem) {
+    super(id, name, score, season, poem);
     this.nameSuffix = nameSuffix;
     this.tricks = [];
   }
   enabled(){
-    if (this.disabled || this.swapped && this.noSwap)
+    if (this.disabled || (this.swapped && this.noswap))
       return false;
     return true;
   }
@@ -246,7 +252,7 @@ class SpecialCharacter extends Character {
     trick.setOwner(this);
     var noswaps = "SwapTrick,CopyTrick";
     if(noswaps.includes(trick.constructor.name))
-      this.noSwap = true;
+      this.noswap = true;
   }
   isSpecial() {
     return true;
@@ -270,13 +276,21 @@ class SpecialCharacter extends Character {
         return this.tricks[i].performTrick(para);
     return null;
   }
-  getTricks(type) {
-    //checks if it has a trick of <type>
+  getTrick(type) {
+    //returns the first enabled trick of <type>
+    // if type is null, then returns any enabled trick
     if(!this.enabled())
       return null;
-    for(var i=0; i<this.tricks.length; i++)
-      if(type.includes(this.tricks[i].constructor.name) && this.tricks[i].enabled())
-        return this.tricks[i];
+    for(var i=0; i<this.tricks.length; i++){
+      if(this.tricks[i].enabled()){
+        if(type == null)
+          return this.tricks[i];
+        else {
+          if(type.includes(this.tricks[i].constructor.name))
+            return this.tricks[i];
+        }
+      }
+    }
     return null;
   }
   recalculate(player){
@@ -317,6 +331,8 @@ class Deck {
         this.characters.push(specials.characters[i]);
         if(idx != this.getSize())
           this.view.toSpecial(char, specials.characters[i]);
+        specials.characters.splice(i, 1);
+        specials.view.deleteSpecial(i);
         return true;
       }
     return false;
@@ -632,10 +648,7 @@ class Player {
     this.score = 0;
   }
   start(){
-    var len = PLAYER_SPECIALS[SP_CARDS][this.id].length;
-    for (var i = 0; i < len; i++) {
-      this.specials.addChar(model.specialRepository.getChar(PLAYER_SPECIALS[SP_CARDS][this.id][i]));
-    }
+    spmanager.initPlayerSpecials(this);
     this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
   }
   addTableChar(char) {
@@ -645,15 +658,18 @@ class Player {
     this.table.addChar(char);
     char.setOwner(this);
     var oppo = this.id==0?model.player1:model.player0;
+    //am i banned?
     for(var i=0; i<oppo.table.getSize(); i++){
       oppo.table.characters[i].performTricks("NamedBanTrick", char);
     }
-    var trick = char.getTricks("NamedBanTrick");
+    // do i ban someone?
+    var trick = char.getTrick("NamedBanTrick");
     if(trick != null)
       for(var i=0; i<oppo.table.getSize(); i++){
         if(trick.performTrick(oppo.table.characters[i]))
-          oppo.recalculate();
+          oppo.recalculate(true);
       }
+    // do i benefit (from) others?
     for(var i=0; i<this.table.getSize(); i++){
       this.table.characters[i].performTricks("CharTrick", this);
     }
@@ -685,10 +701,10 @@ class Player {
       }
       else
         idx ++;
-    this.recalculate();
+    this.recalculate(false);
     return char;
   }
-  recalculate(){
+  recalculate(animechange){
     //calculate score for the player
     console.log(this.id+"号重新算分");
     var preScore = this.score;
@@ -701,7 +717,7 @@ class Player {
     }
     for(var i=0; i<this.completeCombos.length; i++)
       this.score += this.completeCombos[i].calculateFullScore();
-    if(preScore != this.score)
+    if(preScore != this.score && animechange)
       messenger.animeScoreInc(this.id, preScore, this.score - preScore);
   }
   getDesc() {
@@ -714,7 +730,7 @@ class Player {
 }
 class Model {
   constructor(p1, p2) {
-    this.pack = [parseInt(p1), parseInt(p2)];
+    this.pack = [p1, p2];
     this.commonRepository = new Repository("common");
     this.specialRepository = new Repository("special");
     this.player0 = new Player(0);
@@ -889,13 +905,13 @@ class Model {
   aiSelectObtain() {
     //returns an array [hand pick, pool pick]
     switch (AI_LEVEL) {
-      case "ai1":
+      case 1:
         return model.pickLeft(this.player0);
         break;
-      case "ai2":
+      case 2:
         return model.pickOptimal(this.player0, this.player1, false);
         break;
-      case "ai3":
+      case 3:
         return model.pickOptimal(this.player0, this.player1, true);
         break;
       default: log("Invalid AI　Level!!!!!!!!");
@@ -929,11 +945,11 @@ class Model {
   }
   aiSelectDiscard(){
     switch (AI_LEVEL) {
-      case "ai1":
+      case 1:
         return null;
-      case "ai2":
+      case 2:
         return this.discardOptimal(model.player0, this.player1, false);
-      case "ai3":
+      case 3:
         return this.discardOptimal(model.player0, this.player1, true);
       default: log("Invalid AI　Level!!!!!!!!");
         return null;

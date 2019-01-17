@@ -36,18 +36,40 @@
   background-color: rgba(255, 246, 206, 0.2);
   box-shadow: 0 0 4px 2px rgba(255, 246, 206, 0.2);
 }
-.smallcard {
+.smallchar {
     margin: calc(var(--card-width)*0.05) calc(var(--card-width)*0.05) calc(var(--card-width)*0.15);
 }
-.smallcard>div{
+.smallcard::before{
+  content: "失效";
+}
+.smallcard {
+  background-color: var(--text-shadow-color);
   width: calc(var(--card-width) * 0.78);
   height: calc(var(--card-height) * 0.78);
+  margin: auto;
+  border-radius: 3%;
+  position: relative;
+  color: #aa916f;
+  font-size: calc(var(--card-width) * 0.3);
+  font-weight: bold;
+  font-family: "Arial", "Microsoft Yahei";
+  text-shadow: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.smallcard>div{
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top:0;
+  left:0;
   background-size: 100% 100%;
   border-radius: 3%;
   box-shadow: 3px 3px 6px 0 rgba(0,0,0,0.4);
   -webkit-box-shadow: 3px 3px 6px 0 rgba(0,0,0,0.4);
 }
-.smallcard>p{
+.smallchar>p{
   font-family: "Microsoft Yahei";
   color: var(--text-shadow-color);
   font-size: calc(var(--main-width)*0.013);
@@ -130,7 +152,7 @@
   letter-spacing: -1px;
 }
 .combocard #combocardchars span.notmine{
-  color: var(--text-warnning-color);
+  color: var(--text-warning-color);
 }
 .combocard #combocardchars span:not(:last-child)::after{
   content:"、";
@@ -149,20 +171,23 @@
   margin: calc(var(--card-height)*0.1) auto 0;
 }
 
+.hoverinfobox{
+  text-align: left;
+  position: fixed;
+  overflow: hidden;
+}
 .charcontainer>.hoverinfobox{
   visibility: hidden;
 }
 .charcontainer.faceup>.hoverinfobox, #hand1 .charcontainer>.hoverinfobox, #pool .charcontainer>.hoverinfobox{
   visibility: visible;
-  text-align: left;
-  position: fixed;
-  background-color: rgba(0,0,0,0);
-  top: calc(50% - var(--card-height)*0.75);
-  left: calc(50% + var(--main-width)*0.415 - var(--main-width)*0.075);
-  overflow: hidden;
   width: calc(var(--main-width) * 0.15);
   height: calc(var(--card-height)*1.5);
+  top: calc(50% - var(--card-height)*0.75);
+  left: calc(50% + var(--main-width)*0.34);
+  background-color: rgba(0,0,0,0);
 }
+
 .charcontainer>.hoverinfobox>div{
   width: calc(var(--main-width) * 0.15);
   float: left;
@@ -172,16 +197,22 @@
   margin-bottom: 10%;
 }
 .hoverinfobox .namepanel{
-  color: var(text-heading-color);
-  font-size: calc(var(--card-width)*0.21);
-  padding: 2% 0;
+  color: var(--text-hl-color);
+  font-size: calc(var(--card-width)*0.2);
   border-width: 0 0 2px 0;
   border-style: solid;
   border-image: linear-gradient(to right,
     rgba(249, 235, 174,0),
     rgba(249, 235, 174,1) 30%,
     rgba(249, 235, 174,0) 100%) 100% 1;
-  }
+}
+.hoverinfobox .namepanel>div{
+  margin-bottom: 5%;
+}
+.hoverinfobox .teammatepanel{
+  color: var(--text-glow-color);
+  font-family: "Arial", "Microsoft Yahei";
+}
 .charcontainer>.hoverinfobox>.namepanel>div:first-child{
   width: 80%;
   float: left;
@@ -204,9 +235,53 @@
 }
 .charcontainer .hoverinfobox .teammatepanel{
   font-size: calc(var(--card-width)*0.15);
-  font-family: "KaiTi", "楷体";
-  color: var(--text-hl-color);
 }
-.charcontainer .hoverinfobox .teammatepanel div{
+.smallchar>.hoverinfobox{
+  width: calc(var(--main-width)*0.17);
+  height: var(--main-height);
+  top: calc(50% - var(--main-height)*0.5);
+  left: calc(50% + var(--main-width)*0.33);
+  background-color: rgba(42, 25, 10,0.7);
+  z-index: 99;
+  width: 0;
+  transition: width var(--transition-sec);
+}
+.smallchar:hover>.hoverinfobox, .smallchar:active>.hoverinfobox{
+  width: calc(var(--main-width)*0.17);
+}
+.smallchar>.hoverinfobox>div{
+  width: calc(var(--main-width)*0.15);
+  margin-left:calc(var(--main-width)*0.01);
+}
+.smallchar>.hoverinfobox>.namepanel{
+  margin-top: calc(var(--main-width)*0.055);
+}
+.smallchar>.hoverinfobox>.namepanel>div{
+  font-size: calc(var(--card-width)*0.24);
   margin-bottom: 5%;
+}
+.smallchar>.hoverinfobox>.poempanel{
+  margin-top: calc(var(--main-width)*0.015);
+  font-size: calc(var(--card-width)*0.17);
+}
+.smallchar>.hoverinfobox>.teammatepanel{
+  margin-top: calc(var(--main-width)*0.06);
+}
+.smallchar>.hoverinfobox>.trickpanel{
+  margin-top: calc(var(--main-width)*0.05);
+  font-family: "Arial", "Microsoft Yahei";
+  color: var(--text-glow-color);
+}
+.smallchar>.hoverinfobox>.trickpanel>div{
+  margin: calc(var(--main-width)*0.01) 0 2%;
+}
+.hoverinfobox .poempanel{
+  white-space: pre;
+}
+.smallchar>.hoverinfobox>div:last-child{
+  font-size: calc(var(--card-width)*0.15);
+}
+.specials .smallchar>.hoverinfobox{
+  left: auto;
+  right: calc(50% + var(--main-width)*0.33);
 }

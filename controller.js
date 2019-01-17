@@ -1,5 +1,3 @@
-
-
 function delayedFunc(func, timeUnits){
   if (timeUnits == null)
   timeUnits = 1;
@@ -55,9 +53,10 @@ class Controller{
         }, 2);
       }
       else{
-        if(model.player0.hand.getSize()+model.player1.hand.getSize() == 0)
+        if(model.player1.hand.getSize() == 0){
           //game end
           messenger.notifyFinal();
+        }
         else {
           model.dealOne(model.player0);
           model.checkMatch1();
@@ -77,6 +76,8 @@ class Controller{
       oppoinfo.exit();
     }
     else {
+      if(playerinfo.specialsPanelOn())
+        playerinfo.exitSpecialsPanel();
       oppoinfo.hide();
       playerinfo.show();
     }
@@ -87,8 +88,19 @@ class Controller{
       oppoinfo.exit();
     }
     else {
+      if(playerinfo.specialsPanelOn())
+        playerinfo.exitSpecialsPanel();
       playerinfo.hide();
       oppoinfo.show();
+    }
+  }
+  checkPlayerSpecials(){
+    if(playerinfo.specialsPanelOn())
+      playerinfo.exitSpecialsPanel();
+    else{
+      if(playerinfo.visible()) playerinfo.exit();
+      if(oppoinfo.visible()) oppoinfo.exit();
+      playerinfo.showSpecialsPanel();
     }
   }
   selectInfo(){
@@ -191,5 +203,7 @@ class Controller{
     var type = "UnnamedBanTrick";
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
     controller.handleBans();
+  }
+  doNothing(){
   }
 }
