@@ -143,7 +143,10 @@ background-image : linear-gradient(to right,
   font-size: 1.5vw;
 }
 
-#gamestart, #start_match, #confirm_match, #cancel_match {
+#gamestart, #start_match,
+#confirm_match, #cancel_match,
+#create_room, #join_room,
+#inviteinput, #invitebutton {
   border: 1px solid  #281B11;
   width: 25%;
   padding: 1vw 0;
