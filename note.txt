@@ -1,3 +1,35 @@
+[记得处理的小问题：infobanner gradient not working on ios safari]
+
+当前进度：
+完成：[特殊牌][程序逻辑整理]
+未完成：[卡牌信息][特殊牌发放][特殊牌存储][特殊牌选择]
+
+
+先做1.主界面
+卡牌信息先做吧：
+3个可能位置：
+考虑到可能重用，每个部分都搞一个function生成对应的div
+1. 主界面(done)
+  hand1, pool, hand0.faceup
+	右侧 hoverinfobox 那个位置
+	显示内容：[名字:基础分]/[可形成组合的卡牌](即使是特殊牌也只显示这些)
+2. 特殊牌仓库界面
+  左侧整条
+	显示内容：[名字*后缀]/[角色尬诗]/[技能]*n
+3. 明牌堆界面
+  右侧整条
+	显示内容：
+	  特殊牌：同上
+		普通牌：[名字]/[角色尬诗]/[可组队卡牌] (然而普通牌的角色尬诗我没录。。。)
+
+附加：
+  明牌界面：
+	  已禁用卡牌黑化（disabled, swapped&noswap）
+		已失效技能标注（disabled）
+
+尽量用hover/active完成，不要再listener了。。。
+
+
 特殊牌：
 id：普通角色名首字母+游戏代数+字母
 	e.g.,如果存在3张沈夜特殊牌，则分别为sy2a,sy2b,sy2c
@@ -13,13 +45,19 @@ id：普通角色名首字母+游戏代数+字母
 
 哈哈哈错了，copy才应该是最早用的，因为copy可能引发其他任何技能。给除copy以外的技能搞一个clone吧。
 obtain整体流程
-copy?
-swap?
+preObtain: copy?/swap? (一旦引发从头preobtain)
+
+inObtain:
 model.obtain
-addchar
-ban?
+(次序分先后因为这里被ban是namedban不会引发reveal了)
+ban
 user reveal?(flip card)
-view.obtain: oppo swap?ban?copy?
+view.obtain: actions, combos
+
+postObtain:
+deal
+end or next obtain
+
 (info banner disappear upon user clicks)
 
 当前进度：

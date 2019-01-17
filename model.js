@@ -188,11 +188,12 @@ function getRandom(max){
 }
 
 class Character {
-  constructor(id, name, score, season) {
+  constructor(id, name, score, season, description) {
     this.id = id;
     this.name = name;
     this.score = score;
     this.season = season;
+    this.description = description;
     this.card = null;//card class in view
     this.owner = null;//player
     this.disabled = false;
@@ -231,9 +232,8 @@ class Character {
 }
 class SpecialCharacter extends Character {
   constructor(id, name, nameSuffix, score, season, description) {
-    super(id, name, score, season);
+    super(id, name, score, season, description);
     this.nameSuffix = nameSuffix;
-    this.description = description;
     this.tricks = [];
   }
   enabled(){
@@ -412,14 +412,14 @@ class Repository extends Deck {
   init(){
     if (this.type == "common")
     {
-      this.initCommonRepo(model.p1);
-      this.initCommonRepo(model.p2);
+      this.initCommonRepo(model.pack[0]);
+      this.initCommonRepo(model.pack[1]);
     }
     else if (this.type == "special"){
-      spmanager.initRepository(this, model.p1);
-      spmanager.initRepository(this, model.p2);
-      spmanager.initRepository(this, model.p1);
-      spmanager.initRepository(this, model.p2);
+      spmanager.initRepository(this, model.pack[0]);
+      spmanager.initRepository(this, model.pack[1]);
+      spmanager.initRepository(this, model.pack[0]);
+      spmanager.initRepository(this, model.pack[1]);
     }
     else
       console.log("Illegal Repository Type: " + this.type);
@@ -438,6 +438,7 @@ class TabledCombo{
   constructor(char, index){
     this.characters = [char];
     this.index = index;
+    this.fullScore = this.getBaseScore;
   }
   addChar(char){
     this.characters.push(char);
@@ -509,6 +510,19 @@ class Combos{
     }
     getSize(){
       return COMBO_LIST.length;
+    }
+    getTeamMates(char){
+      var mates = [];
+      for(var i=0; i<COMBO_LIST.length; i++){
+        var names = COMBO_LIST[i][0];
+        if(names.includes(char.name)){
+          for(var j=0; j<names.length; j++) {
+              if(names[j] != char.name && !mates.includes(names[j]))
+                mates.push(names[j]);
+          }
+        }
+      }
+      return mates;
     }
     getNewCombos(player, char){
       //update player: partialCombos. completeCombos, score
@@ -700,8 +714,7 @@ class Player {
 }
 class Model {
   constructor(p1, p2) {
-    this.p1 = p1;
-    this.p2 = p2;
+    this.pack = [parseInt(p1), parseInt(p2)];
     this.commonRepository = new Repository("common");
     this.specialRepository = new Repository("special");
     this.player0 = new Player(0);
@@ -945,7 +958,7 @@ class Model {
       }
     }*/
 
-    console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
+    //console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
     var ac0 = player.addTableChar(obtainVector.playerTableChars[0]);
     var ac1 = player.addTableChar(obtainVector.playerTableChars[1]);
     obtainVector.charScoreInc = ac0[0] + ac1[0];

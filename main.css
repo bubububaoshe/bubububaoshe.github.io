@@ -6,14 +6,15 @@
   --banner-background: rgba(42, 25, 10,0.5);
   --text-color: #7a614f;
   --text-hl-color:#eadeaa;
+  --text-heading-color: #f9ebae;
   --text-glow-color: #FFF6CE;
   --text-shadow-color: #252120;
   --text-warnning-color: #DB4D3D;
   --card-shadow-color: rgba(0,0,0,0.4);
-  --card-glow-color: #F9F56E;
+  --card-glow-color: #fceba4;
   --final-background-color: rgba(40, 27, 17, 0.5);
-  --transition-sec: 0.5s;
   /*
+  --transition-sec
   --card-width
   --card-height
   --main-width
@@ -103,10 +104,14 @@ body {
   width: var(--card-width);
   height: var(--card-height);
 }
+.charcontainer{
+  width: var(--card-width);
+  height: var(--card-height);
+}
 .cardcontainer{
-    width: var(--card-width);
-    height: var(--card-height);
-    perspective: 1000px;
+  width: 100%;
+  height: 100%;
+  perspective: 1000px;
 }
 .card{
   width: 100%;
@@ -150,13 +155,13 @@ body {
   text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
   -webkit-text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
 }
-.faceup{
+.faceup .card{
   transform: rotateY(180deg);
 }
 
 
 /*---------------------for testing----------------------
 */
-#hand0 .cardcontainer:hover .card{
+#hand0 .charcontainer:hover .card{
   transform: rotateY(180deg);
 }

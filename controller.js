@@ -1,4 +1,4 @@
-var OPERATION_DELAY = 500; //delay in milliseconds between machine operations
+
 
 function delayedFunc(func, timeUnits){
   if (timeUnits == null)
@@ -18,7 +18,6 @@ class Controller{
     model.activate(char);
   }
   obtain(){
-    view.blockGame();
     var handc = model.activeChar;
     model.activate(handc);
     model.player1.hand.removeChar(handc);
@@ -46,6 +45,26 @@ class Controller{
       obtainVector.init(model.player0, hc, pc);
       controller.handleCopies();
     }
+  }
+  postObtain(pid){
+    delayedFunc(function(){
+      if(pid == 1){
+        model.dealOne(model.player1);
+        delayedFunc(function(){
+          controller.opponentObtain();
+        }, 2);
+      }
+      else{
+        if(model.player0.hand.getSize()+model.player1.hand.getSize() == 0)
+          //game end
+          messenger.notifyFinal();
+        else {
+          model.dealOne(model.player0);
+          model.checkMatch1();
+          view.unblockGame();
+        }
+      }
+    });
   }
   discard(){
     var char = model.player1.hand.getChar(this.id);
@@ -94,7 +113,7 @@ class Controller{
         var target = model.aiSelectCopy(trick);
         obtainVector.setTrickTarget(type, target);
         if(target != null)
-          messenger.notifyOppoAction(type, controller.confirmCopy);
+          messenger.notifyOppoAction(type, controller.confirmPreObtain);
         else
           controller.handleCopies();
       }
@@ -113,9 +132,9 @@ class Controller{
         var target = model.aiSelectSwap();
         obtainVector.setTrickTarget(type, target);
         if(target != null)
-          messenger.notifyOppoAction(type, controller.confirmSwap);
+          messenger.notifyOppoAction(type, controller.confirmPreObtain);
         else
-          controller.handleSwaps();
+          controller.handleCopies();
       }
       else
         model.obtain();
@@ -143,15 +162,12 @@ class Controller{
   }
   handleReveals(){
     obtainVector.performReveal();
+    view.blockGame();
     view.obtain();
   }
-  confirmCopy(){
-    messenger.exitNotifyOppoAction(controller.confirmCopy);
+  confirmPreObtain(){
+    messenger.exitNotifyOppoAction(controller.confirmPreObtain);
     controller.handleCopies();
-  }
-  confirmSwap(){
-    messenger.exitNotifyOppoAction(controller.confirmSwap);
-    controller.handleSwaps();
   }
   confirmBan(){
     messenger.exitNotifyOppoAction(controller.confirmBan);
@@ -168,7 +184,7 @@ class Controller{
     oppoinfo.exitSelectionPanel();
     var type = "SwapTrick";
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    controller.handleSwaps();
+    controller.handleCopies();
   }
   selectBan(){
     oppoinfo.exitSelectionPanel();

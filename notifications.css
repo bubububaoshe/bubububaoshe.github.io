@@ -1,4 +1,4 @@
-#infobox, #hoverinfobox{
+#infobox{
   height: calc(var(--card-height)*0.5);
   font-size: calc(var(--main-width)*0.02);
   white-space: pre;
@@ -7,13 +7,13 @@
   align-items: center;
   padding: 0 5%;
 }
-#hoverinfobox{
+#specialboard #hoverinfobox{
   margin: calc(var(--card-height)*0.25) 0;
   height: calc(var(--card-height)*1.5);
 }
 #blocker {
   font-size: calc(var(--main-width)*0.05);
-  display: none;
+  z-index: 999;
 }
 .banner{
   display: flex;
@@ -24,10 +24,10 @@
   width: 100%;
   padding: calc(var(--card-height)*0.3) 0;
   background-image : linear-gradient(to right,
-                      rgb(30,19,10, 0) 10%,
-                      rgb(30,19,10, 0.7) 40%,
-                      rgb(30,19,10, 0.7) 60%,
-                      rgb(30,19,10, 0) 90%);
+                      rgba(30,19,10, 0) 10%,
+                      rgba(30,19,10, 0.7) 40%,
+                      rgba(30,19,10, 0.7) 60%,
+                      rgba(30,19,10, 0) 90%);
 }
 .banner .bannertext{
   margin-bottom: calc(var(--card-height)*0.1);
@@ -79,8 +79,7 @@
 }
 
 #finalcontainer{
-  visibility: hidden;
-  display: block;
+  z-index: 999;
   transition: transform 2s ease-out;
   -webkit-transition: transform 2s ease-out;
   transform: translate(0, calc(var(--win-height) * -1));
@@ -168,16 +167,16 @@
 }
 
 .cover{
+  visibility: hidden;
   position: absolute;
   top:0;
   bottom:0;
   left:0;
   right:0;
-  z-index: 999;
 }
 
 .combobonus::before {
-    content: "+";
+    content: "";
     margin-left: -100%;
 }
 .combobonus::after {
@@ -224,11 +223,8 @@
 }
 .transitopacity{
   opacity: 0;
-  visibility: hidden;
-  transition-property: opacity;
-  transition-duration: var(--transition-sec);
-  -webkit-transition-property: opacity;
-  -webkit-transition-duration: var(--transition-sec);
+  transition: opacity var(--transition-sec) linear;
+  -webkit-transition: opacity var(--transition-sec) linear;
 }
 .transitall{
   transition-property: top, left, transform;

@@ -4,7 +4,8 @@ MAX_MAIN_RATIO = 2;//max width/height ratio of the main board
 MIN_MAIN_RATIO = 1.7;//min width/height ratio of the main board
 CARD_RATIO = 3 / 4; //width/height ratio of a card
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
-MOVE_DURATION = 2; //2 time units (500ms)
+OPERATION_DELAY = 500; //delay in milliseconds between machine operations
+MOVE_DURATION = 2; //2 time units (OPERATION_DELAY)
 
 var CARDH=0, CARDW=0, WINW=0, WINH=0, MAINW=0, MAINH=0;
 
@@ -77,9 +78,12 @@ class Card{
   */
   constructor(char) {
     this.container = document.createElement("div");
-    this.container.classList.add("cardcontainer", "transitall");
+    this.container.classList.add("charcontainer");
+    var cardContainer = document.createElement("div");
+    this.container.appendChild(cardContainer);
+    cardContainer.classList.add("cardContainer", "transitall");
     this.card = document.createElement("div");
-    this.container.appendChild(this.card);
+    cardContainer.appendChild(this.card);
     this.card.id = char.id;
     this.card.classList.add("card", "transitform");
     var front = document.createElement("div");
@@ -89,6 +93,47 @@ class Card{
     var back = document.createElement("div");
     this.card.appendChild(back);
     back.classList.add("cardback");
+    this.container.appendChild(this.createInfobox(char));
+  }
+  createInfobox(char){
+    var div = document.createElement("div");
+    div.classList.add("hoverinfobox", "transitopacity");
+    div.appendChild(this.createNamePanel(char, true));
+    div.appendChild(this.createTeammatePanel(char));
+    return div;
+  }
+  createTeammatePanel(char){
+    var div = document.createElement("div");
+    div.classList.add("teammatepanel");
+    var mates = combos.getTeamMates(char);
+    var len = mates.length;
+    div.innerHTML = "<div>可组合的卡牌：<br></div>";
+    for(var i=0; i<len-1; i++)
+      div.innerHTML += mates[i] + "、";
+    if(len > 0)
+      div.innerHTML += mates[len-1];
+    return div;
+  }
+  createNamePanel(char, showscore){
+    var div = document.createElement("div");
+    div.classList.add("namepanel", "bignotice");
+    var namediv = document.createElement("div");
+    div.appendChild(namediv);
+    if(char.isSpecial())
+      namediv.textContent = char.name + "&bull;" + char.nameSuffix;
+    else
+      namediv.textContent = char.name;
+    if(showscore){
+      var scorediv = document.createElement("div");
+      div.appendChild(scorediv);
+      var span = document.createElement("span");
+      scorediv.appendChild(span);
+      span.textContent = char.score;
+      span = document.createElement("span");
+      scorediv.appendChild(span);
+      span.textContent = "分";
+    }
+    return div;
   }
   setChar(char){
     this.card.id = char.id;
@@ -117,11 +162,11 @@ class Card{
     container.style.zIndex = null;
   }
   activate(){
-    this.container.classList.add("pop");
+    this.container.firstElementChild.classList.add("pop");
     this.card.classList.add("glow");
   }
   deactivate(){
-    this.container.classList.remove("pop");
+    this.container.firstElementChild.classList.remove("pop");
     this.card.classList.remove("glow");
   }
   match(){
@@ -133,7 +178,7 @@ class Card{
     this.removeController(controller.obtain);
   }
   faceup(){
-    this.card.classList.add("faceup");
+    this.container.classList.add("faceup");
   }
   facedown(){
     this.card.classList.remove("faceup");
@@ -317,7 +362,10 @@ class Messenger {
     // anime score and score inc
     document.querySelector("#score" + pid +  " div").textContent = preScore + inc;
     var incdiv = document.getElementsByClassName("combobonus")[pid];
-    incdiv.textContent = inc;
+    if(inc > 0)
+      incdiv.textContent = "+" + inc;
+    else
+      incdiv.textContent = inc;
     reflow();
     incdiv.classList.add("animebonus");
     delayedFunc(function(){
@@ -346,14 +394,8 @@ class Messenger {
       }
       sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getName());
     }
-    else{
-      delayedFunc(function(){
-        model.dealOne(model.player1);
-        delayedFunc(function(){
-          controller.opponentObtain();
-        }, 2);
-      });
-    }
+    else
+      controller.postObtain(1);
   }
   notifyOppoCombo(preScore, comboCount, combos){
     if(comboCount > 0){
@@ -464,6 +506,7 @@ class View {
     model.player1.table.view = this.table1;
     model.player1.specials.view = this.specials1;
     model.pool.view = this.pool;
+    document.documentElement.style.setProperty("--transition-sec", OPERATION_DELAY + "ms");
     window.addEventListener("resize", this.setSizes);
   }
   checkMatch1(){
@@ -486,10 +529,10 @@ class View {
     }
   }
   blockGame(){
-    document.getElementById("blocker").style.display = "block";
+    document.getElementById("blocker").style.visibility = "visible";
   }
   unblockGame(){
-    document.getElementById("blocker").style.display = "none";
+    document.getElementById("blocker").style.visibility = null;
   }
   discard(player, oldChar, newChar) {
     if (player.id == 1) {
@@ -541,18 +584,8 @@ class View {
     view.swappedObtain(player, obtainVector.chars[1], obtainVector.swapChars[1]);
     messenger.animeScoreInc(player.id, obtainVector.preScore, charInc);
     if(player.id == 0){
-      //messenger.notifyOppoSwap(obtainVector.getTrickCount("SwapTrick"));
       messenger.notifyOppoCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
-      delayedFunc(function(){
-        if(model.player0.hand.getSize()+model.player1.hand.getSize() == 0)
-          //game end
-          messenger.notifyFinal();
-        else {
-          model.dealOne(model.player0);
-          model.checkMatch1();
-          view.unblockGame();
-        }
-      });
+      controller.postObtain(0);
     }
     else {
       obtainVector.getHandChar().card.removeController(controller.activate);
@@ -630,4 +663,4 @@ function gameinit(){
   model.setup();
 }
 document.getElementById("gamestart").addEventListener("click", gameinit);
-//gameinit();
+gameinit();

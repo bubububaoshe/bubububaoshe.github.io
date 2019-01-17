@@ -12,7 +12,7 @@ class SPManager{
   initRepository(repo, pack) {
     var char, trick;
     switch (pack) {
-      case "1":
+      case 1:
         char = new SpecialCharacter("qy1a", "悭臾", "水虺", 4, "夏", "榣山水湄遇长琴， \n通天彻地为知音。");
         trick = new ComboTrick(null, 10);
         char.addTrick(trick);
@@ -46,7 +46,7 @@ class SPManager{
         char.setNoswap();
         repo.addChar(char);
       break;
-      case "2":
+      case 2:
         char = new SpecialCharacter("sy2a", "沈夜", "紫微", 4, "冬", "天命难解此中局，\n神血护佑心魔曲。");
         trick = new DealTrick(" 下一回合一定出现一个流月城角色",["华月","沈曦","谢衣"], true);
         char.addTrick(trick);
@@ -100,7 +100,7 @@ class SPManager{
         char.setNoswap();
         repo.addChar(char);
       break;
-      case "3":
+      case 3:
       break;
     }
   }
