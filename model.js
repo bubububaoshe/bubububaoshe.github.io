@@ -2,7 +2,7 @@
 maximum combo name size: 8
 maximum combo size: 6
 */
-
+DEFAULT_CHAR_POEM = "角色诗未录入\n珍稀牌也不太全\n牌面也截得不好...\n如果您可以帮忙\n请微博联系我\n@眉毛分你一半\n谢谢～";
 COMMON_CHAR_LIST = [
 [
   ["ly1", "陵越", 2, "冬"],
@@ -177,37 +177,49 @@ COMBO_LIST = [
   [ ["巫炤", "缙云"], "意难平", 4],
   [ ["巫炤", "欧阳少恭"], "放弃治疗", 4]
   */
-]
-PLAYER_SPECIALS = [
-  [],
-  []
 ];
-
 INIT_CARD_NUM_HAND = 10;
 INIT_CARD_NUM_POOL = 8;
 POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
+BONUS_THRESHOLDS = [170, 140, 110];
 
-
-class Trick {
-  constructor(description) {
-    this.description = description;
-  }
-  performTrick() {
-    return this.description;
-  }
+function getRandom(max){
+  //returns random in [0, max-1]
+  return Math.floor((Math.random()*max));
 }
+
 class Character {
-  constructor(id, name, score, season) {
+  constructor(id, name, score, season, poem) {
     this.id = id;
     this.name = name;
-    this.description = "";
     this.score = score;
     this.season = season;
+    this.poem = poem;
     this.card = null;//card class in view
     this.owner = null;//player
+    this.disabled = false;
+    this.swapped = false;
+    this.noswap = false;
   }
   isSpecial() {
     return false;
+  }
+  getSpecial(specials){
+    // special cards won't be upgraded once more
+    // note: it does not only get the special, it does everything of an upgrade except assigning the new char
+    if(this.isSpecial()) return this;
+    var sps = specials.characters;
+    for(var i=0; i<sps.length; i++)
+      if(sps[i].name == this.name){
+        var sp = sps[i];
+        sp.card = this.card;
+        this.card.setChar(sp);
+        sp.disabled = this.disabled;
+        sps.splice(i, 1);
+        specials.view.deleteSpecial(i);
+        return sp;
+      }
+    return this;
   }
   setOwner(owner) {
     this.owner = owner;
@@ -219,28 +231,77 @@ class Character {
     var msg = this.id + "：" + this.name + "，" + this.score + "分，" + this.season + "季, 归属玩家" + (this.owner == null ? "-" : this.owner.id) + "\n";
     return msg;
   }
+  performTricks(type, para) {return null;}
+  getTrick(type){return null;}
+  enabled(){return false;}//common chars has no tricks
+  recalculate(player){}
 }
 class SpecialCharacter extends Character {
-  constructor(id, name, description, score, season) {
-    super(id, name, description, score, season);
+  constructor(id, name, nameSuffix, score, season, poem) {
+    super(id, name, score, season, poem);
+    this.nameSuffix = nameSuffix;
     this.tricks = [];
+  }
+  enabled(){
+    if (this.disabled || (this.swapped && this.noswap))
+      return false;
+    return true;
   }
   addTrick(trick) {
     this.tricks.push(trick);
+    trick.setOwner(this);
+    var noswaps = "SwapTrick,CopyTrick";
+    if(noswaps.includes(trick.constructor.name))
+      this.noswap = true;
   }
   isSpecial() {
     return true;
   }
-  performTricks() {
-    var msg = "",
-      tlen = this.tricks.length;
-    for (var i = 0; i < tlen; i++)
-      msg += "技能" + (i + 1) + "：" + this.tricks[i].performTrick() + "\n";
-    return msg;
+  getCommonChar(){
+    var repo = model.commonRepository.characters;
+    for(var i=0; i<repo.length; i++)
+      if(repo[i].name == this.name)
+        return repo[i];
+    return null;
+  }
+  setNoswap(){
+    this.noswap = true;
+  }
+  performTricks(type, para) {
+    //perform a trick of <type>, only performs one trick
+    if(!this.enabled())
+      return null;
+    for(var i=0; i<this.tricks.length; i++)
+      if(this.tricks[i].enabled() && type.includes(this.tricks[i].constructor.name))
+        return this.tricks[i].performTrick(para);
+    return null;
+  }
+  getTrick(type) {
+    //returns the first enabled trick of <type>
+    // if type is null, then returns any enabled trick
+    if(!this.enabled())
+      return null;
+    for(var i=0; i<this.tricks.length; i++){
+      if(this.tricks[i].enabled()){
+        if(type == null)
+          return this.tricks[i];
+        else {
+          if(type.includes(this.tricks[i].constructor.name))
+            return this.tricks[i];
+        }
+      }
+    }
+    return null;
+  }
+  recalculate(player){
+    if(!this.enabled()) return;
+    for(var i=0; i<this.tricks.length; i++){
+      if(this.tricks[i].enabled())
+        this.tricks[i].recalculate(player);
+    }
   }
   getDesc() {
     var msg = super.getDesc();
-    msg += this.performTricks();
     return msg;
   }
 }
@@ -249,9 +310,32 @@ class Deck {
     this.characters = [];
     this.view = null;
   }
-  initDeck(size, repo) {
+  initDeck(size, commons, specials) {
     for (var i = 0; i < size; i++)
-      this.addChar(repo.removeRandom());
+      this.addChar(commons.removeRandom());
+    var me = this;
+    if(specials!=null && specials.getSize()>0){
+      delayedFunc(function(){
+        for (var i = 0, idx = 0; i < size; i++){
+          if(!me.toSpecial(idx, specials))
+            idx ++;
+        }
+      },1);
+    }
+  }
+  toSpecial(idx, specials){
+    var char = this.characters[idx];
+    for(var i=0; i<specials.getSize(); i++)
+      if(specials.characters[i].name == char.name) {
+        this.characters.splice(idx, 1);
+        this.characters.push(specials.characters[i]);
+        if(idx != this.getSize())
+          this.view.toSpecial(char, specials.characters[i]);
+        specials.characters.splice(i, 1);
+        specials.view.deleteSpecial(i);
+        return true;
+      }
+    return false;
   }
   getSize(){
     return this.characters.length;
@@ -259,7 +343,7 @@ class Deck {
   addChar(char) {
     this.characters.push(char);
   }
-  addRandom(repo) {
+  addRandom(repo, specials) {
     if (repo.characters.length == 0) {
       alert("Empty deck!");
       return null;
@@ -270,7 +354,10 @@ class Deck {
   }
   getMatch(char) {
     var s = char.season;
+
+    /////////!!!!!!!!!!!!!!!!!!!!!Modified for testingggggggg!!!!!!!!!!!!!!!!!
     for (var i = 0; i < this.getSize(); i++)
+    //for (var i = this.getSize()-1; i >= 0; i--)
       if (this.characters[i].season == s)
         return this.characters[i];
     return null;
@@ -279,8 +366,13 @@ class Deck {
     this.view.clear();
     this.characters.length = 0;
   }
+  destroy(){
+    this.characters.length = 0;
+    if(this.view != null)
+      this.view.destroy();
+  }
   removeRandom() {
-    var i = Math.floor((Math.random() * this.characters.length));
+    var i = getRandom(this.characters.length);
     var char = this.characters[i];
     this.characters.splice(i, 1);
     return char;
@@ -294,9 +386,9 @@ class Deck {
         break;
       }
     }
-    if (target < 0) return false;
+    if (target < 0) return null;
     this.characters.splice(target, 1);
-    return true;
+    return char;
   }
   removeCharByID(id) {
     var target = -1,
@@ -329,19 +421,24 @@ class Deck {
   }
 }
 class Repository extends Deck {
-  constructor(type, p1, p2) {
+  constructor(type) {
     super();
-    if (type == "common")
+    this.type = type;
+  }
+  init(m = model, sp = spmanager){ // Add model ptr for server
+    if (this.type == "common")
     {
-      this.initCommonRepo(p1);
-        this.initCommonRepo(p2);
+      this.initCommonRepo(m.pack[0]);
+      this.initCommonRepo(m.pack[1]);
     }
-    else if (type == "special"){
-      this.initSpecialRepo(p1);
-      this.initSpecialRepo(p2);
+    else if (this.type == "special"){
+      sp.initRepository(this, m.pack[0]);
+      sp.initRepository(this, m.pack[1]);
+      sp.initRepository(this, m.pack[0]);
+      sp.initRepository(this, m.pack[1]);
     }
     else
-      alert("Illegal Repository Type: " + type);
+      console.log("Illegal Repository Type: " + this.type);
   }
   initCommonRepo(version) {
     var pack = COMMON_CHAR_LIST[version-1];
@@ -352,29 +449,12 @@ class Repository extends Deck {
       this.addChar(char);
     }
   }
-  initSpecialRepo(pack) {
-    let sp = new SpecialCharacter(200, "沈夜", 6, "冬");
-    let t1 = new Trick("打徒弟"),
-      t2 = new Trick("打徒孙");
-    sp.addTrick(t1);
-    sp.addTrick(t2);
-    this.addChar(sp);
-    sp = new SpecialCharacter(203, "夏夷则", 6, "冬");
-    t1 = new Trick("逸尘"), t2 = new Trick("小鱼干");
-    sp.addTrick(t1);
-    sp.addTrick(t2);
-    this.addChar(sp);
-    sp = new SpecialCharacter(214, "姬轩辕", 6, "秋");
-    t1 = new Trick("失忆"), t2 = new Trick("做梦");
-    sp.addTrick(t1);
-    sp.addTrick(t2);
-    this.addChar(sp);
-  }
 }
 class TabledCombo{
   constructor(char, index){
     this.characters = [char];
     this.index = index;
+    this.fullScore = this.getBaseScore;
   }
   addChar(char){
     this.characters.push(char);
@@ -394,7 +474,19 @@ class TabledCombo{
   getName(){
     return COMBO_LIST[this.index][1];
   }
-  getScore(){
+  calculateFullScore(){
+    this.fullScore = COMBO_LIST[this.index][2];
+    for(var i=0; i<this.getSize(); i++){
+      var res = this.characters[i].performTricks("ComboTrick", this);
+      if(res != null)
+        this.fullScore += res;
+    }
+    return this.fullScore;
+  }
+  getFullScore(){
+    return this.fullScore;
+  }
+  getBaseScore(){
     return COMBO_LIST[this.index][2];
   }
   isComplete(){
@@ -403,11 +495,27 @@ class TabledCombo{
   getCompleteList(){
     return COMBO_LIST[this.index][0];
   }
+  containsChar(char){
+    for(var i=0; i<this.characters.length; i++)
+      if(this.characters[i] == char)
+        return true;
+    return false;
+  }
+  removeChar(char){
+    for(var i=0; i<this.characters.length; i++)
+      if(this.characters[i] == char){
+        this.characters.splice(i, 1);
+        return char;
+      }
+    return null;
+  }
   getDesc(){
-    var msg = COMBO_LIST[this.index][1] + " : ";
-    msg +=  COMBO_LIST[this.index][2] + "\n";
+    var msg = COMBO_LIST[this.index][1];
+    // + " : " + COMBO_LIST[this.index][2]
+    /* + "\n";
     for(var i=0; i<this.getSize(); i++)
       msg += "[" + this.characters[i].name + "]\n";
+    */
     return msg;
   }
 }
@@ -418,6 +526,19 @@ class Combos{
     }
     getSize(){
       return COMBO_LIST.length;
+    }
+    getTeamMates(char){
+      var mates = [];
+      for(var i=0; i<COMBO_LIST.length; i++){
+        var names = COMBO_LIST[i][0];
+        if(names.includes(char.name)){
+          for(var j=0; j<names.length; j++) {
+              if(names[j] != char.name && !mates.includes(names[j]))
+                mates.push(names[j]);
+          }
+        }
+      }
+      return mates;
     }
     getNewCombos(player, char){
       //update player: partialCombos. completeCombos, score
@@ -443,7 +564,7 @@ class Combos{
                     nccount ++;
                     pcombos.splice(k, 1);
                     player.completeCombos.unshift(pcombo);
-                    player.score += pcombo.getScore();
+                    player.score += pcombo.calculateFullScore();
                   }
                   else{
                     //the combo is not complete, move it to the partiallist cardfront
@@ -508,7 +629,7 @@ class Combos{
     }
 }
 class Player {
-  constructor(id, commonRepo, specialRepo) {
+  constructor(id) {
     this.id = id;
     this.hand = new Deck();
     this.table = new Deck();
@@ -518,34 +639,105 @@ class Player {
     this.partialCombos = [];
     this.completeCombos = [];
   }
-  reset(){
-    this.table.clear();
+  init(){
+    this.table.destroy();
+    this.specials.destroy();
     this.matchable = true;
     this.partialCombos.length = 0;
     this.completeCombos.length = 0;
     this.score = 0;
   }
-  initSpecials(repo) {
-    var slen = PLAYER_SPECIALS[this.id].length;
-    for (var i = 0; i < slen; i++) {
-      this.specials.addChar(repo.removeCharacterByID(PLAYER_SPECIALS[this.id][i]));
+  start(chars = null){ // init with chars?
+    spmanager.initPlayerSpecials(this);
+    if (chars == null) {
+      this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
+    } else {
+      var cr = model.commonRepository;
+      for (var i=0; i<chars.length; i++) {
+        var c = cr.getChar(chars[i].id);
+        cr.removeChar(c);
+        this.hand.addChar(c);
+      }
+      // todo: add special handling
+      var me = this;
+      if(this.specials!=null && this.specials.getSize()>0){
+        delayedFunc(function(){
+          for (var i = 0, idx = 0; i < size; i++){
+            if(!me.toSpecial(idx, this.specials))
+              idx ++;
+          }
+        },1);
+      }
     }
   }
-  addChar(char) {
+  addTableChar(char) {
+    //add a char to player's table
+    //return: [char score increment, combo count] (weird I know that)
+    var prescore = this.score;
     this.table.addChar(char);
     char.setOwner(this);
+    var oppo = this.id==0?model.player1:model.player0;
+    //am i banned?
+    for(var i=0; i<oppo.table.getSize(); i++){
+      oppo.table.characters[i].performTricks("NamedBanTrick", char);
+    }
+    // do i ban someone?
+    var trick = char.getTrick("NamedBanTrick");
+    if(trick != null)
+      for(var i=0; i<oppo.table.getSize(); i++){
+        if(trick.performTrick(oppo.table.characters[i]))
+          oppo.recalculate(true);
+      }
+    // do i benefit (from) others?
+    for(var i=0; i<this.table.getSize(); i++){
+      this.table.characters[i].performTricks("CharTrick", this);
+    }
     this.score += char.score;
+    var charinc = this.score - prescore;
     var comboCount = combos.getNewCombos(this, char);
-    return comboCount;
+    return [charinc, comboCount];
   }
-  // Server has no access to global variable 'combos' so ...
-  // FIXME: char may be NULL
-  addChar_server(char, _combos) {
-    this.table.addChar(char);
-    char.setOwner(this);
-    this.score += char.score;
-    var comboCount = _combos.getNewCombos(this, char);
-    return comboCount;
+  removeTableChar(char){
+    //remove a char from player's table
+    char.setOwner(null);
+    var chars = this.table.characters;
+    for(var i=0; i<chars.length; i++)
+      if(chars[i] == char){
+        chars.splice(i, 1);
+        break;
+      }
+    var size = this.partialCombos.length;
+    for(var i=0, idx = 0; i<size; i++)
+      if(this.partialCombos[idx].removeChar(char) != null && this.partialCombos[idx].getSize() == 0)
+          this.partialCombos.splice(idx, 1);
+      else
+        idx ++;
+    size = this.completeCombos.length;
+    for(var i=0, idx = 0; i<size; i++)
+      if(this.completeCombos[idx].removeChar(char) != null){
+        this.partialCombos.unshift(this.completeCombos[idx]);
+        this.completeCombos.splice(idx, 1);
+      }
+      else
+        idx ++;
+    this.recalculate(false);
+    return char;
+  }
+  recalculate(animechange){
+    //calculate score for the player
+    console.log(this.id+"号重新算分");
+    var preScore = this.score;
+    this.score = 0;
+    //base score & special card bonus
+    var chars = this.table.characters;
+    for(var i=0; i<chars.length; i++){
+      this.score += chars[i].score;
+      chars[i].recalculate(this); //recalculate char bonus
+    }
+    for(var i=0; i<this.completeCombos.length; i++)
+      this.score += this.completeCombos[i].calculateFullScore();
+    if(preScore != this.score && animechange)
+      messenger.animeScoreInc(this.id, preScore, this.score - preScore);
   }
   getDesc() {
     var msg = "玩家" + this.id;
@@ -557,83 +749,58 @@ class Player {
 }
 class Model {
   constructor(p1, p2) {
-    this.commonRepository = new Repository("common", p1, p2);
-    this.specialRepository = new Repository("special", p1, p2);
-    this.player0 = new Player(0, this.commonRepository, this.specialRepository);
-    this.player1 = new Player(1, this.commonRepository, this.specialRepository);
+    this.pack = [p1, p2];
+    this.commonRepository = new Repository("common");
+    this.specialRepository = new Repository("special");
+    this.player0 = new Player(0);
+    this.player1 = new Player(1);
     this.pool = new Deck();
     this.activeChar = null;
     this.isMultiplayer = false;
-    this.isMultiplayerServer = false;
   }
-  reset(){
-    model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
-    model.pool.clear();
-    model.commonRepository.characters = model.commonRepository.characters.concat(model.player0.table.characters);
-    model.player0.reset();
-    model.commonRepository.characters = model.commonRepository.characters.concat(model.player1.table.characters);
-    model.player1.reset();
-    view.reset();
-  }
-  reset_server() {
-    this.commonRepository.characters = this.commonRepository.characters.concat(this.pool.characters);
-    this.pool.characters.length = 0;
-    this.commonRepository.characters = this.commonRepository.characters.concat(this.player0.table.characters);
-    this.player0.table.characters.length = 0;
-    this.commonRepository.characters = this.commonRepository.characters.concat(this.player1.table.characters);
-    this.player1.table.characters.length = 0;
-  }
-  restart(){
-    model.initHand(model.player0);
-    model.initHand(model.player1);
-    model.initPool();
-    view.restart();
+  // side: 先手 or 后手
+  // p0c:  先手的手牌
+  // p1c:  后手的手牌
+  // pool, repo: 牌池、牌堆
+  start(isMultiplayer = false, side=0, p0c = null, p1c = null, pool = null, repo = null){
+    var p01 = [ p0c, p1c ];
+    model.player1.start(p01[side  ]);
+    model.player0.start(p01[1-side]);
+    model.poolStart(pool, repo);
+    view.start();
     model.checkMatch1();
+    model.isMultiplayer = isMultiplayer;
   }
   init(){
+    model.player1.init();
+    model.player0.init();
+    model.pool.destroy();
+    model.commonRepository.destroy();
+    model.specialRepository.destroy();
+    model.activeChar = null;
+    model.commonRepository.init();
+    model.specialRepository.init();
     view.init();
-    model.initHand(model.player0);
-    model.initHand(model.player1);
-    model.initPool();
-    view.hand0.init();
-    view.hand1.init();
-    view.pool.init();
-    model.checkMatch1();
+    delayedFunc(model.start);
   }
-  init_server() {
-    this.isMultiplayer = true;
-    this.isMultiplayerServer = true;
-    this.initHand(this.player0);
-    this.initHand(this.player1);
-    this.initPool();
-    this.combos = new Combos();
+  initServerBookkeeping() {
+    console.log("[Model] Initializing server-side bookkeeping");
   }
-  initCombos_server() {
-    return new Combos();
+  setup(){
+    model.commonRepository.init();
+    model.specialRepository.init();
+    view.init();
   }
-  initAsClient() {
-    console.log('[model.initAsClient]');
-  }
-  initHand(player){
-    player.hand.initDeck(INIT_CARD_NUM_HAND, this.commonRepository);
-  }
-  initHandByRemoteState(player, player_remote) {
-    var x = player_remote.hand.characters;
-    for (var i=0; i<x.length; i++) {
-      var cid = x[i].id;
-      var char = model.commonRepository.removeCharByID(cid);
-      player.hand.addChar(char);
-    }
-  }
-  initPool(){
-    this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
-  }
-  initPoolByRemoteState(pool, pool_remote) {
-    var x = pool_remote.characters;
-    for (var i=0; i<pool_remote.characters.length; i++) {
-      var cid = x[i].id;
-      var char = model.commonRepository.removeCharByID(cid);
-      this.pool.addChar(char);
+  poolStart(poolc = null, repoc = null){
+    if (poolc == null && repoc == null) {
+      this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
+    } else {
+      var cr = this.commonRepository;
+      for (var i=0; i<poolc.length; i++) {
+        var c = cr.getChar(poolc[i].id);
+        this.commonRepository.removeChar(c);
+        this.pool.addChar(c);
+      }
     }
   }
   discard(player, char){
@@ -642,37 +809,9 @@ class Model {
     else
       player.hand.removeChar(char);
     model.pool.addChar(char);
-    var newChar = player.hand.addRandom(model.commonRepository);
-    //log((player==this.player0?"AI":"你") +"-["+char.name+"]+["+newChar.name+"]");
+    var newChar = player.hand.addRandom(model.commonRepository, player.specials);
+    player.hand.toSpecial(player.hand.getSize()-1, player.specials);
     view.discard(player, char, newChar);
-    
-    if (model.isMultiplayer) {
-      var local_player_id = 0;
-      if (player == model.player1) local_player_id = 1;
-      console.log("emitting discard, "+char.id+", "+newChar.id);
-      socket.emit('Game_Discard', local_player_id, char.id, newChar.id);
-    }
-  }
-  oppoDiscard_client(char_id, newchar_id) {
-    var player = model.player0;
-    var char = player.hand.getChar(char_id);
-    var newchar = model.commonRepository.getChar(newchar_id);
-    player.hand.removeChar(char);
-    model.commonRepository.removeChar(newchar);
-    model.pool.addChar(char);
-    if (newchar != null) {
-      player.hand.addChar(newchar);
-    } else {
-      console.log('[oppoDiscard_client] newchar is null');
-    }
-    view.discard(player, char, newchar);
-  }
-  discard_server(player, char, newchar) {
-    console.log("[discard_server] "+char+","+newchar);
-    player.hand.removeChar(char);
-    this.pool.addChar(char);
-    this.commonRepository.removeChar(newchar);
-    player.hand.addChar(newchar);
   }
   overSize(){
     return this.pool.getSize() >= POOL_CAPACITY;
@@ -708,40 +847,10 @@ class Model {
     return false;
   }
   redeal(){
-    console.log('Redeal');
     model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
     model.pool.clear();
     model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
     view.pool.init();
-    if (model.isMultiplayer) {
-      var cids = [], c = model.pool.characters;
-      for (var i=0; i<c.length; i++) cids.push(c[i].id);
-      console.log('Emitting redealt CIDs to remote');
-      socket.emit('Game_Redeal', cids);
-    }
-  }
-  oppoRedeal(pool_cids) {
-    console.log('Opponent redeal');
-    model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
-    model.pool.clear();
-    for (var i=0; i<pool_cids.length; i++) {
-      var cid = pool_cids[i];
-      var ch = model.commonRepository.getChar(cid);
-      model.commonRepository.removeChar(ch);
-      model.pool.addChar(ch);
-    }
-    view.pool.init();
-  }
-  oppoRedeal_server(pool_cids) {
-    this.commonRepository.characters = this.commonRepository.characters.concat(
-      this.pool.characters);
-    this.pool.characters.length = 0;
-    for (var i=0; i<pool_cids.length; i++) {
-      var cid = pool_cids[i];
-      var ch = this.commonRepository.getChar(cid);
-      this.commonRepository.removeChar(ch);
-      this.pool.addChar(ch);
-    }
   }
   checkMatch1(){
     while(model.overSeason())
@@ -768,25 +877,20 @@ class Model {
     var match = this.pickLeft(player);
     return match != null;
   }
-  dealOne(cid) {
-    if (cid == null)
-      var char = model.pool.addRandom(model.commonRepository);
+  dealOne(player) {/*
+    var chars = player.table.characters;
+    var char = chars[chars.length -1].performTricks("DealTrick", player);
+    if(char == null)
+      char = chars[chars.length -2].performTricks("DealTrick", player);
+      */
+    var char = obtainVector.performDeal();
+    if(char == null)
+      char = model.pool.addRandom(model.commonRepository);
     else {
-      var char = model.commonRepository.removeCharByID(cid);
+      model.commonRepository.removeChar(char);
       model.pool.addChar(char);
     }
     view.dealOne(char);
-  }
-  dealOne_server(cid) { // Same except no view changes
-    var ret = null;
-    if (cid == null) {
-      var char = this.pool.addRandom(this.commonRepository);
-      ret = char.id;
-    } else {
-      var char = this.commonRepository.removeCharById(cid);
-      this.pool.addChar(char);
-    }
-    return ret;
   }
   pickLeft(player){
       var poolChars = model.pool.characters;
@@ -801,7 +905,6 @@ class Model {
       }
       return null;
   }
-
   pickOptimal(player, oppo, considerOppo){
     //return the optimal [handchar, poolchar] according to combos.evaluateChar()
     var poolChars = model.pool.characters;
@@ -836,45 +939,84 @@ class Model {
     }
     return pick;
   }
-  aiPick() {
+  aiSelectObtain() {
     //returns an array [hand pick, pool pick]
     switch (AI_LEVEL) {
-      case "ai1":
+      case 1:
         return model.pickLeft(this.player0);
         break;
-      case "ai2":
+      case 2:
         return model.pickOptimal(this.player0, this.player1, false);
         break;
-      case "ai3":
+      case 3:
         return model.pickOptimal(this.player0, this.player1, true);
         break;
       default: log("Invalid AI　Level!!!!!!!!");
         return null;
     }
   }
-  aiDiscard(){
+  aiSelectCopy(trick){
+      var cans = [];
+      var chars = model.player1.table.characters;
+      for(var i=0; i<chars.length; i++)
+        if(trick.isValidTarget(chars[i]))
+          cans.push(chars[i]);
+      var size = cans.length;
+      if(size == 0) return null;
+      return cans[getRandom(size)];
+  }
+  aiSelectSwap(){
+    var size = model.player1.table.getSize();
+    if(size == 0) return null;
+    return model.player1.table.characters[getRandom(size)];
+  }
+  aiSelectBan(trick){
+    var cans = [];
+    var chars = model.player1.table.characters;
+    for(var i=0; i<chars.length; i++)
+      if(trick.isValidTarget(chars[i]))
+        cans.push(chars[i]);
+    var size = cans.length;
+    if(size == 0) return null;
+    return cans[getRandom(size)];
+  }
+  aiSelectDiscard(){
     switch (AI_LEVEL) {
-      case "ai1":
+      case 1:
         return null;
-      case "ai2":
+      case 2:
         return this.discardOptimal(model.player0, this.player1, false);
-      case "ai3":
+      case 3:
         return this.discardOptimal(model.player0, this.player1, true);
       default: log("Invalid AI　Level!!!!!!!!");
         return null;
     }
   }
-  obtain(player, handChar, poolChar) {
-    model.pool.removeChar(poolChar);
-    player.hand.removeChar(handChar);
-    var comboCount = player.addChar(poolChar) + player.addChar(handChar);
-    view.obtain(player, handChar, poolChar, comboCount);
-  }
-  obtain_server(player, handChar, poolChar) {
-    this.pool.removeChar(poolChar);
-    player.hand.removeChar(handChar);
-    var comboCount = player.addChar_server(poolChar, this.combos) + 
-                     player.addChar_server(handChar, this.combos);
+  obtain() {
+  // controller: pc is upgraded by player.specials and is removed from pool
+  // controller: hs, ps are both upgraded by player.specials and are removed from oppo's table
+  // hc/pc are specialchars if hs/ps are not null
+    var player = obtainVector.player;
+    var oppo = player.id==0? model.player1:model.player0;
+    /*player.hand.removeChar(chars[0]);
+    //which of the four are new chars? : obtainVector.chars[]
+    //where are these two chars added? : swapchar==null?player:oppo
+    //when is UnnamedBanTrick performed? : after addTableChar, before view
+    for(var i=0; i<2; i++){
+      if(obtainVector.swapChars[i] != null){
+        chars[i].swapped = true;
+        obtainVector.swapChars[i].swapped = true;
+        oppo.addTableChar(chars[i]);
+        chars[i] = obtainVector.swapChars[i];
+      }
+    }*/
+
+    //console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
+    var ac0 = player.addTableChar(obtainVector.playerTableChars[0]);
+    var ac1 = player.addTableChar(obtainVector.playerTableChars[1]);
+    obtainVector.charScoreInc = ac0[0] + ac1[0];
+    obtainVector.comboCount =  ac0[1] + ac1[1];
+    controller.handleBans();
   }
   activate(char) {//player1 set a card active
     if (this.activeChar == null || this.activeChar != char) {
@@ -885,13 +1027,6 @@ class Model {
       this.activeChar = null;
     }
   }
-  activate_server(char) {
-    if (this.activeChar == null || this.activeChar != char) {
-      this.activeChar = char;
-    } else {
-      this.activeChar = null;
-    }
-  }
   getDesc() {
     var msg = this.player0.getDesc();
     msg += this.player1.getDesc();
@@ -899,4 +1034,3 @@ class Model {
     return msg;
   }
 }
-module.exports = Model; // This is for NodeJS

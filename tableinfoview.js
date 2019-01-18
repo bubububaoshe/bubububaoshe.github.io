@@ -1,31 +1,40 @@
+//now this indeed counts the views of player tables (max=2)
 var tableviewcount = 0;
 class TableInfoView{
   constructor(player){
     if(player.id==0)
-      this.container = document.getElementsByClassName("tableinfocontainer")[0];
-    else
       this.container = document.getElementsByClassName("tableinfocontainer")[1];
+    else
+      this.container = document.getElementsByClassName("tableinfocontainer")[2];
     this.player = player;
     var divs = this.container.firstElementChild.childNodes;
     for(var i=0; i<divs.length; i++)
       divs[i].addEventListener("click", controller.selectInfo);
     this.on = false;
   }
-  addSmallCard(char){
-    var sc = document.createElement("div");
-    sc.classList.add("smallcard");
-    var inn = document.createElement("div");
-    sc.appendChild(inn);
+  addSmallCard(char, container){
+    container = container==null?this.container.querySelector('.charinfocontainer'):container;
+    var schar = container.appendChild(document.createElement("div"));
+    schar.classList.add("smallchar");
+    schar.id = char.id;
+    var inn = schar.appendChild(document.createElement("div"));
+    inn.classList.add("smallcard");
+    inn = inn.appendChild(document.createElement("div"));
     inn.style.backgroundImage = char.getPortrait();
-    inn = document.createElement("p");
-    sc.appendChild(inn);
-    inn.textContent = char.score;
-    this.container.querySelector('.charinfocontainer').appendChild(sc);
+    if(char.isSpecial() && char.getTrick()==null)
+      inn.style.opacity = 0.4;
+    inn = schar.appendChild(document.createElement("p"));
+    inn.textContent = "基础分:" + char.score;
+    //inn = schar.appendChild(document.createElement("div"));
+    //inn.classList.add("hoverinfobox", "transitform");
+    schar.appendChild(char.card.createFullInfobox(char));
+    return schar;
   }
-  createCharView(){
+  createCharView(container, trick){
     var chars = this.player.table.characters;
     for(var i=0; i<chars.length; i++)
-      this.addSmallCard(chars[i]);
+      if(trick == null || trick.isValidTarget(chars[i]))
+        this.addSmallCard(chars[i], container);
   }
   addCombo(combo){
     var div = document.createElement("div");
@@ -41,7 +50,7 @@ class TableInfoView{
     chd.textContent = combo.getName();
     infocontainer.appendChild(chd);
     chd = document.createElement("div");
-    chd.textContent = combo.getScore();
+    chd.textContent = combo.isComplete()?combo.getFullScore():combo.getBaseScore();
     infocontainer.appendChild(chd);
     var charscontainer = document.createElement("div");
     charscontainer.id = "combocardchars";
@@ -90,15 +99,13 @@ class TableInfoView{
       tableviewcount ++;
       //create view
       this.createCharView();
+      var cards = this.container.querySelector('.charinfocontainer').children;
+      for(var i=0; i<cards.length; i++)
+        cards[i].addEventListener("click", controller.doNothing);
       this.createComboView();
     }
-    this.container.style.display = "block";
-  }
-  hide(){
-    this.container.style.display = null;
-  }
-  visible(){
-    return this.container.style.display != "";
+    this.fadeUnder("tableinfo", true);
+    showOpacity(this.container, true);
   }
   exit(){
     this.hide();
@@ -113,6 +120,73 @@ class TableInfoView{
       this.container.getElementsByClassName("ccomboinfocontainer")[0].textContent="";
       this.container.getElementsByClassName("icomboinfocontainer")[0].textContent="";
       this.setPane(1);
+      this.fadeUnder("tableinfo", false);
+    }
+  }
+  hide(){
+    showOpacity(this.container, false);
+  }
+  exitSelectionPanel(controllerFunc){
+    var container = document.getElementsByClassName("tableinfocontainer")[0];
+    showOpacity(container, false);
+    this.fadeUnder("selectionpanel", false);
+    container.getElementsByClassName('charinfocontainer')[0].textContent = "";
+    container.getElementsByClassName('charinfocontainer')[1].textContent = "";
+  }
+  showSelectionPanel(trick, msg, controllerFunc){
+    // this char view is to select a target when a char trick is performed
+    var char = trick.owner;
+    var container = document.getElementsByClassName("tableinfocontainer")[0];
+    var card = this.addSmallCard(char, container.getElementsByClassName('charinfocontainer')[0]);
+    card.getElementsByTagName("p")[0].textContent = "从下方选择对方卡牌" + msg;
+    var chartable = container.getElementsByClassName('charinfocontainer')[1];
+    this.createCharView(chartable, trick);
+    var cards = chartable.children;
+    for(var i=0; i<cards.length; i++)
+      cards[i].addEventListener("click", controllerFunc);
+    //container.style.display = "block";
+    showOpacity(container, true);
+    this.fadeUnder("selectionpanel", true);
+  }
+  exitSpecialsPanel(){
+    messenger.note("");
+    var container = document.getElementsByClassName("tableinfocontainer")[3];
+    showOpacity(container, false);
+    this.fadeUnder("tableinfo", false);
+    container.getElementsByClassName('charinfocontainer')[0].textContent = "";
+  }
+  showSpecialsPanel(){
+    messenger.note("再次点击牌\n组返回牌局");
+    var container = document.getElementsByClassName("tableinfocontainer")[3];
+    var chartable = container.querySelector(".charinfocontainer");
+    var chars = model.player1.specials.characters;
+    for(var i=0; i<chars.length; i++){
+      var schar = playerinfo.addSmallCard(chars[i], chartable);
+      schar.addEventListener("click", controller.doNothing);
+    }
+    showOpacity(container, true);
+    this.fadeUnder("tableinfo", true);
+  }
+  specialsPanelOn(){
+    var container = document.getElementsByClassName("tableinfocontainer")[3];
+    return this.visible(container);
+  }
+  visible(container){
+    container = container==null?this.container:container;
+    return container.style.opacity != 0;
+  }
+  fadeUnder(myslef, fade){
+    var opacity = fade?0.1:1;
+    switch (myslef) {
+      case "tableinfo":
+        document.getElementById("gamezone").style.opacity = opacity;
+        break;
+      case "selectionpanel":
+        document.getElementById("hand0container").style.opacity = opacity;
+        document.getElementById("poolcontainer").style.opacity = opacity;
+        document.getElementById("hand1container").style.opacity = opacity;
+        break;
+      default:
     }
   }
   setPane(idx){

@@ -80,24 +80,43 @@
     </div>
     <div id="singleplayerinputs" style="width:100%">
       <div id="aiinput" class="segmented-control" style="width: 100%; color: #281B11">
-        <input type="radio" name="ai" id="ai1">
-        <input type="radio" name="ai" id="ai2" checked>
-        <input type="radio" name="ai" id="ai3" >
-        <label for="ai1" data-value="十分智障的AI">AI 一级</label>
-        <label for="ai2" data-value="沉迷种田的AI">AI 二级</label>
-        <label for="ai3" data-value="恶意满满的AI">AI 三级</label>
-      </div>
-      <br/><br/>
-		  <div id="gamestart">开始游戏</div>
+		<input type="radio" name="ai" id="ai1">
+		<input type="radio" name="ai" id="ai2" checked>
+		<input type="radio" name="ai" id="ai3" >
+		<label for="ai1" data-value="温和亲切的AI">炤级</label>
+		<label for="ai2" data-value="沉迷种田的AI">洛级</label>
+		<label for="ai3" data-value="恶意满满的AI">危级</label>
+	</div>
+	<div id="spinput" class="segmented-control" style="width: 100%; color: #281B11">
+		<input type="radio" name="sp" id="sp0">
+		<input type="radio" name="sp" id="sp1" checked>
+		<label for="sp0" data-value="你和AI都不想使用珍稀牌">不含珍稀牌</label>
+		<label for="sp1" data-value="可使用所有珍稀牌 [测试中]">包含珍稀牌</label>
+	</div>
+		<div id="gamestart">开始游戏</div>
     </div>
+	<div id="spselection">
+		<div id="p0sp"></div>
+		<div id="sprepo"></div>
+		<div id="p1sp"></div>
+	</div>
 	</div>
 	<div id="main">
 		<div id="scoreboard">
-			<div id="table0"></div>
-			<div id="score0" class="bignotice"></div>
-			<div id="score1" class="bignotice"></div>
-			<div id="table1"></div>
+			<div id="table0" class="cardstack"></div>
+			<div id="score0" class="bignotice">
+				<div></div>
+				<div class="combobonus">
+				</div>
+			</div>
+			<div id="infobox" class="bignotice"><div></div></div>
+			<div id="score1" class="bignotice">
+				<div></div>
+				<div class="combobonus"></div>
+			</div>
+			<div id="table1" class="cardstack"></div>
 		</div>
+		<div id="gamezonecontainer">
 			<div id="gamezone">
 				<div id="hand0container"><div id="hand0"></div></div>
 				<div id="poolcontainer">
@@ -117,69 +136,85 @@
 					</div>
 					<p class="string"></p>
 				</div>
-				<div class="tableinfocontainer cover">
-					<div class="infoheader flexbox">
-							<div>&#9830; 卡牌</div>
-							<div>&#9830; 完成组合</div>
-							<div>&#9830; 未完组合</div>
-						</ul>
-					</div>
-					<div class="charinfocontainer flexbox" ></div>
-					<div class="ccomboinfocontainer flexbox"></div>
-					<div class="icomboinfocontainer flexbox"></div>
-				</div>
-				<div class="tableinfocontainer cover">
-					<div class="infoheader flexbox">
-							<div>&#9830; 卡牌</div>
-							<div>&#9830; 完成组合</div>
-							<div>&#9830; 未完组合</div>
-						</ul>
-					</div>
-					<div class="charinfocontainer flexbox" ></div>
-					<div class="ccomboinfocontainer flexbox"><!--
-						<div class="combocard">
-							<div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-								<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
-							</div>
-							<div>
-								<div id="combocardinfo">
-									<div>老板</div>
-									<div>90</div>
-								</div>
-								<div id="combocardchars">
-									<span class="ismine">巫炤</span><span class="ismine">欧阳少恭</span><span class="notmine">沈夜</span><span class="ismine">巫炤</span>
-								</div>
-							</div>
-						</div>-->
-					</div>
-					<div class="icomboinfocontainer flexbox" ></div>
+				<div class="tableinfocontainer cover transitopacity">
+					<div class="charinfocontainer flexbox"></div>
+					<div class="charinfocontainer flexbox"></div>
 				</div>
 			</div>
-			<div id="specialboard">
-				<p></p>
-				<div id="infobox"></div>
+			<div class="tableinfocontainer cover transitopacity">
+				<div class="infoheader bignotice">
+						<div>&#9830; 对方卡牌</div>
+						<div>&#9830; 完成组合</div>
+						<div>&#9830; 未完组合</div>
+					</ul>
+				</div>
+				<div class="charinfocontainer flexbox"></div>
+				<div class="ccomboinfocontainer flexbox"></div>
+				<div class="icomboinfocontainer flexbox"></div>
 			</div>
-	</div>
-	<div id="combobanner" class="cover transitopacity banner">
-		<div id="combotext">完成组合<span class="combohl"></span>，获得<span class="combohl"></span>分</div>
-		<div id="combocards">
-			<div class="postercard"></div>
-			<div class="postercard"></div>
-			<div class="postercard"></div>
-			<div class="postercard"></div>
-			<div class="postercard"></div>
-			<div class="postercard"></div>
+			<div class="tableinfocontainer cover transitopacity">
+				<div class="infoheader bignotice">
+						<div>&#9830; 我方卡牌</div>
+						<div>&#9830; 完成组合</div>
+						<div>&#9830; 未完组合</div>
+					</ul>
+				</div>
+				<div class="charinfocontainer flexbox"></div>
+				<div class="ccomboinfocontainer flexbox"><!--
+					<div class="combocard">
+						<div>
+							<div class="thumbnailcard" style="background-Image:url('img/oysg1.jpg')"></div>
+						</div>
+						<div>
+							<div id="combocardinfo">
+								<div>老板</div>
+								<div>90</div>
+							</div>
+							<div id="combocardchars">
+								<span class="ismine">欧阳少恭</span><span class="notmine">沈夜</span>
+							</div>
+						</div>
+					</div>-->
+				</div>
+				<div class="icomboinfocontainer flexbox"></div>
+			</div>
+			<div class="tableinfocontainer cover transitopacity">
+				<div class="infoheader bignotice">
+						<div>&#9830; 我方珍稀牌</div>
+				</div>
+				<div class="charinfocontainer specials flexbox"></div>
+			</div>
+		</div>
+		<div id="specialboard">
+			<div id="specials0" class="cardstack"></div>
+			<div id="hoverinfobox" class="bignotice"><div></div></div>
+			<div id="specials1" class="cardstack"></div>
 		</div>
 	</div>
+	<div id="infobanner" class="cover transitopacity banner">
+		<div>
+			<div class="bannertext">
+				<span></span><span class="bannerhl"></span><span></span><span class="bannerhl"></span><span></span>
+			</div>
+			<div class="bannercards"><!--
+				<div class="swapposter">
+				<div></div>
+					<div class="postercard"></div>
+				</div>
+				<div class="swapposter">
+					<div></div>
+					<div class="postercard" style="background-image:url(img/wz3.jpg)"></div>
+				</div>-->
+			</div>
+		</div>
+	</div>
+	<audio id="soundeffect" src=""></audio>
 </body>
 </html>
+<script src="tricks.js"></script>
 <script src="model.js"></script>
 <script src="controller.js"></script>
+<script src="spmanager.js"></script>
 <script src="tableinfoview.js"></script>
 <script src="view.js"></script>
 <script src="/socket.io/socket.io.js"></script>
@@ -230,7 +265,7 @@
     if (document.getElementById('multiplayertype1').checked == true) { // 邀
       document.getElementById("room_buttons").style.display = "block";
       document.getElementById("match_buttons").style.display = "none";
-    } else if (document.getElementById('multiplayertype1').checked == true) {
+    } else if (document.getElementById('multiplayertype2').checked == true) {
       document.getElementById("room_buttons").style.display = "none";
       document.getElementById("match_buttons").style.display = "block";
     }
@@ -308,80 +343,18 @@
   });
 
   var AUTOTEST = true;
-  socket.on('Match_GameStart', function(player_self, player_oppo, pool, pack) {
-    console.log("player_self:");
-    console.log(player_self)
-    console.log("player_oppo:");
-    console.log(player_oppo)
-    console.log(pack)
-    // Client's 'gameinit'
-    document.getElementById("main").style.display = "block";
-    document.getElementById("configurator").style.display = "none";
-    sound = new Sound();
-    combos = new Combos();
-    controller = new Controller();
-    messenger = new Messenger();
-    
-    // Client-side 'model.init()'
-    // replicate the behavior of initHand here
-    if (model != undefined) model.reset();
-    model = new Model(pack[0], pack[1]);
-    model.isMultiplayer = true;
-    view = new View();
-    oppoinfo = new TableInfoView(model.player0);
-    playerinfo = new TableInfoView(model.player1);
-    
-    // Inside original model.init()
-    view.init();
-    //model.initHand(model.player0);
-    model.initHandByRemoteState(model.player0, player_oppo);
-    //model.initHand(model.player1);
-    model.initHandByRemoteState(model.player1, player_self);
-    //model.initPool();
-    model.initPoolByRemoteState(model.pool,    pool);
-    
-    view.hand0.init();
-    view.hand1.init();
-    view.pool.init();
-    
-    console.log("Player 0:")
-    console.log(model.player0)
-    console.log("Player 1:")
-    console.log(model.player1)
-    
-    if (AUTOTEST) {
-      document.getElementById("BOOM").textContent = "AUTO TESTING"
-      autotest(); 
-    }
+  socket.on('Match_GameStartOffensive', () => { // 先手开局 
+    gameinit(true);
+    socket.emit('Match_GameStartOffensiveAck',
+      model.player0.hand.characters,
+      model.player1.hand.characters,
+      model.pool.characters,
+      model.commonRepository.characters);
   });
   
-  socket.on('Game_MakeTurn', () => {
-    controller.onMyTurn();
-    messenger.notifyMyTurn();
-    is_my_move = true;
-  });
-  
-  socket.on('Game_OpponentTurn', () => {
-    controller.onOpponentTurn();
-    messenger.notifyOpponentTurn();
-    is_my_move = false;
-  });
-  
-  socket.on('Game_OpponentObtainPair', (handc_id, poolc_id) => {
-    console.log('OpponentObtainPair ' + handc_id + " " + poolc_id);
-    controller.opponentObtainMultiplayer(handc_id, poolc_id);
-  });
-  
-  socket.on('Game_DealOne', (dealt_cid) => {
-    model.dealOne(dealt_cid); 
-  });
-  
-  socket.on('Game_OppoDiscard', (char_id, newchar_id) => {
-    model.oppoDiscard_client(char_id, newchar_id); 
-  });
-  
-  socket.on('Game_OppoRedeal', (pool_cids) => {
-    model.oppoRedeal(pool_cids);
+  socket.on('Match_GameStartDefensive', (p0c, p1c, poolc, repoc) => { // 后手开局
+    console.log('[后手开局]');
+    gameinit(true, 1, p0c, p1c, poolc, repoc);
   });
   
   socket.on('Room_PlayerDisconnected', () => {
@@ -528,7 +501,6 @@
   
   // 默认打开多人模式
   document.getElementById('vs_player').click();
-  // 默认在多人模式下采取房间模式
-  document.getElementById('multiplayertype1').click();
+  document.getElementById('multiplayertype2').click();
   
 </script>

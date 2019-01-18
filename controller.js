@@ -1,5 +1,3 @@
-var OPERATION_DELAY = 500; //delay in milliseconds between machine operations
-
 function delayedFunc(func, timeUnits){
   if (timeUnits == null)
   timeUnits = 1;
@@ -11,14 +9,7 @@ class Controller{
   constructor(){
   }
   restart(){
-    if (model.isMultiplayer == false) {
-      model.reset();
-      delayedFunc(function(){
-        model.restart();
-      });
-    } else {
-      socket.emit('Game_StartNewRound');
-    }
+    model.init();
   }
   activate(){
     var char = model.player1.hand.getChar(this.id);
@@ -26,76 +17,53 @@ class Controller{
   }
   obtain(){
     var handc = model.activeChar;
-    var poolc = model.pool.getChar(this.id);
     model.activate(handc);
-    model.obtain(model.player1, handc, poolc);
-    view.blockGame();
-    
-    if (model.isMultiplayer == false) {
-      delayedFunc(function(){
-        model.dealOne();
-        delayedFunc(function(){
-          controller.opponentObtain();
-        }, 2);
-      });
-    } else {
-      console.log('Will emit now');
-      var handc_id = handc.id;
-      var poolc_id = poolc.id;
-      // If I am the last one to make a move ..
-      if (model.player0.hand.getSize() + model.player1.hand.getSize() == 0) {
-        messenger.notifyFinal();
-      }
-      socket.emit('Game_ObtainPair', handc_id, poolc_id);
-    }
-  };
-  // opponentObtain may not need 2 be called in multiplayer, does it
+    model.player1.hand.removeChar(handc);
+    var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
+    obtainVector.init(model.player1, handc, poolc);
+    controller.handleCopies();
+  }
   opponentObtain(){
     while(model.overSeason())
       model.redeal();
-    var pick = model.aiPick();
+    var pick = model.aiSelectObtain();
     if(pick == null){
       if(model.overSize()){
         model.redeal();
         controller.opponentObtain();
       }
       else {
-        model.discard(model.player0, model.aiDiscard());
+        model.discard(model.player0, model.aiSelectDiscard());
         controller.opponentObtain();
       }
     }
     else {
-      model.obtain(model.player0, pick[0], pick[1]);
-      delayedFunc(function(){
-        if(model.player0.hand.getSize()+model.player1.hand.getSize() == 0)
+      var hc = model.player0.hand.removeChar(pick[0]);
+      var pc = model.pool.removeChar(pick[1]).getSpecial(model.player0.specials);
+      obtainVector.init(model.player0, hc, pc);
+      controller.handleCopies();
+    }
+  }
+  postObtain(pid){
+    delayedFunc(function(){
+      if(pid == 1){
+        model.dealOne(model.player1);
+        delayedFunc(function(){
+          controller.opponentObtain();
+        }, 2);
+      }
+      else{
+        if(model.player1.hand.getSize() == 0){
           //game end
           messenger.notifyFinal();
-        else{
-          model.dealOne();
+        }
+        else {
+          model.dealOne(model.player0);
           model.checkMatch1();
           view.unblockGame();
         }
-      });
-    }
-  }
-  opponentObtainMultiplayer(handc_id, poolc_id) {
-    var handc = model.player0.hand.getChar(handc_id),
-        poolc = model.pool.getChar(poolc_id);
-    model.obtain(model.player0, handc, poolc);
-    if (model.player0.hand.getSize() + model.player1.hand.getSize() == 0) {
-      messenger.notifyFinal();
-    } else {
-      model.checkMatch1();
-      view.unblockGame();
-    }
-  }
-  onOpponentTurn() {
-    view.blockGame();
-    console.log("对方回合");
-  }
-  onMyTurn() {
-    view.unblockGame();
-    console.log("我方回合");
+      }
+    });
   }
   discard(){
     var char = model.player1.hand.getChar(this.id);
@@ -108,6 +76,8 @@ class Controller{
       oppoinfo.exit();
     }
     else {
+      if(playerinfo.specialsPanelOn())
+        playerinfo.exitSpecialsPanel();
       oppoinfo.hide();
       playerinfo.show();
     }
@@ -118,8 +88,19 @@ class Controller{
       oppoinfo.exit();
     }
     else {
+      if(playerinfo.specialsPanelOn())
+        playerinfo.exitSpecialsPanel();
       playerinfo.hide();
       oppoinfo.show();
+    }
+  }
+  checkPlayerSpecials(){
+    if(playerinfo.specialsPanelOn())
+      playerinfo.exitSpecialsPanel();
+    else{
+      if(playerinfo.visible()) playerinfo.exit();
+      if(oppoinfo.visible()) oppoinfo.exit();
+      playerinfo.showSpecialsPanel();
     }
   }
   selectInfo(){
@@ -131,5 +112,98 @@ class Controller{
       oppoinfo.setPane(idx+1);
     else
       playerinfo.setPane(idx+1);
+  }
+  handleCopies(){
+    var type = "CopyTrick";
+    if(obtainVector.player.id == 1){
+      if(!obtainVector.trickSelector(type))
+        controller.handleSwaps();
+    }
+    else {
+      var trick = obtainVector.getNextTrick(type);
+      if(trick != null){
+        var target = model.aiSelectCopy(trick);
+        obtainVector.setTrickTarget(type, target);
+        if(target != null)
+          messenger.notifyOppoAction(type, controller.confirmPreObtain);
+        else
+          controller.handleCopies();
+      }
+      else
+        controller.handleSwaps();
+    }
+  }
+  handleSwaps(){
+    var type = "SwapTrick";
+    if(obtainVector.player.id == 1){
+      if(!obtainVector.trickSelector(type))
+        model.obtain();
+    }
+    else {
+      if(obtainVector.getNextTrick(type) != null){
+        var target = model.aiSelectSwap();
+        obtainVector.setTrickTarget(type, target);
+        if(target != null)
+          messenger.notifyOppoAction(type, controller.confirmPreObtain);
+        else
+          controller.handleCopies();
+      }
+      else
+        model.obtain();
+    }
+  }
+  handleBans(){
+    var type = "UnnamedBanTrick";
+    if(obtainVector.player.id == 1){
+      if(!obtainVector.trickSelector(type))
+        controller.handleReveals();
+    }
+    else {
+      var trick = obtainVector.getNextTrick(type);
+      if(trick != null){
+        var target = model.aiSelectBan(trick);
+        obtainVector.setTrickTarget(type, target);
+        if(target != null)
+          messenger.notifyOppoAction(type, controller.confirmBan);
+        else
+          controller.handleBans();
+      }
+      else
+        view.obtain();
+    }
+  }
+  handleReveals(){
+    obtainVector.performReveal();
+    view.blockGame();
+    view.obtain();
+  }
+  confirmPreObtain(){
+    messenger.exitNotifyOppoAction(controller.confirmPreObtain);
+    controller.handleCopies();
+  }
+  confirmBan(){
+    messenger.exitNotifyOppoAction(controller.confirmBan);
+    controller.handleBans();
+  }
+  selectCopy(){
+    oppoinfo.exitSelectionPanel();
+    var type = "CopyTrick";
+    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
+    controller.handleCopies();
+  }
+  selectSwap(){
+    // user swaps with the opponent
+    oppoinfo.exitSelectionPanel();
+    var type = "SwapTrick";
+    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
+    controller.handleCopies();
+  }
+  selectBan(){
+    oppoinfo.exitSelectionPanel();
+    var type = "UnnamedBanTrick";
+    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
+    controller.handleBans();
+  }
+  doNothing(){
   }
 }

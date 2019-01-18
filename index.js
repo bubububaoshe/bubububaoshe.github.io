@@ -6,6 +6,7 @@ var io = require('socket.io')(http);
 
 // 包含游戏的Model
 Model = require("./model.js");
+SPManager = require("./spmanager.js");
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + "/index.html");
@@ -142,39 +143,19 @@ class PlayerMatcher {
 g_playermatcher = new PlayerMatcher();
 g_all_games = [];
 
-// 现在想的就是服务端存着一个Model，两边的玩家都得以它为准
+// 要不，服务器就不维持游戏拷贝了
 class Game {
   constructor(p0, p1) {
     this.players = [p0, p1]; // Player's Sockets
-    this.model_players = []; // Player's Model representations
     this.curr_player = 0;
     console.log("Game.Ctor, Player id: "+p0.player_id + ","+p1.player_id);
   }
   
   Start() {
-    // TODO: pack 1 selection (in room?)
-    var pack = [1, 2];
-    if (this.model != undefined) {
-      this.model.reset_server();
-    }
-    this.model = new Model(pack[0], pack[1]);
-    var m = this.model;
-    {
-      m.init_server();
-      // Check match 1 ??
-      this.model_players = [];
-      this.model_players.push(m.player0);
-      this.model_players.push(m.player1);
-    }
-    
     this.players[0].game = this;
     this.players[1].game = this;
     
-    this.players[0].emit('Match_GameStart', m.player0, m.player1, m.pool, pack);
-    this.players[1].emit('Match_GameStart', m.player1, m.player0, m.pool, pack);
-    
-    this.players[this.curr_player].emit('Game_MakeTurn');
-    this.players[1-this.curr_player].emit('Game_OpponentTurn');
+    this.players[0].emit('Match_GameStartOffensive');
   }
   
   GetPlayerIndexBySocket(socket) {
@@ -191,72 +172,6 @@ class Game {
     }
   }
   
-  OnPlayerObtain(p, handc_id, poolc_id) {
-    var pidx = this.GetPlayerIndexBySocket(p);
-    console.log('[OnPlayerObtain] '+handc_id+", "+poolc_id + " pidx="+pidx
-      + " id="+p.player_id);
-    
-    if (pidx != -1) {
-      var other_socket = this.players[1-pidx];
-      this.model.activate_server(handc);
-      
-      var handc = this.model_players[pidx].hand.getChar(handc_id);
-      var poolc = this.model.pool.getChar(poolc_id);
-      
-      //console.log('[OnPlayerObtain] handc:');
-      //console.log(handc);
-      //console.log('[OnPlayerObtain] poolc:');
-      //console.log(poolc);
-      
-      this.model.obtain_server(this.model_players[pidx], handc, poolc);
-      
-      var deal_cid = this.model.dealOne_server();
-                 p.emit('Game_DealOne', deal_cid);
-      other_socket.emit('Game_DealOne', deal_cid);
-      
-      other_socket.emit('Game_OpponentObtainPair', handc_id, poolc_id);
-      other_socket.emit('Game_MakeTurn');
-      p.emit('Game_OpponentTurn');
-    }
-  }
-  // 这里的Discard似乎在单机模式中是既可以表示自己弃牌也可以表示对方弃牌的？
-  OnPlayerSeesDiscard(p, local_player_id, char_id, newchar_id) {
-    var pidx = this.GetPlayerIndexBySocket(p);
-    console.log('[OnPlayerSeesDiscard] char='+char_id+', newchar='+newchar_id);
-    if (pidx != -1) {
-      var other_socket = this.players[1-pidx];
-      var this_mp = this.model_players[pidx],
-          other_mp = this.model_players[1-pidx]; // mp = Model Player
-      var the_mp = (local_player_id == 0) ? other_mp : this_mp;
-      
-      { // Server-side bookkeeping.
-        var char = the_mp.hand.getChar(char_id);
-        var newchar = this.model.commonRepository.getChar(newchar_id);
-        this.model.discard_server(the_mp, char, newchar);
-      }
-      
-      if (local_player_id == 1) {
-        other_socket.emit('Game_OppoDiscard', char_id, newchar_id);
-      } else {
-        console.log('[OnPlayerSeesDiscard] Do not know how to deal with this case')
-      }
-    }
-  }
-  
-  OnPlayerRedeal(p, pool_cids) {
-    var pidx = this.GetPlayerIndexBySocket(p);
-    console.log('[OnPlayerRedeal] pidx=' + pidx);
-    if (pidx != -1) {
-      
-      { // Server-side bookkeeping.
-        this.model.oppoRedeal_server(pool_cids);
-      }
-      
-      var other_socket = this.players[1-pidx];
-      other_socket.emit('Game_OppoRedeal', pool_cids);
-    }
-  }
-  
   OnPlayerDisconnectedOrCanceled(p) {
     var pidx = this.GetPlayerIndexBySocket(p);
     console.log('[OnPlayerDisconnectedOrCanceled] player_id='+p.player_id);
@@ -265,6 +180,12 @@ class Game {
       var other_socket = this.players[1-pidx];
       other_socket.emit('Room_PlayerDisconnected');
     }
+  }
+  
+  PassInitDataToP1(p0, p0c, p1c, poolc, repoc) {
+    var pidx = this.GetPlayerIndexBySocket(p0);
+    var p1 = this.players[1-pidx];
+    p1.emit('Match_GameStartDefensive', p0c, p1c, poolc, repoc);
   }
 };
 
@@ -314,41 +235,10 @@ io.on('connection', function(socket) {
 	  g_playermatcher.OnPlayerConfirmsMatch(socket);
 	});
 	
-	socket.on('Game_ObtainPair', (handc_id, poolc_id) => {
+	socket.on('Match_GameStartOffensiveAck', (p0c, p1c, poolc, repoc) => {
+	  console.log('Player ' + socket.player_id + ' GameStartOffensiveAck');
 	  var g = FindGameBySocket(socket);
-	  if (g != null) {
-	    g.OnPlayerObtain(socket, handc_id, poolc_id);
-	  } else {
-	    console.log('[Game_ObtainPair] [Error] game is null');
-	  }
-	});
-	
-	socket.on('Game_Discard', (local_player_id, char_id, newchar_id) => {
-	  var g = FindGameBySocket(socket);
-	  if (g != null) {
-	    g.OnPlayerSeesDiscard(socket, local_player_id, char_id, newchar_id);
-	  } else {
-	    console.log('[Game_Discard] [Error] game is null');
-	  }
-	});
-	
-	// One player has redeal'ed, sync the redeal'ed pool to the other player
-	socket.on('Game_Redeal', (pool_cids) => {
-	  var g = FindGameBySocket(socket);
-	  if (g != null) {
-	    g.OnPlayerRedeal(socket, pool_cids);
-	  } else {
-	    console.log('[Game_Redeal] [Error] game is null');
-	  }
-	});
-	
-	socket.on('Game_StartNewRound', () => {
-	  var g = FindGameBySocket(socket);
-	  if (g != null) {
-	    g.Start();
-	  } else {
-	    console.log('[Game_StartNewRound] [Error] game is null');
-	  } 
+	  if (g != null) g.PassInitDataToP1(socket, p0c, p1c, poolc, repoc);
 	});
 	
 	socket.on('Info_RefreshOnlinePlayerCount', () => {
