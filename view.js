@@ -60,9 +60,9 @@ class Sound{
   draw(){this.play("draw");}
   combovoice(nextFunc,name){
     var onetimeFunc=function(){
-      nextFunc.call();
-      sound.audio.removeEventListener("ended", onetimeFunc);
-    }
+        nextFunc.call();
+        sound.audio.removeEventListener("ended", onetimeFunc);
+    };
     this.audio.addEventListener("ended", onetimeFunc);
     this.audio.addEventListener("error", onetimeFunc);
     this.audio.src = "combomp3/" + name + ".mp3";
