@@ -120,7 +120,8 @@ class SPManager{
       player.specials.addChar(model.specialRepository.getChar(sps[i]));
   }
   awardSpecials(){
-    var minscore = BONUS_THRESHOLDS[AI_LEVEL-1];
+    var minscore = BONUS_THRESHOLDS[AI_LEVEL-1] + model.player1.specials.getSize() * 5;
+    minscore = minscore>200? 200: minscore;
     if(model.player1.score >= minscore){
       var pspecials = this.getPlayerSpecialsArray(1);
       var clen = COMPLETE_SPECIALS.length;

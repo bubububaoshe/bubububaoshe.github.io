@@ -181,7 +181,7 @@ COMBO_LIST = [
 INIT_CARD_NUM_HAND = 10;
 INIT_CARD_NUM_POOL = 8;
 POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
-BONUS_THRESHOLDS = [200, 170, 140];
+BONUS_THRESHOLDS = [170, 140, 110];
 
 function getRandom(max){
   //returns random in [0, max-1]
