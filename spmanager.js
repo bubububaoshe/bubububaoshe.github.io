@@ -1,11 +1,14 @@
 PLAYER_SPECIALS = [
   [[],[]],
   [
-    ["blts1b", "fqx1a", "hy2a", "oysg1a", "wry2b", "xy2a", "xyz2b", "ywy2a"],
+    ["blts1b", "fqx1a", "hy2a", "oysg1a", "wry2b", "xy2a", "xyz2b", "ywy2a", "hy1a", "ly1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "xyz2a", "ywy2b"],
     ["hy1a", "ly1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "xyz2a", "ywy2b"]
   ]
 ];
-COMPLETE_SPECIALS = ["blts1b", "fqx1a", "hy1a", "hy2a", "ly1a", "oysg1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "wry2b", "xy2a", "xyz2a", "xyz2b", "ywy2a", "ywy2b"];
+COMPLETE_SPECIALS = [
+  "blts1b", "fqx1a", "hy1a", "ly1a", "oysg1a", "qy1a",
+  "hy2a", "qhzr2a", "sx2a", "sy2a", "wry2b", "xy2a", "xyz2a", "xyz2b", "ywy2a", "ywy2b"
+];
 class SPManager{
   constructor(){}
   initRepository(repo, pack) {
@@ -104,8 +107,9 @@ class SPManager{
     }
   }
   getPlayerSpecialsArray(pid){
-    if(pid == 0)
-      return PLAYER_SPECIALS[SP_CARDS][pid];
+    if(pid == 0){
+      return PLAYER_SPECIALS[SP_CARDS][0].slice(0, model.player1.specials.getSize());
+    }
     if(SP_CARDS == 0)
       return [];
     return getCookie("qqxspecials");

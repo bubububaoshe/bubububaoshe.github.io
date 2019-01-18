@@ -739,15 +739,15 @@ class Model {
     this.activeChar = null;
   }
   start(){
-    model.player0.start();
     model.player1.start();
+    model.player0.start();
     model.poolStart();
     view.start();
     model.checkMatch1();
   }
   init(){
-    model.player0.init();
     model.player1.init();
+    model.player0.init();
     model.pool.destroy();
     model.commonRepository.destroy();
     model.specialRepository.destroy();
