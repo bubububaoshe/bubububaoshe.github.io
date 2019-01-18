@@ -761,7 +761,6 @@ class Model {
     model.commonRepository.init();
     model.specialRepository.init();
     view.init();
-    model.start();
   }
   poolStart(){
     this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);

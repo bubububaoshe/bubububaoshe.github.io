@@ -1,16 +1,15 @@
 PLAYER_SPECIALS = [
-  [[],[]],
-  [
     ["blts1b", "fqx1a", "hy2a", "oysg1a", "wry2b", "xy2a", "xyz2b", "ywy2a", "hy1a", "ly1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "xyz2a", "ywy2b"],
     ["hy1a", "ly1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "xyz2a", "ywy2b"]
-  ]
 ];
 COMPLETE_SPECIALS = [
   "blts1b", "fqx1a", "hy1a", "ly1a", "oysg1a", "qy1a",
   "hy2a", "qhzr2a", "sx2a", "sy2a", "wry2b", "xy2a", "xyz2a", "xyz2b", "ywy2a", "ywy2b"
 ];
 class SPManager{
-  constructor(){}
+  constructor(){
+    this.setupPlayerSpecials();
+  }
   initRepository(repo, pack) {
     var char, trick;
     switch (pack) {
@@ -106,24 +105,45 @@ class SPManager{
       break;
     }
   }
-  getPlayerSpecialsArray(pid){
-    if(pid == 0){
-      return PLAYER_SPECIALS[SP_CARDS][0].slice(0, model.player1.specials.getSize());
+  setupPlayerSpecials(){
+      PLAYER_SPECIALS[1] = getCookie("qqxspecials");
+      var len;
+      switch (SP_CARDS) {
+        case 0:
+          PLAYER_SPECIALS[0] = [];
+          break;
+        case 1:
+          PLAYER_SPECIALS[0] = this.getRandomSubarray(COMPLETE_SPECIALS, PLAYER_SPECIALS[1].length);
+          break;
+        case 2:
+          PLAYER_SPECIALS[0] = COMPLETE_SPECIALS;
+          break;
+        default:
+          alert("Invalid Mode for Specials: " + SP_CARDS);
+      }
+  }
+  getRandomSubarray(arr, len){
+    var keep = [];
+    var idxs = [];
+    for(var i=0; i<arr.length; i++)
+      idxs.push(i);
+    for(var i=0; i<len; i++){
+      var rand = getRandom(idxs.length);
+      keep.push(arr[idxs[rand]]);
+      idxs.splice(rand, 1);
     }
-    if(SP_CARDS == 0)
-      return [];
-    return getCookie("qqxspecials");
+    return keep;
   }
   initPlayerSpecials(player){
-    var sps = this.getPlayerSpecialsArray(player.id);
+    var sps = PLAYER_SPECIALS[player.id];
     for (var i = 0; i < sps.length; i++)
       player.specials.addChar(model.specialRepository.getChar(sps[i]));
   }
   awardSpecials(){
-    var minscore = BONUS_THRESHOLDS[AI_LEVEL-1] + (model.player1.specials.getSize() - model.player0.specials.getSize()) * 5;
+    var minscore = BONUS_THRESHOLDS[AI_LEVEL-1] + (PLAYER_SPECIALS[1].length - PLAYER_SPECIALS[0].length) * 5;
     minscore = minscore>200? 200: minscore;
     if(model.player1.score >= minscore){
-      var pspecials = this.getPlayerSpecialsArray(1);
+      var pspecials = PLAYER_SPECIALS[1];
       var clen = COMPLETE_SPECIALS.length;
       if(pspecials.length < clen){
         var rand = getRandom(clen - pspecials.length);

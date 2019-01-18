@@ -508,7 +508,7 @@ class Messenger {
   notifyAward(minScore, spid){
     var banner = document.getElementById("infobanner");
     var levels = ["炤", "洛", "危"];
-    messenger.setBannerHeadline(["恭喜对战", levels[AI_LEVEL]+"级AI", "超过" , minScore,"分，请抱好"]);
+    messenger.setBannerHeadline(["恭喜对战", levels[AI_LEVEL-1]+"级AI", "超过" , minScore,"分，请抱好"]);
     var poster =  banner.querySelector(".bannercards").appendChild(document.createElement("div"));
     poster.classList.add("postercard");
     poster.style.backgroundImage = "url('img/" + spid + ".jpg')";banner.addEventListener("click", function(){
@@ -700,8 +700,6 @@ function gameinit(){
   AI_LEVEL = parseInt(getInput("aiinput").charAt(2));
   COMBO_VOICE = getInput("voiceinput");
   SP_CARDS = parseInt(getInput("spinput").charAt(2));
-  document.getElementById("main").style.display = "block";
-  document.getElementById("configurator").style.display = "none";
   sound = new Sound();
   combos = new Combos();
   model = new Model(p1, p2);
@@ -713,7 +711,11 @@ function gameinit(){
   oppoinfo = new TableInfoView(model.player0);
   playerinfo = new TableInfoView(model.player1);
   model.setup();
+
+  document.getElementById("main").style.display = "block";
+  document.getElementById("configurator").style.display = "none";
+  model.start();
+
 }
 document.getElementById("gamestart").addEventListener("click", gameinit);
 //gameinit();
-//spmanager.awardSpecials();
