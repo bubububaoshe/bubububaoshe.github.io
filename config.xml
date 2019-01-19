@@ -7,15 +7,20 @@
 
 <!-- versionCode is optional and Android only -->
 
-  <name>GJ3QQX</name>
+  <name>千秋戏</name>
 
   <description>
-    The card game Qianqiuxi from Gujian 3.
+   源自古剑3的卡牌补刀小游戏。
   </description>
 
-  <author href="https://build.phonegap.com" email="support@phonegap.com">
+  <author href="https://weibo.com/3802484189/" email="support@phonegap.com">
       bubububaoshe
   </author>
+
+  <!-- all platforms -->
+  <preference name="orientation" value="landscape" />
+  <preference name="fullscreen" value="true" />
+
   <platform name="android">
     <icon src="icon.png" width="512" height="512" />
   </platform>
