@@ -368,7 +368,7 @@ class Deck {
     this.characters.length = 0;
   }
   destroy(){
-    this.characters.length = 0;console.log("release!");
+    this.characters.length = 0;
     if(this.view != null)
       this.view.destroy();
   }
@@ -708,7 +708,6 @@ class Player {
   }
   recalculate(animechange){
     //calculate score for the player
-    console.log(this.id+"号重新算分");
     var preScore = this.score;
     this.score = 0;
     //base score & special card bonus
@@ -968,18 +967,6 @@ class Model {
   // hc/pc are specialchars if hs/ps are not null
     var player = obtainVector.player;
     var oppo = player.id==0? model.player1:model.player0;
-    /*player.hand.removeChar(chars[0]);
-    //which of the four are new chars? : obtainVector.chars[]
-    //where are these two chars added? : swapchar==null?player:oppo
-    //when is UnnamedBanTrick performed? : after addTableChar, before view
-    for(var i=0; i<2; i++){
-      if(obtainVector.swapChars[i] != null){
-        chars[i].swapped = true;
-        obtainVector.swapChars[i].swapped = true;
-        oppo.addTableChar(chars[i]);
-        chars[i] = obtainVector.swapChars[i];
-      }
-    }*/
 
     //console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
     var ac0 = player.addTableChar(obtainVector.playerTableChars[0]);

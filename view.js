@@ -281,7 +281,7 @@ class DeckDiv {
       card.moveto(view.repository);
     }
   }
-  destroy(){console.log(this.constructor.name);
+  destroy(){
     this.container.textContent = "";
   }
 }

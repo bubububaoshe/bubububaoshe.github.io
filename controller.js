@@ -218,7 +218,6 @@ class Controller{
   doNothing(){
   }
   spPick(){
-    console.log("Pick:" + this.id);
     PLAYER_SPECIALS[1].push(this.id);
     document.getElementById("sppick").appendChild(this);
     playerinfo.updateSPPick();
@@ -226,11 +225,9 @@ class Controller{
     this.removeEventListener("click", controller.spPick);
     this.addEventListener("click", controller.spUnpick);
   }
-  spUnpick(){console.log("UnPick:" + this.id);
+  spUnpick(){
     var idx = PLAYER_SPECIALS[1].indexOf(this.id);
-    console.log(this.id+":"+idx);
     PLAYER_SPECIALS[1].splice(idx, 1);
-    console.log(PLAYER_SPECIALS[1]);
     document.getElementById("sprepo").appendChild(this);
     playerinfo.updateSPPick();
     sound.activate();

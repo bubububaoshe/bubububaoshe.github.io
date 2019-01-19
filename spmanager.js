@@ -101,6 +101,7 @@ class SPManager{
       case 3:
       break;
     }
+    //USER_SPECIAL_REPO = COMPLETE_SPECIALS;
     USER_SPECIAL_REPO = this.loadSpecials("qqxspecials");
     if(USER_SPECIAL_REPO.length > 0)
       PLAYER_SPECIALS[1] = this.loadSpecials("qqxspecialpicks");
@@ -121,7 +122,7 @@ class SPManager{
       keep.push(val);
       this.removeDuplicates(val, arr);
     }
-    return keep;console.log(len+":"+keep);
+    return keep;
   }
   removeDuplicates(id, ids){
     var id = id.substring(0, id.length - 1);
@@ -133,10 +134,9 @@ class SPManager{
         idx++;
   }
   initPlayerSpecials(player){
-    var sps = PLAYER_SPECIALS[player.id];console.log(sps);
+    var sps = PLAYER_SPECIALS[player.id];
     for (var i = 0; i < sps.length; i++)
       player.specials.addChar(model.specialRepository.removeCharByID(sps[i]));
-    console.log(player.specials.getSize());
   }
   saveSpecials(type, carray){
     if(type == null){
@@ -185,7 +185,7 @@ class SPManager{
   hasDuplicates(id, ids){
     id = id.substring(0, id.length - 1);
     for(var i=0; i<ids.length; i++)
-      if(ids[i].startsWith(id)){console.log("DUP:"+id);
+      if(ids[i].startsWith(id)){
         return true;}
     return false;
   }

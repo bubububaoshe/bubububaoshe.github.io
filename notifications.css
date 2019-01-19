@@ -125,7 +125,7 @@
   left: calc(60% - var(--main-height)*0.195);
   top:  32.5%;
   background-color: var(--final-background-color);
-  border: calc(var(--main-height)*0.02) dashed rgba(0, 0, 0, 0.1);
+  border: calc(var(--main-height)*0.02) solid rgba(0, 0, 0, 0.1);
   transform: rotate(22.5deg);
   -webkit-transform: rotate(22.5deg);
 }
