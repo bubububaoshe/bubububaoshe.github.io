@@ -281,7 +281,7 @@ class DeckDiv {
       card.moveto(view.repository);
     }
   }
-  destroy(){
+  destroy(){console.log(this.constructor.name);
     this.container.textContent = "";
   }
 }
@@ -548,12 +548,14 @@ class View {
   init(){
     view.blockGame();
     messenger.init();
+    /*
     this.pool.destroy();
     this.table0.destroy();
     this.table1.destroy();
     this.repository.destroy();
     this.specials0.destroy();
     this.specials1.destroy();
+    */
     this.repository.init();
   }
   setup(){

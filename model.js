@@ -368,7 +368,7 @@ class Deck {
     this.characters.length = 0;
   }
   destroy(){
-    this.characters.length = 0;
+    this.characters.length = 0;console.log("release!");
     if(this.view != null)
       this.view.destroy();
   }
@@ -643,6 +643,7 @@ class Player {
   init(){
     this.table.destroy();
     this.specials.destroy();
+    this.hand.destroy();
     this.matchable = true;
     this.partialCombos.length = 0;
     this.completeCombos.length = 0;
@@ -760,6 +761,14 @@ class Model {
   setup(){
     model.commonRepository.init();
     model.specialRepository.init();
+    window.addEventListener("beforeunload", function (event) {
+      model.player1.init();
+      model.player0.init();
+      model.pool.destroy();
+      model.commonRepository.destroy();
+      model.specialRepository.destroy();
+      returnValue = undefined;
+    });
   }
   poolStart(){
     this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
