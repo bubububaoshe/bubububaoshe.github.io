@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<widget xmlns   = "http://www.w3.org/ns/widgets"
+    xmlns:gap   = "http://phonegap.com/ns/1.0"
+    id          = "gj3.fanworks.bubububaoshe.qqx"
+    versionCode = "10"
+    version     = "1.0.0" >
+
+<!-- versionCode is optional and Android only -->
+
+  <name>GJ3QQX</name>
+
+  <description>
+    The card game Qianqiuxi from Gujian 3.
+  </description>
+
+  <author href="https://build.phonegap.com" email="support@phonegap.com">
+      bubububaoshe
+  </author>
+  <platform name="android">
+    <icon src="icon.png" width="512" height="512" />
+  </platform>
+</widget>
