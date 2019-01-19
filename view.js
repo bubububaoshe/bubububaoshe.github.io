@@ -1,7 +1,7 @@
 //consts
 
 MAX_MAIN_RATIO = 2.3;//max width/height ratio of the main board
-MIN_MAIN_RATIO = 1.7;//min width/height ratio of the main board
+MIN_MAIN_RATIO = 1.66;//min width/height ratio of the main board
 CARD_RATIO = 3 / 4; //width/height ratio of a card
 HAND_CARD_OVERLAP = 0.44; //percent of neighboring cards that overlap in hand board
 OPERATION_DELAY = 500; //delay in milliseconds between machine operations
@@ -26,9 +26,81 @@ function showOpacity(div, show){
     div.style.opacity = 1;
   }
   else{
-    div.style.opacity = null;
+    div.style.opacity = 0;
     div.style.visibility = null;
   }
+}
+
+function createInfobox(char){
+  var div = document.createElement("div");
+  div.classList.add("hoverinfobox", "transitopacity");
+  div.appendChild(createNamePanel(char, true));
+  div.appendChild(createTeammatePanel(char));
+  return div;
+}
+function createFullInfobox(char){
+  var div = document.createElement("div");
+  div.classList.add("hoverinfobox", "transitform");
+  div.appendChild(createNamePanel(char, false));
+  div.appendChild(createPoemPanel(char));
+  if(char.isSpecial())
+    div.appendChild(createTrickPanel(char));
+  else
+    div.appendChild(createTeammatePanel(char));
+  return div;
+}
+function createTrickPanel(char){
+  var div = document.createElement("div");
+  div.classList.add("trickpanel");
+  var nos = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+  var len = char.tricks.length;
+  var i=0;
+  for(; i<len; i++){
+    div.innerHTML += "<div>技能效果" + nos[i] + "：</div>";
+    div.innerHTML += char.tricks[i].description;
+  }
+  if(char.noswap)
+    div.innerHTML += "<div>技能效果" + nos[i] + "：</div>被交换后卡牌技能无效";
+  return div;
+}
+function createTeammatePanel(char){
+  var div = document.createElement("div");
+  div.classList.add("teammatepanel");
+  var mates = combos.getTeamMates(char);
+  var len = mates.length;
+  div.innerHTML = "<div>可组合的卡牌：</div>";
+  for(var i=0; i<len-1; i++)
+    div.innerHTML += mates[i] + "、";
+  if(len > 0)
+    div.innerHTML += mates[len-1];
+  return div;
+}
+function createNamePanel(char, showscore){
+  var div = document.createElement("div");
+  div.classList.add("namepanel", "bignotice");
+  var namediv = document.createElement("div");
+  div.appendChild(namediv);
+  if(char.isSpecial())
+    namediv.innerHTML = char.name + "&middot;" + char.nameSuffix;
+  else
+    namediv.innerHTML = char.name;
+  if(showscore){
+    var scorediv = document.createElement("div");
+    div.appendChild(scorediv);
+    var span = document.createElement("span");
+    scorediv.appendChild(span);
+    span.textContent = char.score;
+    span = document.createElement("span");
+    scorediv.appendChild(span);
+    span.textContent = "分";
+  }
+  return div;
+}
+function createPoemPanel(char){
+  var div = document.createElement("div");
+  div.classList.add("poempanel", "bignotice");
+  div.textContent = char.poem==null?DEFAULT_CHAR_POEM:char.poem;
+  return div;
 }
 class Sound{
   constructor(){
@@ -93,79 +165,8 @@ class Card{
     var back = document.createElement("div");
     this.card.appendChild(back);
     back.classList.add("cardback");
-    this.container.appendChild(this.createInfobox(char));
+    this.container.appendChild(createInfobox(char));
     this.container.addEventListener("click", controller.doNothing);
-  }
-  createInfobox(char){
-    var div = document.createElement("div");
-    div.classList.add("hoverinfobox", "transitopacity");
-    div.appendChild(this.createNamePanel(char, true));
-    div.appendChild(this.createTeammatePanel(char));
-    return div;
-  }
-  createFullInfobox(char){
-    var div = document.createElement("div");
-    div.classList.add("hoverinfobox", "transitform");
-    div.appendChild(this.createNamePanel(char, false));
-    div.appendChild(this.createPoemPanel(char));
-    if(char.isSpecial())
-      div.appendChild(this.createTrickPanel(char));
-    else
-      div.appendChild(this.createTeammatePanel(char));
-    return div;
-  }
-  createTrickPanel(char){
-    var div = document.createElement("div");
-    div.classList.add("trickpanel");
-    var nos = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
-    var len = char.tricks.length;
-    var i=0;
-    for(; i<len; i++){
-      div.innerHTML += "<div>技能效果" + nos[i] + "：</div>";
-      div.innerHTML += char.tricks[i].description;
-    }
-    if(char.noswap)
-      div.innerHTML += "<div>技能效果" + nos[i] + "：</div>被交换后卡牌技能无效";
-    return div;
-  }
-  createTeammatePanel(char){
-    var div = document.createElement("div");
-    div.classList.add("teammatepanel");
-    var mates = combos.getTeamMates(char);
-    var len = mates.length;
-    div.innerHTML = "<div>可组合的卡牌：</div>";
-    for(var i=0; i<len-1; i++)
-      div.innerHTML += mates[i] + "、";
-    if(len > 0)
-      div.innerHTML += mates[len-1];
-    return div;
-  }
-  createNamePanel(char, showscore){
-    var div = document.createElement("div");
-    div.classList.add("namepanel", "bignotice");
-    var namediv = document.createElement("div");
-    div.appendChild(namediv);
-    if(char.isSpecial())
-      namediv.innerHTML = char.name + "&middot;" + char.nameSuffix;
-    else
-      namediv.innerHTML = char.name;
-    if(showscore){
-      var scorediv = document.createElement("div");
-      div.appendChild(scorediv);
-      var span = document.createElement("span");
-      scorediv.appendChild(span);
-      span.textContent = char.score;
-      span = document.createElement("span");
-      scorediv.appendChild(span);
-      span.textContent = "分";
-    }
-    return div;
-  }
-  createPoemPanel(char){
-    var div = document.createElement("div");
-    div.classList.add("poempanel", "bignotice");
-    div.textContent = char.poem==null?DEFAULT_CHAR_POEM:char.poem;
-    return div;
   }
   setChar(char){
     this.card.id = char.id;
@@ -369,15 +370,20 @@ class Messenger {
     this.note("");
     document.querySelector("#score0 div").textContent = 0;
     document.querySelector("#score1 div").textContent = 0;
+  }
+  hideFinalNotice(){
     var div = document.getElementById("finalcontainer");
     div.removeEventListener("click", controller.restart);
     div.classList.remove("notransform");
     delayedFunc(function(){
-      div.style.visibility = null;}, 4);
+      div.style.visibility = null;
+    }, 4);
   }
   note(msg){
-    var info = document.getElementById("infobox").firstElementChild;
-    info.textContent = msg;
+    document.getElementById("infobox").firstElementChild.textContent = msg;
+  }
+  spselectionnote(msg){
+    document.getElementById("selectioninfo").firstElementChild.textContent = msg;
   }
   notifyNoMatch(display) {
     if (display == "show")
@@ -453,8 +459,10 @@ class Messenger {
     var msg = document.getElementById("finalmsg");
     var div = document.getElementById("finalcontainer");
     if(model.player1.score > model.player0.score){
-      spmanager.awardSpecials();
-      msg.textContent = "你赢了";
+      if(spmanager.awardSpecials())
+        msg.textContent = "千秋戏王";
+      else
+        msg.textContent = "你赢了";
       sound.win();
     }
     else if(model.player1.score < model.player0.score){
@@ -505,10 +513,10 @@ class Messenger {
     showOpacity(banner, false);
     banner.querySelector(".bannercards").textContent = "";
   }
-  notifyAward(minScore, spid){
+  notifyAward(minscore, spid){
     var banner = document.getElementById("infobanner");
     var levels = ["炤", "洛", "危"];
-    messenger.setBannerHeadline(["恭喜对战", levels[AI_LEVEL-1]+"级AI", "超过" , minScore,"分，请抱好"]);
+    messenger.setBannerHeadline(["恭喜对战", levels[AI_LEVEL-1]+"级AI", "超过" , minscore,"分，请抱好"]);
     var poster =  banner.querySelector(".bannercards").appendChild(document.createElement("div"));
     poster.classList.add("postercard");
     poster.style.backgroundImage = "url('img/" + spid + ".jpg')";banner.addEventListener("click", function(){
@@ -686,14 +694,8 @@ class View {
 
 var sound, combos, model, controller, spmanager, messenger, view, oppoinfo, playerinfo, obtainVector;
 var AI_LEVEL, COMBO_VOICE, SP_CARDS;
-function getInput(inputsID){
-  var inputs = document.getElementById(inputsID).getElementsByTagName("input");
-  for(var i=0; i<inputs.length; i++)
-    if(inputs[i].checked){
-      return inputs[i].id;
-    }
-}
-function gameinit(){
+
+function gamesetup(){
   var pack = getInput("packinput");
   var p1 = parseInt(pack.charAt(1));
   var p2 = parseInt(pack.charAt(2));
@@ -710,12 +712,8 @@ function gameinit(){
   view = new View();
   oppoinfo = new TableInfoView(model.player0);
   playerinfo = new TableInfoView(model.player1);
+  showOpacity(document.getElementById("configurator"), false);
   model.setup();
-
-  document.getElementById("main").style.display = "block";
-  document.getElementById("configurator").style.display = "none";
-  model.start();
-
+  controller.gameinit();
 }
-document.getElementById("gamestart").addEventListener("click", gameinit);
-//gameinit();
+document.getElementById("comfirmSetting").addEventListener("click", gamesetup);

@@ -182,6 +182,7 @@ INIT_CARD_NUM_HAND = 10;
 INIT_CARD_NUM_POOL = 8;
 POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
 BONUS_THRESHOLDS = [170, 140, 110];
+MAX_SP_NUM = 15;
 
 function getRandom(max){
   //returns random in [0, max-1]
@@ -739,6 +740,7 @@ class Model {
     this.activeChar = null;
   }
   start(){
+    view.init();
     model.player1.start();
     model.player0.start();
     model.poolStart();
@@ -754,13 +756,10 @@ class Model {
     model.activeChar = null;
     model.commonRepository.init();
     model.specialRepository.init();
-    view.init();
-    delayedFunc(model.start);
   }
   setup(){
     model.commonRepository.init();
     model.specialRepository.init();
-    view.init();
   }
   poolStart(){
     this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);

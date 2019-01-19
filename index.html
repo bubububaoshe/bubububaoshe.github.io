@@ -15,8 +15,8 @@
 	<link rel="stylesheet" type="text/css" href="tableinfo.css">
 </head>
 
-<body>
-	<div id="configurator" class="flexbox">
+<body class="noselect">
+	<div id="configurator" class="flexbox transitopacity">
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="version" id="p12" checked>
 			<input type="radio" name="version" id="p13" disabled="true">
@@ -35,22 +35,39 @@
 			<input type="radio" name="ai" id="ai1">
 			<input type="radio" name="ai" id="ai2" checked>
 			<input type="radio" name="ai" id="ai3" >
-			<label for="ai1" data-value="温和亲切的AI">炤级</label>
-			<label for="ai2" data-value="沉迷种田的AI">洛级</label>
-			<label for="ai3" data-value="恶意满满的AI">危级</label>
+			<label for="ai1" data-value="温和亲切的AI">炤级AI</label>
+			<label for="ai2" data-value="沉迷种田的AI">洛级AI</label>
+			<label for="ai3" data-value="恶意满满的AI">危级AI</label>
 		</div>
 		<div id="spinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="sp" id="sp0">
 			<input type="radio" name="sp" id="sp1" checked>
-			<label for="sp0" data-value="你和AI都不想使用珍稀牌">不含珍稀牌</label>
-			<label for="sp1" data-value="可使用所有珍稀牌 [测试中]">包含珍稀牌</label>
+			<input type="radio" name="sp" id="sp2">
+			<input type="radio" name="sp" id="sp3">
+			<label for="sp0" data-value="AI不想使用珍稀牌">AI无珍稀牌</label>
+			<label for="sp1" data-value="AI珍稀牌量是你一半">AI 1/2珍稀牌</label>
+			<label for="sp2" data-value="AI珍稀牌量和你一样">AI等量珍稀牌</label>
+			<label for="sp3" data-value="AI拥有所有珍稀牌">AI全珍稀牌</label>
 		</div>
-		<div id="gamestart">开始游戏</div>
+		<div id="comfirmSetting" class="confirmbutton">确定</div>
 	</div>
-	<div id="spselection">
-		<div id="p0sp"></div>
-		<div id="sprepo"></div>
-		<div id="p1sp"></div>
+	<div id="spselection" class="transitopacity">
+		<div class="selectionarea verticalflex">
+			<div>
+				<div id="sprepo" class="charinfocontainer flexbox"></div>
+				<div class="cover"></div>
+			</div>
+			<div><div id="sppick" class="charinfocontainer flexbox"></div></div>
+		</div>
+		<div class="rightsidebar verticalflex">
+			<div></div>
+			<div id="selectioninfo" class="centeredtext"><div>从上方牌库
+选择特殊牌
+到下方牌组
+最多选15张</div></div>
+			<div id="gamestart" class="centeredtext"><div>开始
+游戏</div></div>
+		</div>
 	</div>
 	<div id="main">
 		<div id="scoreboard">
@@ -60,7 +77,7 @@
 				<div class="combobonus">
 				</div>
 			</div>
-			<div id="infobox" class="bignotice"><div></div></div>
+			<div id="infobox" class="centeredtext bignotice"><div></div></div>
 			<div id="score1" class="bignotice">
 				<div></div>
 				<div class="combobonus"></div>
@@ -126,7 +143,7 @@
 				</div>
 				<div class="icomboinfocontainer flexbox"></div>
 			</div>
-			<div class="tableinfocontainer cover transitopacity">
+			<div class="tableinfocontainer cover">
 				<div class="infoheader bignotice">
 						<div>&#9830; 我方珍稀牌</div>
 				</div>

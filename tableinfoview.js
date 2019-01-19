@@ -12,7 +12,7 @@ class TableInfoView{
       divs[i].addEventListener("click", controller.selectInfo);
     this.on = false;
   }
-  addSmallCard(char, container){
+  addSmallCard(char, container, showscore){
     container = container==null?this.container.querySelector('.charinfocontainer'):container;
     var schar = container.appendChild(document.createElement("div"));
     schar.classList.add("smallchar");
@@ -21,14 +21,20 @@ class TableInfoView{
     inn.classList.add("smallcard");
     inn = inn.appendChild(document.createElement("div"));
     inn.style.backgroundImage = char.getPortrait();
+    if(showscore == null || showscore){
+      inn = schar.appendChild(document.createElement("p"));
+      inn.textContent = "基础分:" + char.score;
+    }
+    schar.appendChild(createFullInfobox(char));
     if(char.isSpecial() && char.getTrick()==null)
-      inn.style.opacity = 0.4;
-    inn = schar.appendChild(document.createElement("p"));
-    inn.textContent = "基础分:" + char.score;
-    //inn = schar.appendChild(document.createElement("div"));
-    //inn.classList.add("hoverinfobox", "transitform");
-    schar.appendChild(char.card.createFullInfobox(char));
+      this.enableCard(schar, false);
     return schar;
+  }
+  enableCard(chardiv, enable){
+    if(enable)
+      chardiv.firstElementChild.firstElementChild.style.opacity = null;
+    else
+      chardiv.firstElementChild.firstElementChild.style.opacity = 0.4;
   }
   createCharView(container, trick){
     var chars = this.player.table.characters;
@@ -170,6 +176,57 @@ class TableInfoView{
   specialsPanelOn(){
     var container = document.getElementsByClassName("tableinfocontainer")[3];
     return this.visible(container);
+  }
+  exitSpecialsPick(){
+    document.getElementById("sprepo").textContent = "";
+    document.getElementById("sppick").textContent = "";
+    showOpacity(document.getElementById("spselection"), false);
+  }
+  showSpecialsPick(){
+    var repodiv = document.getElementById("sprepo");
+    var pickdiv = document.getElementById("sppick");
+    var repo = model.specialRepository;
+    //this func is called after gameinit and before gamestart
+    //so specialRepository includes all the special chars
+    for(var i=0; i<USER_SPECIAL_REPO.length; i++){
+      var char = repo.getChar(USER_SPECIAL_REPO[i]);
+      if(PLAYER_SPECIALS[1].includes(char.id)){
+        var chardiv = this.addSmallCard(char, pickdiv, false);
+        chardiv.addEventListener("click", controller.spUnpick);
+      }
+      else{
+        var chardiv = this.addSmallCard(char, repodiv, false);
+        if(spmanager.hasDuplicates(char.id, PLAYER_SPECIALS[1]))
+          this.enableCard(chardiv, false);
+        else
+          chardiv.addEventListener("click", controller.spPick);
+        this.spFullBlock();
+      }
+    }
+  }
+  updateSPPick(){
+    this.spDisableDuplicates();
+    this.spFullBlock();
+  }
+  spDisableDuplicates(){
+    var schars = document.getElementById("sprepo").children;
+    for(var i=0; i<schars.length; i++)
+      if(spmanager.hasDuplicates(schars[i].id, PLAYER_SPECIALS[1])) {
+        this.enableCard(schars[i], false);
+        schars[i].removeEventListener("click", controller.spPick);
+      }
+      else {
+        this.enableCard(schars[i], true);
+        schars[i].addEventListener("click", controller.spPick);
+      }
+
+
+  }
+  spFullBlock(){
+    if(PLAYER_SPECIALS[1].length >= MAX_SP_NUM)
+      document.querySelector("#spselection .cover").style.visibility = "visible";
+    else
+      document.querySelector("#spselection .cover").style.visibility = null;
   }
   visible(container){
     container = container==null?this.container:container;

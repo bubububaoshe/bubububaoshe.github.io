@@ -1,12 +1,41 @@
+.transitopacity{
+  opacity: 0;
+  background-color: rgba(0,0,0,0);
+  transition: opacity var(--transition-sec) linear;
+  -webkit-transition: opacity var(--transition-sec) linear;
+}
+
+.transitform{
+  transition-property: transform;
+  transition-duration: var(--transition-sec);
+  -webkit-transition-property: transform;
+  -webkit-transition-duration: var(--transition-sec);
+}
+.transitall{
+  transition-property: top, left, transform;
+  transition-duration: var(--transition-sec);
+  -webkit-transition-property: top, left, transform;
+  -webkit-transition-duration: var(--transition-sec);
+}
+.verticalflex{
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.centeredtext{
+  white-space: pre;
+  display: flex;
+  align-items: center;
+}
+.centeredtext>div{
+  width: 100%;
+}
 #infobox{
   height: calc(var(--card-height)*0.5);
   font-size: calc(var(--main-width)*0.02);
-  white-space: pre;
-  display: flex;
-  overflow: hidden;
-  align-items: center;
-  padding: 0 5%;
 }
+
 #specialboard #hoverinfobox{
   margin: calc(var(--card-height)*0.25) 0;
   height: calc(var(--card-height)*1.5);
@@ -116,7 +145,8 @@
     color: var(--text-color);
     font-size: calc(var(--card-height)*0.15);
 }
-#finalmsg{
+#finalmsg.bignotice{
+    font-size: calc(var(--card-height)*0.38);
     margin-top: 25%;
     animation: finalneo 2s infinite;
     -webkit-animation: finalneo 2s infinite;
@@ -144,25 +174,28 @@
 
 #configurator {
   position: relative;
-  height: 50%;
-  width: 50%;
-  top: 25%;
+  min-height: 50%;
+  max-height: 70%;
+  width: 60%;
+  top: 20%;
+  margin: auto;
   align-items: center;
   overflow: visible;
+  opacity: 1;
 }
 #configurator div{
   display: inline-block;
   font-size: 1.5vw;
 }
-
-#gamestart{
-  border: 1px solid  #281B11;
+.confirmbutton{
   width: 25%;
   padding: 1vw 0;
+  border: 1px solid  var(--text-shadow-color);
+  color: var(--text-shadow-color);
   cursor: pointer;
 }
-#gamestart:hover, #gamestart:active{
-  background-color: #281B11;
+.confirmbutton:hover, .confirmbutton:active {
+  background-color: var(--text-shadow-color);
   color: white;
 }
 
@@ -212,23 +245,4 @@
     top: calc(var(--card-height)*-0.25);
     opacity: 0;
   }
-}
-
-
-.transitform{
-  transition-property: transform;
-  transition-duration: var(--transition-sec);
-  -webkit-transition-property: transform;
-  -webkit-transition-duration: var(--transition-sec);
-}
-.transitopacity{
-  opacity: 0;
-  transition: opacity var(--transition-sec) linear;
-  -webkit-transition: opacity var(--transition-sec) linear;
-}
-.transitall{
-  transition-property: top, left, transform;
-  transition-duration: var(--transition-sec);
-  -webkit-transition-property: top, left, transform;
-  -webkit-transition-duration: var(--transition-sec);
 }

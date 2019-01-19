@@ -5,11 +5,22 @@ function delayedFunc(func, timeUnits){
     func.call();
   }, Math.floor(OPERATION_DELAY * timeUnits));
 }
+function getInput(inputsID){
+  var inputs = document.getElementById(inputsID).getElementsByTagName("input");
+  for(var i=0; i<inputs.length; i++)
+    if(inputs[i].checked){
+      return inputs[i].id;
+    }
+}
 class Controller{
   constructor(){
   }
   restart(){
+    messenger.hideFinalNotice();
     model.init();
+    delayedFunc(function(){
+      controller.gameinit();
+    }, 2);
   }
   activate(){
     var char = model.player1.hand.getChar(this.id);
@@ -205,5 +216,43 @@ class Controller{
     controller.handleBans();
   }
   doNothing(){
+  }
+  spPick(){
+    console.log("Pick:" + this.id);
+    PLAYER_SPECIALS[1].push(this.id);
+    document.getElementById("sppick").appendChild(this);
+    playerinfo.updateSPPick();
+    sound.activate();
+    this.removeEventListener("click", controller.spPick);
+    this.addEventListener("click", controller.spUnpick);
+  }
+  spUnpick(){console.log("UnPick:" + this.id);
+    var idx = PLAYER_SPECIALS[1].indexOf(this.id);
+    console.log(this.id+":"+idx);
+    PLAYER_SPECIALS[1].splice(idx, 1);
+    console.log(PLAYER_SPECIALS[1]);
+    document.getElementById("sprepo").appendChild(this);
+    playerinfo.updateSPPick();
+    sound.activate();
+    this.removeEventListener("click", controller.spUnpick);
+    this.addEventListener("click", controller.spPick);
+  }
+  gameinit(){
+    if(USER_SPECIAL_REPO.length == 0)
+      controller.gamestart();
+    else{
+      document.getElementById("main").style.display = "none";
+      playerinfo.showSpecialsPick();
+      showOpacity(document.getElementById("spselection"), true);
+      document.getElementById("gamestart").addEventListener("click", controller.gamestart);
+    }
+  }
+  gamestart(){
+    if(USER_SPECIAL_REPO.length > 0)
+      spmanager.saveSpecials();
+    spmanager.setAISpecials();
+    playerinfo.exitSpecialsPick();
+    document.getElementById("main").style.display = "block";
+    model.start();
   }
 }
