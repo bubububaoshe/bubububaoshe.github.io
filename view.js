@@ -439,7 +439,7 @@ class Messenger {
           messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
         },1);
       }
-      sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getName());
+      sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
     }
     else
       controller.postObtain(1);
