@@ -5,11 +5,22 @@ function delayedFunc(func, timeUnits){
     func.call();
   }, Math.floor(OPERATION_DELAY * timeUnits));
 }
+function getInput(inputsID){
+  var inputs = document.getElementById(inputsID).getElementsByTagName("input");
+  for(var i=0; i<inputs.length; i++)
+    if(inputs[i].checked){
+      return inputs[i].id;
+    }
+}
 class Controller{
   constructor(){
   }
   restart(){
+    messenger.hideFinalNotice();
     model.init();
+    delayedFunc(function(){
+      controller.gameinit();
+    }, 2);
   }
   activate(){
     var char = model.player1.hand.getChar(this.id);
@@ -205,5 +216,63 @@ class Controller{
     controller.handleBans();
   }
   doNothing(){
+  }
+  spPick(){
+    PLAYER_SPECIALS[1].push(this.id);
+    document.getElementById("sppick").appendChild(this);
+    playerinfo.updateSPPick();
+    sound.activate();
+    this.removeEventListener("click", controller.spPick);
+    this.addEventListener("click", controller.spUnpick);
+  }
+  spUnpick(){
+    var idx = PLAYER_SPECIALS[1].indexOf(this.id);
+    PLAYER_SPECIALS[1].splice(idx, 1);
+    document.getElementById("sprepo").appendChild(this);
+    playerinfo.updateSPPick();
+    sound.activate();
+    this.removeEventListener("click", controller.spUnpick);
+    this.addEventListener("click", controller.spPick);
+  }
+  gameinit(){
+    if(USER_SPECIAL_REPO.length == 0)
+      controller.gamestart();
+    else{
+      document.getElementById("main").style.display = "none";
+      playerinfo.showSpecialsPick();
+      showOpacity(document.getElementById("spselection"), true);
+      document.getElementById("gamestart").addEventListener("click", controller.gamestart);
+    }
+  }
+  gamestart(){
+    var should_skip = false;
+    if (is_multiplayer == true && versus_rank == 1) should_skip = true;
+    
+    if (should_skip == false) {
+      if(USER_SPECIAL_REPO.length > 0)
+        spmanager.saveSpecials();
+      spmanager.setAISpecials();
+      playerinfo.exitSpecialsPick();
+      document.getElementById("main").style.display = "block";
+      model.start();
+    }
+    
+    if(is_multiplayer == true) {
+      if (versus_rank == 0) {
+        var s = model.getSnapshot();
+        console.log(s);
+        socket.emit('Match_SetupComplete', PLAYER_SPECIALS[1], s);
+      } else {
+        socket.emit('Match_SetupComplete', PLAYER_SPECIALS[1], null);
+      }
+    }
+  }
+  // 后手的人开始游戏用。后手玩家需要收到先手玩家的牌局
+  gamestartDefensive(snapshot) {
+    if(USER_SPECIAL_REPO.length > 0)
+      spmanager.saveSpecials();
+    playerinfo.exitSpecialsPick();
+    document.getElementById("main").style.display = "block";
+    model.start(snapshot);
   }
 }

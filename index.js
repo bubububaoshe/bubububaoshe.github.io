@@ -109,7 +109,7 @@ class PlayerMatcher {
 		}
 		p.match_confirmed = true;
 		if (other.match_confirmed == true) {
-			this.StartGame(pair);
+			this.SetupGame(pair);
 		} else {
 			other.emit("Match_OtherPlayerConfirmed");
 		}
@@ -125,12 +125,12 @@ class PlayerMatcher {
 	  }
 	}
 	
-	StartGame(pair) {
+	SetupGame(pair) {
 	  console.log("Should start a game now");
 	  this.matched_pairs.RemovePair(pair);
 	  var g = new Game(pair[0], pair[1]);
 	  g_all_games.push(g);
-	  g.Start();
+	  g.Setup();
 	}
 	
 	IsPlayerInMatchQueueOrMatched(p) {
@@ -143,19 +143,23 @@ class PlayerMatcher {
 g_playermatcher = new PlayerMatcher();
 g_all_games = [];
 
-// 要不，服务器就不维持游戏拷贝了
 class Game {
   constructor(p0, p1) {
     this.players = [p0, p1]; // Player's Sockets
     this.curr_player = 0;
+    this.initsp = [[], []]; // 初始时的特殊牌
+    this.snapshot = null;    // 游戏状态的快照
     console.log("Game.Ctor, Player id: "+p0.player_id + ","+p1.player_id);
   }
   
-  Start() {
+  Setup() { // 两个玩家该gamesetup()
+    this.snapshot = null;
     this.players[0].game = this;
     this.players[1].game = this;
-    
-    this.players[0].emit('Match_GameStartOffensive');
+    this.players[0].state = "setup";
+    this.players[1].state = "setup";
+    this.players[0].emit('Match_GameSetupOffensive');
+    this.players[1].emit('Match_GameSetupDefensive');
   }
   
   GetPlayerIndexBySocket(socket) {
@@ -182,10 +186,30 @@ class Game {
     }
   }
   
-  PassInitDataToP1(p0, p0c, p1c, poolc, repoc) {
-    var pidx = this.GetPlayerIndexBySocket(p0);
-    var p1 = this.players[1-pidx];
-    p1.emit('Match_GameStartDefensive', p0c, p1c, poolc, repoc);
+  // 选好了特殊牌，存于sp中
+  OnPlayerSetupComplete(p, sp, snapshot) {
+    var pidx = this.GetPlayerIndexBySocket(p);
+    this.initsp[pidx] = sp.slice(); // Clone
+    console.log('[OnPlayerFinishedSetup] player_id='+p.player_id+', specials='+sp);
+    
+    if ((snapshot != null) && (this.snapshot == null)) {
+      this.snapshot = snapshot;
+      console.log('[OnPlayerFinishedSetup] snpashot saved');
+    }
+    
+    if (pidx != -1) {
+      p.state = "setup_complete";
+      var other = this.players[1 - pidx]; 
+      if (other.state == "setup") {
+        other.emit('Game_OtherPlayerSetupComplete');
+      } else {
+        console.log('[both player finished]');
+        this.players[0].state = 'in_game';
+        this.players[1].state = 'in_game';
+        this.players[0].emit('Match_GameInitOffensive', this.initsp[1], this.snapshot);
+        this.players[1].emit('Match_GameInitDefensive', this.initsp[0], this.snapshot);
+      }
+    }
   }
 };
 
@@ -271,6 +295,11 @@ io.on('connection', function(socket) {
         socket.emit('Match_InvalidInvitation', '未找到该ID对应的玩家');
       }
     }
+	});
+	
+	socket.on('Match_SetupComplete', (sp, snapshot) => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnPlayerSetupComplete(socket, sp, snapshot);
 	});
 });
 

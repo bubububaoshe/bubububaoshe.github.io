@@ -91,82 +91,82 @@ COMMON_CHAR_LIST = [
   ["mhz3", "梦魂枝", 2, "秋"],
 ]
 ];
-COMBO_LIST = [
-  [ [ "风晴雪", "焦炭", "谢衣" ], "厨房功夫", 10],
-  [ [ "谢衣", "乐无异"], "春风雨", 4],
-  [ [ "谢衣", "静水湖"], "重山隐", 4] ,
-  [ [ "谢衣", "沈夜"], "孤月寒灯", 4] ,
-  [ [ "谢衣", "忘川"], "别破军", 4] ,
-  [ [ "谢衣", "通天之器"], "空留忆", 4] ,
-  [ [ "流月城", "谢衣"], "胡不归", 4] ,
-  [ [ "流月城", "沈夜"], "永夜寒沉", 4] ,
-  [ [ "沈曦", "沈夜"], "三日遥", 4] ,
-  [ [ "流月城", "沈曦"], "月中生", 4] ,
-  [ [ "兔子抱枕", "沈曦"], "伴长眠", 4] ,
-  [ [ "华月箜篌", "华月"], "廉贞曲", 4] ,
-  [ [ "流月城", "华月"], "月之殇", 4] ,
-  [ [ "华月", "沈夜"], "护孤城", 4] ,
-  [ [ "谢衣", "沈夜", "沈曦", "华月"], "烈山遗族", 20] ,
-  [ [ "谢衣", "沈夜", "沈曦", "流月城", "华月"], "红月", 40] ,
-  [ ["古剑晗光", "乐无异"], "家传宝贝", 5],
-  [ ["禺期", "古剑晗光", "乐无异"], "剑主之谊", 10],
-  [ ["长安", "乐无异"], "玉京游", 4],
-  [ ["闻人羽", "乐无异"], "比肩行", 5],
-  [ ["金麒麟", "闻人羽", "乐无异"], "长相忆", 10],
-  [ ["百草谷", "闻人羽"], "星海天罡", 5],
-  [ ["夏夷则", "太华山"], "逸尘", 5],
-  [ ["夏夷则", "露草"], "待佳期", 4],
-  [ ["太华山", "清和真人"], "太华山人", 4],
-  [ ["夏夷则", "清和真人"], "严师胜父", 4],
-  [ ["夏夷则", "阿阮"], "光逐影", 5],
-  [ ["夏夷则", "太华山", "清和真人"], "温茶相待", 10],
-  [ ["露草", "阿阮"], "共株生", 4],
-  [ ["昭明", "阿阮"], "芳草心", 4],
-  [ ["巫山", "阿阮"], "山鬼", 5],
-  [ ["神女墓", "巫山"], "神女静眠", 4],
-  [ ["巫山", "露草", "阿阮"], "露草流萤", 10],
-  [ ["巫山", "露草", "阿阮", "神女墓"], "巫山神女", 20],
-  [ ["禺期", "红玉"], "古剑剑灵", 4],
-  [ ["禺期", "昭明"], "铸剑仙师", 4],
-  [ ["禺期", "无名之剑"], "历劫重生", 4],
-  [ ["禺期", "古剑晗光"], "未成之剑", 4],
-  [ ["昭明", "无名之剑", "古剑晗光"], "千年一器", 10],
-  [ ["昭明", "无名之剑", "古剑晗光", "禺期"], "天地熔炉", 20],
-  [ ["昭明", "无名之剑", "古剑焚寂", "古剑红玉", "古剑晗光"], "古剑奇谭", 40],
-  [ ["夏夷则", "阿阮", "闻人羽", "乐无异"], "蓝衫偃师记", 20],
-  [ ["欧阳少恭", "青玉坛"], "丹芷长老", 4],
-  [ ["欧阳少恭", "凤来"], "揽琴独照", 4],
-  [ ["巽芳", "欧阳少恭"], "仙山眷侣", 4],
-  [ ["榣山", "欧阳少恭"], "故地重回", 4],
-  [ ["悭臾", "欧阳少恭"], "榣山遗韵", 4],
-  [ ["欧阳少恭", "蓬莱"], "栖身之所", 4],
-  [ ["巽芳", "蓬莱"], "蓬莱公主", 4],
-  [ ["巽芳", "蓬莱", "欧阳少恭"], "芳华如梦", 10],
-  [ ["黑龙鳞片", "悭臾"], "应龙信物", 4],
-  [ ["榣山", "悭臾"], "水虺醉琴", 4],
-  [ ["欧阳少恭", "方兰生"], "琴川友", 4],
-  [ ["琴川", "方兰生"], "望乡", 4],
-  [ ["方兰生", "青玉司南佩"], "永相随", 4],
-  [ ["百胜刀", "方兰生"], "无情客", 4],
-  [ ["安陆", "红玉"], "明月青霜", 4],
-  [ ["古剑红玉", "红玉"], "剑舞红袖", 4],
-  [ ["天墉城", "红玉"], "千古剑灵", 4],
-  [ ["紫榕林", "襄铃"], "故林栖", 4],
-  [ ["风晴雪", "百里屠苏", "桃花谷"], "桃花幻梦", 10],
-  [ ["风晴雪", "百里屠苏"], "与子成说", 3],
-  [ ["百里屠苏", "悭臾"], "乘龙归", 3],
-  [ ["百里屠苏", "天墉城"], "云涌昆仑", 3],
-  [ ["天墉城", "陵越"], "天墉掌门", 4],
-  [ ["百里屠苏", "陵越", "天墉城"], "天墉旧事", 10],
-  [ ["百里屠苏", "古剑焚寂"], "焚焰血戮", 3],
-  [ ["黑龙鳞片", "百里屠苏"], "故友赠礼", 3],
-  [ ["百里屠苏", "欧阳少恭"], "琴心剑魄", 3],
-  [ ["尹千觞", "欧阳少恭"], "醉梦江湖", 4],
-  [ ["尹千觞", "幽都"], "幽都巫咸", 4],
-  [ ["风晴雪", "尹千觞", "幽都"], "幽夜苍茫", 10],
-  [ ["风晴雪", "尹千觞"], "陌相逢", 4],
-  [ ["风晴雪", "幽都"], "幽都灵女", 4],
-  [ ["风晴雪", "方兰生", "百里屠苏", "红玉", "尹千觞", "襄铃"], "黑衣少侠传", 60]
+COMBO_LIST  = [
+  [ [ "风晴雪", "焦炭", "谢衣" ], "厨房功夫", 10, "cfgj"],
+  [ [ "谢衣", "乐无异"], "春风雨", 4, "cfy"],
+  [ [ "谢衣", "静水湖"], "重山隐", 4, "csy"] ,
+  [ [ "谢衣", "沈夜"], "孤月寒灯", 4, "gyhd"] ,
+  [ [ "谢衣", "忘川"], "别破军", 4, 'bpj'] ,
+  [ [ "谢衣", "通天之器"], "空留忆", 4, 'kly'] ,
+  [ [ "流月城", "谢衣"], "胡不归", 4, 'hbg'] ,
+  [ [ "流月城", "沈夜"], "永夜寒沉", 4, 'yyhc'] ,
+  [ [ "沈曦", "沈夜"], "三日遥", 4, 'sry'],
+  [ [ "流月城", "沈曦"], "月中生", 4, 'yzssx'] ,
+  [ [ "兔子抱枕", "沈曦"], "伴长眠", 4, 'bcm'] ,
+  [ [ "华月箜篌", "华月"], "廉贞曲", 4, 'lzq'] ,
+  [ [ "流月城", "华月"], "月之殇", 4, 'yzshy'] ,
+  [ [ "华月", "沈夜"], "护孤城", 4, 'hgc'] ,
+  [ [ "谢衣", "沈夜", "沈曦", "华月"], "烈山遗族", 20, 'lsyz'] ,
+  [ [ "谢衣", "沈夜", "沈曦", "流月城", "华月"], "红月", 40, 'hy'] ,
+  [ ["古剑晗光", "乐无异"], "家传宝贝", 5, 'jcbb'],
+  [ ["禺期", "古剑晗光", "乐无异"], "剑主之谊", 10, 'jjzy'],
+  [ ["长安", "乐无异"], "玉京游", 4, 'yjy'],
+  [ ["闻人羽", "乐无异"], "比肩行", 5, 'bjx'],
+  [ ["金麒麟", "闻人羽", "乐无异"], "长相忆", 10, 'cxy'],
+  [ ["百草谷", "闻人羽"], "星海天罡", 5, 'xhtg'],
+  [ ["夏夷则", "太华山"], "逸尘", 5, 'yc'],
+  [ ["夏夷则", "露草"], "待佳期", 4, 'lc'],
+  [ ["太华山", "清和真人"], "太华山人", 4, 'thsr'],
+  [ ["夏夷则", "清和真人"], "严师胜父", 4, 'yssf'],
+  [ ["夏夷则", "阿阮"], "光逐影", 5, 'gzy'],
+  [ ["夏夷则", "太华山", "清和真人"], "温茶相待", 10, 'wcxd'],
+  [ ["露草", "阿阮"], "共株生", 4, 'gzs'],
+  [ ["昭明", "阿阮"], "芳草心", 4, 'fcx'],
+  [ ["巫山", "阿阮"], "山鬼", 5, 'sg'],
+  [ ["神女墓", "巫山"], "神女静眠", 4, 'snjm'],
+  [ ["巫山", "露草", "阿阮"], "露草流萤", 10, 'lcly'],
+  [ ["巫山", "露草", "阿阮", "神女墓"], "巫山神女", 20, 'wssn'],
+  [ ["禺期", "红玉"], "古剑剑灵", 4, 'gjjl'],
+  [ ["禺期", "昭明"], "铸剑仙师", 4, 'zjxs'],
+  [ ["禺期", "无名之剑"], "历劫重生", 4, 'ljcs'],
+  [ ["禺期", "古剑晗光"], "未成之剑", 4, 'wczj'],
+  [ ["昭明", "无名之剑", "古剑晗光"], "千年一器", 10, 'qnyq'],
+  [ ["昭明", "无名之剑", "古剑晗光", "禺期"], "天地熔炉", 20, 'tdrl'],
+  [ ["昭明", "无名之剑", "古剑焚寂", "古剑红玉", "古剑晗光"], "古剑奇谭", 40, 'gjqt'],
+  [ ["夏夷则", "阿阮", "闻人羽", "乐无异"], "蓝衫偃师记", 20, 'lsysj'],
+  [ ["欧阳少恭", "青玉坛"], "丹芷长老", 4, 'dzzl'],
+  [ ["欧阳少恭", "凤来"], "揽琴独照", 4, 'lqdz'],
+  [ ["巽芳", "欧阳少恭"], "仙山眷侣", 4, 'xsjl'],
+  [ ["榣山", "欧阳少恭"], "故地重回", 4, 'gdch'],
+  [ ["悭臾", "欧阳少恭"], "榣山遗韵", 4, 'ysyy'],
+  [ ["欧阳少恭", "蓬莱"], "栖身之所", 4, 'xszs'],
+  [ ["巽芳", "蓬莱"], "蓬莱公主", 4, 'plgz'],
+  [ ["巽芳", "蓬莱", "欧阳少恭"], "芳华如梦", 10, 'fhrm'],
+  [ ["黑龙鳞片", "悭臾"], "应龙信物", 4, 'ylxw'],
+  [ ["榣山", "悭臾"], "水虺醉琴", 4, 'shzq'],
+  [ ["欧阳少恭", "方兰生"], "琴川友", 4, 'qcy'],
+  [ ["琴川", "方兰生"], "望乡", 4, 'wx'],
+  [ ["方兰生", "青玉司南佩"], "永相随", 4, 'yxs'],
+  [ ["百胜刀", "方兰生"], "无情客", 4, 'wqk'],
+  [ ["安陆", "红玉"], "明月青霜", 4, 'myqs'],
+  [ ["古剑红玉", "红玉"], "剑舞红袖", 4, 'jwhx'],
+  [ ["天墉城", "红玉"], "千古剑灵", 4,'qgjl'],
+  [ ["紫榕林", "襄铃"], "故林栖", 4, 'glx'],
+  [ ["风晴雪", "百里屠苏", "桃花谷"], "桃花幻梦", 10,'thhm'],
+  [ ["风晴雪", "百里屠苏"], "与子成说", 3, 'gycs'],
+  [ ["百里屠苏", "悭臾"], "乘龙归", 3, 'clg'],
+  [ ["百里屠苏", "天墉城"], "云涌昆仑", 3, 'yykl'],
+  [ ["天墉城", "陵越"], "天墉掌门", 4, 'tyzm'],
+  [ ["百里屠苏", "陵越", "天墉城"], "天墉旧事", 10, 'tyjs'],
+  [ ["百里屠苏", "古剑焚寂"], "焚焰血戮", 3, 'fyxl'],
+  [ ["黑龙鳞片", "百里屠苏"], "故友赠礼", 3, 'gyzl'],
+  [ ["百里屠苏", "欧阳少恭"], "琴心剑魄", 3, 'qxjp'],
+  [ ["尹千觞", "欧阳少恭"], "醉梦江湖", 4, 'zmjh'],
+  [ ["尹千觞", "幽都"], "幽都巫咸", 4, 'ydwx'],
+  [ ["风晴雪", "尹千觞", "幽都"], "幽夜苍茫", 10, 'yycm'],
+  [ ["风晴雪", "尹千觞"], "陌相逢", 4, 'mxf'],
+  [ ["风晴雪", "幽都"], "幽都灵女", 4, 'ydln'],
+  [ ["风晴雪", "方兰生", "百里屠苏", "红玉", "尹千觞", "襄铃"], "黑衣少侠传", 60, 'hysxz']
   /*
   [ ["巫炤", "司危"], "西陵毒唯", 4],
   [ ["巫炤", "西陵"], "炤不保西", 3],
@@ -182,6 +182,7 @@ INIT_CARD_NUM_HAND = 10;
 INIT_CARD_NUM_POOL = 8;
 POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
 BONUS_THRESHOLDS = [170, 140, 110];
+MAX_SP_NUM = 15;
 
 function getRandom(max){
   //returns random in [0, max-1]
@@ -425,17 +426,17 @@ class Repository extends Deck {
     super();
     this.type = type;
   }
-  init(m = model, sp = spmanager){ // Add model ptr for server
+  init(){
     if (this.type == "common")
     {
-      this.initCommonRepo(m.pack[0]);
-      this.initCommonRepo(m.pack[1]);
+      this.initCommonRepo(model.pack[0]);
+      this.initCommonRepo(model.pack[1]);
     }
     else if (this.type == "special"){
-      sp.initRepository(this, m.pack[0]);
-      sp.initRepository(this, m.pack[1]);
-      sp.initRepository(this, m.pack[0]);
-      sp.initRepository(this, m.pack[1]);
+      spmanager.initRepository(this, model.pack[0]);
+      spmanager.initRepository(this, model.pack[1]);
+      spmanager.initRepository(this, model.pack[0]);
+      spmanager.initRepository(this, model.pack[1]);
     }
     else
       console.log("Illegal Repository Type: " + this.type);
@@ -473,6 +474,9 @@ class TabledCombo{
   }
   getName(){
     return COMBO_LIST[this.index][1];
+  }
+  getInit(){
+    return COMBO_LIST[this.index][3];
   }
   calculateFullScore(){
     this.fullScore = COMBO_LIST[this.index][2];
@@ -642,33 +646,15 @@ class Player {
   init(){
     this.table.destroy();
     this.specials.destroy();
+    this.hand.destroy();
     this.matchable = true;
     this.partialCombos.length = 0;
     this.completeCombos.length = 0;
     this.score = 0;
   }
-  start(chars = null){ // init with chars?
+  start(){
     spmanager.initPlayerSpecials(this);
-    if (chars == null) {
-      this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
-    } else {
-      var cr = model.commonRepository;
-      for (var i=0; i<chars.length; i++) {
-        var c = cr.getChar(chars[i].id);
-        cr.removeChar(c);
-        this.hand.addChar(c);
-      }
-      // todo: add special handling
-      var me = this;
-      if(this.specials!=null && this.specials.getSize()>0){
-        delayedFunc(function(){
-          for (var i = 0, idx = 0; i < size; i++){
-            if(!me.toSpecial(idx, this.specials))
-              idx ++;
-          }
-        },1);
-      }
-    }
+    this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
   }
   addTableChar(char) {
     //add a char to player's table
@@ -725,7 +711,6 @@ class Player {
   }
   recalculate(animechange){
     //calculate score for the player
-    console.log(this.id+"号重新算分");
     var preScore = this.score;
     this.score = 0;
     //base score & special card bonus
@@ -756,20 +741,61 @@ class Model {
     this.player1 = new Player(1);
     this.pool = new Deck();
     this.activeChar = null;
-    this.isMultiplayer = false;
   }
-  // side: 先手 or 后手
-  // p0c:  先手的手牌
-  // p1c:  后手的手牌
-  // pool, repo: 牌池、牌堆
-  start(isMultiplayer = false, side=0, p0c = null, p1c = null, pool = null, repo = null){
-    var p01 = [ p0c, p1c ];
-    model.player1.start(p01[side  ]);
-    model.player0.start(p01[1-side]);
-    model.poolStart(pool, repo);
-    view.start();
-    model.checkMatch1();
-    model.isMultiplayer = isMultiplayer;
+  start(snapshot = null){
+    if (snapshot == null) {
+      view.init();
+      model.player1.start();
+      model.player0.start();
+      model.poolStart();
+      view.start();
+      model.checkMatch1();
+    } else { // for multiplayer
+      view.init();
+      
+      var my_id = versus_rank, oppo_id = 1-my_id;
+      var hands = [ snapshot.p0h, snapshot.p1h ]; // this is from Offender's perspective
+      var sps   = [ snapshot.p0sp,snapshot.p1sp];
+      var pool  = snapshot.pool;
+      
+      // --> model.player1.start()
+      //     --> spmanager.initPlayerSpecials(model.player1)
+      var p1_h = hands[my_id], p1_sp = sps[my_id];
+      for (var i=0; i<p1_sp.length; i++)
+        model.player1.specials.addChar(model.specialRepository.removeCharByID(
+          p1_sp[i]));
+      //     <-- spmanager.initPlayerSpecials(model.player1)
+      //     --> player1.hand.initDeck
+      for (var i=0; i<p1_h.length; i++)
+        model.player1.hand.addChar(model.commonRepository.removeCharByID(p1_h[i]));
+      model.player1.hand.initDeck(0, null, model.player1.specials);
+      //     <-- player1.hand.initDeck
+      // <-- model.player1.start()
+      
+      // --> model.player0.start()
+      //     --> spmanager.initPlayerSpecials(model.player0)
+      var p0_h = hands[oppo_id], p0_sp = [];//sps[oppo_id];
+      p0_sp.length = 0;
+      
+      for (var i=0; i<p0_sp.length; i++)
+        model.player0.specials.addChar(model.specialRepository.removeCharByID(
+          p0_sp[i]));
+      //     <-- spmanager.initPlayerSpecials(model.player0)
+      //     --> player0.hand.initDeck
+      for (var i=0; i<p0_h.length; i++)
+        model.player0.hand.addChar(model.commonRepository.removeCharByID(p0_h[i]));
+      model.player0.hand.initDeck(0, null, model.player0.specials);
+      //     <-- player1.hand.initDeck
+      // <-- model.player1.start()
+      
+      // --> model.poolStart()
+      for (var i=0; i<pool.length; i++)
+        model.pool.addChar(model.commonRepository.removeCharByID(pool[i]));
+      // <-- model.poolStart()
+      
+      view.start();
+      model.checkMatch1();
+    }
   }
   init(){
     model.player1.init();
@@ -780,28 +806,21 @@ class Model {
     model.activeChar = null;
     model.commonRepository.init();
     model.specialRepository.init();
-    view.init();
-    delayedFunc(model.start);
-  }
-  initServerBookkeeping() {
-    console.log("[Model] Initializing server-side bookkeeping");
   }
   setup(){
     model.commonRepository.init();
     model.specialRepository.init();
-    view.init();
+    window.addEventListener("beforeunload", function (event) {
+      model.player1.init();
+      model.player0.init();
+      model.pool.destroy();
+      model.commonRepository.destroy();
+      model.specialRepository.destroy();
+      returnValue = undefined;
+    });
   }
-  poolStart(poolc = null, repoc = null){
-    if (poolc == null && repoc == null) {
-      this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
-    } else {
-      var cr = this.commonRepository;
-      for (var i=0; i<poolc.length; i++) {
-        var c = cr.getChar(poolc[i].id);
-        this.commonRepository.removeChar(c);
-        this.pool.addChar(c);
-      }
-    }
+  poolStart(){
+    this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
   }
   discard(player, char){
     if(char == null)
@@ -998,18 +1017,6 @@ class Model {
   // hc/pc are specialchars if hs/ps are not null
     var player = obtainVector.player;
     var oppo = player.id==0? model.player1:model.player0;
-    /*player.hand.removeChar(chars[0]);
-    //which of the four are new chars? : obtainVector.chars[]
-    //where are these two chars added? : swapchar==null?player:oppo
-    //when is UnnamedBanTrick performed? : after addTableChar, before view
-    for(var i=0; i<2; i++){
-      if(obtainVector.swapChars[i] != null){
-        chars[i].swapped = true;
-        obtainVector.swapChars[i].swapped = true;
-        oppo.addTableChar(chars[i]);
-        chars[i] = obtainVector.swapChars[i];
-      }
-    }*/
 
     //console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
     var ac0 = player.addTableChar(obtainVector.playerTableChars[0]);
@@ -1033,4 +1040,24 @@ class Model {
     msg += "卡池\n" + this.pool.getDesc();
     return msg;
   }
+  getSnapshot() { // 这个Snapshot不带view
+    return {
+      'p0h' :extractIDs(model.player0.hand.characters),
+      'p0sp':extractIDs(model.player0.specials.characters),
+      'p0table':extractIDs(model.player0.table.characters),
+      'p1h' :extractIDs(model.player1.hand.characters),
+      'p1sp':extractIDs(model.player1.specials.characters),
+      'p1table':extractIDs(model.player1.table.characters),
+      'pool':extractIDs(model.pool.characters),
+      'common_repo':extractIDs(model.commonRepository.characters),
+      'special_repo':extractIDs(model.specialRepository.characters),
+    };
+  }
+}
+
+function extractIDs(characters) {
+  var ret = [];
+  for (var i=0; i<characters.length; i++)
+    ret.push(characters[i].id);
+  return ret;
 }

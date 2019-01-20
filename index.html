@@ -15,14 +15,50 @@
 	<link rel="stylesheet" type="text/css" href="tableinfo.css">
 </head>
 
-<body>
-	<div id="configurator" class="flexbox">
+<body class="noselect">
+	<div id="configurator" class="flexbox transitopacity">
 		<div id="modeinput" class="segmented-control" style="width: 100%; color: #334422">
 			<input type="radio" name="gamemode" id="vs_ai"     checked onclick='SetGameMode(1);'>
 			<input type="radio" name="gamemode" id="vs_player" onclick='SetGameMode(2);'>
 			<label for="vs_ai"     data-value="独享的快乐">单人游戏</label>
 			<label for="vs_player" data-value="双倍的快乐">双人对战</label>
-	  </div>
+		</div>
+		<hr/>
+		<div id="multiplayerinfo" style="width:100%; color:#112211">
+			<div style="width: 100%;">
+			<div id="lobbystatus">
+			当前在线人数：未知
+			</div>
+			<div id="myplayerid">
+			（ID）
+			</div>
+			<div id="refresh_lobbystatus">
+			[刷新]
+			</div>
+			</div>
+		</div>
+		<div id="multiplayertypeinput" class="segmented-control" style="width: 50%; color: #281B11">
+			<input type="radio" name="multiplayertype" id="multiplayertype1" checked>
+			<input type="radio" name="multiplayertype" id="multiplayertype2">
+			<label for="multiplayertype1" data-value="选人一起玩">选人一起玩</label>
+			<label for="multiplayertype2" data-value="随机匹配小伙伴">随机匹配小伙伴</label>
+		</div>
+		<div id="room_buttons" style="width: 100%; margin-bottom: 0.5vw; margin-top: 0.5vw">
+			<div id="inviteinput" class="inviteinput" style="width:35%">
+			对方ID：<input id="invitedid" type="text" size=5></input>
+			</div>
+			<div id="invitebutton">
+			邀请之
+			</div>
+			</div>
+			<div id="match_buttons" style="width: 100%; margin-bottom: 0.5vw; margin-top: 0.5vw">
+			<div id="start_match" style="">随机寻找对手</div>
+			</div>
+			<div id="confirm_cancel_buttons" style="width:100%; margin-bottom: 0.5vw; margin-top: 0.5vw"> 
+			<div id="confirm_match" style="display:none">确认配对</div>
+			<div id="cancel_match" style="display:none">放弃配对</div>
+		</div>
+		<hr/>
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="version" id="p12" checked>
 			<input type="radio" name="version" id="p13" disabled="true">
@@ -37,78 +73,43 @@
 			<label for="voiceon" data-value="完成组合时播放语音">语音</label>
 			<label for="voiceoff" data-value="完成组合时BlueBlue">无语音</label>
 		</div>
-	  <div id="multiplayerinputs" style="width:100%">
-      <!--<div id="prestrictioninput" class="segmented-control" style="width: 50%;
-      color: #281B11">
-         <input type="radio" name="prestriction" id="prestriction1" checked>
-         <input type="radio" name="prestriction" id="prestriction2">
-         <label for="prestriction1" data-value="不限制牌组">不限制牌组</label>
-         <label for="prestriction2" data-value="必须使用所选牌组">限制牌组</label>
-      </div>
-      -->
-      <div id="multiplayerinfo" style="width:100%; color:#112211">
-        <div style="width: 100%;">
-          <div id="lobbystatus">
-          当前在线人数：未知
-          </div>
-          <div id="myplayerid">
-          （ID）
-          </div>
-          <div id="refresh_lobbystatus">
-          [刷新]
-          </div>
-        </div>
-      </div>
-      <div id="multiplayertypeinput" class="segmented-control" style="width: 50%;
-      color: #281B11">
-         <input type="radio" name="multiplayertype" id="multiplayertype1" checked>
-         <input type="radio" name="multiplayertype" id="multiplayertype2">
-         <label for="multiplayertype1" data-value="选人一起玩">选人一起玩</label>
-         <label for="multiplayertype2" data-value="随机匹配小伙伴">随机匹配小伙伴</label>
-      </div>
-      <div id="room_buttons" style="width: 100%; margin-bottom: 0.5vw; margin-top: 0.5vw">
-        <div id="inviteinput" class="inviteinput" style="width:35%">
-        对方ID：<input id="invitedid" type="text" size=5></input>
-        </div>
-        <div id="invitebutton">
-        邀请之
-        </div>
-      </div>
-      <div id="match_buttons" style="width: 100%; margin-bottom: 0.5vw; margin-top: 0.5vw">
-        <div id="start_match" style="">随机寻找对手</div>
-      </div>
-      <div id="confirm_cancel_buttons" style="width:100%; margin-bottom: 0.5vw; margin-top: 0.5vw"> 
-        <div id="confirm_match" style="display:none">确认配对</div>
-        <div id="cancel_match" style="display:none">放弃配对</div>
-      </div>
-    </div>
-    <div id="singleplayerinputs" style="width:100%">
-      <div id="aiinput" class="segmented-control" style="width: 100%; color: #281B11">
-		<input type="radio" name="ai" id="ai1">
-		<input type="radio" name="ai" id="ai2" checked>
-		<input type="radio" name="ai" id="ai3" >
-		<label for="ai1" data-value="温和亲切的AI">炤级</label>
-		<label for="ai2" data-value="沉迷种田的AI">洛级</label>
-		<label for="ai3" data-value="恶意满满的AI">危级</label>
+		<div id="aiinput" class="segmented-control" style="width: 100%; color: #281B11">
+			<input type="radio" name="ai" id="ai1">
+			<input type="radio" name="ai" id="ai2" checked>
+			<input type="radio" name="ai" id="ai3" >
+			<label for="ai1" data-value="温和亲切的AI">炤级AI</label>
+			<label for="ai2" data-value="沉迷种田的AI">洛级AI</label>
+			<label for="ai3" data-value="恶意满满的AI">危级AI</label>
+		</div>
+		<div id="spinput" class="segmented-control" style="width: 100%; color: #281B11">
+			<input type="radio" name="sp" id="sp0">
+			<input type="radio" name="sp" id="sp1" checked>
+			<input type="radio" name="sp" id="sp2">
+			<input type="radio" name="sp" id="sp3">
+			<label for="sp0" data-value="AI不想使用珍稀牌">AI无珍稀牌</label>
+			<label for="sp1" data-value="AI珍稀牌量是你一半">AI 1/2珍稀牌</label>
+			<label for="sp2" data-value="AI珍稀牌量和你一样">AI等量珍稀牌</label>
+			<label for="sp3" data-value="AI拥有所有珍稀牌">AI全珍稀牌</label>
+		</div>
+		<div id="comfirmSetting" class="confirmbutton">确定</div>
 	</div>
-	<div id="spinput" class="segmented-control" style="width: 100%; color: #281B11">
-		<input type="radio" name="sp" id="sp0">
-		<input type="radio" name="sp" id="sp1" checked>
-		<label for="sp0" data-value="你和AI都不想使用珍稀牌">不含珍稀牌</label>
-		<label for="sp1" data-value="可使用所有珍稀牌 [测试中]">包含珍稀牌</label>
-	</div>
-		<div id="gamestart">开始游戏</div>
-    </div>
-	<div id="spselection">
-		<div id="p0sp"></div>
-		<div id="sprepo"></div>
-		<div id="p1sp"></div>
-	</div>
-	</div>
-	<div id="spselection">
-		<div id="p0sp"></div>
-		<div id="sprepo"></div>
-		<div id="p1sp"></div>
+	<div id="spselection" class="transitopacity">
+		<div class="selectionarea verticalflex">
+			<div>
+				<div id="sprepo" class="charinfocontainer flexbox"></div>
+				<div class="cover"></div>
+			</div>
+			<div><div id="sppick" class="charinfocontainer flexbox"></div></div>
+		</div>
+		<div class="rightsidebar verticalflex">
+			<div></div>
+			<div id="selectioninfo" class="centeredtext"><div>从上方牌库
+选择特殊牌
+到下方牌组
+最多选15张</div></div>
+			<div id="gamestart" class="centeredtext"><div>开始
+游戏</div></div>
+		</div>
 	</div>
 	<div id="main">
 		<div id="scoreboard">
@@ -118,7 +119,7 @@
 				<div class="combobonus">
 				</div>
 			</div>
-			<div id="infobox" class="bignotice"><div></div></div>
+			<div id="infobox" class="centeredtext bignotice"><div></div></div>
 			<div id="score1" class="bignotice">
 				<div></div>
 				<div class="combobonus"></div>
@@ -132,10 +133,7 @@
 					<div id="pool"></div>
 					<div id="repository"></div>
 				</div>
-				<div id="hand1container"><div id="hand1"></div>
-				  <div id="infobox1"></div>
-				  <div id="BOOM" onclick="autotest()">BOOM</div>
-				</div>
+				<div id="hand1container"><div id="hand1"></div></div>
 				<div id="blocker" class="cover"></div>
 				<div id="finalcontainer" class="cover">
 					<div></div><div></div><div></div>
@@ -187,7 +185,7 @@
 				</div>
 				<div class="icomboinfocontainer flexbox"></div>
 			</div>
-			<div class="tableinfocontainer cover transitopacity">
+			<div class="tableinfocontainer cover">
 				<div class="infoheader bignotice">
 						<div>&#9830; 我方珍稀牌</div>
 				</div>
@@ -251,11 +249,11 @@
   
   function SetGameMode(m) {
     if (m == 1) { // 单人模式
-      document.getElementById("multiplayerinputs").style.display="none";
+      //document.getElementById("multiplayerinputs").style.display="none";
       document.getElementById("singleplayerinputs").style.display="block";
     } else { // 对战模式
-      document.getElementById("multiplayerinputs").style.display="block";
-      document.getElementById("singleplayerinputs").style.display="none";
+      //document.getElementById("multiplayerinputs").style.display="block";
+      //document.getElementById("singleplayerinputs").style.display="none";
       
       document.getElementById("start_match").style.display = "inline-block";
       document.getElementById("confirm_match").style.display = "none";
@@ -352,20 +350,6 @@
   });
 
   var AUTOTEST = true;
-  socket.on('Match_GameStartOffensive', () => { // 先手开局 
-    gameinit(true);
-    socket.emit('Match_GameStartOffensiveAck',
-      model.player0.hand.characters,
-      model.player1.hand.characters,
-      model.pool.characters,
-      model.commonRepository.characters);
-  });
-  
-  socket.on('Match_GameStartDefensive', (p0c, p1c, poolc, repoc) => { // 后手开局
-    console.log('[后手开局]');
-    gameinit(true, 1, p0c, p1c, poolc, repoc);
-  });
-  
   socket.on('Room_PlayerDisconnected', () => {
     console.log('对方玩家已离线');
   });
@@ -511,5 +495,45 @@
   // 默认打开多人模式
   document.getElementById('vs_player').click();
   document.getElementById('multiplayertype2').click();
+  
+  
+  // sp evts
+  
+  socket.on('Match_GameSetupOffensive', () => { // 先手开局
+    console.log('[先手选取特殊牌]');
+    versus_rank = 0;
+    gamesetup(true);
+  });
+  
+  socket.on('Match_GameSetupDefensive', (p0c, p1c, poolc, repoc) => { // 后手开局
+    console.log('[后手选取特殊牌]');
+    versus_rank = 1;
+    gamesetup(true);
+  });
+  
+  function OtherPlayerSpecialCardFixup(other_sp) {
+    console.log('Fixup');
+    model.player0.specials.length = 0;
+    var temp_sp = new Repository("special");
+    temp_sp.init();
+    for (var i=0; i<other_sp.length; i++) {
+      model.player0.specials.addChar(temp_sp.removeCharByID(other_sp[i]));
+    }
+    model.player0.hand.initDeck(0, null, model.player0.specials);
+    view.specials0.init();
+  }
+  
+  socket.on('Match_GameInitOffensive', (other_sp) => {
+    console.log('[先手开局] other_sp='+other_sp);
+    OtherPlayerSpecialCardFixup(other_sp);
+  });
+  
+  socket.on('Match_GameInitDefensive', (other_sp, snapshot) => {
+    console.log('[后手开局], other_sp=' + other_sp);
+    console.log(snapshot)
+    controller.gamestartDefensive(snapshot);
+    OtherPlayerSpecialCardFixup(other_sp);
+  });
+  
   
 </script>

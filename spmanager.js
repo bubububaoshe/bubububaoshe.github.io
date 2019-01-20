@@ -1,15 +1,12 @@
-PLAYER_SPECIALS = [
-    ["blts1b", "fqx1a", "hy2a", "oysg1a", "wry2b", "xy2a", "xyz2b", "ywy2a", "hy1a", "ly1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "xyz2a", "ywy2b"],
-    ["hy1a", "ly1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "xyz2a", "ywy2b"]
-];
 COMPLETE_SPECIALS = [
   "blts1b", "fqx1a", "hy1a", "ly1a", "oysg1a", "qy1a",
   "hy2a", "qhzr2a", "sx2a", "sy2a", "wry2b", "xy2a", "xyz2a", "xyz2b", "ywy2a", "ywy2b"
 ];
+USER_SPECIAL_REPO = ["hy1a", "ly1a", "qhzr2a", "qy1a", "sx2a", "sy2a", "xyz2a", "ywy2b"];
+PLAYER_SPECIALS = [[],[]];
+
 class SPManager{
-  constructor(){
-    this.setupPlayerSpecials();
-  }
+  constructor(){}
   initRepository(repo, pack) {
     var char, trick;
     switch (pack) {
@@ -104,46 +101,69 @@ class SPManager{
       case 3:
       break;
     }
+    //USER_SPECIAL_REPO = COMPLETE_SPECIALS;
+    USER_SPECIAL_REPO = this.loadSpecials("qqxspecials");
+    if(USER_SPECIAL_REPO.length > 0)
+      PLAYER_SPECIALS[1] = this.loadSpecials("qqxspecialpicks");
+    else
+      USER_SPECIAL_REPO.push(COMPLETE_SPECIALS[getRandom(COMPLETE_SPECIALS.length)]);
   }
-  setupPlayerSpecials(){
-      PLAYER_SPECIALS[1] = getCookie("qqxspecials");
-      var len;
-      switch (SP_CARDS) {
-        case 0:
-          PLAYER_SPECIALS[0] = [];
-          break;
-        case 1:
-          PLAYER_SPECIALS[0] = this.getRandomSubarray(COMPLETE_SPECIALS, PLAYER_SPECIALS[1].length);
-          break;
-        case 2:
-          PLAYER_SPECIALS[0] = COMPLETE_SPECIALS;
-          break;
-        default:
-          alert("Invalid Mode for Specials: " + SP_CARDS);
-      }
+  setAISpecials(){
+      var aisizes = [0, Math.floor(PLAYER_SPECIALS[1].length/2), PLAYER_SPECIALS[1].length, MAX_SP_NUM];
+      PLAYER_SPECIALS[0] = this.getRandomSubarray(COMPLETE_SPECIALS, aisizes[SP_CARDS]);
   }
   getRandomSubarray(arr, len){
-    var keep = [];
-    var idxs = [];
-    for(var i=0; i<arr.length; i++)
-      idxs.push(i);
-    for(var i=0; i<len; i++){
-      var rand = getRandom(idxs.length);
-      keep.push(arr[idxs[rand]]);
-      idxs.splice(rand, 1);
+    if(len <= 0)
+      return [];
+  	var keep = [];
+  	var arr = arr.slice(0);
+    for(var i=0; i<len && arr.length > 0; i++){
+      var val = arr[getRandom(arr.length)];
+      keep.push(val);
+      this.removeDuplicates(val, arr);
     }
     return keep;
+  }
+  removeDuplicates(id, ids){
+    var id = id.substring(0, id.length - 1);
+    var len = ids.length;
+    for(var i=0, idx=0; i<len; i++)
+      if(ids[idx].startsWith(id))
+        ids.splice(idx, 1);
+      else
+        idx++;
   }
   initPlayerSpecials(player){
     var sps = PLAYER_SPECIALS[player.id];
     for (var i = 0; i < sps.length; i++)
-      player.specials.addChar(model.specialRepository.getChar(sps[i]));
+      player.specials.addChar(model.specialRepository.removeCharByID(sps[i]));
+  }
+  saveSpecials(type, carray){
+    if(type == null){
+      this.saveSpecials("qqxspecials", USER_SPECIAL_REPO);
+      this.saveSpecials("qqxspecialpicks", PLAYER_SPECIALS[1]);
+      return;
+    }
+    var arrs = [[],[]];
+    for(var i=0; i<carray.length; i++)
+      if(carray[i].includes(model.pack[0]))
+        arrs[0].push(carray[i]);
+      else
+        if(carray[i].includes(model.pack[1]))
+          arrs[1].push(carray[i]);
+        else
+          alert("Illegal SPChar ID:" + carray[i]);
+    for(var i=0; i<2; i++)
+      setCookie(type+model.pack[i], arrs[i]);
+  }
+  loadSpecials(type){
+    return getCookie(type+model.pack[0]).concat(getCookie(type+model.pack[1]));
   }
   awardSpecials(){
     var minscore = BONUS_THRESHOLDS[AI_LEVEL-1] + (PLAYER_SPECIALS[1].length - PLAYER_SPECIALS[0].length) * 5;
     minscore = minscore>200? 200: minscore;
     if(model.player1.score >= minscore){
-      var pspecials = PLAYER_SPECIALS[1];
+      var pspecials = USER_SPECIAL_REPO;
       var clen = COMPLETE_SPECIALS.length;
       if(pspecials.length < clen){
         var rand = getRandom(clen - pspecials.length);
@@ -154,10 +174,20 @@ class SPManager{
               break;
             }
         pspecials.push(award);
-        setCookie("qqxspecials", pspecials);
+        this.saveSpecials("qqxspecials", pspecials);
+        //setCookie("qqxspecials", pspecials);
         messenger.notifyAward(minscore, award);
       }
+      return true;
     }
+    return false;
+  }
+  hasDuplicates(id, ids){
+    id = id.substring(0, id.length - 1);
+    for(var i=0; i<ids.length; i++)
+      if(ids[i].startsWith(id)){
+        return true;}
+    return false;
   }
 }
 function setCookie(cname, carray, exdays = 9999) {
@@ -175,7 +205,11 @@ function getCookie(cname) {
             c = c.substring(1);
         }
         if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length).split(",");
+          var val = c.substring(name.length, c.length);
+            if(val.length > 0)
+              return val.split(",");
+            else
+              return [];
         }
     }
     return [];

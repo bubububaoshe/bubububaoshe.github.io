@@ -8,7 +8,7 @@
   --text-hl-color:#f9ebae;/*eadeaa*/
   --text-heading-color: #f9ebae;
   --text-glow-color: #eadeaa;/*FFF6CE*/
-  --text-shadow-color: #252120;
+  --text-shadow-color: #281B11;/*#252120*/;
   --text-warning-color: #DB4D3D;
   --card-shadow-color: rgba(0,0,0,0.4);
   --card-glow-color: #fceba4;
@@ -30,8 +30,18 @@ body {
   text-align: center;
   overflow: hidden;
 }
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
 #main {
   position: fixed;
+  display: none;
 }
 #scoreboard, #specialboard, #gamezonecontainer {
   position: relative;

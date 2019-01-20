@@ -300,7 +300,7 @@ class UnnamedBanTrick extends Trick{
   isValidTarget(char){
     return char.getTrick("ComboTrick,CharTrick,NamedBanTrick")!=null;
   }
-  selectTarget(){return super.selectTarget("禁用其技能", controller.selectBan);}
+  selectTarget(){return super.selectTarget("禁用其加分技能", controller.selectBan);}
   performTrick(char){
     if(char != null){
       console.log(this.owner.name + " 禁用 " + char.name);
