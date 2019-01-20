@@ -121,10 +121,10 @@
 }
 
 /* hover effects */
-#pool>.charcontainer>.cardcontainer:hover, #hand1>.charcontainer>.cardcontainer:hover{
+#pool>.charcontainer:hover>.cardcontainer, #hand1>.charcontainer:hover>.cardcontainer{
   transform: translate(0, calc(var(--card-height)/-3));
 }
-#table0>.charcontainer>.cardcontainer:hover, #table1>.charcontainer>.cardcontainer:hover,  #specials1>.charcontainer>.cardcontainer:hover{
+#table0>.charcontainer:hover>.cardcontainer, #table1>.charcontainer:hover>.cardcontainer,  #specials1>.charcontainer:hover>.cardcontainer{
   transform: translate(0, calc(var(--card-height)/-4));
 }
 #pool>.charcontainer:nth-child(odd)>.cardcontainer:hover {

@@ -15,7 +15,7 @@
 	<link rel="stylesheet" type="text/css" href="tableinfo.css">
 </head>
 
-<body class="noselect">
+<body id="rootcontainer" class="noselect">
 	<div id="configurator" class="flexbox transitopacity">
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="version" id="p12" checked>
@@ -57,7 +57,9 @@
 				<div id="sprepo" class="charinfocontainer flexbox"></div>
 				<div class="cover"></div>
 			</div>
-			<div><div id="sppick" class="charinfocontainer flexbox"></div></div>
+			<div>
+				<div id="sppick" class="charinfocontainer flexbox"></div>
+			</div>
 		</div>
 		<div class="rightsidebar verticalflex">
 			<div></div>
@@ -94,12 +96,14 @@
 				<div id="hand1container"><div id="hand1"></div></div>
 				<div id="blocker" class="cover"></div>
 				<div id="finalcontainer" class="cover">
-					<div></div><div></div><div></div>
-					<div>
-						<div id="finalmsg" class="bignotice">你赢了</div>
-						<p>点击牌桌区域继续</p>
+					<div class="badge revolver">
+						<div></div><div></div><div></div><div></div>
 					</div>
-					<p class="string"></p>
+					<div class="centeredtext">
+						<div id="finalmsg" class="bignotice"></div>
+						<div class="bannertext">点击牌桌区域继续</div>
+					</div>
+					<div class="string"></div>
 				</div>
 				<div class="tableinfocontainer cover transitopacity">
 					<div class="charinfocontainer flexbox"></div>
@@ -152,7 +156,7 @@
 		</div>
 		<div id="specialboard">
 			<div id="specials0" class="cardstack"></div>
-			<div id="hoverinfobox" class="bignotice"><div></div></div>
+			<div id="hoverinfobox" class="bignotice"></div>
 			<div id="specials1" class="cardstack"></div>
 		</div>
 	</div>

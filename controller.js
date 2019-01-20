@@ -64,7 +64,7 @@ class Controller{
         }, 2);
       }
       else{
-        if(model.player1.hand.getSize() == 0){
+        if(model.player1.hand.getSize() >= 0){
           //game end
           messenger.notifyFinal();
         }
@@ -218,7 +218,7 @@ class Controller{
   doNothing(){
   }
   spPick(){
-    PLAYER_SPECIALS[1].push(this.id);
+    PLAYER_SPECIALS[1].push(this.id);console.log(2);
     document.getElementById("sppick").appendChild(this);
     playerinfo.updateSPPick();
     sound.activate();

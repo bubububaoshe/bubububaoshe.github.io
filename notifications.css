@@ -1,10 +1,16 @@
+.revolver{
+  animation: revolve 40s linear infinite;
+}
+@keyframes revolve {
+  from {transform: rotate(0deg);}
+  to {transform: rotate(360deg);}
+}
 .transitopacity{
   opacity: 0;
   background-color: rgba(0,0,0,0);
   transition: opacity var(--transition-sec) linear;
   -webkit-transition: opacity var(--transition-sec) linear;
 }
-
 .transitform{
   transition-property: transform;
   transition-duration: var(--transition-sec);
@@ -23,22 +29,32 @@
   flex-direction: column;
   justify-content: space-between;
 }
+.bannertext{
+  font-size: calc(var(--card-height)*0.2);
+  color: var(--text-color);
+}
 .centeredtext{
-  white-space: pre;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
 }
 .centeredtext>div{
   width: 100%;
+  text-align: center;
 }
 #infobox{
   height: calc(var(--card-height)*0.5);
   font-size: calc(var(--main-width)*0.02);
+  white-space: pre;
 }
 
 #specialboard #hoverinfobox{
   margin: calc(var(--card-height)*0.25) 0;
   height: calc(var(--card-height)*1.5);
+  width: 100%;
+  z-index: 10;
 }
 #blocker {
   font-size: calc(var(--main-width)*0.05);
@@ -61,8 +77,6 @@
 .banner .bannertext{
   margin-bottom: calc(var(--card-height)*0.1);
   width: 100%;
-  font-size: calc(var(--card-height)*0.2);
-  color: var(--text-color);
 }
 .banner .bannercards{
   display: flex;
@@ -118,38 +132,48 @@
   transform: none;
   -webkit-transform: none;
 }
-#finalcontainer>div{
+#finalcontainer>div, #finalcontainer .badge>div{
+  position: absolute;
+}
+#finalcontainer .badge{
+  width: calc(var(--main-height)*0.39);
+  height: calc(var(--main-height)*0.39);
+  left: calc(60% - var(--main-height)*0.195);
+  top: 30.5%;
+}
+#finalcontainer .badge>div{
   width: calc(var(--main-height)*0.35);
   height:  calc(var(--main-height)*0.35);
-  position: absolute;
-  left: calc(60% - var(--main-height)*0.195);
-  top:  32.5%;
-  background-color: var(--final-background-color);
-  border: calc(var(--main-height)*0.02) solid rgba(0, 0, 0, 0.1);
-  transform: rotate(22.5deg);
-  -webkit-transform: rotate(22.5deg);
+  background-color: var(--banner-background);
+  border: calc(var(--main-height)*0.02) solid rgba(0, 0, 0, 0.05);
 }
-#finalcontainer>div:nth-child(2){
-  transform: rotate(45deg);
-  -webkit-transform: rotate(45deg);
+#finalcontainer>.badge>div:nth-child(2){
+  transform: rotate(22.25deg);
+  -webkit-transform: rotate(22.25deg);
 }
-#finalcontainer>div:nth-child(3){
+#finalcontainer>.badge>div:nth-child(3){
   transform: rotate(67.5deg);
   web-kittransform: rotate(67.5deg);
 }
-#finalcontainer>div:nth-child(4){
-  transform: rotate(0);
-  -webkit-transform: rotate(0);
+#finalcontainer>.badge>div:nth-child(4){
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
 }
-#finalcontainer>div>p{
-    color: var(--text-color);
-    font-size: calc(var(--card-height)*0.15);
+#finalcontainer>.centeredtext{
+  width: calc(var(--main-height)*0.35);
+  height: calc(var(--main-height)*0.35);
+  left: calc(60% - var(--main-height)*0.195);
+  top: 30.5%;
+  border: calc(var(--main-height)*0.02) solid var(--final-background);
+  border-radius: 50%;
 }
-#finalmsg.bignotice{
-    font-size: calc(var(--card-height)*0.38);
-    margin-top: 25%;
-    animation: finalneo 2s infinite;
-    -webkit-animation: finalneo 2s infinite;
+#finalcontainer .bannertext{
+  font-size: calc(var(--card-height)*0.13);
+}
+#finalmsg{
+    white-space: pre;
+    animation: finalneo 2s infinite linear;
+    -webkit-animation: finalneo 2s infinite linear;
 }
 
 @keyframes finalneo{
@@ -158,16 +182,14 @@
   to {text-shadow: 0 0 calc(var(--card-width)*0.05) var(--text-glow-color);}
 }
 @-webkit-keyframes finalneo{
-  from {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
-  50% {text-shadow: 0 0 calc(var(--card-width)*0.15) #FE9272;}
-  to {text-shadow: 0 0 calc(var(--card-width)*0.05) #FE9272;}
+  from {text-shadow: 0 0 calc(var(--card-width)*0.0) var(--text-glow-color);}
+  50% {text-shadow: 0 0 calc(var(--card-width)*0.15) var(--text-glow-color)2;}
+  to {text-shadow: 0 0 calc(var(--card-width)*0.0) var(--text-glow-color);}
 }
 .string{
-  margin: 0;
-  height: 25.255%;
+  height: 30.5%;
   width: 0;
-  border-right: calc(var(--main-height)*0.02) dotted var(--final-background-color);
-  position: absolute;
+  border-right: calc(var(--main-height)*0.02) dotted var(--final-background);
   left: calc(60% - calc(var(--main-height)*0.01));
   top: 0;
 }

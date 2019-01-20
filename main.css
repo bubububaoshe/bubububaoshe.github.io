@@ -1,18 +1,17 @@
 :root {
   --page-background-color: #EBE6DF;
   --page-background-image: url("img/background.jpg");
-  --gamezone-background: rgba(114,90,64,0.7);
-  --board-background: rgba(114,90,64,0.6);
-  --banner-background: rgba(42, 25, 10,0.5);
+  --gamezone-background: #725a4070; /*rgba(114,90,64,0.7);*/
+  --board-background: #725a4060; /*rgba(114,90,64,0.6);*/
+  --banner-background: #2a190a50; /*rgba(42, 25, 10,0.5);*/
+  --final-background: #594733;
   --text-color: #7a614f;
-  --text-hl-color:#f9ebae;/*eadeaa*/
-  --text-heading-color: #f9ebae;
-  --text-glow-color: #eadeaa;/*FFF6CE*/
-  --text-shadow-color: #281B11;/*#252120*/;
+  --text-hl-color:#f9ebae;
+  --text-glow-color: #eadeaa;
+  --text-shadow-color: #281B11;
   --text-warning-color: #DB4D3D;
-  --card-shadow-color: rgba(0,0,0,0.4);
+  --card-shadow-color: #00000040; /*rgba(0,0,0,0.4);*/
   --card-glow-color: #fceba4;
-  --final-background-color: rgba(40, 27, 17, 0.5);
   /*
   --transition-sec
   --card-width
@@ -30,7 +29,7 @@ body {
   text-align: center;
   overflow: hidden;
 }
-.noselect {
+#rootcontainer.noselect {
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
      -khtml-user-select: none; /* Konqueror HTML */
@@ -41,7 +40,6 @@ body {
 }
 #main {
   position: fixed;
-  display: none;
 }
 #scoreboard, #specialboard, #gamezonecontainer {
   position: relative;
@@ -174,4 +172,31 @@ body {
 */
 #hand0 .charcontainer:hover .card{
   transform: rotateY(180deg);
+}
+
+
+#rootcontainer { display:block; }
+
+@media only screen and (orientation:portrait){
+  #rootcontainer {
+    position: relative;
+    top: calc(50% - var(--win-height)/2);
+    left: calc(50% - var(--win-width)/2);
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+  }
+
+}
+
+@media only screen and (orientation:landscape){
+  #rootcontainer {
+     -webkit-transform: rotate(0deg);
+     -moz-transform: rotate(0deg);
+     -o-transform: rotate(0deg);
+     -ms-transform: rotate(0deg);
+     transform: rotate(0deg);
+  }
 }

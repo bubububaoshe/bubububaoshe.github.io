@@ -26,6 +26,7 @@ class TableInfoView{
       inn.textContent = "基础分:" + char.score;
     }
     schar.appendChild(createFullInfobox(char));
+    schar.addEventListener("touchstart", controller.doNothing);
     if(char.isSpecial() && char.getTrick()==null)
       this.enableCard(schar, false);
     return schar;
@@ -105,9 +106,6 @@ class TableInfoView{
       tableviewcount ++;
       //create view
       this.createCharView();
-      var cards = this.container.querySelector('.charinfocontainer').children;
-      for(var i=0; i<cards.length; i++)
-        cards[i].addEventListener("click", controller.doNothing);
       this.createComboView();
     }
     this.fadeUnder("tableinfo", true);
@@ -166,10 +164,8 @@ class TableInfoView{
     var container = document.getElementsByClassName("tableinfocontainer")[3];
     var chartable = container.querySelector(".charinfocontainer");
     var chars = model.player1.specials.characters;
-    for(var i=0; i<chars.length; i++){
+    for(var i=0; i<chars.length; i++)
       var schar = playerinfo.addSmallCard(chars[i], chartable);
-      schar.addEventListener("click", controller.doNothing);
-    }
     showOpacity(container, true);
     this.fadeUnder("tableinfo", true);
   }

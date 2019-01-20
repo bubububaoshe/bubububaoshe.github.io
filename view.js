@@ -166,7 +166,7 @@ class Card{
     this.card.appendChild(back);
     back.classList.add("cardback");
     this.container.appendChild(createInfobox(char));
-    this.container.addEventListener("click", controller.doNothing);
+    this.container.addEventListener("touchstart", controller.doNothing);
   }
   setChar(char){
     this.card.id = char.id;
@@ -460,7 +460,7 @@ class Messenger {
     var div = document.getElementById("finalcontainer");
     if(model.player1.score > model.player0.score){
       if(spmanager.awardSpecials())
-        msg.textContent = "千秋戏王";
+        msg.textContent = "千秋\n戏王";
       else
         msg.textContent = "你赢了";
       sound.win();
@@ -470,7 +470,7 @@ class Messenger {
       sound.lose();
     }
     else {
-      msg.textContent = "平手";
+      msg.textContent = "难得\n糊涂";
       sound.draw();
     }
     div.addEventListener("click", controller.restart);
@@ -665,8 +665,20 @@ class View {
     var maindiv = document.getElementById("main");
     WINW = document.documentElement.clientWidth;
     WINH =document.documentElement.clientHeight;
-    MAINW = WINW;
-    MAINH = WINH;
+    if (window.matchMedia("(orientation: portrait)").matches) {
+   // you're in PORTRAIT mode
+      MAINW = WINH;
+      MAINH = WINW;
+      WINW = MAINW;
+      WINH = MAINH;
+      var root =  document.getElementById("rootcontainer");
+      root.style.width = WINW;
+      root.style.height = WINH;
+    }
+    else {
+      MAINW = WINW;
+      MAINH = WINH;
+    }
     if (MAINW / MAINH > MAX_MAIN_RATIO)
       MAINW = MAINH * MAX_MAIN_RATIO;
     else if (MAINW / MAINH < MIN_MAIN_RATIO)
@@ -688,6 +700,7 @@ class View {
     setCSSInt("--main-height", MAINH);
     setCSSInt("--main-width", MAINW);
     setCSSInt("--win-height", WINH);
+    setCSSInt("--win-width", WINW);
     //var poolM = (MAINW*0.643*(1-2*0.028)-CARDW*2.5)/(INIT_CARD_NUM_POOL+1)- CARDW;
     var poolM = (MAINW*0.66*(1-2*0.028)-CARDW*1.3)/(INIT_CARD_NUM_POOL+1)- CARDW;
     setCSSInt("--pool-margin", poolM);
@@ -714,6 +727,7 @@ function gamesetup(){
   view = new View();
   oppoinfo = new TableInfoView(model.player0);
   playerinfo = new TableInfoView(model.player1);
+  document.getElementById("main").style.display = "none";
   showOpacity(document.getElementById("configurator"), false);
   model.setup();
   controller.gameinit();

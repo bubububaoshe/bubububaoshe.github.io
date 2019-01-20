@@ -101,12 +101,12 @@ class SPManager{
       case 3:
       break;
     }
-    //USER_SPECIAL_REPO = COMPLETE_SPECIALS;
     USER_SPECIAL_REPO = this.loadSpecials("qqxspecials");
     if(USER_SPECIAL_REPO.length > 0)
       PLAYER_SPECIALS[1] = this.loadSpecials("qqxspecialpicks");
     else
       USER_SPECIAL_REPO.push(COMPLETE_SPECIALS[getRandom(COMPLETE_SPECIALS.length)]);
+    //USER_SPECIAL_REPO = COMPLETE_SPECIALS;
   }
   setAISpecials(){
       var aisizes = [0, Math.floor(PLAYER_SPECIALS[1].length/2), PLAYER_SPECIALS[1].length, MAX_SP_NUM];

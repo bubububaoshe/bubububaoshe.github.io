@@ -297,15 +297,15 @@
   width: 83%;
   height: 100%;
   float: left;
+  border-right: 1px solid var(--text-shadow-color);
 }
 #spselection .rightsidebar{
   width: 17%;
   height: 100%;
   float: left;
+  margin-left: -1px;
 }
 .selectionarea>div{
-  width: calc(100% - 1px);
-  border-right: 1px solid var(--text-shadow-color);
   overflow: auto;
 }
 .selectionarea>div:first-child{
@@ -320,8 +320,6 @@
 .selectionarea .charinfocontainer{
   margin: calc(var(--card-width)*0.1) auto;
   justify-content: flex-start;
-}
-.selectionarea .charinfocontainer{
   width: calc(var(--card-width)*0.88*8);
 }
 .selectionarea .smallchar{
