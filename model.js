@@ -758,35 +758,20 @@ class Model {
       var sps   = [ snapshot.p0sp,snapshot.p1sp];
       var pool  = snapshot.pool;
       
+      // Replicates the following functions
       // --> model.player1.start()
       //     --> spmanager.initPlayerSpecials(model.player1)
+      //     --> player1.hand.initDeck
       var p1_h = hands[my_id], p1_sp = sps[my_id];
       for (var i=0; i<p1_sp.length; i++)
         model.player1.specials.addChar(model.specialRepository.removeCharByID(
           p1_sp[i]));
-      //     <-- spmanager.initPlayerSpecials(model.player1)
-      //     --> player1.hand.initDeck
       for (var i=0; i<p1_h.length; i++)
         model.player1.hand.addChar(model.commonRepository.removeCharByID(p1_h[i]));
-      model.player1.hand.initDeck(0, null, model.player1.specials);
-      //     <-- player1.hand.initDeck
-      // <-- model.player1.start()
       
-      // --> model.player0.start()
-      //     --> spmanager.initPlayerSpecials(model.player0)
-      var p0_h = hands[oppo_id], p0_sp = [];//sps[oppo_id];
-      p0_sp.length = 0;
-      
-      for (var i=0; i<p0_sp.length; i++)
-        model.player0.specials.addChar(model.specialRepository.removeCharByID(
-          p0_sp[i]));
-      //     <-- spmanager.initPlayerSpecials(model.player0)
-      //     --> player0.hand.initDeck
+      var p0_h = hands[oppo_id], p0_sp = sps[oppo_id];
       for (var i=0; i<p0_h.length; i++)
         model.player0.hand.addChar(model.commonRepository.removeCharByID(p0_h[i]));
-      model.player0.hand.initDeck(0, null, model.player0.specials);
-      //     <-- player1.hand.initDeck
-      // <-- model.player1.start()
       
       // --> model.poolStart()
       for (var i=0; i<pool.length; i++)
@@ -795,6 +780,16 @@ class Model {
       
       view.start();
       model.checkMatch1();
+      
+      // These two may require the view to be already okay??
+      for (var i = 0, idx = 0; i < model.player1.hand.characters.length; i++){
+        if(!model.player1.hand.toSpecial(idx, model.player1.specials))
+          idx ++;
+      } 
+      for (var i = 0, idx = 0; i < model.player0.hand.characters.length; i++){
+        if(!model.player0.hand.toSpecial(idx, model.player0.specials))
+          idx ++;
+      }
     }
   }
   init(){
@@ -831,6 +826,20 @@ class Model {
     var newChar = player.hand.addRandom(model.commonRepository, player.specials);
     player.hand.toSpecial(player.hand.getSize()-1, player.specials);
     view.discard(player, char, newChar);
+    
+    if (is_multiplayer) // Added for multiplayer
+      socket.emit('Game_DiscardOne', char.id, newChar.id);
+  }
+  opponentDiscard(discarded_id, added_id) { // Only in multiplayer mode
+    var discarded = model.player0.hand.getChar(discarded_id);
+    model.player0.hand.removeChar(discarded)
+    model.pool.addChar(discarded);
+    var added = model.commonRepository.getChar(added_id);
+    model.player0.hand.addChar(added);
+    model.commonRepository.removeChar(added);
+    console.log(discarded)
+    console.log(added);
+    view.discard(model.player0, discarded, added);
   }
   overSize(){
     return this.pool.getSize() >= POOL_CAPACITY;
@@ -896,13 +905,14 @@ class Model {
     var match = this.pickLeft(player);
     return match != null;
   }
-  dealOne(player) {/*
+  dealOne(player, the_char_id = null) {/*
     var chars = player.table.characters;
     var char = chars[chars.length -1].performTricks("DealTrick", player);
     if(char == null)
       char = chars[chars.length -2].performTricks("DealTrick", player);
       */
-    var char = obtainVector.performDeal();
+    var char = (the_char_id == null) ? obtainVector.performDeal() :
+      model.commonRepository.removeCharByID(the_char_id); // for multiplayer
     if(char == null)
       char = model.pool.addRandom(model.commonRepository);
     else {
@@ -910,6 +920,7 @@ class Model {
       model.pool.addChar(char);
     }
     view.dealOne(char);
+    return char.id; // for multiplayer
   }
   pickLeft(player){
       var poolChars = model.pool.characters;

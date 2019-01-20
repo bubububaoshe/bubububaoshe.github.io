@@ -146,7 +146,7 @@ g_all_games = [];
 class Game {
   constructor(p0, p1) {
     this.players = [p0, p1]; // Player's Sockets
-    this.curr_player = 0;
+    this.curr_player = 1;  // 先手看自己ID=1
     this.initsp = [[], []]; // 初始时的特殊牌
     this.snapshot = null;    // 游戏状态的快照
     console.log("Game.Ctor, Player id: "+p0.player_id + ","+p1.player_id);
@@ -158,8 +158,8 @@ class Game {
     this.players[1].game = this;
     this.players[0].state = "setup";
     this.players[1].state = "setup";
-    this.players[0].emit('Match_GameSetupOffensive');
-    this.players[1].emit('Match_GameSetupDefensive');
+    this.players[0].emit('Match_GameSetupDefensive');
+    this.players[1].emit('Match_GameSetupOffensive');
   }
   
   GetPlayerIndexBySocket(socket) {
@@ -206,9 +206,54 @@ class Game {
         console.log('[both player finished]');
         this.players[0].state = 'in_game';
         this.players[1].state = 'in_game';
-        this.players[0].emit('Match_GameInitOffensive', this.initsp[1], this.snapshot);
-        this.players[1].emit('Match_GameInitDefensive', this.initsp[0], this.snapshot);
+        this.players[1].emit('Match_GameInitOffensive', this.initsp[0], this.snapshot);
+        this.players[0].emit('Match_GameInitDefensive', this.initsp[1], this.snapshot);
+        this.OnStartOfTurn();
       }
+    }
+  }
+  
+  OnStartOfTurn() {
+    this.players[this.curr_player].emit('Game_SelfTurn');
+    this.players[1-this.curr_player].emit('Game_OpponentTurn');
+  }
+  
+  OnObtain(socket, handc_id, poolc_id) {
+    console.log('[OnObtain] player ' + socket.player_id + ' obtained ' +
+      handc_id + ' & ' + poolc_id);
+    
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      var other = this.players[1 - pidx];
+      other.emit('Game_OpponentObtain', handc_id, poolc_id);
+      
+      // 在这个时候就可以换边了吗。在之前的版本中，这样是会导致数据竞争的
+      this.OnEndTurn();
+      this.OnStartOfTurn();
+    }
+  }
+    
+  OnEndTurn() {
+    this.curr_player = 1 - this.curr_player;
+  }
+  
+  OnDealOne(socket, dealt_id) {
+    console.log('[OnDealOne] player ' + socket.player_id + ' dealt ' +
+      dealt_id);
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      var other = this.players[1 - pidx];
+      other.emit('Game_OpponentDealOne', dealt_id);
+    }
+  }
+  
+  OnDiscardOne(socket, discarded_id, added_id) {
+    console.log('[OnDiscardOne] player ' + socket.player_id + ' discarded ' +
+      discarded_id + ' & added ' + added_id);
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      var other = this.players[1 - pidx];
+      other.emit('Game_OpponentDiscardOne', discarded_id, added_id);
     }
   }
 };
@@ -300,6 +345,21 @@ io.on('connection', function(socket) {
 	socket.on('Match_SetupComplete', (sp, snapshot) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnPlayerSetupComplete(socket, sp, snapshot);
+	});
+	
+	socket.on('Game_Obtain', (handc_id, poolc_id) => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnObtain(socket, handc_id, poolc_id);
+	});
+	
+	socket.on('Game_DealOne', (dealt_id) => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnDealOne(socket, dealt_id);  
+	});
+	
+	socket.on('Game_DiscardOne', (discarded, added) => {
+	    var g = FindGameBySocket(socket);
+	  if (g != null) g.OnDiscardOne(socket, discarded, added);
 	});
 });
 

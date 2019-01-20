@@ -26,18 +26,24 @@ class Controller{
     var char = model.player1.hand.getChar(this.id);
     model.activate(char);
   }
-  obtain(){
+  obtain() {
     var handc = model.activeChar;
     model.activate(handc);
     model.player1.hand.removeChar(handc);
     var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
     obtainVector.init(model.player1, handc, poolc);
     controller.handleCopies();
+    if (is_multiplayer)
+      socket.emit('Game_Obtain', handc.id, poolc.id);
   }
-  opponentObtain(){
+  opponentObtain(remote_handcid = null, remote_poolcid = null){ // Changed for multiplayer
     while(model.overSeason())
       model.redeal();
-    var pick = model.aiSelectObtain();
+    var pick = (remote_handcid == null) ? model.aiSelectObtain() : 
+      [model.player0.hand.getChar(remote_handcid),
+       model.pool.getChar(remote_poolcid)];
+    console.log('[opponentObtain] pick=');
+    console.log(pick);
     if(pick == null){
       if(model.overSize()){
         model.redeal();
@@ -55,13 +61,18 @@ class Controller{
       controller.handleCopies();
     }
   }
-  postObtain(pid){
-    delayedFunc(function(){
+  postObtain(pid){ // changed in multiplayer
+    delayedFunc(function(){ 
       if(pid == 1){
-        model.dealOne(model.player1);
-        delayedFunc(function(){
-          controller.opponentObtain();
-        }, 2);
+        var dealt_id = model.dealOne(model.player1);
+        
+        if (is_multiplayer == true) {
+          socket.emit('Game_DealOne', dealt_id);
+        } else {
+          delayedFunc(function(){
+            controller.opponentObtain();
+          }, 2);
+        }
       }
       else{
         if(model.player1.hand.getSize() == 0){
@@ -69,7 +80,9 @@ class Controller{
           messenger.notifyFinal();
         }
         else {
-          model.dealOne(model.player0);
+          if (is_multiplayer != true) { // changed in multiplayer
+            model.dealOne(model.player0);
+          }
           model.checkMatch1();
           view.unblockGame();
         }
@@ -246,7 +259,8 @@ class Controller{
   }
   gamestart(){
     var should_skip = false;
-    if (is_multiplayer == true && versus_rank == 1) should_skip = true;
+    if (is_multiplayer == true && versus_rank == 0)
+      should_skip = true; // changed in multiplayer
     
     if (should_skip == false) {
       if(USER_SPECIAL_REPO.length > 0)
@@ -258,7 +272,7 @@ class Controller{
     }
     
     if(is_multiplayer == true) {
-      if (versus_rank == 0) {
+      if (versus_rank == 1) { // changed for multiplayer
         var s = model.getSnapshot();
         console.log(s);
         socket.emit('Match_SetupComplete', PLAYER_SPECIALS[1], s);

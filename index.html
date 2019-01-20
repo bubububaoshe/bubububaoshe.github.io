@@ -501,26 +501,32 @@
   
   socket.on('Match_GameSetupOffensive', () => { // 先手开局
     console.log('[先手选取特殊牌]');
-    versus_rank = 0;
+    versus_rank = 1;
     gamesetup(true);
   });
   
   socket.on('Match_GameSetupDefensive', (p0c, p1c, poolc, repoc) => { // 后手开局
     console.log('[后手选取特殊牌]');
-    versus_rank = 1;
+    versus_rank = 0;
     gamesetup(true);
   });
   
   function OtherPlayerSpecialCardFixup(other_sp) {
-    console.log('Fixup');
-    model.player0.specials.length = 0;
+    model.player0.specials.clear();
     var temp_sp = new Repository("special");
     temp_sp.init();
     for (var i=0; i<other_sp.length; i++) {
       model.player0.specials.addChar(temp_sp.removeCharByID(other_sp[i]));
     }
-    model.player0.hand.initDeck(0, null, model.player0.specials);
     view.specials0.init();
+    
+    // --> Deck.initDeck
+    for (var i = 0, idx = 0; i < model.player0.hand.characters.length; i++){
+      if(!model.player0.hand.toSpecial(idx, model.player0.specials))
+        idx ++;
+    }
+    // <-- Deck.initDeck
+    
   }
   
   socket.on('Match_GameInitOffensive', (other_sp) => {
@@ -530,10 +536,41 @@
   
   socket.on('Match_GameInitDefensive', (other_sp, snapshot) => {
     console.log('[后手开局], other_sp=' + other_sp);
+    console.log('[PLAYER_SPECIALS[1]=' + PLAYER_SPECIALS[1]);
+    
+    //       p0sp中的0表示后手          后一个1表示自己
+    snapshot.p0sp = PLAYER_SPECIALS[1].splice(0);
     console.log(snapshot)
+    // 后手不用fixup，但是因为对方送来的snapshot里没有自己的specials，所以要加入
+    
     controller.gamestartDefensive(snapshot);
     OtherPlayerSpecialCardFixup(other_sp);
   });
   
+  socket.on('Game_SelfTurn', () => {
+    view.unblockGame();
+    messenger.note('');
+    console.log('我方行动');
+  });
+  
+  socket.on('Game_OpponentTurn', () => {
+    view.blockGame();
+    messenger.note('对方行动');
+    console.log('对方行动');
+  });
+  
+  socket.on('Game_OpponentObtain', (handc_id, poolc_id) => {
+    controller.opponentObtain(handc_id, poolc_id);
+  });
+  
+  socket.on('Game_OpponentDealOne', (dealt_id) => {
+    console.log('OpponentDealOne ' + dealt_id);
+    model.dealOne(model.player0, dealt_id);
+  });
+  
+  socket.on('Game_OpponentDiscardOne', (discarded_id, added_id) => {
+    console.log('OpponentDiscardOne ' + discarded_id + ", " + added_id);
+    model.opponentDiscard(discarded_id, added_id);
+  });
   
 </script>
