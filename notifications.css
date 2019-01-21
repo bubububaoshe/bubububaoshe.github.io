@@ -186,7 +186,7 @@
   float: left;
   height: 100%;
   width: 50%;
-  background-color: var(--final-background);
+  background-color: var(--banner-background);
   color: var(--text-hl-color);
   border-radius: 20%;
 }
