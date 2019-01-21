@@ -157,6 +157,10 @@ class SPManager{
       setCookie(type+model.pack[i], arrs[i]);
   }
   loadSpecials(type){
+    var TEST = true;
+    if (TEST)
+      return COMPLETE_SPECIALS;
+    
     return getCookie(type+model.pack[0]).concat(getCookie(type+model.pack[1]));
   }
   awardSpecials(){

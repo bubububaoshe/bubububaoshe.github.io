@@ -157,7 +157,7 @@ class Trick {
     //show target selection panel
     //returns false if no valid target is found
     if(this.hasValidTarget(model.player0)) {
-      IncrementActionCount(); // 与 controller.selectCopy()配对
+      IncrementActionBarrier(); // 与 controller.selectCopy/Swap()配对
       oppoinfo.showSelectionPanel(this, msg, controllerFunc);
       return true;
     }

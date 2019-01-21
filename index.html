@@ -582,14 +582,18 @@
   });
   
   // Action sequence from last turn
+  // returns null if there are no more entries in the action buffer 
   function GetNextObtainAction() {
+    if (remoteObtainActions.length < 1) return null;
     var a = remoteObtainActions[0];
     remoteObtainActions.splice(0, 1);
     if (a[0] == "controller.obtain") {
       console.log('[replay] controller.obtain ' + a[1] + ", " + a[2]);
       return [a[1], a[2]];
-    } else if (a[0] == "controller.selectCopy") {
-      console.log('[replay] controller.selectCopy ' + a[1]);
+    } else if (a[0] == "controller.selectCopy" ||
+               a[0] == "controller.selectSwap" ||
+               a[0] == "controller.selectBan") {
+      console.log('[replay] ' + a[0] + ' ' + a[1]);
       return a[1];
     }
   }

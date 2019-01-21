@@ -27,26 +27,27 @@ class Controller{
     model.activate(char);
   }
   obtain() {
-    IncrementActionCount();
+    IncrementActionBarrier();
     var handc = model.activeChar;
     model.activate(handc);
     model.player1.hand.removeChar(handc);
+    var orig_poolc_id = this.id; // 这里有个情况：对方玩家可能将此牌变成了特殊牌，所以应该记下原牌的ID
     var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
     
-    console.log('>>> controller.obtain ' + handc.id + ", " + poolc.id);
+    console.log('>>> controller.obtain ' + handc.id + ", " + orig_poolc_id);
     console.log('    obtainVector:');
     console.log(obtainVector);
     
     if (is_multiplayer) // WebSocket messages are in-order, so server will have entire sequence
-      socket.emit('Game_ObtainStart', handc.id,
-                                 poolc.id);
+      socket.emit('Game_ObtainStart', handc.id, orig_poolc_id);
       
     obtainVector.init(model.player1, handc, poolc);
     controller.handleCopies();
     
     // 不太清楚怎么使用轮询（似乎要使用Promise.then()对远端进行比较大的改动），所以暂时采取在发起端记下所有事件的方式
     // 做决定的函数是异步的，所以得要维持一个Counter，降为0时再告知服务器该回合结束了
-    DecrementActionCount();
+    // 这其实是一个作用于当前玩家在obtain期间产生的所有线程的barrier
+    DecrementActionBarrier();
   }
   opponentObtain(remote_handcid = null, remote_poolcid = null){ // Changed for multiplayer
     console.log('[opponentObtain] ' + remote_handcid + ', ' + remote_poolcid);
@@ -54,7 +55,7 @@ class Controller{
       model.redeal();
     var pick = (remote_handcid == null) ? model.aiSelectObtain() : 
       [model.player0.hand.getChar(remote_handcid),
-       model.pool.getChar(remote_poolcid)];
+       model.pool.getChar(remote_poolcid)]; // getSpecial 在接下来再调用
     if(pick == null){
       if(model.overSize()){
         model.redeal();
@@ -159,10 +160,12 @@ class Controller{
       var trick = obtainVector.getNextTrick(type); // looks like const, so reentrant
       if(trick != null){
         var target = null;
-        if (is_multiplayer != true) { target = model.aiSelectCopy(trick); }
+        if (is_multiplayer != true) { target = model.aiSelectCopy(trick); } // changed in multiplayer
         else {
           var target_id = GetNextObtainAction();
-          target = model.player1.table.getChar(target_id);
+          target = (target_id == null) ? 
+            null :
+            model.player1.table.getChar(target_id); // from Table, according to tricks.js
         }
         obtainVector.setTrickTarget(type, target);
         if(target != null)
@@ -182,7 +185,14 @@ class Controller{
     }
     else {
       if(obtainVector.getNextTrick(type) != null){
-        var target = model.aiSelectSwap();
+        var target = null;
+        if (is_multiplayer != true) { target = model.aiSelectSwap(); } // changed in multiplayer
+        else {
+          var target_id = GetNextObtainAction();
+          target = (target_id == null) ?
+            null :
+            model.player1.table.getChar(target_id); // from Table, according to tricks.js
+        }
         obtainVector.setTrickTarget(type, target);
         if(target != null)
           messenger.notifyOppoAction(type, controller.confirmPreObtain);
@@ -202,7 +212,14 @@ class Controller{
     else {
       var trick = obtainVector.getNextTrick(type);
       if(trick != null){
-        var target = model.aiSelectBan(trick);
+        var target = null;
+        if (is_multiplayer != true) { target = model.aiSelectBan(trick); } // changed in multiplayer
+        else {
+          var target_id = GetNextObtainAction();
+          target = (target_id == null) ?
+            null :
+            model.player1.table.getChar(target_id);
+        }
         obtainVector.setTrickTarget(type, target);
         if(target != null)
           messenger.notifyOppoAction(type, controller.confirmBan);
@@ -232,7 +249,7 @@ class Controller{
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
     if (is_multiplayer) // multiplayer
       socket.emit('Game_SetCopyTrickTarget', this.id);
-    DecrementActionCount(); // 与trick.selectTarget("CopyTrick")对应
+    DecrementActionBarrier(); // 与trick.selectTarget("CopyTrick")对应
     controller.handleCopies();
   }
   selectSwap(){
@@ -240,12 +257,18 @@ class Controller{
     oppoinfo.exitSelectionPanel();
     var type = "SwapTrick";
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
+    if (is_multiplayer)
+      socket.emit('Game_SetSwapTrickTarget', this.id);
+    DecrementActionBarrier();
     controller.handleCopies();
   }
   selectBan(){
     oppoinfo.exitSelectionPanel();
     var type = "UnnamedBanTrick";
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
+    if (is_multiplayer)
+      socket.emit('Game_SetUnnamedBanTrickTarget', this.id);
+    DecrementActionBarrier();
     controller.handleBans();
   }
   doNothing(){

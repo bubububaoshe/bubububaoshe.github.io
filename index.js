@@ -241,6 +241,26 @@ class Game {
       this.obtain_actions[pidx].push(['controller.selectCopy', tgt_id]);
     }
   }
+  
+  // Record 'SwapTrickTarget' action
+  OnSetSwapTrickTarget(socket, tgt_id) {
+    console.log('[OnSetSwapTrickTarget] player ' + socket.player_id + ' swaps ' +
+      tgt_id);
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      this.obtain_actions[pidx].push(['controller.selectSwap', tgt_id]);
+    }
+  }
+  
+  // Record 'UnnamedBanTrickTarget' action
+  OnSetUnnamedBanTrickTarget(socket, tgt_id) {
+    console.log('[OnSetUnnamedBanTrickTarget] player ' + socket.player_id + ' bans ' +
+      tgt_id);
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      this.obtain_actions[pidx].push(['controller.selectBan', tgt_id]);
+    }
+  }
     
   // End recording action sequence && forward to the other player
   OnObtainEnd(socket) {
@@ -407,9 +427,22 @@ io.on('connection', function(socket) {
 	  if (g != null) g.OnObtainStart(socket, handc_id, poolc_id);
 	});
 	
+	// From: controller.selectCopy()
 	socket.on('Game_SetCopyTrickTarget', (tgt_id) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnSetCopyTrickTarget(socket, tgt_id);
+	});
+	
+	// From: controller.selectSwap()
+	socket.on('Game_SetSwapTrickTarget', (tgt_id) => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnSetSwapTrickTarget(socket, tgt_id);
+	});
+	
+	// From: controller.selectBan()
+	socket.on('Game_SetUnnamedBanTrickTarget', (tgt_id) => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnSetUnnamedBanTrickTarget(socket, tgt_id);
 	});
 	
 	socket.on('Game_ObtainEnd', () => {

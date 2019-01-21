@@ -327,6 +327,15 @@ CopyTrick:
                                                   此时后手玩家再调用与model.setup()相当的部分，但是用snapshot代替Deck.removeRandom()
 												  然后后手玩家再调用对方的特殊牌的view的初始化部分，fixup
 
+（总共的Tricks类别）
+ComboTrick   ：悭臾、百里屠苏、欧阳少恭、
+RevealTrick：怪臾、
+DealTrick   百里屠苏、
+CharTrick    不需选择对象                                 风晴雪、
+SwapTrick    需要controller选择一个对象、作用于table    ：陵越、
+UnnamedBanTrick  需要controller选择一个对象、作用于table 欧阳少恭、
+CopyTrick：红玉、
+
 （每一回合的过程）
 
  当前玩家               服务器中转                  对方玩家
@@ -336,8 +345,18 @@ CopyTrick:
 	v
  controller.obtain()    手牌与池牌
     |                `----------------------->  model.opponentObtain()
-	v                                       （若有特别动作，应该等待对方完成？）
- controller.handleCopies()
+	v                                                               |
+ >> controller.handleCopies() 【会重入】                                        |
+  >> obtainVector.trickSelector("CopyTrick")                       |
+   >> obtainVector.getTrickSubjectObjectArrays("CopyTrick")      |
+    >> trick.selectTarget              ,-----> 点击触发                   |
+     >> oppoinfo.showSelectionPanel --'     controller.selectCopy                 V
+  << obtainVector.trickSeoector                                                           >> controller.handleCopies() 对手分支
+  >> controller.handleSwaps()
+   >> obtainVector.trickSelector("SwapTrick")
+    >> obtainVector.getTrickSubjectObjectArrays("SwapTrick")
+	 >> trick.selectTarget              ,-----> 点击触发
+	  >> oppoinfo.showSelectionPanel --'   controller.selectSwap
 
 在单机中版中，上面所有的函数调用都是一次完成。
 而在对战时，得由多个消息进行驱动。
@@ -346,3 +365,5 @@ CopyTrick:
 似乎第一种方法弄起来比较简单
 
 ---------------------------------------
+
+问题：当玩家1获得乐无异却因没有作用对象而失效时，玩家2执行opponentObtain时处理CopyTrick的方法是：

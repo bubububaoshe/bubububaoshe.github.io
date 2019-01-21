@@ -776,8 +776,8 @@ class Model {
       view.init(); // TESTING
       if (TEST) {
         model.poolStart(['gjhg2', 'ywy2', "bsd1", "qysnp1", "ca2", "qy1", "zrl1"]);
-        model.player1.start(["hy1", "xyz2", "wmzj2", "fl1", "blts1", "al1", "hllp1", "xl1", "ar2", "gjfj1"]);
-        model.player0.start(["sy2", "pl1", "qc1"]);
+        model.player1.start(["hy1", "ly1", "oysg1", "fl1", "al1", "hllp1", "xl1", "ar2"]);
+        model.player0.start(["sy2", "pl1", "qc1",  "sx2", "gjfj1", "blts1", "fqx1"]);
       }
       else {
         model.poolStart();

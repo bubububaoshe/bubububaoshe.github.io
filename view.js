@@ -701,11 +701,11 @@ var versus_rank = -999; // 0:先手； 1:后手
 var remoteObtainActions = null;
 var turnActionCount = 0; // 该回合内的动作计数。只有从1降到0时才送出“ObtainEnd”
 
-function IncrementActionCount() {
+function IncrementActionBarrier() {
   turnActionCount += 1;
 }
 
-function DecrementActionCount() {
+function DecrementActionBarrier() {
   if (is_multiplayer != true) return;
   turnActionCount -= 1;
   if (turnActionCount == 0)
