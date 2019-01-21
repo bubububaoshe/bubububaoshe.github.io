@@ -26,6 +26,7 @@ body {
   background-size: cover;
   margin: 0;
   font-family: Helvetica,'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
+  height: 100%;
   text-align: center;
   overflow: hidden;
 }
@@ -166,42 +167,4 @@ body {
 }
 .faceup .card{
   transform: rotateY(180deg);
-}
-
-
-/*---------------------for testing----------------------
-*/
-#hand0 .charcontainer:hover .card{
-  transform: rotateY(180deg);
-}
-
-
-#rootcontainer {
-  display:block;
-  height: var(--win-height);
-  width: var(--win-width);
-}
-
-@media only screen and (orientation:portrait){
-  #rootcontainer {
-    position: relative;
-    top: calc(50% - var(--win-height)/2);
-    left: calc(50% - var(--win-width)/2);
-    -webkit-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    -ms-transform: rotate(90deg);
-    transform: rotate(90deg);
-  }
-
-}
-
-@media only screen and (orientation:landscape){
-  #rootcontainer {
-     -webkit-transform: rotate(0deg);
-     -moz-transform: rotate(0deg);
-     -o-transform: rotate(0deg);
-     -ms-transform: rotate(0deg);
-     transform: rotate(0deg);
-  }
 }

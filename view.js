@@ -644,18 +644,12 @@ class View {
   setSizes() {
     //cardh, cardw, handoffset, pooloffset
     var maindiv = document.getElementById("main");
-    WINW = document.documentElement.clientWidth;
-    WINH =document.documentElement.clientHeight;
-    if (WINW < WINH) {
-      MAINW = WINH;
-      MAINH = WINW;
-      WINW = MAINW;
-      WINH = MAINH;
-    }
-    else {
-      MAINW = WINW;
-      MAINH = WINH;
-    }
+    //WINW = document.documentElement.clientWidth;
+    //WINH =document.documentElement.clientHeight;
+    WINW = window.innerWidth;
+    WINH = window.innerHeight;
+    MAINW = WINW;
+    MAINH = WINH;
     if (MAINW / MAINH > MAX_MAIN_RATIO)
       MAINW = MAINH * MAX_MAIN_RATIO;
     else if (MAINW / MAINH < MIN_MAIN_RATIO)
@@ -719,4 +713,4 @@ function showPage(id){
 }
 setup();
 //test
-controller.configure();
+//controller.configure();

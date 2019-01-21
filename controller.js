@@ -222,7 +222,7 @@ class Controller{
   doNothing(){
   }
   spPick(){
-    model.player1.specialIDs.push(this.id);console.log(2);
+    model.player1.specialIDs.push(this.id);
     document.getElementById("sppick").appendChild(this);
     playerinfo.updateSPPick();
     sound.activate();

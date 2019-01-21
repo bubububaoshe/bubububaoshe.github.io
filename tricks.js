@@ -78,8 +78,10 @@ class ObtainVector{
       if(trick != null && objects[i] == null)
         if(trick.selectTarget())
           return true;
-        else
+        else{
           trick.performTrick(null);
+          return this.trickSelector(type);
+        }
     }
     return false;
   }
@@ -313,12 +315,10 @@ class UnnamedBanTrick extends Trick{
   performTrick(char){
     if(char != null){
       console.log(this.owner.name + " 禁用 " + char.name);
-      char.disabled = true;
       char.owner.recalculate(true);
     }
-    else {
+    else
       console.log(this.owner.name + " 无禁用对象");
-    }
     this.disabled = true; //only works once
     return char;
   }

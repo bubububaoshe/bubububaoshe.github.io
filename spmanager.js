@@ -14,7 +14,7 @@ class SPManager{
       model.player1.specialIDs = this.loadSpecials("qqxspecialpicks");
     else
       this.userSpecialRepoIDs.push(this.specialRepoIDs[getRandom(this.specialRepoIDs.length)]);
-    this.userSpecialRepoIDs = this.specialRepoIDs;
+    //this.userSpecialRepoIDs = this.specialRepoIDs;
     this.userSpecialRepository = new SpecialRepository();
     this.userSpecialRepository.init(this.userSpecialRepoIDs);
   }
