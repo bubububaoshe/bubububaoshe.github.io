@@ -45,6 +45,7 @@ body {
   position: relative;
   float: left;
   height: 100%;
+
 }
 #scoreboard, #specialboard {
   background: var(--board-background);
@@ -175,7 +176,11 @@ body {
 }
 
 
-#rootcontainer { display:block; }
+#rootcontainer {
+  display:block;
+  height: var(--win-height);
+  width: var(--win-width);
+}
 
 @media only screen and (orientation:portrait){
   #rootcontainer {

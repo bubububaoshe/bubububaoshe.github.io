@@ -1,8 +1,10 @@
+config cookie
+
 当前进度：
 未完成：特殊牌选择/存储
 1. 存储内容：
 [玩家的特殊牌库] USER_SPECIAL_REPO : qqxspecials
-[玩家的上轮特殊牌选择] PLAYER_SPECIALS[1] : qqxspecialpicks
+[玩家的上轮特殊牌选择] model.player1.specialIDs : qqxspecialpicks
 不存储的内容：
 对方的特殊牌库和特殊牌选择
 对方为AI时，根据设置和玩家的选择随机选择正确的特殊牌

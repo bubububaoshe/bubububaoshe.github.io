@@ -315,7 +315,7 @@ class Deck {
     for (var i = 0; i < size; i++)
       this.addChar(commons.removeRandom());
     var me = this;
-    if(specials!=null && specials.getSize()>0){
+    if(specials != null && specials.getSize()>0){
       delayedFunc(function(){
         for (var i = 0, idx = 0; i < size; i++){
           if(!me.toSpecial(idx, specials))
@@ -363,14 +363,10 @@ class Deck {
         return this.characters[i];
     return null;
   }
-  clear() {
-    this.view.clear();
-    this.characters.length = 0;
-  }
-  destroy(){
+  clear(){
     this.characters.length = 0;
     if(this.view != null)
-      this.view.destroy();
+      this.view.clear();
   }
   removeRandom() {
     var i = getRandom(this.characters.length);
@@ -421,34 +417,29 @@ class Deck {
     return msg;
   }
 }
-class Repository extends Deck {
-  constructor(type) {
+class CommonRepository extends Deck {
+  constructor() {
     super();
-    this.type = type;
   }
-  init(){
-    if (this.type == "common")
-    {
-      this.initCommonRepo(model.pack[0]);
-      this.initCommonRepo(model.pack[1]);
-    }
-    else if (this.type == "special"){
-      spmanager.initRepository(this, model.pack[0]);
-      spmanager.initRepository(this, model.pack[1]);
-      spmanager.initRepository(this, model.pack[0]);
-      spmanager.initRepository(this, model.pack[1]);
-    }
-    else
-      console.log("Illegal Repository Type: " + this.type);
-  }
-  initCommonRepo(version) {
-    var pack = COMMON_CHAR_LIST[version-1];
-    var len = pack.length;
+  init(pack){
+    for(var p = 0; p < 2; p++){
+      var ids = COMMON_CHAR_LIST[pack[p]-1];
+      var len = ids.length;
 
-    for (var i = 0; i < len; i++) {
-      let char = new Character(pack[i][0], pack[i][1], pack[i][2], pack[i][3]);
-      this.addChar(char);
+      for (var i = 0; i < len; i++) {
+        var char = new Character(ids[i][0], ids[i][1], ids[i][2], ids[i][3]);
+        this.addChar(char);
+      }
     }
+  }
+}
+class SpecialRepository extends Deck {
+  constructor() {
+    super();
+  }
+  init(ids){
+    for(var i=0; i<ids.length; i++)
+      this.addChar(spmanager.createSpecial(ids[i]));
   }
 }
 class TabledCombo{
@@ -637,23 +628,24 @@ class Player {
     this.id = id;
     this.hand = new Deck();
     this.table = new Deck();
-    this.specials = new Deck();
+    this.specials = new SpecialRepository();
     this.score = 0;
     this.matchable = true;
     this.partialCombos = [];
     this.completeCombos = [];
+    this.specialIDs = [];
   }
-  init(){
-    this.table.destroy();
-    this.specials.destroy();
-    this.hand.destroy();
+  clear(){
+    this.table.clear();
+    this.specials.clear();
+    this.hand.clear();
     this.matchable = true;
     this.partialCombos.length = 0;
     this.completeCombos.length = 0;
     this.score = 0;
   }
-  start(){
-    spmanager.initPlayerSpecials(this);
+  init(){
+    this.specials.init(this.specialIDs);
     this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
   }
   addTableChar(char) {
@@ -733,46 +725,35 @@ class Player {
   }
 }
 class Model {
-  constructor(p1, p2) {
-    this.pack = [p1, p2];
-    this.commonRepository = new Repository("common");
-    this.specialRepository = new Repository("special");
+  constructor() {
+    this.commonRepository = new CommonRepository();
     this.player0 = new Player(0);
     this.player1 = new Player(1);
     this.pool = new Deck();
     this.activeChar = null;
   }
-  start(){
-    view.init();
-    model.player1.start();
-    model.player0.start();
-    model.poolStart();
-    view.start();
-    model.checkMatch1();
+  setPack(p1 ,p2){
+    this.pack = [p1, p2];
   }
   init(){
+    model.commonRepository.init(this.pack);
+    view.repository.init();
+
     model.player1.init();
     model.player0.init();
-    model.pool.destroy();
-    model.commonRepository.destroy();
-    model.specialRepository.destroy();
+    model.poolInit();
+    view.init();
+    model.checkMatch1();
+  }
+  clear(){
+    model.player1.clear();
+    model.player0.clear();
+    model.pool.clear();
+    model.commonRepository.clear();
     model.activeChar = null;
-    model.commonRepository.init();
-    model.specialRepository.init();
+    view.clear();
   }
-  setup(){
-    model.commonRepository.init();
-    model.specialRepository.init();
-    window.addEventListener("beforeunload", function (event) {
-      model.player1.init();
-      model.player0.init();
-      model.pool.destroy();
-      model.commonRepository.destroy();
-      model.specialRepository.destroy();
-      returnValue = undefined;
-    });
-  }
-  poolStart(){
+  poolInit(){
     this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
   }
   discard(player, char){

@@ -18,7 +18,7 @@
 <body id="rootcontainer" class="noselect">
 	<div id="configurator" class="flexbox transitopacity">
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
-			<input type="radio" name="version" id="p12" checked>
+			<input type="radio" name="version" id="p12">
 			<input type="radio" name="version" id="p13" disabled="true">
 			<input type="radio" name="version" id="p23" disabled="true">
 			<label for="p12" data-value="1+2 代人物">1+2</label>
@@ -26,14 +26,14 @@
 			<label for="p23" data-value="2+3 代人物">2+3</label>
 		</div>
 		<div id="voiceinput" class="segmented-control" style="width: 100%; color: #281B11">
-			<input type="radio" name="voice" id="voiceon" checked>
+			<input type="radio" name="voice" id="voiceon">
 			<input type="radio" name="voice" id="voiceoff">
 			<label for="voiceon" data-value="完成组合时播放语音">语音</label>
 			<label for="voiceoff" data-value="完成组合时BlueBlue">无语音</label>
 		</div>
 		<div id="aiinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="ai" id="ai1">
-			<input type="radio" name="ai" id="ai2" checked>
+			<input type="radio" name="ai" id="ai2">
 			<input type="radio" name="ai" id="ai3" >
 			<label for="ai1" data-value="温和亲切的AI">炤级AI</label>
 			<label for="ai2" data-value="沉迷种田的AI">洛级AI</label>
@@ -41,7 +41,7 @@
 		</div>
 		<div id="spinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="sp" id="sp0">
-			<input type="radio" name="sp" id="sp1" checked>
+			<input type="radio" name="sp" id="sp1">
 			<input type="radio" name="sp" id="sp2">
 			<input type="radio" name="sp" id="sp3">
 			<label for="sp0" data-value="AI不想使用珍稀牌">AI无珍稀牌</label>
@@ -49,7 +49,7 @@
 			<label for="sp2" data-value="AI珍稀牌量和你一样">AI等量珍稀牌</label>
 			<label for="sp3" data-value="AI拥有所有珍稀牌">AI全珍稀牌</label>
 		</div>
-		<div id="comfirmSetting" class="confirmbutton">确定</div>
+		<div id="comfirmSetting" class="confirmbutton">确认此设置</div>
 	</div>
 	<div id="spselection" class="transitopacity">
 		<div class="selectionarea verticalflex">
@@ -63,25 +63,21 @@
 		</div>
 		<div class="rightsidebar verticalflex">
 			<div></div>
-			<div id="selectioninfo" class="centeredtext"><div>从上方牌库
-选择特殊牌
-到下方牌组
-最多选15张</div></div>
-			<div id="gamestart" class="centeredtext"><div>开始
-游戏</div></div>
+			<div id="selectioninfo" class="centeredtext"><div>从上方牌库<br />选择特殊牌<br />到下方牌组<br />最多选15张</div></div>
+			<div id="gamestart" class="centeredtext button"><div>开始<br />游戏</div></div>
 		</div>
 	</div>
 	<div id="main">
 		<div id="scoreboard">
 			<div id="table0" class="cardstack"></div>
 			<div id="score0" class="bignotice">
-				<div></div>
+				<div>0</div>
 				<div class="combobonus">
 				</div>
 			</div>
 			<div id="infobox" class="centeredtext bignotice"><div></div></div>
 			<div id="score1" class="bignotice">
-				<div></div>
+				<div>0</div>
 				<div class="combobonus"></div>
 			</div>
 			<div id="table1" class="cardstack"></div>
@@ -104,6 +100,14 @@
 						<div class="bannertext">点击牌桌区域继续</div>
 					</div>
 					<div class="string"></div>
+					<div class="nextaction">
+						<div id="reconfig" class="button centeredtext">
+							<div>返回设置</div>
+						</div>
+						<div id="restart" class="button centeredtext">
+							<div>再来亿局</div>
+						</div>
+					</div>
 				</div>
 				<div class="tableinfocontainer cover transitopacity">
 					<div class="charinfocontainer flexbox"></div>

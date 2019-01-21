@@ -6,6 +6,7 @@
   to {transform: rotate(360deg);}
 }
 .transitopacity{
+  visibility: hidden;
   opacity: 0;
   background-color: rgba(0,0,0,0);
   transition: opacity var(--transition-sec) linear;
@@ -139,7 +140,7 @@
   width: calc(var(--main-height)*0.39);
   height: calc(var(--main-height)*0.39);
   left: calc(60% - var(--main-height)*0.195);
-  top: 30.5%;
+  top: 38%;
 }
 #finalcontainer .badge>div{
   width: calc(var(--main-height)*0.35);
@@ -163,7 +164,7 @@
   width: calc(var(--main-height)*0.35);
   height: calc(var(--main-height)*0.35);
   left: calc(60% - var(--main-height)*0.195);
-  top: 30.5%;
+  top: 38%;
   border: calc(var(--main-height)*0.02) solid var(--final-background);
   border-radius: 50%;
 }
@@ -175,7 +176,38 @@
     animation: finalneo 2s infinite linear;
     -webkit-animation: finalneo 2s infinite linear;
 }
-
+#finalcontainer .nextaction{
+  width: calc(var(--main-height)*0.8);
+  height: calc(var(--main-height)*0.2);
+  top: 5%;
+  left: calc(60% - var(--main-height)*0.4);
+}
+.nextaction>div{
+  float: left;
+  height: 100%;
+  width: 50%;
+  background-color: var(--final-background);
+  color: var(--text-hl-color);
+  border-radius: 20%;
+}
+.nextaction>div:first-child{
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 80%;
+}
+.nextaction>div>div{
+  width: 80%;
+}
+.nextaction>div:first-child>div{
+  text-align: right;
+}
+.nextaction>div:last-child{
+  text-align: left;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 80%;
+}
+.nextaction>div:last-child>div{
+  text-align: left;
+}
 @keyframes finalneo{
   from {text-shadow: 0 0 calc(var(--card-width)*0.05) var(--text-glow-color);}
   50% {text-shadow: 0 0 calc(var(--card-width)*0.15) var(--text-glow-color);}
@@ -187,7 +219,7 @@
   to {text-shadow: 0 0 calc(var(--card-width)*0.0) var(--text-glow-color);}
 }
 .string{
-  height: 30.5%;
+  height: 38%;
   width: 0;
   border-right: calc(var(--main-height)*0.02) dotted var(--final-background);
   left: calc(60% - calc(var(--main-height)*0.01));
@@ -210,7 +242,7 @@
   font-size: 1.5vw;
 }
 .confirmbutton{
-  width: 25%;
+  width: 35%;
   padding: 1vw 0;
   border: 1px solid  var(--text-shadow-color);
   color: var(--text-shadow-color);

@@ -17,9 +17,13 @@ class Controller{
   }
   restart(){
     messenger.hideFinalNotice();
-    model.init();
+    var id = this.id;
     delayedFunc(function(){
-      controller.gameinit();
+      model.clear();
+      if(id == "restart")
+        controller.gameinit();
+      else
+        showPage("configurator");
     }, 2);
   }
   activate(){
@@ -64,7 +68,7 @@ class Controller{
         }, 2);
       }
       else{
-        if(model.player1.hand.getSize() >= 0){
+        if(model.player1.hand.getSize() == 0){
           //game end
           messenger.notifyFinal();
         }
@@ -218,7 +222,7 @@ class Controller{
   doNothing(){
   }
   spPick(){
-    PLAYER_SPECIALS[1].push(this.id);console.log(2);
+    model.player1.specialIDs.push(this.id);console.log(2);
     document.getElementById("sppick").appendChild(this);
     playerinfo.updateSPPick();
     sound.activate();
@@ -226,30 +230,43 @@ class Controller{
     this.addEventListener("click", controller.spUnpick);
   }
   spUnpick(){
-    var idx = PLAYER_SPECIALS[1].indexOf(this.id);
-    PLAYER_SPECIALS[1].splice(idx, 1);
+    var idx = model.player1.specialIDs.indexOf(this.id);
+    model.player1.specialIDs.splice(idx, 1);
     document.getElementById("sprepo").appendChild(this);
     playerinfo.updateSPPick();
     sound.activate();
     this.removeEventListener("click", controller.spUnpick);
     this.addEventListener("click", controller.spPick);
   }
+  configure(){
+    var pack = getInput("packinput");
+    var p1 = parseInt(pack.charAt(1));
+    var p2 = parseInt(pack.charAt(2));
+    model.setPack(p1, p2);
+    var ai = getInput("aiinput");
+    AI_LEVEL = parseInt(ai.charAt(2));
+    COMBO_VOICE = getInput("voiceinput");
+    var sp = getInput("spinput");
+    SP_CARDS = parseInt(sp.charAt(2));
+    setCookie("configurations", [pack, ai, COMBO_VOICE, sp]);
+    spmanager.setup();
+    controller.gameinit();
+  }
   gameinit(){
-    if(USER_SPECIAL_REPO.length == 0)
+    if(spmanager.userSpecialRepoIDs.length == 0)
       controller.gamestart();
     else{
-      document.getElementById("main").style.display = "none";
       playerinfo.showSpecialsPick();
-      showOpacity(document.getElementById("spselection"), true);
+      showPage("spselection");
       document.getElementById("gamestart").addEventListener("click", controller.gamestart);
     }
   }
   gamestart(){
-    if(USER_SPECIAL_REPO.length > 0)
+    if(spmanager.userSpecialRepoIDs.length > 0)
       spmanager.saveSpecials();
     spmanager.setAISpecials();
     playerinfo.exitSpecialsPick();
-    document.getElementById("main").style.display = "block";
-    model.start();
+    showPage("main");
+    model.init();
   }
 }

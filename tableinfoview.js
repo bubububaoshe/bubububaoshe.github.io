@@ -26,7 +26,7 @@ class TableInfoView{
       inn.textContent = "基础分:" + char.score;
     }
     schar.appendChild(createFullInfobox(char));
-    schar.addEventListener("touchstart", controller.doNothing);
+    schar.addEventListener("touchstart", controller.doNothing, {passive:true});
     if(char.isSpecial() && char.getTrick()==null)
       this.enableCard(schar, false);
     return schar;
@@ -182,17 +182,17 @@ class TableInfoView{
     var repodiv = document.getElementById("sprepo");
     var pickdiv = document.getElementById("sppick");
     var repo = model.specialRepository;
-    //this func is called after gameinit and before gamestart
-    //so specialRepository includes all the special chars
-    for(var i=0; i<USER_SPECIAL_REPO.length; i++){
-      var char = repo.getChar(USER_SPECIAL_REPO[i]);
-      if(PLAYER_SPECIALS[1].includes(char.id)){
+    //this func is called after getsetup and before gameinit
+    //so spmanager.userSpecialRepository includes all the special chars that user may have
+    for(var i=0; i<spmanager.userSpecialRepository.getSize(); i++){
+      var char = spmanager.userSpecialRepository.characters[i];
+      if(model.player1.specialIDs.includes(char.id)){
         var chardiv = this.addSmallCard(char, pickdiv, false);
         chardiv.addEventListener("click", controller.spUnpick);
       }
       else{
         var chardiv = this.addSmallCard(char, repodiv, false);
-        if(spmanager.hasDuplicates(char.id, PLAYER_SPECIALS[1]))
+        if(spmanager.hasDuplicates(char.id, model.player1.specialIDs))
           this.enableCard(chardiv, false);
         else
           chardiv.addEventListener("click", controller.spPick);
@@ -207,7 +207,7 @@ class TableInfoView{
   spDisableDuplicates(){
     var schars = document.getElementById("sprepo").children;
     for(var i=0; i<schars.length; i++)
-      if(spmanager.hasDuplicates(schars[i].id, PLAYER_SPECIALS[1])) {
+      if(spmanager.hasDuplicates(schars[i].id, model.player1.specialIDs)) {
         this.enableCard(schars[i], false);
         schars[i].removeEventListener("click", controller.spPick);
       }
@@ -219,7 +219,7 @@ class TableInfoView{
 
   }
   spFullBlock(){
-    if(PLAYER_SPECIALS[1].length >= MAX_SP_NUM)
+    if(model.player1.specialIDs.length >= MAX_SP_NUM)
       document.querySelector("#spselection .cover").style.visibility = "visible";
     else
       document.querySelector("#spselection .cover").style.visibility = null;

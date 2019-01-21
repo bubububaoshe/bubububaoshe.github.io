@@ -166,7 +166,7 @@ class Card{
     this.card.appendChild(back);
     back.classList.add("cardback");
     this.container.appendChild(createInfobox(char));
-    this.container.addEventListener("touchstart", controller.doNothing);
+    this.container.addEventListener("touchstart", controller.doNothing, {passive:true});
   }
   setChar(char){
     this.card.id = char.id;
@@ -269,19 +269,6 @@ class DeckDiv {
         chars[i].card.moveto(player.specials.view);
   }
   clear(){
-    var chars = this.deck.characters;
-    for(var i=0; i<chars.length; i++){
-      var card = chars[i].card;
-      if(this == view.table0){
-        card.removeController(controller.checkOppoInfo);
-        card.facedown();
-      }
-      else if(this == view.table1)
-        card.removeController(controller.checkPlayerInfo);
-      card.moveto(view.repository);
-    }
-  }
-  destroy(){
     this.container.textContent = "";
   }
 }
@@ -366,14 +353,15 @@ class PoolDiv extends DeckDiv {
 class Messenger {
   constructor(){
   }
-  init(){
+  clear(){
     this.note("");
     document.querySelector("#score0 div").textContent = 0;
     document.querySelector("#score1 div").textContent = 0;
   }
   hideFinalNotice(){
     var div = document.getElementById("finalcontainer");
-    div.removeEventListener("click", controller.restart);
+    document.getElementById("restart").removeEventListener("click", controller.restart);
+    document.getElementById("reconfig").removeEventListener("click", controller.restart);
     div.classList.remove("notransform");
     delayedFunc(function(){
       div.style.visibility = null;
@@ -473,7 +461,8 @@ class Messenger {
       msg.textContent = "难得\n糊涂";
       sound.draw();
     }
-    div.addEventListener("click", controller.restart);
+    document.getElementById("restart").addEventListener("click", controller.restart);
+    document.getElementById("reconfig").addEventListener("click", controller.restart);
     div.style.visibility = "visible";
     div.classList.add("notransform");
   }
@@ -519,7 +508,8 @@ class Messenger {
     messenger.setBannerHeadline(["恭喜对战", levels[AI_LEVEL-1]+"级AI", "超过" , minscore,"分，请抱好"]);
     var poster =  banner.querySelector(".bannercards").appendChild(document.createElement("div"));
     poster.classList.add("postercard");
-    poster.style.backgroundImage = "url('img/" + spid + ".jpg')";banner.addEventListener("click", function(){
+    poster.style.backgroundImage = "url('img/" + spid + ".jpg')";
+    banner.addEventListener("click", function(){
       messenger.exitNotifyOppoAction(controller.doNothing);
     });
     showOpacity(banner, true);
@@ -537,7 +527,7 @@ class View {
     this.specials1 = new RepoDiv(document.getElementById("specials1"), model.player1.specials);
     this.setup();
   }
-  start(){
+  init(){
     view.specials0.init();
     view.specials1.init();
     view.hand0.init();
@@ -545,18 +535,9 @@ class View {
     view.pool.init();
     view.unblockGame();
   }
-  init(){
+  clear(){
     view.blockGame();
-    messenger.init();
-    /*
-    this.pool.destroy();
-    this.table0.destroy();
-    this.table1.destroy();
-    this.repository.destroy();
-    this.specials0.destroy();
-    this.specials1.destroy();
-    */
-    this.repository.init();
+    messenger.clear();
   }
   setup(){
     this.setSizes();
@@ -665,15 +646,11 @@ class View {
     var maindiv = document.getElementById("main");
     WINW = document.documentElement.clientWidth;
     WINH =document.documentElement.clientHeight;
-    if (window.matchMedia("(orientation: portrait)").matches) {
-   // you're in PORTRAIT mode
+    if (WINW < WINH) {
       MAINW = WINH;
       MAINH = WINW;
       WINW = MAINW;
       WINH = MAINH;
-      var root =  document.getElementById("rootcontainer");
-      root.style.width = WINW;
-      root.style.height = WINH;
     }
     else {
       MAINW = WINW;
@@ -709,27 +686,35 @@ class View {
 
 var sound, combos, model, controller, spmanager, messenger, view, oppoinfo, playerinfo, obtainVector;
 var AI_LEVEL, COMBO_VOICE, SP_CARDS;
-
-function gamesetup(){
-  var pack = getInput("packinput");
-  var p1 = parseInt(pack.charAt(1));
-  var p2 = parseInt(pack.charAt(2));
-  AI_LEVEL = parseInt(getInput("aiinput").charAt(2));
-  COMBO_VOICE = getInput("voiceinput");
-  SP_CARDS = parseInt(getInput("spinput").charAt(2));
+function setup(){
   sound = new Sound();
   combos = new Combos();
-  model = new Model(p1, p2);
   obtainVector = new ObtainVector();
-  controller = new Controller();
   spmanager = new SPManager();
+  model = new Model();
   messenger = new Messenger();
+  controller = new Controller();
   view = new View();
   oppoinfo = new TableInfoView(model.player0);
   playerinfo = new TableInfoView(model.player1);
-  document.getElementById("main").style.display = "none";
-  showOpacity(document.getElementById("configurator"), false);
-  model.setup();
-  controller.gameinit();
+  var defaults = ["p12", "voiceon", "ai2", "sp1"];
+  var configs = getCookie("configurations");
+  if(configs.length == 0) configs = defaults;
+  for(var i = 0; i < configs.length; i++)
+    document.getElementById(configs[i]).checked = true;
+  showPage("configurator");
+  document.getElementById("comfirmSetting").addEventListener("click", controller.configure);
 }
-document.getElementById("comfirmSetting").addEventListener("click", gamesetup);
+function showPage(id){
+  var ids = ["configurator", "spselection"];
+  if(id == "main")
+    document.getElementById("main").style.display = "block";
+  else
+    document.getElementById("main").style.display = "none";
+  for(var i=0; i<2; i++)
+    if(ids[i] != id)
+      showOpacity(document.getElementById(ids[i]), false);
+    else
+      showOpacity(document.getElementById(id), true);
+}
+setup();
