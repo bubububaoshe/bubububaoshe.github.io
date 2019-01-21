@@ -229,28 +229,6 @@
   var is_my_move = false;
   var g_my_player_id = -999;
   
-  var g_syncpoints = [];
-  var g_remote_sync_msgs = [];
-  class SyncPoint {
-    constructor() {
-      this.done = false;
-      this.received_msg = null;
-      this.event_name = "";
-    }
-    async WaitFor(event_name) {
-      this.event_name = event_name;
-      g_syncpoints.push(this);
-      while (this.done == false) {
-        await sleep(233);
-      }
-      return this.received_msg;
-    }
-    PostMessage(x) { // Called @ socket reception of data
-      this.done = true;
-      this.received_msg = x;
-    }
-  };
-  
   // 按键事件
   document.getElementById("refresh_lobbystatus").addEventListener("click", function() {
     socket.emit('Info_RefreshOnlinePlayerCount');
@@ -553,12 +531,13 @@
   
   socket.on('Match_GameInitOffensive', (other_sp) => {
     console.log('[先手开局] other_sp='+other_sp);
+    messenger.hideFinalNotice(); // If from restart
     OtherPlayerSpecialCardFixup(other_sp);
   });
   
   socket.on('Match_GameInitDefensive', (other_sp, snapshot) => {
     console.log('[后手开局], other_sp=' + other_sp);
-    console.log('[PLAYER_SPECIALS[1]=' + PLAYER_SPECIALS[1]);
+    messenger.hideFinalNotice(); // if from restart
     
     //       p0sp中的0表示后手          后一个1表示自己
     snapshot.p0sp = PLAYER_SPECIALS[1].splice(0);
@@ -571,13 +550,25 @@
   
   socket.on('Game_SelfTurn', () => {
     view.unblockGame();
-    messenger.note('');
+    
+    var delay = 1;
+    if (messenger.mayErase() != true) delay += 2;
+    delayedFunc(function() {
+      messenger.note('该你出牌了');
+    }, delay);
+    
     console.log('我方行动');
   });
   
   socket.on('Game_OpponentTurn', () => {
     view.blockGame();
-    messenger.note('对方行动');
+    
+    var delay = 1;
+    if (messenger.mayErase() != true) delay += 2;
+    delayedFunc(function() {
+      messenger.note('对方出牌');
+    }, delay);
+    
     console.log('对方行动');
   });
   
@@ -620,24 +611,7 @@
     model.redeal(pool_ids, repo_ids);
   });
   
-  function DispatchRemoteSyncMsgs() {
-    var m = g_remote_sync_msgs, s = g_syncpoints;
-    for (var i=0; i<m.length; i++) {
-      var consumed = false;
-      var event_name = m[i][0], args = m[i][1];
-      for (var j=0; j<s.length; j++) {
-        console.log("i="+i+", j="+j+", "+event_name+" vs "+s[j].event_name)
-        if (s[j].event_name == event_name) {
-          consumed = true;
-          s[j].PostMessage(args);
-          s.splice(j, 1);
-          break;
-        }
-      }
-      if (consumed == true) {
-        i--;
-        m.splice(i, 1);
-      }
-    }
-  }
+  socket.on('Game_OpponentGameEnd', () => {
+    messenger.notifyFinal();
+  });
 </script>

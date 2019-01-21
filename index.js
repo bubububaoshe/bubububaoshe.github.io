@@ -310,6 +310,31 @@ class Game {
     }
   }
   
+  OnGameEnd(socket) {
+    console.log('[OnGameEnd] player ' + socket.player_id + ' says game end');
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      var other = this.players[1 - pidx];
+      other.emit('Game_OpponentGameEnd');
+    }
+  }
+  
+  OnVoteRestart(socket) {
+    console.log('[OnVoteRestart] player ' + socket.player_id + ' votes to restart');
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      this.players[pidx].state = "voted_to_restart";
+      var other = this.players[1 - pidx];
+      if (other.state == "voted_to_restart") {
+        // Switch side & restart game
+        console.log('Starting new round');
+        var temp = this.players[1];
+        this.players[1] = this.players[0];
+        this.players[0] = temp;
+        this.Setup();
+      }
+    }
+  }
 };
 
 FindGameBySocket = function(socket) {
@@ -448,6 +473,16 @@ io.on('connection', function(socket) {
 	socket.on('Game_ObtainEnd', () => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnObtainEnd(socket);
+	});
+	
+	socket.on('Game_GameEnd', () => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnGameEnd(socket);
+	});
+	
+	socket.on('Game_VoteRestart', () => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnVoteRestart(socket);
 	});
 });
 

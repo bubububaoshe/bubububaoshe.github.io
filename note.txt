@@ -367,3 +367,10 @@ CopyTrick：红玉、
 ---------------------------------------
 
 问题：当玩家1获得乐无异却因没有作用对象而失效时，玩家2执行opponentObtain时处理CopyTrick的方法是：
+解答：走target=null的分支，所以应该可以在command buffer为空时将target设为null
+
+问题：打出乐无异但是选取对象中只有一张失效了的陵越，点完后再次出现选择界面，但却误以为barrier已到（是否可能连续出现两次选择目标的界面？）
+解答：是可以连续出现两次选择界面，解决方法是把DecrementBarrier移到controller.handleCopies的下方，这样barrier的处理才正确（因为后者可能会增加barrier的计数器。）
+
+重新开局时后手变先手
+会导致complete_specials变成[undefined]不知道是怎么回事

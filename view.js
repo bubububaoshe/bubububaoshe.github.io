@@ -379,6 +379,11 @@ class Messenger {
       div.style.visibility = null;
     }, 4);
   }
+  mayErase() {
+    var x = document.getElementById("infobox").firstElementChild.textContent;
+    if (x == "该你出牌了" || x == "对方行动") return true;
+    else return false;
+  }
   note(msg){
     document.getElementById("infobox").firstElementChild.textContent = msg;
   }

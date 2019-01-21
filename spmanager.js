@@ -158,8 +158,12 @@ class SPManager{
   }
   loadSpecials(type){
     var TEST = true;
-    if (TEST)
-      return COMPLETE_SPECIALS;
+    if (TEST) 
+      //return COMPLETE_SPECIALS; // will become UNDEFINED upon restart?
+      return [
+        "blts1b", "fqx1a", "hy1a", "ly1a", "oysg1a", "qy1a",
+        "hy2a", "qhzr2a", "sx2a", "sy2a", "wry2b", "xy2a", "xyz2a", "xyz2b", "ywy2a", "ywy2b"
+      ];
     
     return getCookie(type+model.pack[0]).concat(getCookie(type+model.pack[1]));
   }

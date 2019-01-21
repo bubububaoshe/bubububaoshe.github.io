@@ -16,11 +16,17 @@ class Controller{
   constructor(){
   }
   restart(){
-    messenger.hideFinalNotice();
-    model.init();
-    delayedFunc(function(){
-      controller.gameinit();
-    }, 2);
+    if (is_multiplayer != true) { // Changed in multiplayer
+      messenger.hideFinalNotice();
+      model.init();
+      delayedFunc(function(){
+        controller.gameinit();
+      }, 2);
+    } else {
+      model.init();
+      console.log("Voted to restart");
+      socket.emit('Game_VoteRestart'); // Will swap defensive/offensive & restart if BOTH players click this button
+    }
   }
   activate(){
     var char = model.player1.hand.getChar(this.id);
@@ -90,6 +96,9 @@ class Controller{
         if(model.player1.hand.getSize() == 0){
           //game end
           messenger.notifyFinal();
+          if (is_multiplayer) {
+            socket.emit('Game_GameEnd');
+          }
         }
         else {
           if (is_multiplayer != true) { // changed in multiplayer
@@ -249,8 +258,8 @@ class Controller{
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
     if (is_multiplayer) // multiplayer
       socket.emit('Game_SetCopyTrickTarget', this.id);
+    controller.handleCopies(); // May increase barrier ?
     DecrementActionBarrier(); // 与trick.selectTarget("CopyTrick")对应
-    controller.handleCopies();
   }
   selectSwap(){
     // user swaps with the opponent
@@ -259,8 +268,8 @@ class Controller{
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
     if (is_multiplayer)
       socket.emit('Game_SetSwapTrickTarget', this.id);
-    DecrementActionBarrier();
     controller.handleCopies();
+    DecrementActionBarrier();
   }
   selectBan(){
     oppoinfo.exitSelectionPanel();
@@ -268,8 +277,8 @@ class Controller{
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
     if (is_multiplayer)
       socket.emit('Game_SetUnnamedBanTrickTarget', this.id);
-    DecrementActionBarrier();
     controller.handleBans();
+    DecrementActionBarrier();
   }
   doNothing(){
   }
