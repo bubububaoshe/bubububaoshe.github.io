@@ -294,11 +294,20 @@ class CharTrick extends Trick{
   clone(){return new CharTrick(this.charName, this.bonus);}
 }
 class UnnamedBanTrick extends Trick{
-  constructor(){
-    super("禁用对方任意一张珍稀牌的技能");
+  constructor(group, names){
+    if(group == null)
+      super("禁用对方任意一张珍稀牌的技能");
+    else {
+      super("禁用对方任意一张" + group + "珍稀牌的技能");
+      this.group = group;
+      this.names = names;
+    }
   }
   isValidTarget(char){
-    return char.getTrick("ComboTrick,CharTrick,NamedBanTrick")!=null;
+    if(this.names == null)
+      return char.getTrick("ComboTrick,CharTrick,NamedBanTrick")!=null;
+    else
+      return this.names.includes(char.name) && char.getTrick("ComboTrick,CharTrick,NamedBanTrick")!=null;
   }
   selectTarget(){return super.selectTarget("禁用其加分技能", controller.selectBan);}
   performTrick(char){
@@ -313,7 +322,7 @@ class UnnamedBanTrick extends Trick{
     this.disabled = true; //only works once
     return char;
   }
-  clone(){return new UnnamedBanTrick();}
+  clone(){return new UnnamedBanTrick(this.group, this.names);}
 }
 class NamedBanTrick extends Trick{
   constructor(name){

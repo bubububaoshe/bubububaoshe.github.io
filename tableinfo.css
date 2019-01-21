@@ -338,14 +338,14 @@
   content: "满员";
 }
 .selectionarea .cover{
-  background-color: var(--page-background-color);
+  background-color: #ebe6df73;
   color: var(--text-shadow-color);
-  font-size: calc(var(--card-height));
+  font-size: var(--card-height);
   font-weight: bold;
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 0.2;
+  opacity: 0.5;
 }
 .rightsidebar>div:first-child{
   height: 60%;

@@ -718,3 +718,5 @@ function showPage(id){
       showOpacity(document.getElementById(id), true);
 }
 setup();
+//test
+controller.configure();
