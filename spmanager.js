@@ -216,7 +216,7 @@ class SPManager{
   }
   setAISpecials(){
       var aisizes = [0, Math.floor(model.player1.specialIDs.length/2), model.player1.specialIDs.length, MAX_SP_NUM];
-      model.player0.specialIDs = this.getRandomSubarray(this.userSpecialRepoIDs, aisizes[SP_CARDS]);
+      model.player0.specialIDs = this.getRandomSubarray(this.specialRepoIDs, aisizes[SP_CARDS]);
   }
   getRandomSubarray(arr, len){
     if(len <= 0)

@@ -2,6 +2,12 @@
 maximum combo name size: 8
 maximum combo size: 6
 */
+INIT_CARD_NUM_HAND = 10;
+INIT_CARD_NUM_POOL = 8;
+POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
+BONUS_THRESHOLDS = [170, 140, 110];
+MAX_SP_NUM = 15;
+
 DEFAULT_CHAR_POEM = "";
 COMMON_CHAR_LIST = [
 [
@@ -176,11 +182,6 @@ COMBO_LIST  = [
   [ ["巫炤", "欧阳少恭"], "放弃治疗", 4]
   */
 ];
-INIT_CARD_NUM_HAND = 10;
-INIT_CARD_NUM_POOL = 8;
-POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
-BONUS_THRESHOLDS = [170, 140, 110];
-MAX_SP_NUM = 15;
 
 function getRandom(max){
   //returns random in [0, max-1]
