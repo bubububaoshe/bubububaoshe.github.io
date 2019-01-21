@@ -72,6 +72,8 @@ class ObtainVector{
     // show unfinished selector for tricks of <type>
     // return true if selector is invoked, false otherwise.
     var so = this.getTrickSubjectObjectArrays(type);
+    console.log(">>> CopyTrick(" + type + "), SO Array:");
+    console.log(so);
     var subjects = so[0], objects = so[1];
     for(var i=0; i<subjects.length; i++){
       var trick = subjects[i].getTrick(type);
@@ -155,6 +157,7 @@ class Trick {
     //show target selection panel
     //returns false if no valid target is found
     if(this.hasValidTarget(model.player0)) {
+      IncrementActionCount(); // 与 controller.selectCopy()配对
       oppoinfo.showSelectionPanel(this, msg, controllerFunc);
       return true;
     }

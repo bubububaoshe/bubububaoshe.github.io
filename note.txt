@@ -267,6 +267,12 @@ CopyTrick:
 
 ---------------------------------------
 
+是从model开始传递信息还是应该从controller开始传递信息？
+从一个方面看，似乎model被重复利用的次数多些，但controller更接近“AI玩家的动作”，所以各有各的好
+从另一个方面看，model中的一些事件会被被动触发，比如redeal，所以不得不从model中开始传消息
+
+---------------------------------------
+
 对战时间轴
 
 （双方匹配阶段）
@@ -323,23 +329,20 @@ CopyTrick:
 
 （每一回合的过程）
 
-7. 若需洗牌redeal或换一张牌discard，则转8，否则转9
+ 当前玩家               服务器中转                  对方玩家
+ 
+ model.redeal()      Redeal,poolids,repoids
+    |           `---------------------------->  model.redeal(poolids, repoids)
+	v
+ controller.obtain()    手牌与池牌
+    |                `----------------------->  model.opponentObtain()
+	v                                       （若有特别动作，应该等待对方完成？）
+ controller.handleCopies()
 
-8. 当前玩家 ---> 服务器 'Game_Redeal' 洗牌，带洗牌结果（如果需要重新洗牌的话）
-   另一玩家 <------'    'Game_Redeal' 服务器告知另一名玩家洗牌的结果
-
-9. 当前玩家进行 controller.obtain()
-   当前玩家 ---> 服务器 'Game_Obtain' 取一对牌，带所取的牌的ID（不能传Card对象，因为其是递归数据结构）
-   有可能转10
-   
-10. 当前玩家进行 controller.handleCopies()
-
-11. 当前玩家进行 controller.handleSwaps()
-
-12. 当前玩家进行 model.obtain()
-
-13. 当前玩家进行 controller.handleBans()
-
-14. 当前玩家执行 controller.handleReveals()
+在单机中版中，上面所有的函数调用都是一次完成。
+而在对战时，得由多个消息进行驱动。
+一种方法是，在当前玩家侧，记下所有的消息，然后一起回放。
+另一种方法是，在对方玩家侧把函数都改写为可重入的，然后每次接收到消息就再调用一回目前所在步骤的函数。
+似乎第一种方法弄起来比较简单
 
 ---------------------------------------

@@ -27,23 +27,34 @@ class Controller{
     model.activate(char);
   }
   obtain() {
+    IncrementActionCount();
     var handc = model.activeChar;
     model.activate(handc);
     model.player1.hand.removeChar(handc);
     var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
+    
+    console.log('>>> controller.obtain ' + handc.id + ", " + poolc.id);
+    console.log('    obtainVector:');
+    console.log(obtainVector);
+    
+    if (is_multiplayer) // WebSocket messages are in-order, so server will have entire sequence
+      socket.emit('Game_ObtainStart', handc.id,
+                                 poolc.id);
+      
     obtainVector.init(model.player1, handc, poolc);
     controller.handleCopies();
-    if (is_multiplayer)
-      socket.emit('Game_Obtain', handc.id, poolc.id);
+    
+    // 不太清楚怎么使用轮询（似乎要使用Promise.then()对远端进行比较大的改动），所以暂时采取在发起端记下所有事件的方式
+    // 做决定的函数是异步的，所以得要维持一个Counter，降为0时再告知服务器该回合结束了
+    DecrementActionCount();
   }
   opponentObtain(remote_handcid = null, remote_poolcid = null){ // Changed for multiplayer
+    console.log('[opponentObtain] ' + remote_handcid + ', ' + remote_poolcid);
     while(model.overSeason())
       model.redeal();
     var pick = (remote_handcid == null) ? model.aiSelectObtain() : 
       [model.player0.hand.getChar(remote_handcid),
        model.pool.getChar(remote_poolcid)];
-    console.log('[opponentObtain] pick=');
-    console.log(pick);
     if(pick == null){
       if(model.overSize()){
         model.redeal();
@@ -139,14 +150,20 @@ class Controller{
   }
   handleCopies(){
     var type = "CopyTrick";
-    if(obtainVector.player.id == 1){
-      if(!obtainVector.trickSelector(type))
+    if(obtainVector.player.id == 1) {
+      var t = obtainVector.trickSelector(type);
+      if(!t)
         controller.handleSwaps();
     }
     else {
-      var trick = obtainVector.getNextTrick(type);
+      var trick = obtainVector.getNextTrick(type); // looks like const, so reentrant
       if(trick != null){
-        var target = model.aiSelectCopy(trick);
+        var target = null;
+        if (is_multiplayer != true) { target = model.aiSelectCopy(trick); }
+        else {
+          var target_id = GetNextObtainAction();
+          target = model.player1.table.getChar(target_id);
+        }
         obtainVector.setTrickTarget(type, target);
         if(target != null)
           messenger.notifyOppoAction(type, controller.confirmPreObtain);
@@ -209,10 +226,13 @@ class Controller{
     messenger.exitNotifyOppoAction(controller.confirmBan);
     controller.handleBans();
   }
-  selectCopy(){
+  selectCopy(){ // modified in multiplayer
     oppoinfo.exitSelectionPanel();
     var type = "CopyTrick";
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
+    if (is_multiplayer) // multiplayer
+      socket.emit('Game_SetCopyTrickTarget', this.id);
+    DecrementActionCount(); // 与trick.selectTarget("CopyTrick")对应
     controller.handleCopies();
   }
   selectSwap(){
@@ -268,6 +288,8 @@ class Controller{
       spmanager.setAISpecials();
       playerinfo.exitSpecialsPick();
       document.getElementById("main").style.display = "block";
+      
+      // 初始化一个局面供调试珍稀牌功能用…
       model.start();
     }
     

@@ -149,6 +149,7 @@ class Game {
     this.curr_player = 1;  // 先手看自己ID=1
     this.initsp = [[], []]; // 初始时的特殊牌
     this.snapshot = null;    // 游戏状态的快照
+    this.obtain_actions = [[], []];
     console.log("Game.Ctor, Player id: "+p0.player_id + ","+p1.player_id);
   }
   
@@ -218,21 +219,44 @@ class Game {
     this.players[1-this.curr_player].emit('Game_OpponentTurn');
   }
   
-  OnObtain(socket, handc_id, poolc_id) {
-    console.log('[OnObtain] player ' + socket.player_id + ' obtained ' +
+  // Start recording action sequence &&
+  // record 'controller.obtain' action (b/c it is emitted from controller.obtain)
+  OnObtainStart(socket, handc_id, poolc_id) {
+    console.log('[OnObtainStart] player ' + socket.player_id + ' obtained ' +
       handc_id + ' & ' + poolc_id);
     
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
+      this.obtain_actions[pidx].length = 0;
+      this.obtain_actions[pidx].push(['controller.obtain', handc_id, poolc_id]);      
+    }
+  }
+  
+  // Record 'CopyTrickTarget' action
+  OnSetCopyTrickTarget(socket, tgt_id) {
+    console.log('[OnSetCopyTrickTarget] player ' + socket.player_id + ' copies ' +
+      tgt_id);
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      this.obtain_actions[pidx].push(['controller.selectCopy', tgt_id]);
+    }
+  }
+    
+  // End recording action sequence && forward to the other player
+  OnObtainEnd(socket) {
+    console.log('[OnObtainEnd] player ' + socket.player_id + ' obtain end');
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
       var other = this.players[1 - pidx];
-      other.emit('Game_OpponentObtain', handc_id, poolc_id);
       
-      // 在这个时候就可以换边了吗。在之前的版本中，这样是会导致数据竞争的
+      other.emit('Game_OpponentObtain', this.obtain_actions[pidx]);
+      this.obtain_actions[pidx].length = 0;
+      
       this.OnEndTurn();
       this.OnStartOfTurn();
     }
   }
-    
+  
   OnEndTurn() {
     this.curr_player = 1 - this.curr_player;
   }
@@ -256,6 +280,16 @@ class Game {
       other.emit('Game_OpponentDiscardOne', discarded_id, added_id);
     }
   }
+  
+  OnRedeal(socket, pool_ids, repo_ids) {
+    console.log('[OnRedeal] player ' + socket.player_id + ' redeals ');
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      var other = this.players[1 - pidx];
+      other.emit('Game_OpponentRedeal', pool_ids, repo_ids);
+    }
+  }
+  
 };
 
 FindGameBySocket = function(socket) {
@@ -347,19 +381,40 @@ io.on('connection', function(socket) {
 	  if (g != null) g.OnPlayerSetupComplete(socket, sp, snapshot);
 	});
 	
-	socket.on('Game_Obtain', (handc_id, poolc_id) => {
-	  var g = FindGameBySocket(socket);
-	  if (g != null) g.OnObtain(socket, handc_id, poolc_id);
-	});
-	
+	// The following stuff shall reflect the procedures in a turn
+	// From: controller.postObtain (?)
 	socket.on('Game_DealOne', (dealt_id) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnDealOne(socket, dealt_id);  
 	});
 	
+	// From: model.discard
 	socket.on('Game_DiscardOne', (discarded, added) => {
 	    var g = FindGameBySocket(socket);
 	  if (g != null) g.OnDiscardOne(socket, discarded, added);
+	});
+	
+	// From: model.redeal
+	socket.on('Game_Redeal', (pool_ids, repo_ids) =>{
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnRedeal(socket, pool_ids, repo_ids);
+	});
+	
+	// From: model.obtain()
+	//       Starts recording all actions in 1 turn
+	socket.on('Game_ObtainStart', (handc_id, poolc_id) => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnObtainStart(socket, handc_id, poolc_id);
+	});
+	
+	socket.on('Game_SetCopyTrickTarget', (tgt_id) => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnSetCopyTrickTarget(socket, tgt_id);
+	});
+	
+	socket.on('Game_ObtainEnd', () => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnObtainEnd(socket);
 	});
 });
 

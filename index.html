@@ -52,11 +52,11 @@
 			</div>
 			</div>
 			<div id="match_buttons" style="width: 100%; margin-bottom: 0.5vw; margin-top: 0.5vw">
-			<div id="start_match" style="">随机寻找对手</div>
+			<div id="start_match" style="background-color:#CCCC66;">随机寻找对手</div>
 			</div>
 			<div id="confirm_cancel_buttons" style="width:100%; margin-bottom: 0.5vw; margin-top: 0.5vw"> 
-			<div id="confirm_match" style="display:none">确认配对</div>
-			<div id="cancel_match" style="display:none">放弃配对</div>
+			<div id="confirm_match" style="background-color:#66CC66;display:none">确认配对</div>
+			<div id="cancel_match" style="background-color:#CC6666;display:none">放弃配对</div>
 		</div>
 		<hr/>
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
@@ -228,6 +228,28 @@
 <script type="text/javascript">
   var is_my_move = false;
   var g_my_player_id = -999;
+  
+  var g_syncpoints = [];
+  var g_remote_sync_msgs = [];
+  class SyncPoint {
+    constructor() {
+      this.done = false;
+      this.received_msg = null;
+      this.event_name = "";
+    }
+    async WaitFor(event_name) {
+      this.event_name = event_name;
+      g_syncpoints.push(this);
+      while (this.done == false) {
+        await sleep(233);
+      }
+      return this.received_msg;
+    }
+    PostMessage(x) { // Called @ socket reception of data
+      this.done = true;
+      this.received_msg = x;
+    }
+  };
   
   // 按键事件
   document.getElementById("refresh_lobbystatus").addEventListener("click", function() {
@@ -559,8 +581,24 @@
     console.log('对方行动');
   });
   
-  socket.on('Game_OpponentObtain', (handc_id, poolc_id) => {
-    controller.opponentObtain(handc_id, poolc_id);
+  // Action sequence from last turn
+  function GetNextObtainAction() {
+    var a = remoteObtainActions[0];
+    remoteObtainActions.splice(0, 1);
+    if (a[0] == "controller.obtain") {
+      console.log('[replay] controller.obtain ' + a[1] + ", " + a[2]);
+      return [a[1], a[2]];
+    } else if (a[0] == "controller.selectCopy") {
+      console.log('[replay] controller.selectCopy ' + a[1]);
+      return a[1];
+    }
+  }
+  
+  // Will replay a whole sequce of actions
+  socket.on('Game_OpponentObtain', (obtain_actions) => {
+    remoteObtainActions = obtain_actions;
+    var obtain_ids = GetNextObtainAction(obtain_actions);
+    controller.opponentObtain(obtain_ids[0], obtain_ids[1]);
   });
   
   socket.on('Game_OpponentDealOne', (dealt_id) => {
@@ -573,4 +611,29 @@
     model.opponentDiscard(discarded_id, added_id);
   });
   
+  socket.on('Game_OpponentRedeal', (pool_ids, repo_ids) => {
+    console.log('Opponent Redeal');
+    model.redeal(pool_ids, repo_ids);
+  });
+  
+  function DispatchRemoteSyncMsgs() {
+    var m = g_remote_sync_msgs, s = g_syncpoints;
+    for (var i=0; i<m.length; i++) {
+      var consumed = false;
+      var event_name = m[i][0], args = m[i][1];
+      for (var j=0; j<s.length; j++) {
+        console.log("i="+i+", j="+j+", "+event_name+" vs "+s[j].event_name)
+        if (s[j].event_name == event_name) {
+          consumed = true;
+          s[j].PostMessage(args);
+          s.splice(j, 1);
+          break;
+        }
+      }
+      if (consumed == true) {
+        i--;
+        m.splice(i, 1);
+      }
+    }
+  }
 </script>

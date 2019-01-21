@@ -652,9 +652,37 @@ class Player {
     this.completeCombos.length = 0;
     this.score = 0;
   }
-  start(){
-    spmanager.initPlayerSpecials(this);
-    this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
+  start(chars = null) {
+    // In multiplayer mode the Opponent's Special cards need to be fetched remotely
+    if (this == model.player0 && is_multiplayer == true) {
+    } else {
+      spmanager.initPlayerSpecials(this);
+    }
+    if (chars == null) {
+      this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
+    } else {
+      // FOR TESTING
+      for (var i=0; i<chars.length; i++) {
+        var c = model.commonRepository.removeCharByID(chars[i]);
+        if (c != undefined && c != false) {
+          this.hand.addChar(c);
+        } else {
+          console.log('[model.start] start with initializer id='+chars[i]+' returns undefined');
+        }
+      }
+      var me = this;
+      // 这其实得要有一个barrier，等主线程的view.start()执行完了才能继续
+      // 不过现在的CPU性能都很高，所以当开始执行toSpecial的时候一定已经执行好了
+      // 或者说… 可能是因为JS的线程调度能够容纳这样的写法。
+      delayedFunc(function() {
+      if (me.specials.getSize() > 0) {
+        for (var i=0, idx=0; i<me.hand.characters.length; i++) {
+          if (!me.hand.toSpecial(idx, me.specials)) idx++;
+        }
+      }
+      }, 1);
+      // Need Fixup ???
+    }
   }
   addTableChar(char) {
     //add a char to player's table
@@ -744,12 +772,20 @@ class Model {
   }
   start(snapshot = null){
     if (snapshot == null) {
-      view.init();
-      model.player1.start();
-      model.player0.start();
-      model.poolStart();
-      view.start();
+      var TEST = true;
+      view.init(); // TESTING
+      if (TEST) {
+        model.poolStart(['gjhg2', 'ywy2', "bsd1", "qysnp1", "ca2", "qy1", "zrl1"]);
+        model.player1.start(["hy1", "xyz2", "wmzj2", "fl1", "blts1", "al1", "hllp1", "xl1", "ar2", "gjfj1"]);
+        model.player0.start(["sy2", "pl1", "qc1"]);
+      }
+      else {
+        model.poolStart();
+        model.player0.start();
+        model.player1.start();
+      }
       model.checkMatch1();
+      view.start();
     } else { // for multiplayer
       view.init();
       
@@ -814,8 +850,16 @@ class Model {
       returnValue = undefined;
     });
   }
-  poolStart(){
-    this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
+  poolStart(ids = null){ // for testing
+    if (ids == null) {
+      this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
+    } else {
+      console.log('poolStart ' + ids)
+      for (var i=0; i<ids.length; i++) {
+        var x = this.commonRepository.removeCharByID(ids[i]);
+        this.pool.addChar(x);
+      }
+    }
   }
   discard(player, char){
     if(char == null)
@@ -874,10 +918,19 @@ class Model {
     }
     return false;
   }
-  redeal(){
+  redeal(pool_ids = null, repo_ids = null) { // Changed for multiplayer
     model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
-    model.pool.clear();
-    model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
+    if (pool_ids == null) {
+      model.pool.clear();
+      model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
+      socket.emit('Game_Redeal', extractIDs(model.pool.characters),
+                                 extractIDs(model.commonRepository.characters));
+    } else {
+      model.pool.clear();
+      for (var i=0; i<pool_ids.length; i++) {
+        model.pool.addChar(model.commonRepository.removeCharByID(pool_ids[i]));
+      }
+    }
     view.pool.init();
   }
   checkMatch1(){
@@ -1034,6 +1087,7 @@ class Model {
     var ac1 = player.addTableChar(obtainVector.playerTableChars[1]);
     obtainVector.charScoreInc = ac0[0] + ac1[0];
     obtainVector.comboCount =  ac0[1] + ac1[1];
+    
     controller.handleBans();
   }
   activate(char) {//player1 set a card active
