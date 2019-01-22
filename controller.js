@@ -260,6 +260,7 @@ class Controller{
       showPage("spselection");
       document.getElementById("gamestart").addEventListener("click", controller.gamestart);
     }
+    window.scrollTo(0,document.body.scrollHeight);
   }
   gamestart(){
     if(spmanager.userSpecialRepoIDs.length > 0)

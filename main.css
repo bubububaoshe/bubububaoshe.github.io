@@ -33,21 +33,6 @@ html .appcontainer, .appwrapper{
   width: 100%;
 }
 @media (max-height: 500px) and (orientation: landscape) {
-  .appheader::before {
-    content: "看到此文字时上划屏幕(尽量)进入全屏";
-    color: #fafafa;
-    background: #333333;
-    font-size: 1em;
-    height: 5em;
-    width: 100%;
-    position: absolute;
-    top: -5em;
-    left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9;
-  }
   .appcontainer {
     margin-top: 5em;
     position: relative;
