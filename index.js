@@ -42,8 +42,9 @@ Array.prototype.RemovePair = function(x) {
   }
 }
 
-g_all_sockets = [];
-g_serial = 1;
+var g_all_sockets = [];
+var g_serial = 1;
+var g_is_verify = true;
 
 class PlayerMatcher {
 	constructor() {
@@ -150,6 +151,8 @@ class Game {
     this.initsp = [[], []]; // 初始时的特殊牌
     this.snapshot = null;    // 游戏状态的快照
     this.obtain_actions = [[], []];
+    this.snapshots = [ null, null ];
+    this.turns = [ 0, 0 ];
     console.log("Game.Ctor, Player id: "+p0.player_id + ","+p1.player_id);
   }
   
@@ -161,6 +164,11 @@ class Game {
     this.players[1].state = "setup";
     this.players[0].emit('Match_GameSetupDefensive');
     this.players[1].emit('Match_GameSetupOffensive');
+    // Statistics
+    this.turns[0] = 0;
+    this.turns[1] = 0;
+    this.snapshots[0] = null; // For verification
+    this.snapshots[1] = null; // For verification
   }
   
   GetPlayerIndexBySocket(socket) {
@@ -263,7 +271,7 @@ class Game {
   }
     
   // End recording action sequence && forward to the other player
-  OnObtainEnd(socket) {
+  OnObtainEnd(socket, snapshot) {
     console.log('[OnObtainEnd] player ' + socket.player_id + ' obtain end');
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
@@ -271,6 +279,10 @@ class Game {
       
       other.emit('Game_OpponentObtain', this.obtain_actions[pidx]);
       this.obtain_actions[pidx].length = 0;
+      if (g_is_verify==true && snapshot != null && snapshot != undefined) {
+        this.snapshots[pidx] = snapshot;
+        //this.VerifySnapshots();
+      }
       
       this.OnEndTurn();
       this.OnStartOfTurn();
@@ -317,6 +329,9 @@ class Game {
       var other = this.players[1 - pidx];
       other.emit('Game_OpponentGameEnd');
     }
+    if (g_is_verify) {
+      this.VerifySnapshots();
+    }
   }
   
   OnVoteRestart(socket) {
@@ -333,6 +348,15 @@ class Game {
         this.players[0] = temp;
         this.Setup();
       }
+    }
+  }
+  
+  VerifySnapshots() {
+    if (this.snapshots[0] != null && this.snapshots[1] != null) {
+      console.log('[VerifySnapshots], P0(id=' + this.players[0].player_id +
+        ') vs P1(id=' + this.players[1].player_id);
+      console.log('  Score: ' + this.snapshots[0].p0score + ' vs ' + this.snapshots[0].p1score +
+        ' | ' + this.snapshots[1].p0score + ' vs ' + this.snapshots[1].p1score);
     }
   }
 };
@@ -470,9 +494,9 @@ io.on('connection', function(socket) {
 	  if (g != null) g.OnSetUnnamedBanTrickTarget(socket, tgt_id);
 	});
 	
-	socket.on('Game_ObtainEnd', () => {
+	socket.on('Game_ObtainEnd', (snapshot) => {
 	  var g = FindGameBySocket(socket);
-	  if (g != null) g.OnObtainEnd(socket);
+	  if (g != null) g.OnObtainEnd(socket, snapshot);
 	});
 	
 	socket.on('Game_GameEnd', () => {

@@ -1116,6 +1116,8 @@ class Model {
       'pool':extractIDs(model.pool.characters),
       'common_repo':extractIDs(model.commonRepository.characters),
       'special_repo':extractIDs(model.specialRepository.characters),
+      'p0score': model.player0.score,
+      'p1score': model.player1.score,
     };
   }
 }

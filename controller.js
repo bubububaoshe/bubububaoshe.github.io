@@ -39,11 +39,7 @@ class Controller{
     model.player1.hand.removeChar(handc);
     var orig_poolc_id = this.id; // 这里有个情况：对方玩家可能将此牌变成了特殊牌，所以应该记下原牌的ID
     var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
-    
-    console.log('>>> controller.obtain ' + handc.id + ", " + orig_poolc_id);
-    console.log('    obtainVector:');
-    console.log(obtainVector);
-    
+   
     if (is_multiplayer) // WebSocket messages are in-order, so server will have entire sequence
       socket.emit('Game_ObtainStart', handc.id, orig_poolc_id);
       

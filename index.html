@@ -226,8 +226,31 @@
 <script src="view.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
+
+  // New variables for multiplayer mode
   var is_my_move = false;
   var g_my_player_id = -999;
+  var is_multiplayer = false;
+  var versus_rank = -999; // 0:先手； 1:后手
+  var remoteObtainActions = null;
+  
+  var is_verify_per_round = true;
+  
+  // Barrier for "Obtain" stuff
+  var turnActionCount = 0;
+  function IncrementActionBarrier() {
+    turnActionCount += 1;
+  }
+  function DecrementActionBarrier() {
+    if (is_multiplayer != true) return;
+    turnActionCount -= 1;
+    if (turnActionCount == 0) {
+      if (is_verify_per_round == true)
+        socket.emit('Game_ObtainEnd', model.getSnapshot());
+      else
+        socket.emit('Game_ObtainEnd');
+    }
+  }
   
   // 按键事件
   document.getElementById("refresh_lobbystatus").addEventListener("click", function() {
@@ -550,6 +573,7 @@
   
   socket.on('Game_SelfTurn', () => {
     view.unblockGame();
+    is_my_move = true;
     
     var delay = 1;
     if (messenger.mayErase() != true) delay += 2;
@@ -562,6 +586,7 @@
   
   socket.on('Game_OpponentTurn', () => {
     view.blockGame();
+    is_my_move = false;
     
     var delay = 1;
     if (messenger.mayErase() != true) delay += 2;
@@ -614,4 +639,130 @@
   socket.on('Game_OpponentGameEnd', () => {
     messenger.notifyFinal();
   });
+  
+  // AUTO TEST START
+  AUTOTEST_autostartmatch();
+  var autotest_round = 1;
+  
+  // ======================= AUTO TEST ==============================
+  async function AUTOTEST_autostartmatch() {
+    var done = false;
+    while (done == false) {
+      await sleep(1000);
+      console.log('..');
+      var x = document.getElementById('start_match');
+      if (x.style.visibility == '') {
+        x.click(); // 开始匹配
+        console.log('[AUTOTEST] started matching process');
+        while (done == false) {
+          await sleep(1000);
+          var y = document.getElementById('confirm_match');
+          if (y.style.display != 'none') {
+            y.click();
+            console.log('[AUTOTEST] confirmed match');
+            AUTOTEST_selectspecial();
+            done = true;
+          }
+        }
+      }
+    }
+  }
+  
+  async function AUTOTEST_selectspecial() {
+    console.log('[AUTOTEST] round #' + autotest_round);
+    console.log('[AUTOTEST] select special cards');
+    var x = document.getElementById('gamestart');
+    // Make some choices
+    await sleep(1000)
+    x.click();
+    if (autotest_round == 1)
+      document.getElementById('finalcontainer').click();
+    delayedFunc(function() {
+      AUTOTEST_maingame();
+    }, 5);
+  }
+  
+  function IsSelectionPanelPresent() {
+    var x = document.getElementsByClassName('tableinfocontainer')[0];
+    if (x.style.visibility == "visible") return true;
+    else return false;
+  }
+  
+  function IsInfoBannerPresent() {
+    var x = document.getElementById('infobanner');
+    if (x.style.visibility == "visible") return true;
+    else return false;
+  }
+  
+  function IsFinalNoticePresent() {
+    if (document.getElementById('finalcontainer').style.visibility == "visible")
+      return true;
+    else return false;
+  }
+  
+  async function AUTOTEST_maingame() {
+    while (true) {
+      
+      if (is_my_move != true) {
+        await sleep(1000);
+        continue;
+      } else if (IsInfoBannerPresent() == true) {
+        document.getElementById('infobanner').click();
+        await sleep(1000);
+        continue;
+      } else if (IsSelectionPanelPresent() == true) {
+        var s = document.getElementsByClassName('tableinfocontainer')[0];
+        var cands = s.children[1].children;
+        cands[0].click();
+        
+        await sleep(1000);
+        continue;
+      } else if (IsFinalNoticePresent() == true) {
+        var d = 20;
+        autotest_round += 1;
+        await sleep(20000 + versus_rank*1000);
+        document.getElementById('finalcontainer').click();
+        await sleep(5678 + versus_rank * 1234);
+        document.getElementById('gamestart').click();
+        await sleep(2000 + versus_rank * 2311);
+      } else {
+        
+        // If game ended then break
+        
+        var mychars = model.player1.hand.characters;
+        var handc = null, poolc = null;
+        var activated = false;
+        for (var i=0; i<mychars.length; i++) {
+          model.activate(mychars[i]);
+          await sleep(700);
+          var p = model.pool.characters;
+          for (var j=0; j<p.length; j++) {
+            if (p[j].card.card.classList.contains('glow')) {
+              poolc = p[j];
+              handc = mychars[i];
+              activated = true;
+              
+              await sleep(400);
+              poolc.card.card.click();
+              break;
+            }
+          }
+          
+          if (activated == true) break;
+          else { // 可能是只有一张牌且无法打出的情况，点击之
+            model.player1.hand.characters[0].card.card.click();
+            await sleep(1000);
+          }
+        }
+        
+        // do we need to select target ?
+        
+        
+        await sleep(1000);
+      }
+        
+      // obtain
+    }
+  }
+  
 </script>

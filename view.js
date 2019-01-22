@@ -701,21 +701,6 @@ class View {
 
 var sound, combos, model, controller, spmanager, messenger, view, oppoinfo, playerinfo, obtainVector;
 var AI_LEVEL, COMBO_VOICE, SP_CARDS;
-var is_multiplayer = false;
-var versus_rank = -999; // 0:先手； 1:后手
-var remoteObtainActions = null;
-var turnActionCount = 0; // 该回合内的动作计数。只有从1降到0时才送出“ObtainEnd”
-
-function IncrementActionBarrier() {
-  turnActionCount += 1;
-}
-
-function DecrementActionBarrier() {
-  if (is_multiplayer != true) return;
-  turnActionCount -= 1;
-  if (turnActionCount == 0)
-    socket.emit('Game_ObtainEnd');
-}
 
 function gamesetup(multiplayer = false){
   is_multiplayer = multiplayer;
