@@ -773,7 +773,7 @@ class Model {
   overSeason(){
     //returns true:
     //if >= 6 cards of a certain season in pool and >= 3 cards of other seasons in pool+repository
-    var count = 0;;
+    var count = 0;
     var chars = this.pool.characters;
     var seasons = ["春", "夏", "秋", "冬"];
     for(var i=0; i<seasons.length; i++){
@@ -801,8 +801,9 @@ class Model {
     return false;
   }
   redeal(){
+    model.pool.view.preRedeal();
     model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
-    model.pool.clear();
+    model.pool.characters.length = 0;
     model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
     view.pool.init();
   }

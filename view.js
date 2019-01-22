@@ -349,6 +349,14 @@ class PoolDiv extends DeckDiv {
       }
     }
   }
+  preRedeal(){
+    for(var i=0; i<this.deck.getSize(); i++)
+      this.deck.characters[i].card.moveto(view.repository);
+  }
+}
+class TableDiv extends DeckDiv{
+  constructor(div, table){super(div, table);}
+
 }
 class Messenger {
   constructor(){
@@ -520,8 +528,8 @@ class View {
     this.hand0 = new Hand0Div(document.getElementById("hand0"), model.player0.hand);
     this.hand1 = new Hand1Div(document.getElementById("hand1"), model.player1.hand);
     this.pool = new PoolDiv(document.getElementById("pool"), model.pool);
-    this.table0 = new DeckDiv(document.getElementById("table0"), model.player0.table);
-    this.table1 = new DeckDiv(document.getElementById("table1"), model.player1.table);
+    this.table0 = new TableDiv(document.getElementById("table0"), model.player0.table);
+    this.table1 = new TableDiv(document.getElementById("table1"), model.player1.table);
     this.repository = new RepoDiv(document.getElementById("repository"), model.commonRepository);
     this.specials0 = new RepoDiv(document.getElementById("specials0"), model.player0.specials);
     this.specials1 = new RepoDiv(document.getElementById("specials1"), model.player1.specials);
