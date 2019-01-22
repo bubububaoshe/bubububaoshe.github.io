@@ -199,7 +199,6 @@ class Character {
     this.disabled = false;
     this.swapped = false;
     this.noswap = false;
-    this.card = new Card(this);
   }
   isSpecial() {
     return false;
@@ -429,6 +428,7 @@ class CommonRepository extends Deck {
 
       for (var i = 0; i < len; i++) {
         var char = new Character(ids[i][0], ids[i][1], ids[i][2], ids[i][3], ids[i][4]);
+        char.card = new Card(char);
         this.addChar(char);
       }
     }
@@ -439,8 +439,11 @@ class SpecialRepository extends Deck {
     super();
   }
   init(ids){
-    for(var i=0; i<ids.length; i++)
-      this.addChar(spmanager.createSpecial(ids[i]));
+    for(var i=0; i<ids.length; i++) {
+      var char = spmanager.createSpecial(ids[i]);
+      char.card = new Card(char);
+      this.addChar(char);
+    }
   }
 }
 class TabledCombo{

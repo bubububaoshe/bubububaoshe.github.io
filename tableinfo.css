@@ -363,7 +363,7 @@
 .button{
   font-size: calc(var(--main-height)*0.05);
   background-color: var(--text-shadow-color);
-  color: var(--page-background-color);
+  color: var(--text-color);
   cursor: hand;
 }
 .button:hover, .button:active{

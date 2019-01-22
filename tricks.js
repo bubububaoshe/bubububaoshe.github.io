@@ -315,6 +315,7 @@ class UnnamedBanTrick extends Trick{
   performTrick(char){
     if(char != null){
       console.log(this.owner.name + " 禁用 " + char.name);
+      char.disabled = true;
       char.owner.recalculate(true);
     }
     else

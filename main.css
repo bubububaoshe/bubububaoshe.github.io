@@ -1,12 +1,12 @@
 :root {
-  --page-background-color: #EBE6DF;
-  --page-background-image: url("img/background.jpg");
+  --page-background: #9a8e82;
+  --page-background2: #94897e;
   --gamezone-background: rgba(114,90,64,0.7);
   --board-background: rgba(114,90,64,0.6);
   --banner-background: rgba(42, 25, 10,0.5);
   --banner-background4: rgba(42, 25, 10,0.9375);
   --final-background: #594733;
-  --text-color: #7a614f;
+  --text-color: #ccb08d;
   --text-hl-color:#f9ebae;
   --text-glow-color: #eadeaa;
   --text-shadow-color: #281B11;
@@ -22,8 +22,9 @@
   */
 }
 body {
-  background-color: var(--page-background-color);
-  background-image: var(--page-background-image);
+  background: url("img/background.jpg"),
+    repeating-linear-gradient(to top left, var(--page-background), var(--page-background) 5px, var(--page-background2) 5px, var(--page-background2) 10px),
+    var(--page-background);
   background-size: cover;
   margin: 0;
   font-family: Helvetica,'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
