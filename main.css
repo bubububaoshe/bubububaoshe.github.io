@@ -21,18 +21,39 @@
   --main-height
   */
 }
-body {
-  background: url("img/background.jpg"),
-    repeating-linear-gradient(to top left, var(--page-background), var(--page-background) 5px, var(--page-background2) 5px, var(--page-background2) 10px),
-    var(--page-background);
-  background-size: cover;
+
+html,body {
+  box-sizing: border-box;
   margin: 0;
-  font-family: Helvetica,'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
-  height: 100%;
-  text-align: center;
-  overflow: hidden;
+  padding: 0;
 }
-#rootcontainer.noselect {
+*, *:before, *:after { box-sizing: inherit; }
+html .appcontainer, .appwrapper{
+  height: 100%;
+  width: 100%;
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .appheader::before {
+    content: "看到此文字时上划屏幕(尽量)进入全屏";
+    color: #fafafa;
+    background: #333333;
+    font-size: 1em;
+    height: 5em;
+    width: 100%;
+    position: absolute;
+    top: -5em;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9;
+  }
+  .appcontainer {
+    margin-top: 5em;
+    position: relative;
+  }
+}
+#appcontainer.noselect {
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
      -khtml-user-select: none; /* Konqueror HTML */
@@ -41,8 +62,25 @@ body {
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }
+.appwrapper{
+  background: url("img/background.jpg"),
+    repeating-linear-gradient(to top left, var(--page-background), var(--page-background) 5px, var(--page-background2) 5px, var(--page-background2) 10px),
+    var(--page-background);
+  background-size: cover;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  font-family: Helvetica,'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
+  min-height: 100%;
+  text-align: center;
+}
 #main {
   position: fixed;
+  top: 0;
+  bottom: 0;
+  left:0;
+  right: 0;
 }
 #scoreboard, #specialboard, #gamezonecontainer {
   position: relative;

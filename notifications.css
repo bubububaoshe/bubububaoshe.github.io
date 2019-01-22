@@ -143,25 +143,26 @@
   top: 15%;
   height: 13%;
 }
+#finalcontainer #reconfig, #finalcontainer .badge, #finalcontainer .badge>div, #finalcontainer #restart{
+  width: calc(var(--main-height)*0.4);
+  height: calc(var(--main-height)*0.4);
+}
+#finalcontainer #reconfig, #finalcontainer .badge, #finalcontainer #restart{
+  left: calc(50% - var(--main-height)*0.2);
+}
+#finalcontainer #reconfig, #finalcontainer #restart{
+  border: calc(var(--main-height)*0.02) solid var(--final-background);
+}
 #finalcontainer #reconfig{
     border-radius: 0 0 100% 100%;
-    width: calc(var(--main-height)*0.35);
-    height: calc(var(--main-height)*0.11);
-    left: calc(50% - var(--main-height)*0.195);
+    height: calc(var(--main-height)*0.15);
     top: 0;
     background-color: var(--banner-background4);
-    border: calc(var(--main-height)*0.02) solid var(--final-background);
-    color: var(--text-color);
 }
-#finalcontainer .badge{
-  width: calc(var(--main-height)*0.39);
-  height: calc(var(--main-height)*0.39);
-  left: calc(50% - var(--main-height)*0.195);
+#finalcontainer .badge, #finalcontainer #restart{
   top: 28%;
 }
 #finalcontainer .badge>div{
-  width: calc(var(--main-height)*0.35);
-  height:  calc(var(--main-height)*0.35);
   background-color: var(--banner-background);
   border: calc(var(--main-height)*0.02) solid rgba(0, 0, 0, 0.05);
 }
@@ -178,11 +179,6 @@
   -webkit-transform: rotate(45deg);
 }
 #finalcontainer #restart{
-  width: calc(var(--main-height)*0.35);
-  height: calc(var(--main-height)*0.35);
-  left: calc(50% - var(--main-height)*0.195);
-  top: 28%;
-  border: calc(var(--main-height)*0.02) solid var(--final-background);
   border-radius: 50%;
 }
 #finalcontainer .bannertext{
@@ -194,40 +190,6 @@
     -webkit-animation: finalneo 2s infinite linear;
 }
 
-/*
-#finalcontainer .nextaction{
-  width: calc(var(--main-height)*0.8);
-  height: calc(var(--main-height)*0.2);
-  top: 5%;
-  left: calc(60% - var(--main-height)*0.4);
-}
-.nextaction>div{
-  float: left;
-  height: 100%;
-  width: 50%;
-  background-color: var(--banner-background);
-  color: var(--text-hl-color);
-  border-radius: 20%;
-}
-.nextaction>div:first-child{
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 80%;
-}
-.nextaction>div>div{
-  width: 80%;
-}
-.nextaction>div:first-child>div{
-  text-align: right;
-}
-.nextaction>div:last-child{
-  text-align: left;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 80%;
-}
-.nextaction>div:last-child>div{
-  text-align: left;
-}
-*/
 @keyframes finalneo{
   from {text-shadow: 0 0 calc(var(--card-width)*0.05) var(--text-glow-color);}
   50% {text-shadow: 0 0 calc(var(--card-width)*0.15) var(--text-glow-color);}

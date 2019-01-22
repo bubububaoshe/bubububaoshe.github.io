@@ -79,7 +79,7 @@
 }
 .combocard{
   height: calc(var(--card-height)*0.6);
-  width: calc(var(--card-width)*6);
+  width: calc(var(--card-width)*7);
   margin-bottom: 1%;
   background-image : linear-gradient(to left,
                       rgba(58,46,35,0) 8%,
@@ -93,14 +93,14 @@
 }
 .combocard>div{
   float: left;
-  height: calc(var(--card-height)*0.5);
+  height: 100%;
   padding: calc(var(--card-height)*0.05) 0;
 }
 .combocard>div:first-child{
   width: 37%;
 }
 .combocard>div:last-child{
-  width: 60%;
+  width: 63%;
   text-align: left;
   padding-left: 3%;
 }
@@ -303,7 +303,7 @@
   width: 17%;
   height: 100%;
   float: left;
-  margin-left: -1px;
+  //margin-left: -1px;
 }
 .selectionarea>div{
   overflow: auto;
