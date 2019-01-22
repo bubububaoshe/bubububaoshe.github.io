@@ -1,4 +1,4 @@
-config cookie
+destroy: remove controllers
 
 当前进度：
 未完成：特殊牌选择/存储

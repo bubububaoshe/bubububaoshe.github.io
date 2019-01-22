@@ -272,19 +272,13 @@ class DeckDiv {
     this.container.textContent = "";
   }
 }
-class RepoDiv extends DeckDiv{
-  constructor(div, repo) {
-    super(div, repo);
-  }
+class SpecialsDiv extends DeckDiv{
+  constructor(div, specials) {super(div, specials);}
   init(){
-    var chars = this.deck.characters;
-    for(var i=0; i<chars.length; i++){
-      var card = new Card(chars[i]);
-      chars[i].card = card;
-      this.container.appendChild(card.container);
+    super.init();
+    for(var i=0; i<this.deck.getSize(); i++)
       if(this == view.specials1)
-        card.addController(controller.checkPlayerSpecials);
-    }
+        this.deck.characters[i].card.addController(controller.checkPlayerSpecials);
   }
   deleteSpecial(idx){
     this.container.removeChild(this.container.children[idx]);
@@ -530,9 +524,9 @@ class View {
     this.pool = new PoolDiv(document.getElementById("pool"), model.pool);
     this.table0 = new TableDiv(document.getElementById("table0"), model.player0.table);
     this.table1 = new TableDiv(document.getElementById("table1"), model.player1.table);
-    this.repository = new RepoDiv(document.getElementById("repository"), model.commonRepository);
-    this.specials0 = new RepoDiv(document.getElementById("specials0"), model.player0.specials);
-    this.specials1 = new RepoDiv(document.getElementById("specials1"), model.player1.specials);
+    this.repository = new DeckDiv(document.getElementById("repository"), model.commonRepository);
+    this.specials0 = new SpecialsDiv(document.getElementById("specials0"), model.player0.specials);
+    this.specials1 = new SpecialsDiv(document.getElementById("specials1"), model.player1.specials);
     this.setup();
   }
   init(){

@@ -136,11 +136,28 @@
 #finalcontainer>div, #finalcontainer .badge>div{
   position: absolute;
 }
+#finalcontainer .string{
+  width: 0;
+  border-right: calc(var(--main-height)*0.02) dotted var(--final-background);
+  left: calc(50% - calc(var(--main-height)*0.01));
+  top: 15%;
+  height: 13%;
+}
+#finalcontainer #reconfig{
+    border-radius: 0 0 100% 100%;
+    width: calc(var(--main-height)*0.35);
+    height: calc(var(--main-height)*0.11);
+    left: calc(50% - var(--main-height)*0.195);
+    top: 0;
+    background-color: var(--banner-background4);
+    border: calc(var(--main-height)*0.02) solid var(--final-background);
+    color: var(--text-color);
+}
 #finalcontainer .badge{
   width: calc(var(--main-height)*0.39);
   height: calc(var(--main-height)*0.39);
-  left: calc(60% - var(--main-height)*0.195);
-  top: 38%;
+  left: calc(50% - var(--main-height)*0.195);
+  top: 28%;
 }
 #finalcontainer .badge>div{
   width: calc(var(--main-height)*0.35);
@@ -160,11 +177,11 @@
   transform: rotate(45deg);
   -webkit-transform: rotate(45deg);
 }
-#finalcontainer>.centeredtext{
+#finalcontainer #restart{
   width: calc(var(--main-height)*0.35);
   height: calc(var(--main-height)*0.35);
-  left: calc(60% - var(--main-height)*0.195);
-  top: 38%;
+  left: calc(50% - var(--main-height)*0.195);
+  top: 28%;
   border: calc(var(--main-height)*0.02) solid var(--final-background);
   border-radius: 50%;
 }
@@ -176,6 +193,8 @@
     animation: finalneo 2s infinite linear;
     -webkit-animation: finalneo 2s infinite linear;
 }
+
+/*
 #finalcontainer .nextaction{
   width: calc(var(--main-height)*0.8);
   height: calc(var(--main-height)*0.2);
@@ -208,6 +227,7 @@
 .nextaction>div:last-child>div{
   text-align: left;
 }
+*/
 @keyframes finalneo{
   from {text-shadow: 0 0 calc(var(--card-width)*0.05) var(--text-glow-color);}
   50% {text-shadow: 0 0 calc(var(--card-width)*0.15) var(--text-glow-color);}
@@ -217,13 +237,6 @@
   from {text-shadow: 0 0 calc(var(--card-width)*0.0) var(--text-glow-color);}
   50% {text-shadow: 0 0 calc(var(--card-width)*0.15) var(--text-glow-color)2;}
   to {text-shadow: 0 0 calc(var(--card-width)*0.0) var(--text-glow-color);}
-}
-.string{
-  height: 38%;
-  width: 0;
-  border-right: calc(var(--main-height)*0.02) dotted var(--final-background);
-  left: calc(60% - calc(var(--main-height)*0.01));
-  top: 0;
 }
 
 #configurator {

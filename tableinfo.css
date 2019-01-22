@@ -367,6 +367,5 @@
   cursor: hand;
 }
 .button:hover, .button:active{
-  color: white;
-  text-shadow: 0 0 calc(var(--main-height)*0.01) white;
+  font-weight: bold;
 }
