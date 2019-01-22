@@ -134,6 +134,8 @@ class Sound{
     var onetimeFunc=function(){
         nextFunc.call();
         sound.audio.removeEventListener("ended", onetimeFunc);
+        if (ShouldSyncOnSound())
+          DecrementActionBarrier();
     };
     this.audio.addEventListener("ended", onetimeFunc);
     this.audio.addEventListener("error", onetimeFunc);
@@ -446,18 +448,42 @@ class Messenger {
       }
       sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
     }
-    else
+    else {
       controller.postObtain(1);
+    }
   }
   notifyOppoCombo(preScore, comboCount, combos){
     if(comboCount > 0){
       var combo = combos[--comboCount];
       var inc = combo.getFullScore();
       messenger.animeScoreInc(0, preScore, inc);
-      messenger.note("对方完成组合\n"+combo.getDesc());
-      delayedFunc(function(){
-        messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
-      });
+      
+      // changed in multiplayer
+      if ((is_multiplayer == false) || (is_multiplayer == true && combo_notify_method == 2)) {
+        messenger.note("对方完成组合\n"+combo.getDesc());
+        oppo_combo_notifications += 1;
+        delayedFunc(function(){
+          messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
+        });
+      } else {
+        // copy notifyPlayerCombo
+        var chars = combo.characters;
+        var banner = document.getElementById("infobanner");
+        var posters = banner.querySelector(".bannercards");
+        messenger.setBannerHeadline(["对方完成组合", combo.getName(), "，获得", inc, "分"]);
+        for(var i=0; i<chars.length; i++)
+          posters.appendChild(messenger.createBannerPoster(chars[i]));
+        showOpacity(banner, true);
+        var nextFunc = function(){
+          banner.style.opacity = 0;
+          delayedFunc(function(){
+            banner.style.visibility = "hidden";
+            posters.textContent = "";
+            messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
+          },1);
+        }
+        sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
+      }
     }
   }
   notifyFinal(){
@@ -656,6 +682,10 @@ class View {
     }
     else {
       obtainVector.getHandChar().card.removeController(controller.activate);
+      // 与sound.combovoice的结束事件配对
+      if (ShouldSyncOnSound()) {
+        for (var i=0; i<comboCount; i++) IncrementActionBarrier();
+      }
       messenger.notifyPlayerCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
     }
   }

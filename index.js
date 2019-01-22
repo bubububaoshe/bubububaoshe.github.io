@@ -315,6 +315,8 @@ class Game {
   
   OnRedeal(socket, pool_ids, repo_ids) {
     console.log('[OnRedeal] player ' + socket.player_id + ' redeals ');
+    console.log('pool_ids:'); console.log(pool_ids);
+    console.log('repo_ids:'); console.log(repo_ids);
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
       var other = this.players[1 - pidx];

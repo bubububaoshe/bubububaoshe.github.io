@@ -234,7 +234,15 @@
   var versus_rank = -999; // 0:先手； 1:后手
   var remoteObtainActions = null;
   
-  var is_verify_per_round = true;
+  // Test
+  var is_verify_per_round = false;
+  var combo_notify_method = 1; // 1: 双方都显示全屏大通知
+                               // 2: 发起方显示大通知，接收方显示小通知
+  var is_sync_on_sound = true; // 仅对2有效
+                               // 我觉得 因为postObtain中有个发牌动作 而postObtain前放音频 所以需要sync
+  function ShouldSyncOnSound() {
+    return (combo_notify_method == 2 && is_sync_on_sound == true);
+  }
   
   // Barrier for "Obtain" stuff
   var turnActionCount = 0;
@@ -641,8 +649,9 @@
   });
   
   // AUTO TEST START
-  AUTOTEST_autostartmatch();
+  //AUTOTEST_autostartmatch();
   var autotest_round = 1;
+  var oppo_combo_notifications = 0;
   
   // ======================= AUTO TEST ==============================
   async function AUTOTEST_autostartmatch() {
@@ -701,9 +710,9 @@
   }
   
   async function AUTOTEST_maingame() {
+    var state = "in_game";
     while (true) {
-      
-      if (is_my_move != true) {
+      if (is_my_move != true && (IsFinalNoticePresent() == false)) {
         await sleep(1000);
         continue;
       } else if (IsInfoBannerPresent() == true) {
@@ -719,13 +728,33 @@
         continue;
       } else if (IsFinalNoticePresent() == true) {
         var d = 20;
+        
         autotest_round += 1;
-        await sleep(20000 + versus_rank*1000);
+        console.log('[AUTOTEST] 第' + autotest_round + '局');
+        while (IsInfoBannerPresent() == true) {
+          await sleep(1000);
+        }
+        await sleep(9999);
+        console.log('[AUTOTEST] Clicked final container');
         document.getElementById('finalcontainer').click();
-        await sleep(5678 + versus_rank * 1234);
+        document.getElementById('finalcontainer').visibility = null;
+        while (document.getElementById('spselection').style.opacity == 0) {
+          await sleep(1000);
+        }
+        console.log('[AUTOTEST] Clicked game start');
         document.getElementById('gamestart').click();
-        await sleep(2000 + versus_rank * 2311);
+        await sleep(5000);
+        
       } else {
+        
+        // 不能在对方的动画还没显示完的时候就点牌，不然会导致数据破损
+        // 除非允许一方的点击能够打断另一方正在播放的提示信息
+        if (oppo_combo_notifications > 0) {
+          console.log('[AUTOTEST] 等对方的动画播完=' + oppo_combo_notifications);
+          oppo_combo_notifications -= 1;
+          await sleep(500);
+          continue;
+        }
         
         // If game ended then break
         
@@ -743,16 +772,22 @@
               activated = true;
               
               await sleep(400);
+              model.activate(mychars[i]); // Deactivate
+              await sleep(400);
+              mychars[i].card.card.click();
+              await sleep(400);
               poolc.card.card.click();
               break;
             }
           }
           
           if (activated == true) break;
-          else { // 可能是只有一张牌且无法打出的情况，点击之
+        }
+        
+        if (activated == false) { // 可能是只有一张牌且无法打出的情况，点击之
+          if (model.player1.hand.characters[0].card.card != undefined)
             model.player1.hand.characters[0].card.card.click();
-            await sleep(1000);
-          }
+          await sleep(1000);
         }
         
         // do we need to select target ?

@@ -72,8 +72,6 @@ class ObtainVector{
     // show unfinished selector for tricks of <type>
     // return true if selector is invoked, false otherwise.
     var so = this.getTrickSubjectObjectArrays(type);
-    console.log(">>> CopyTrick(" + type + "), SO Array:");
-    console.log(so);
     var subjects = so[0], objects = so[1];
     for(var i=0; i<subjects.length; i++){
       var trick = subjects[i].getTrick(type);

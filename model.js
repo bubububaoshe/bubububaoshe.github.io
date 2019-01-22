@@ -775,9 +775,9 @@ class Model {
       var TEST = true;
       view.init(); // TESTING
       if (TEST) {
-        model.poolStart(['gjhg2', 'ywy2', "bsd1", "qysnp1", "ca2", "qy1", "zrl1"]);
+        model.poolStart(['gjhg2', 'ywy2', "bsd1", "qysnp1", "ca2", "tyc1", "zrl1"]);
         model.player1.start(["hy1", "ly1", "oysg1", "fl1", "al1", "hllp1", "xl1", "ar2"]);
-        model.player0.start(["sy2", "pl1", "qc1",  "sx2", "gjfj1", "blts1", "fqx1"]);
+        model.player0.start(["sy2", "qy1", "qc1",  "sx2", "gjfj1", "blts1", "fqx1"]);
       }
       else {
         model.poolStart();
@@ -928,7 +928,9 @@ class Model {
     } else {
       model.pool.clear();
       for (var i=0; i<pool_ids.length; i++) {
-        model.pool.addChar(model.commonRepository.removeCharByID(pool_ids[i]));
+        var c = model.commonRepository.removeCharByID(pool_ids[i]);
+        if (c != false) // 多人模式下有可能因为时序略有不一致导致此牌已经被对手打出了，所以要加这个..这个解法不太优雅，更好的方法应该是纳入队列中
+          model.pool.addChar(c);
       }
     }
     view.pool.init();
