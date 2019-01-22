@@ -364,7 +364,7 @@
   font-size: calc(var(--main-height)*0.05);
   background-color: var(--text-shadow-color);
   color: var(--text-color);
-  cursor: hand;
+  cursor: pointer;
 }
 .button:hover, .button:active{
   font-weight: bold;
