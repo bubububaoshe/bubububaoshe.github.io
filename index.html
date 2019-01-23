@@ -57,6 +57,7 @@
 			<div id="confirm_cancel_buttons" style="width:100%; margin-bottom: 0.5vw; margin-top: 0.5vw"> 
 			<div id="confirm_match" style="background-color:#66CC66;display:none">确认配对</div>
 			<div id="cancel_match" style="background-color:#CC6666;display:none">放弃配对</div>
+			<div style="background-color:#6666CC;" onclick='AUTOTEST_autostartmatch();'>T E S T</div>
 		</div>
 		<hr/>
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
@@ -253,6 +254,8 @@
     if (is_multiplayer != true) return;
     turnActionCount -= 1;
     if (turnActionCount == 0) {
+      console.log('<<< 行动完了');
+      console.log('MyCardsCount: ' + model.getMyCardsCount());
       if (is_verify_per_round == true)
         socket.emit('Game_ObtainEnd', model.getSnapshot());
       else
@@ -564,6 +567,7 @@
     console.log('[先手开局] other_sp='+other_sp);
     messenger.hideFinalNotice(); // If from restart
     OtherPlayerSpecialCardFixup(other_sp);
+    console.log('MyCardsCount: ' + model.getMyCardsCount());
   });
   
   socket.on('Match_GameInitDefensive', (other_sp, snapshot) => {
@@ -577,10 +581,16 @@
     
     controller.gamestartDefensive(snapshot);
     OtherPlayerSpecialCardFixup(other_sp);
+    console.log('MyCardsCount: ' + model.getMyCardsCount());
   });
   
   socket.on('Game_SelfTurn', () => {
-    view.unblockGame();
+    if (remoteObtainActions == null || remoteObtainActions.length <= 0) { // for safety ?
+      console.log('<<< 对方行动回放完了_');
+      console.log('MyCardsCount: ' + model.getMyCardsCount());
+      view.unblockGame();
+    }
+    
     is_my_move = true;
     
     var delay = 1;
@@ -589,37 +599,56 @@
       messenger.note('该你出牌了');
     }, delay);
     
-    console.log('我方行动');
+    console.log('>>> 我方行动');
+    console.log('MyCardsCount: ' + model.getMyCardsCount());
   });
   
+  // barrier: 这个要等待对方的动作都播放完成
   socket.on('Game_OpponentTurn', () => {
     view.blockGame();
     is_my_move = false;
     
-    var delay = 1;
-    if (messenger.mayErase() != true) delay += 2;
+    var delay = 0;
+    if (messenger.mayErase() != true) delay += 1;
     delayedFunc(function() {
       messenger.note('对方出牌');
     }, delay);
     
-    console.log('对方行动');
+    console.log('>>> 对方行动');
+    console.log('MyCardsCount: ' + model.getMyCardsCount());
   });
   
   // Action sequence from last turn
   // returns null if there are no more entries in the action buffer 
   function GetNextObtainAction() {
-    if (remoteObtainActions.length < 1) return null;
+    var ret = null;
+    if (remoteObtainActions.length < 1) ret = null;
     var a = remoteObtainActions[0];
     remoteObtainActions.splice(0, 1);
+    var titel = '[replay] [' + remoteObtainActions.length + ' left] ';
     if (a[0] == "controller.obtain") {
-      console.log('[replay] controller.obtain ' + a[1] + ", " + a[2]);
-      return [a[1], a[2]];
+      console.log(titel + 'controller.obtain ' + a[1] + ", " + a[2]);
+      ret = [a[1], a[2]];
     } else if (a[0] == "controller.selectCopy" ||
                a[0] == "controller.selectSwap" ||
                a[0] == "controller.selectBan") {
-      console.log('[replay] ' + a[0] + ' ' + a[1]);
-      return a[1];
+      console.log(titel + a[0] + ' ' + a[1]);
+      ret = a[1];
+    } else if (a[0] == "obtainVector.trickSelector") {
+      console.log(titel + " null ");
+      ret = a[1];
+    } else if (a[0] == "controller.postObtain") {
+      var dealt_id = a[1];
+      console.log("[Opponent's postObtain] " + dealt_id);
+      model.dealOne(model.player0, dealt_id);
+      ret = '';
     }
+    if (remoteObtainActions.length <= 0 && is_my_move) {
+      console.log('<<< 对方行动完了');
+      console.log('MyCardsCount: ' + model.getMyCardsCount());
+      view.unblockGame(); // 对方的动画未播放完亦即还没最后deal之前我方不能行动
+    }
+    return ret;
   }
   
   // Will replay a whole sequce of actions
@@ -627,12 +656,11 @@
     remoteObtainActions = obtain_actions;
     var obtain_ids = GetNextObtainAction(obtain_actions);
     controller.opponentObtain(obtain_ids[0], obtain_ids[1]);
+    // 最后一个Deal
+    GetNextObtainAction();
   });
   
-  socket.on('Game_OpponentDealOne', (dealt_id) => {
-    console.log('OpponentDealOne ' + dealt_id);
-    model.dealOne(model.player0, dealt_id);
-  });
+  // DealOne 原本在这，现在移到上面的OpponentObtain中去了。
   
   socket.on('Game_OpponentDiscardOne', (discarded_id, added_id) => {
     console.log('OpponentDiscardOne ' + discarded_id + ", " + added_id);
@@ -709,14 +737,23 @@
     else return false;
   }
   
+  function IsGameBlocked() {
+    return (document.getElementById("blocker").style.visibility == "visible") ?
+      true : false;
+  }
+  
   async function AUTOTEST_maingame() {
     var state = "in_game";
     while (true) {
-      if (is_my_move != true && (IsFinalNoticePresent() == false)) {
+      if (is_my_move != true && 
+        (IsFinalNoticePresent() == false)) {
         await sleep(1000);
         continue;
       } else if (IsInfoBannerPresent() == true) {
         document.getElementById('infobanner').click();
+        await sleep(1000);
+        continue;
+      } else if (IsGameBlocked() == true && (IsFinalNoticePresent() == false)) {
         await sleep(1000);
         continue;
       } else if (IsSelectionPanelPresent() == true) {
@@ -756,6 +793,7 @@
           continue;
         }
         
+        await sleep(2333);
         // If game ended then break
         
         var mychars = model.player1.hand.characters;
@@ -785,7 +823,7 @@
         }
         
         if (activated == false) { // 可能是只有一张牌且无法打出的情况，点击之
-          if (model.player1.hand.characters[0].card.card != undefined)
+          if (model.player1.hand.characters[0] != undefined)
             model.player1.hand.characters[0].card.card.click();
           await sleep(1000);
         }

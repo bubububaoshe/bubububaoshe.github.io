@@ -270,6 +270,15 @@ class Game {
     }
   }
     
+  OnTrickWithoutTarget(socket, trick_type) {
+    console.log('[OnTrickWithoutTarget] player ' + socket.player_id + ' had a trick ' +
+      'without any targets selected');
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      this.obtain_actions[pidx].push(['obtainVector.trickSelector', null]);
+    }
+  }
+  
   // End recording action sequence && forward to the other player
   OnObtainEnd(socket, snapshot) {
     console.log('[OnObtainEnd] player ' + socket.player_id + ' obtain end');
@@ -299,7 +308,7 @@ class Game {
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
       var other = this.players[1 - pidx];
-      other.emit('Game_OpponentDealOne', dealt_id);
+      this.obtain_actions[pidx].push(['controller.postObtain', dealt_id]);
     }
   }
   
@@ -494,6 +503,12 @@ io.on('connection', function(socket) {
 	socket.on('Game_SetUnnamedBanTrickTarget', (tgt_id) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnSetUnnamedBanTrickTarget(socket, tgt_id);
+	});
+	
+	// From: obtainVector.trickSelector(type)
+	socket.on('Game_TrickWithoutTarget', (trick_type) => {
+    var g = FindGameBySocket(socket);
+    if (g != null) g.OnTrickWithoutTarget(socket, trick_type);
 	});
 	
 	socket.on('Game_ObtainEnd', (snapshot) => {

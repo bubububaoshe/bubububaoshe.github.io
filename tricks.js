@@ -21,6 +21,9 @@ class ObtainVector{
   getNextTrick(type){
     var so = this.getTrickSubjectObjectArrays(type);
     var subjects = so[0], objects = so[1];
+    //console.log('[getNextTrick] ' + type);
+    //console.log('subjects:'); console.log(subjects);
+    //console.log('objects: '); console.log(objects);
     for(var i=0; i<subjects.length; i++){
       var trick = subjects[i].getTrick(type);
       if(trick != null && objects[i] == null){console.log("[计划释放技能]"+subjects[i].name+":"+trick.constructor.name);
@@ -78,8 +81,14 @@ class ObtainVector{
       if(trick != null && objects[i] == null)
         if(trick.selectTarget())
           return true;
-        else
+        else {
+          // multiplayer
+          // 每个不需目标的技能，都记一笔“没有目标”的记录
+          if (is_multiplayer) {
+            socket.emit('Game_TrickWithoutTarget', type);
+          }
           trick.performTrick(null);
+        }
     }
     return false;
   }

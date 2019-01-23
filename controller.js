@@ -33,15 +33,18 @@ class Controller{
     model.activate(char);
   }
   obtain() {
-    IncrementActionBarrier();
+    IncrementActionBarrier(); // 这是用于postObtain里的dealOne的
+    IncrementActionBarrier(); // 这是用于obtain()本体的
     var handc = model.activeChar;
     model.activate(handc);
     model.player1.hand.removeChar(handc);
     var orig_poolc_id = this.id; // 这里有个情况：对方玩家可能将此牌变成了特殊牌，所以应该记下原牌的ID
     var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
    
-    if (is_multiplayer) // WebSocket messages are in-order, so server will have entire sequence
+    if (is_multiplayer) { // WebSocket messages are in-order, so server will have entire sequence
       socket.emit('Game_ObtainStart', handc.id, orig_poolc_id);
+      console.log('obtain ' + handc.id + ' & ' + orig_poolc_id);
+    }
       
     obtainVector.init(model.player1, handc, poolc);
     controller.handleCopies();
@@ -52,12 +55,15 @@ class Controller{
     DecrementActionBarrier();
   }
   opponentObtain(remote_handcid = null, remote_poolcid = null){ // Changed for multiplayer
+    console.log('MyCardsCountr: ' + model.getMyCardsCount());
     console.log('[opponentObtain] ' + remote_handcid + ', ' + remote_poolcid);
     while(model.overSeason())
       model.redeal();
+    console.log('MyCardsCounte: ' + model.getMyCardsCount());
     var pick = (remote_handcid == null) ? model.aiSelectObtain() : 
       [model.player0.hand.getChar(remote_handcid),
        model.pool.getChar(remote_poolcid)]; // getSpecial 在接下来再调用
+    console.log('MyCardsCounst: ' + model.getMyCardsCount());
     if(pick == null){
       if(model.overSize()){
         model.redeal();
@@ -70,7 +76,14 @@ class Controller{
     }
     else {
       var hc = model.player0.hand.removeChar(pick[0]);
-      var pc = model.pool.removeChar(pick[1]).getSpecial(model.player0.specials);
+      console.log('M2yCardsCount: ' + model.getMyCardsCount());
+      var pc = model.pool.removeChar(pick[1]);
+      if (pc == null) {
+        console.log("ERROR!!!!  pick[1] is NULL!!!!");
+        console.trace();
+      }
+      pc = pc.getSpecial(model.player0.specials);
+      console.log('[opponentObtain] hc='+hc+', pc='+pc);
       obtainVector.init(model.player0, hc, pc);
       controller.handleCopies();
     }
@@ -82,6 +95,7 @@ class Controller{
         
         if (is_multiplayer == true) {
           socket.emit('Game_DealOne', dealt_id);
+          DecrementActionBarrier(); // 对应obtain最开始的Increment
         } else {
           delayedFunc(function(){
             controller.opponentObtain();
@@ -252,8 +266,10 @@ class Controller{
     oppoinfo.exitSelectionPanel();
     var type = "CopyTrick";
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    if (is_multiplayer) // multiplayer
+    if (is_multiplayer) { // multiplayer
       socket.emit('Game_SetCopyTrickTarget', this.id);
+      console.log('CopyTrick ' + this.id);
+    }
     controller.handleCopies(); // May increase barrier ?
     DecrementActionBarrier(); // 与trick.selectTarget("CopyTrick")对应
   }
@@ -262,8 +278,10 @@ class Controller{
     oppoinfo.exitSelectionPanel();
     var type = "SwapTrick";
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    if (is_multiplayer)
+    if (is_multiplayer) {
       socket.emit('Game_SetSwapTrickTarget', this.id);
+      console.log('SwapTrick ' + this.id);
+    }
     controller.handleCopies();
     DecrementActionBarrier();
   }
@@ -271,8 +289,10 @@ class Controller{
     oppoinfo.exitSelectionPanel();
     var type = "UnnamedBanTrick";
     obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    if (is_multiplayer)
+    if (is_multiplayer) {
       socket.emit('Game_SetUnnamedBanTrickTarget', this.id);
+      console.log('UnnamedBanTrick ' + this.id);
+    }
     controller.handleBans();
     DecrementActionBarrier();
   }

@@ -772,7 +772,7 @@ class Model {
   }
   start(snapshot = null){
     if (snapshot == null) {
-      var TEST = true;
+      var TEST = false;
       view.init(); // TESTING
       if (TEST) {
         model.poolStart(['gjhg2', 'ywy2', "bsd1", "qysnp1", "ca2", "tyc1", "zrl1"]);
@@ -871,8 +871,10 @@ class Model {
     player.hand.toSpecial(player.hand.getSize()-1, player.specials);
     view.discard(player, char, newChar);
     
-    if (is_multiplayer) // Added for multiplayer
+    if (is_multiplayer) { // Added for multiplayer
       socket.emit('Game_DiscardOne', char.id, newChar.id);
+      console.log('discard ' + char.id + ' for ' + newChar.id);
+    }
   }
   opponentDiscard(discarded_id, added_id) { // Only in multiplayer mode
     var discarded = model.player0.hand.getChar(discarded_id);
@@ -880,9 +882,9 @@ class Model {
     model.pool.addChar(discarded);
     var added = model.commonRepository.getChar(added_id);
     model.player0.hand.addChar(added);
+    model.player0.hand.toSpecial(model.player0.hand.getSize()-1,
+      model.player0.specials); // Fixup
     model.commonRepository.removeChar(added);
-    console.log(discarded)
-    console.log(added);
     view.discard(model.player0, discarded, added);
   }
   overSize(){
@@ -975,6 +977,9 @@ class Model {
       model.pool.addChar(char);
     }
     view.dealOne(char);
+    if (is_multiplayer) {
+      console.log('dealOne ' + char.id);
+    }
     return char.id; // for multiplayer
   }
   pickLeft(player){
@@ -1084,7 +1089,7 @@ class Model {
     var player = obtainVector.player;
     var oppo = player.id==0? model.player1:model.player0;
 
-    //console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
+    console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
     var ac0 = player.addTableChar(obtainVector.playerTableChars[0]);
     var ac1 = player.addTableChar(obtainVector.playerTableChars[1]);
     obtainVector.charScoreInc = ac0[0] + ac1[0];
@@ -1121,6 +1126,15 @@ class Model {
       'p0score': model.player0.score,
       'p1score': model.player1.score,
     };
+  }
+  
+  getMyCardsCount() {
+    return model.player0.hand.characters.length +
+           model.player0.table.characters.length +
+           model.player1.hand.characters.length +
+           model.player1.table.characters.length +
+           model.pool.characters.length +
+           model.commonRepository.characters.length;
   }
 }
 
