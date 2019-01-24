@@ -27,7 +27,10 @@ html,body {
   margin: 0;
   padding: 0;
 }
-*, *:before, *:after { box-sizing: inherit; }
+*, *:before, *:after {
+  box-sizing: inherit;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
 html .appcontainer, .appwrapper{
   height: 100%;
   width: 100%;
@@ -190,6 +193,8 @@ html .appcontainer, .appwrapper{
   text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
   -webkit-text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
 }
-.faceup .card{
+
+/*test
+#hand0 .charcontainer:hover .card{
   transform: rotateY(180deg);
-}
+*/

@@ -156,7 +156,7 @@ class Card{
     cardContainer.classList.add("cardContainer", "transitall");
     this.card = document.createElement("div");
     cardContainer.appendChild(this.card);
-    this.card.id = char.id;
+    this.container.id = char.id;
     this.card.classList.add("card", "transitform");
     var front = document.createElement("div");
     this.card.appendChild(front);
@@ -166,10 +166,10 @@ class Card{
     this.card.appendChild(back);
     back.classList.add("cardback");
     this.container.appendChild(createInfobox(char));
-    this.container.addEventListener("touchstart", controller.doNothing, {passive:true});
+    //this.container.addEventListener("touchstart", controller.doNothing, {passive:true});
   }
   setChar(char){
-    this.card.id = char.id;
+    this.container.id = char.id;
     var front = this.card.querySelector(".cardfront");
     front.style.backgroundImage = char.getPortrait();
     var hvinfo = this.container.querySelector(".hoverinfobox");
@@ -178,24 +178,29 @@ class Card{
   }
   moveto(deck){
     var container = this.container;
-    container.style.transform = "none";
-    container.classList.remove("transitall");
+    if(container.parentNode == null) {
+      deck.container.appendChild(container);
+    }
+    else {
+      //console.log(this.container.id+": " + this.container.parentNode.id+"-->"+deck.container.id);
+      container.style.transform = "none";
+      container.classList.remove("transitall");
+      var rect = container.getBoundingClientRect();
+      var l = rect.left;
+      var t = rect.top;
+      deck.container.appendChild(container);
+      rect = container.getBoundingClientRect();
+      l = l - rect.left;
+      t = t - rect.top;
 
-    var rect = container.getBoundingClientRect();
-    var l = rect.left;
-    var t = rect.top;
-    deck.container.appendChild(container);
-    rect = container.getBoundingClientRect();
-    l = l - rect.left;
-    t = t - rect.top;
-
-    container.style.zIndex = 99;
-    container.style.transform = "translate(" +l+ "px," +t+ "px)";
-    container.style.webkitTransform = "translate(" +l+ "px," +t+ "px)";
-    reflow();
-    container.classList.add("transitall");
-    container.style.transform = null;
-    container.style.zIndex = null;
+      container.style.zIndex = 99;
+      container.style.transform = "translate(" +l+ "px," +t+ "px)";
+      container.style.webkitTransform = "translate(" +l+ "px," +t+ "px)";
+      reflow();
+      container.classList.add("transitall");
+      container.style.transform = null;
+      container.style.zIndex = null;
+    }
   }
   activate(){
     this.container.firstElementChild.classList.add("pop");
@@ -207,17 +212,15 @@ class Card{
   }
   match(){
     this.card.classList.add("glow");
-    this.addController(controller.obtain);
   }
   unmatch(){
     this.card.classList.remove("glow");
-    this.removeController(controller.obtain);
   }
   faceup(){
     this.container.classList.add("faceup");
   }
   facedown(){
-    this.card.classList.remove("faceup");
+    this.container.classList.remove("faceup");
   }
   isFaceup(){
     this.card.classList.contains("faceup");
@@ -226,22 +229,7 @@ class Card{
     this.container.style.transform = 'rotate(' + deg + 'deg)';
   }
   unRotate(){
-    this.container.style.transform = 'none';
-  }
-  setZ(z){
-    this.container.style.zIndex = z;
-  }
-  setLeft(l){
-    this.container.style.left = l;
-  }
-  setTop(t){
-    this.container.style.top = t;
-  }
-  addController(func) {
-    this.card.addEventListener("click", func);
-  }
-  removeController(func) {
-    this.card.removeEventListener("click", func);
+    this.container.style.transform = null;
   }
 }
 class DeckDiv {
@@ -249,44 +237,35 @@ class DeckDiv {
     this.container = div;
     this.deck = deck;
   }
-  init(){
-    var chars = this.deck.characters;
-    for(var i=0; i<chars.length; i++)
-      chars[i].card.moveto(this);
-  }
   toSpecial(char, sp){
-    char.card.setChar(sp);
-    sp.card = char.card;
     var me = this;
     delayedFunc(function(){
       sp.card.moveto(me);
     });
   }
-  reset(player){
-    var chars = this.deck.characters;
-    for(var i=0; i<chars.length; i++)
-      if(chars[i].isSpecial())
-        chars[i].card.moveto(player.specials.view);
-  }
   clear(){
     this.container.textContent = "";
   }
-}
-class SpecialsDiv extends DeckDiv{
-  constructor(div, specials) {super(div, specials);}
-  init(){
-    super.init();
-    for(var i=0; i<this.deck.getSize(); i++)
-      if(this == view.specials1)
-        this.deck.characters[i].card.addController(controller.checkPlayerSpecials);
+  addChar(char){
+    char.card.moveto(this);
+    char.card.facedown();
   }
-  deleteSpecial(idx){
-    this.container.removeChild(this.container.children[idx]);
+  addController(func, action){
+    if(action == null)
+      action = "click";
+    if(action == "touchstart")
+      this.container.addEventListener(action, func, {passive:true});
+    else
+      this.container.addEventListener(action, func);
   }
-}
-class Hand0Div extends DeckDiv{
-  constructor(div, hand){
-    super(div, hand);
+  removeController(func, action){
+    if(action == null)
+      action = "click";
+    this.container.removeEventListener(action, func);
+  }
+  deleteSpecial(char){
+    this.container.removeChild(this.container.querySelector("#" + char.id));
+    //this.container.removeChild(this.container.children[idx]);
   }
   reveal(number){
     var hiddenChars = [];
@@ -302,17 +281,6 @@ class Hand0Div extends DeckDiv{
       hiddenChars.splice(idx, 1);
     }
   }
-}
-class Hand1Div extends DeckDiv {
-  constructor(div, hand) {
-    super(div, hand);
-  }
-  init(){
-    super.init();
-    for(var i=0; i<this.deck.getSize(); i++){
-      this.deck.characters[i].card.addController(controller.activate);
-    }
-  }
   activate(oldChar, newChar) {
     if (oldChar != null) {
       var card = oldChar.card;
@@ -323,14 +291,9 @@ class Hand1Div extends DeckDiv {
       card.activate();
     }
   }
-}
-class PoolDiv extends DeckDiv {
-  constructor(div, pool) {
-    super(div, pool);
-  }
   updateMatch(oldChar, newChar) {
     //update card matchs in pool according to seasons
-    //Match: glow, clickable
+    //Match: glow
     var oldSeason = oldChar==null?null:oldChar.season;
     var newSeason = newChar==null?null:newChar.season;
     if (oldSeason != newSeason) {
@@ -343,14 +306,6 @@ class PoolDiv extends DeckDiv {
       }
     }
   }
-  preRedeal(){
-    for(var i=0; i<this.deck.getSize(); i++)
-      this.deck.characters[i].card.moveto(view.repository);
-  }
-}
-class TableDiv extends DeckDiv{
-  constructor(div, table){super(div, table);}
-
 }
 class Messenger {
   constructor(){
@@ -519,29 +474,27 @@ class Messenger {
 }
 class View {
   constructor() {
-    this.hand0 = new Hand0Div(document.getElementById("hand0"), model.player0.hand);
-    this.hand1 = new Hand1Div(document.getElementById("hand1"), model.player1.hand);
-    this.pool = new PoolDiv(document.getElementById("pool"), model.pool);
-    this.table0 = new TableDiv(document.getElementById("table0"), model.player0.table);
-    this.table1 = new TableDiv(document.getElementById("table1"), model.player1.table);
+    this.hand0 = new DeckDiv(document.getElementById("hand0"), model.player0.hand);
+    this.hand1 = new DeckDiv(document.getElementById("hand1"), model.player1.hand);
+    this.pool = new DeckDiv(document.getElementById("pool"), model.pool);
+    this.table0 = new DeckDiv(document.getElementById("table0"), model.player0.table);
+    this.table1 = new DeckDiv(document.getElementById("table1"), model.player1.table);
     this.repository = new DeckDiv(document.getElementById("repository"), model.commonRepository);
-    this.specials0 = new SpecialsDiv(document.getElementById("specials0"), model.player0.specials);
-    this.specials1 = new SpecialsDiv(document.getElementById("specials1"), model.player1.specials);
+    this.specials0 = new DeckDiv(document.getElementById("specials0"), model.player0.specials);
+    this.specials1 = new DeckDiv(document.getElementById("specials1"), model.player1.specials);
     this.setup();
   }
   init(){
-    view.specials0.init();
-    view.specials1.init();
-    view.hand0.init();
-    view.hand1.init();
-    view.pool.init();
-    view.unblockGame();
+    // add controllers
+    this.hand1.addController(controller.activate);
+    this.unblockGame();
   }
   clear(){
     view.blockGame();
     messenger.clear();
   }
   setup(){
+    this.blockGame();
     this.setSizes();
     model.commonRepository.view = this.repository;
     model.player0.hand.view = this.hand0;
@@ -552,24 +505,33 @@ class View {
     model.player1.specials.view = this.specials1;
     model.pool.view = this.pool;
     document.documentElement.style.setProperty("--transition-sec", OPERATION_DELAY + "ms");
+
+    this.specials1.addController(controller.checkPlayerSpecials);
+    this.table0.addController(controller.checkOppoInfo);
+    this.table1.addController(controller.checkPlayerInfo);
+    this.pool.addController(controller.obtain);
+
+    document.getElementById("sprepo").addEventListener("click", controller.spPick);
+    document.getElementById("sppick").addEventListener("click", controller.spUnpick);
+
+    this.hand0.addController(controller.doNothing, "touchstart");
+    this.hand1.addController(controller.doNothing, "touchstart");
+    this.pool.addController(controller.doNothing, "touchstart");
+    for(var i=0; i<7; i++)
+      document.getElementsByClassName("charinfocontainer")[i].addEventListener("touchstart", controller.doNothing, {passive: true});
+
     window.addEventListener("resize", this.setSizes);
   }
   checkMatch1(){
-    var len = this.hand1.deck.getSize();
-    var chars = this.hand1.deck.characters;
-    if(model.player1.matchable){
+    if(model.player1.matchable) {
       messenger.notifyNoMatch("hidden");
-      for (var i = 0; i < len; i++) {
-        chars[i].card.removeController(controller.discard);
-        chars[i].card.addController(controller.activate);
-      }
+      this.hand1.removeController(controller.discard);
+      this.hand1.addController(controller.activate);
     }
     else {
       messenger.notifyNoMatch("show");
-      for (var i = 0; i < len; i++) {
-        chars[i].card.removeController(controller.activate);
-        chars[i].card.addController(controller.discard);
-      }
+      this.hand1.removeController(controller.activate);
+      this.hand1.addController(controller.discard);
       sound.discard();
     }
   }
@@ -579,63 +541,20 @@ class View {
   unblockGame(){
     document.getElementById("blocker").style.visibility = null;
   }
-  discard(player, oldChar, newChar) {
-    if (player.id == 1) {
-      //hand1 --> pool: remove discard listener
-      //repo --> hand1: add discard listener
-        oldChar.card.removeController(controller.discard);
-        newChar.card.addController(controller.discard);
-    }
-    else {
-      //reset revealed cards
-      oldChar.card.facedown();
-    }
-    oldChar.card.moveto(this.pool);
-    newChar.card.moveto(player.hand.view);
-  }
   dealOne(char) {
-    char.card.moveto(view.pool);
     sound.deal();
-  }
-  swappedObtain(player, char, swapChar){
-    var oppo, playerinfo, oppoinfo;
-    if(player.id==0){
-      oppo = model.player1;
-      playerinfo = controller.checkOppoInfo;
-      oppoinfo = controller.checkPlayerInfo;
-    }
-    else {
-      oppo = model.player0;
-      playerinfo = controller.checkPlayerInfo;
-      oppoinfo = controller.checkOppoInfo;
-    }
-    if(swapChar != null){
-      swapChar.card.moveto(player.table.view);
-      swapChar.card.removeController(oppoinfo);
-      swapChar.card.addController(playerinfo);
-      char.card.moveto(oppo.table.view);
-      char.card.addController(oppoinfo);
-    }
-    else{
-      char.card.moveto(player.table.view);
-      char.card.addController(playerinfo);
-    }
   }
   obtain() {
     var player = obtainVector.player;
     var charInc = obtainVector.charScoreInc;
     var comboCount = obtainVector.comboCount;
-    view.swappedObtain(player, obtainVector.chars[0], obtainVector.swapChars[0]);
-    view.swappedObtain(player, obtainVector.chars[1], obtainVector.swapChars[1]);
     messenger.animeScoreInc(player.id, obtainVector.preScore, charInc);
     if(player.id == 0){
       messenger.notifyOppoCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
       controller.postObtain(0);
     }
-    else {
-      obtainVector.getHandChar().card.removeController(controller.activate);
+    else
       messenger.notifyPlayerCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
-    }
   }
   activate(oldChar, newChar) {
     this.hand1.activate(oldChar, newChar);
@@ -716,3 +635,4 @@ function showPage(id){
 setup();
 //test
 //controller.configure();
+//controller.gamestart();

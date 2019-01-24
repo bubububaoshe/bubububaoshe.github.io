@@ -27,16 +27,22 @@ class Controller{
     }, 2);
   }
   activate(){
-    var char = model.player1.hand.getChar(this.id);
-    model.activate(char);
+    var div = event.target.closest(".charcontainer");
+    if (div != null) {
+      var char = model.player1.hand.getChar(div.id);
+      model.activate(char);
+    }
   }
   obtain(){
-    var handc = model.activeChar;
-    model.activate(handc);
-    model.player1.hand.removeChar(handc);
-    var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
-    obtainVector.init(model.player1, handc, poolc);
-    controller.handleCopies();
+    var div = event.target.closest(".charcontainer");
+    if (div != null && div.firstElementChild.firstElementChild.classList.contains("glow")) {
+      var handc = model.activeChar;
+      model.activate(handc);
+      model.player1.hand.removeChar(handc);
+      var poolc = model.pool.removeCharByID(div.id).getSpecial(model.player1.specials);
+      obtainVector.init(model.player1, handc, poolc);
+      controller.handleCopies();
+    }
   }
   opponentObtain(){
     while(model.overSeason())
@@ -80,10 +86,13 @@ class Controller{
       }
     });
   }
-  discard(){
-    var char = model.player1.hand.getChar(this.id);
-    model.discard(model.player1, char);
-    model.checkMatch1();
+  discard(event){
+    var div = event.target.closest(".charcontainer");
+    if (div != null) {
+      var char = model.player1.hand.getChar(div.id);
+      model.discard(model.player1, char);
+      model.checkMatch1();
+    }
   }
   checkPlayerInfo(){
     if(playerinfo.visible()){
@@ -200,43 +209,55 @@ class Controller{
     messenger.exitNotifyOppoAction(controller.confirmBan);
     controller.handleBans();
   }
-  selectCopy(){
-    oppoinfo.exitSelectionPanel();
-    var type = "CopyTrick";
-    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    controller.handleCopies();
+  selectCopy(event){
+    var div = event.target.closest(".smallchar");
+    if (div != null) {
+      oppoinfo.exitSelectionPanel(controller.selectCopy);
+      var type = "CopyTrick";
+      obtainVector.setTrickTarget(type, model.player0.table.getChar(div.id));
+      controller.handleCopies();
+    }
   }
-  selectSwap(){
-    // user swaps with the opponent
-    oppoinfo.exitSelectionPanel();
-    var type = "SwapTrick";
-    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    controller.handleCopies();
+  selectSwap(event){
+    var div = event.target.closest(".smallchar");
+    if (div != null) {
+      // user swaps with the opponent
+      oppoinfo.exitSelectionPanel(controller.selectSwap);
+      var type = "SwapTrick";
+      obtainVector.setTrickTarget(type, model.player0.table.getChar(div.id));
+      controller.handleCopies();
+    }
   }
-  selectBan(){
-    oppoinfo.exitSelectionPanel();
-    var type = "UnnamedBanTrick";
-    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    controller.handleBans();
+  selectBan(event){
+    var div = event.target.closest(".smallchar");
+    if (div != null) {
+      oppoinfo.exitSelectionPanel(controller.selectBan);
+      var type = "UnnamedBanTrick";
+      obtainVector.setTrickTarget(type, model.player0.table.getChar(div.id));
+      controller.handleBans();
+    }
   }
-  doNothing(){
+  doNothing(){}
+  spPick(event){
+    var div = event.target.closest(".smallchar");
+    // opacity: if not set by js, or set by js =null, style.opacity is 0 (now matter what opacity it is in css)
+    // so if the div is not disabled, its opacity=0
+    if (div != null && div.firstElementChild.firstElementChild.style.opacity == 0) {
+      model.player1.specialIDs.push(div.id);
+      document.getElementById("sppick").appendChild(div);
+      playerinfo.updateSpecialsPick();
+      sound.activate();
+    }
   }
-  spPick(){
-    model.player1.specialIDs.push(this.id);
-    document.getElementById("sppick").appendChild(this);
-    playerinfo.updateSPPick();
-    sound.activate();
-    this.removeEventListener("click", controller.spPick);
-    this.addEventListener("click", controller.spUnpick);
-  }
-  spUnpick(){
-    var idx = model.player1.specialIDs.indexOf(this.id);
-    model.player1.specialIDs.splice(idx, 1);
-    document.getElementById("sprepo").appendChild(this);
-    playerinfo.updateSPPick();
-    sound.activate();
-    this.removeEventListener("click", controller.spUnpick);
-    this.addEventListener("click", controller.spPick);
+  spUnpick(event){
+    var div = event.target.closest(".smallchar");
+    if (div != null) {
+      var idx = model.player1.specialIDs.indexOf(div.id);
+      model.player1.specialIDs.splice(idx, 1);
+      document.getElementById("sprepo").appendChild(div);
+      playerinfo.updateSpecialsPick();
+      sound.activate();
+    }
   }
   configure(){
     var pack = getInput("packinput");

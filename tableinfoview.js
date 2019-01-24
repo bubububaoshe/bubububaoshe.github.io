@@ -26,7 +26,6 @@ class TableInfoView{
       inn.textContent = "基础分:" + char.score;
     }
     schar.appendChild(createFullInfobox(char));
-    schar.addEventListener("touchstart", controller.doNothing, {passive:true});
     if(char.isSpecial() && char.getTrick()==null)
       this.enableCard(schar, false);
     return schar;
@@ -136,6 +135,7 @@ class TableInfoView{
     this.fadeUnder("selectionpanel", false);
     container.getElementsByClassName('charinfocontainer')[0].textContent = "";
     container.getElementsByClassName('charinfocontainer')[1].textContent = "";
+    container.getElementsByClassName('charinfocontainer')[1].removeEventListener("click", controllerFunc);
   }
   showSelectionPanel(trick, msg, controllerFunc){
     // this char view is to select a target when a char trick is performed
@@ -144,10 +144,9 @@ class TableInfoView{
     var card = this.addSmallCard(char, container.getElementsByClassName('charinfocontainer')[0]);
     card.getElementsByTagName("p")[0].textContent = "从下方选择对方卡牌" + msg;
     var chartable = container.getElementsByClassName('charinfocontainer')[1];
+    chartable.addEventListener("click", controllerFunc);
     this.createCharView(chartable, trick);
     var cards = chartable.children;
-    for(var i=0; i<cards.length; i++)
-      cards[i].addEventListener("click", controllerFunc);
     //container.style.display = "block";
     showOpacity(container, true);
     this.fadeUnder("selectionpanel", true);
@@ -186,37 +185,24 @@ class TableInfoView{
     //so spmanager.userSpecialRepository includes all the special chars that user may have
     for(var i=0; i<spmanager.userSpecialRepository.getSize(); i++){
       var char = spmanager.userSpecialRepository.characters[i];
-      if(model.player1.specialIDs.includes(char.id)){
+      if(model.player1.specialIDs.includes(char.id))
         var chardiv = this.addSmallCard(char, pickdiv, false);
-        chardiv.addEventListener("click", controller.spUnpick);
-      }
-      else{
+      else
         var chardiv = this.addSmallCard(char, repodiv, false);
-        if(spmanager.hasDuplicates(char.id, model.player1.specialIDs))
-          this.enableCard(chardiv, false);
-        else
-          chardiv.addEventListener("click", controller.spPick);
-        this.spFullBlock();
-      }
     }
+    this.updateSpecialsPick();
   }
-  updateSPPick(){
+  updateSpecialsPick(){
     this.spDisableDuplicates();
     this.spFullBlock();
   }
   spDisableDuplicates(){
     var schars = document.getElementById("sprepo").children;
     for(var i=0; i<schars.length; i++)
-      if(spmanager.hasDuplicates(schars[i].id, model.player1.specialIDs)) {
+      if(spmanager.hasDuplicates(schars[i].id, model.player1.specialIDs))
         this.enableCard(schars[i], false);
-        schars[i].removeEventListener("click", controller.spPick);
-      }
-      else {
+      else
         this.enableCard(schars[i], true);
-        schars[i].addEventListener("click", controller.spPick);
-      }
-
-
   }
   spFullBlock(){
     if(model.player1.specialIDs.length >= MAX_SP_NUM)

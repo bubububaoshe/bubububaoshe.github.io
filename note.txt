@@ -1,3 +1,4 @@
+try event delegation
 destroy: remove controllers
 
 当前进度：

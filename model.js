@@ -207,15 +207,14 @@ class Character {
     // special cards won't be upgraded once more
     // note: it does not only get the special, it does everything of an upgrade except assigning the new char
     if(this.isSpecial()) return this;
+    if(specials == null) return this;
     var sps = specials.characters;
     for(var i=0; i<sps.length; i++)
       if(sps[i].name == this.name){
         var sp = sps[i];
-        sp.card = this.card;
-        this.card.setChar(sp);
-        sp.disabled = this.disabled;
+        sp.inheritFrom(this);
         sps.splice(i, 1);
-        specials.view.deleteSpecial(i);
+        specials.view.deleteSpecial(sp);
         return sp;
       }
     return this;
@@ -240,6 +239,14 @@ class SpecialCharacter extends Character {
     super(id, name, score, season, poem);
     this.nameSuffix = nameSuffix;
     this.tricks = [];
+  }
+  inheritFrom(src){
+    //inherit game status from its common card
+    this.owner = src.owner;
+    this.disabled = src.disabled;
+    this.swapped = src.swapped;
+    src.card.setChar(this);
+    this.card = src.card;
   }
   enabled(){
     if (this.disabled || (this.swapped && this.noswap))
@@ -309,47 +316,39 @@ class Deck {
     this.characters = [];
     this.view = null;
   }
-  initDeck(size, commons, specials) {
+  init(size, commons, specials) {
     for (var i = 0; i < size; i++)
       this.addChar(commons.removeRandom());
-    var me = this;
-    if(specials != null && specials.getSize()>0){
-      view.blockGame();
-      delayedFunc(function(){
-        for (var i = 0, idx = 0; i < size; i++){
-          if(!me.toSpecial(idx, specials))
-            idx ++;
-        }
-        view.unblockGame();
-      },1);
-    }
-  }
-  toSpecial(idx, specials){
-    var char = this.characters[idx];
-    for(var i=0; i<specials.getSize(); i++)
-      if(specials.characters[i].name == char.name) {
+    for (var i = 0, idx = 0; i < size; i++){
+      var char = this.characters[idx];
+      var upg = char.getSpecial(specials);
+      if(upg != char){
         this.characters.splice(idx, 1);
-        this.characters.push(specials.characters[i]);
-        if(idx != this.getSize())
-          this.view.toSpecial(char, specials.characters[i]);
-        specials.characters.splice(i, 1);
-        specials.view.deleteSpecial(i);
-        return true;
+        this.characters.push(upg);
+        this.view.toSpecial(char, upg);
       }
-    return false;
+      else
+        idx ++;
+    }
   }
   getSize(){
     return this.characters.length;
   }
   addChar(char) {
     this.characters.push(char);
+    if(this.view != null)
+      this.view.addChar(char);
+    return char;
   }
   addRandom(repo, specials) {
     if (repo.characters.length == 0) {
+      console.trace();
       alert("Empty deck!");
       return null;
     }
     var char = repo.removeRandom();
+    if(specials != null)
+      char = char.getSpecial(specials);
     this.addChar(char);
     return char;
   }
@@ -375,15 +374,8 @@ class Deck {
     return char;
   }
   removeChar(char) {
-    var target = -1,
-      clen = this.characters.length;
-    for (var i = 0; i < clen; i++) {
-      if (this.characters[i] == char) {
-        target = i;
-        break;
-      }
-    }
-    if (target < 0) return null;
+    var target = this.characters.indexOf(char);
+    if(target < 0) return null;
     this.characters.splice(target, 1);
     return char;
   }
@@ -396,7 +388,7 @@ class Deck {
         break;
       }
     }
-    if (target < 0) return false;
+    if (target < 0) return null;
     var char = this.characters[target];
     this.characters.splice(target, 1);
     return char;
@@ -418,9 +410,7 @@ class Deck {
   }
 }
 class CommonRepository extends Deck {
-  constructor() {
-    super();
-  }
+  constructor() {super();}
   init(pack){
     for(var p = 0; p < 2; p++){
       var ids = COMMON_CHAR_LIST[pack[p]-1];
@@ -435,9 +425,7 @@ class CommonRepository extends Deck {
   }
 }
 class SpecialRepository extends Deck {
-  constructor() {
-    super();
-  }
+  constructor() {super();}
   init(ids){
     for(var i=0; i<ids.length; i++) {
       var char = spmanager.createSpecial(ids[i]);
@@ -650,7 +638,7 @@ class Player {
   }
   init(){
     this.specials.init(this.specialIDs);
-    this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
+    this.hand.init(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
   }
   addTableChar(char) {
     //add a char to player's table
@@ -663,14 +651,14 @@ class Player {
     for(var i=0; i<oppo.table.getSize(); i++){
       oppo.table.characters[i].performTricks("NamedBanTrick", char);
     }
-    // do i ban someone?
+    //do i ban someone?
     var trick = char.getTrick("NamedBanTrick");
     if(trick != null)
       for(var i=0; i<oppo.table.getSize(); i++){
         if(trick.performTrick(oppo.table.characters[i]))
           oppo.recalculate(true);
       }
-    // do i benefit (from) others?
+    //do i benefit (from) others?
     for(var i=0; i<this.table.getSize(); i++){
       this.table.characters[i].performTricks("CharTrick", this);
     }
@@ -741,11 +729,9 @@ class Model {
   }
   init(){
     model.commonRepository.init(this.pack);
-    view.repository.init();
-
     model.player1.init();
     model.player0.init();
-    model.poolInit();
+    this.pool.init(INIT_CARD_NUM_POOL, this.commonRepository);
     view.init();
     model.checkMatch1();
   }
@@ -757,9 +743,6 @@ class Model {
     model.activeChar = null;
     view.clear();
   }
-  poolInit(){
-    this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
-  }
   discard(player, char){
     if(char == null)
       char = player.hand.removeRandom();
@@ -767,8 +750,7 @@ class Model {
       player.hand.removeChar(char);
     model.pool.addChar(char);
     var newChar = player.hand.addRandom(model.commonRepository, player.specials);
-    player.hand.toSpecial(player.hand.getSize()-1, player.specials);
-    view.discard(player, char, newChar);
+    console.log(player.id + "号放弃 "+ char.name + " 获得 " + newChar.name);
   }
   overSize(){
     return this.pool.getSize() >= POOL_CAPACITY;
@@ -804,11 +786,10 @@ class Model {
     return false;
   }
   redeal(){
-    model.pool.view.preRedeal();
-    model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
+    for(var i=0; i<model.pool.getSize(); i++)
+      model.commonRepository.addChar(model.pool.characters[i]);
     model.pool.characters.length = 0;
-    model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
-    view.pool.init();
+    model.pool.init(INIT_CARD_NUM_POOL, model.commonRepository);
   }
   checkMatch1(){
     while(model.overSeason())
@@ -825,9 +806,11 @@ class Model {
         model.redeal();
         model.checkMatch1();
       }
-      else if(model.player1.matchable){
-        model.player1.matchable = false;
-        view.checkMatch1();
+      else {
+        if(model.player1.matchable){
+          model.player1.matchable = false;
+          view.checkMatch1();
+        }
       }
     }
   }
@@ -951,7 +934,7 @@ class Model {
   // hc/pc are specialchars if hs/ps are not null
     var player = obtainVector.player;
     var oppo = player.id==0? model.player1:model.player0;
-
+    
     console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
     var ac0 = player.addTableChar(obtainVector.playerTableChars[0]);
     var ac1 = player.addTableChar(obtainVector.playerTableChars[1]);
