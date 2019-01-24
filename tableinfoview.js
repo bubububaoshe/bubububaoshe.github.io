@@ -175,6 +175,7 @@ class TableInfoView{
   exitSpecialsPick(){
     document.getElementById("sprepo").textContent = "";
     document.getElementById("sppick").textContent = "";
+    document.querySelector("#spselection .cover").style.visibility = null;
     showOpacity(document.getElementById("spselection"), false);
   }
   showSpecialsPick(){

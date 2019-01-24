@@ -606,8 +606,8 @@ function setup(){
   combos = new Combos();
   obtainVector = new ObtainVector();
   spmanager = new SPManager();
-  model = new Model();
   messenger = new Messenger();
+  model = new Model();
   controller = new Controller();
   view = new View();
   oppoinfo = new TableInfoView(model.player0);

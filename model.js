@@ -934,7 +934,7 @@ class Model {
   // hc/pc are specialchars if hs/ps are not null
     var player = obtainVector.player;
     var oppo = player.id==0? model.player1:model.player0;
-    
+
     console.log(player.id+"号：入手 " + obtainVector.playerTableChars[0].name + " 和 " + obtainVector.playerTableChars[1].name);
     var ac0 = player.addTableChar(obtainVector.playerTableChars[0]);
     var ac1 = player.addTableChar(obtainVector.playerTableChars[1]);

@@ -224,7 +224,7 @@ class DealTrick extends Trick{
     this.names = names;
     this.definite = definite;
   }
-  performTrick() {console.log(this.owner.name+" 发牌");
+  performTrick() {
     //returns a char from <names> with <probility>
     var cans = [];
     var repo = model.commonRepository.characters;
@@ -232,9 +232,11 @@ class DealTrick extends Trick{
       for(var j=0; j<repo.length; j++)
         if(this.names[i] == repo[j].name)
           cans.push(repo[j]);
-    if(this.definite || getRandom(2)==1){
+    if(cans.length > 0 && (this.definite || getRandom(2)==1)){
+      console.log(this.owner.name+" 发牌");
       return cans[getRandom(cans.length)];
     }
+    console.log(this.owner.name+"放弃发牌");
     return null;
   }
   clone(){return new DealTrick(this.description, this.names, this.definite);}
@@ -262,7 +264,7 @@ class CharTrick extends Trick{
   // add <bonus> to tabled char with <cname>
   // note: only benefit chars on one's own side
   constructor(cname, bonus){
-    super(cname + "的分数增加" + bonus + "分");
+    super("己方" + cname + "的分数增加" + bonus + "分");
     this.charName = cname;
     this.bonus = bonus;
   }
