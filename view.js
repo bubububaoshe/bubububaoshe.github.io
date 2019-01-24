@@ -105,8 +105,8 @@ function createPoemPanel(char){
 class Sound{
   constructor(){
     this.audio = document.getElementById("soundeffect");
-    this.ac = new Audio('mp3/activate.mp3');/*
-    this.de = new Audio('mp3/deal.wav');
+    this.ac = new Audio('mp3/activate.mp3');
+    this.de = new Audio('mp3/deal.mp3');/*
     this.wi = new Audio('mp3/win.mp3');
     this.lo = new Audio('mp3/fool.mp3');
     this.di = new Audio('mp3/discard.mp3');
@@ -124,8 +124,8 @@ class Sound{
         })
     }
   }
-  activate(){this.play("activate");}
-  deal(){this.play("deal");}
+  activate(){this.ac.play();}
+  deal(){this.de.play();}
   win(){this.play("win");}
   lose(){this.play("fool");}
   discard(){this.play("discard");}
@@ -447,15 +447,11 @@ class Messenger {
       swapposter.appendChild(messenger.createBannerPoster(chars[i]));
     }
     banner.addEventListener("click", nextFunc);
-    //reflow();
-    //banner.style.opacity = 1;
     showOpacity(banner, true);
   }
   exitNotifyOppoAction(nextFunc){
     var banner = document.getElementById("infobanner");
     banner.removeEventListener("click", nextFunc);
-    //banner.style.opacity = 0;
-    //banner.style.display = null;
     showOpacity(banner, false);
     banner.querySelector(".bannercards").textContent = "";
   }
