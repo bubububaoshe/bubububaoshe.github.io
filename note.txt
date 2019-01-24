@@ -328,70 +328,90 @@ CopyTrick:
                                                   然后后手玩家再调用对方的特殊牌的view的初始化部分，fixup
 
 （总共的Tricks类别）
-ComboTrick   ：悭臾、百里屠苏、欧阳少恭、
-RevealTrick：怪臾、
-DealTrick   百里屠苏、
-CharTrick    不需选择对象                                 风晴雪、
-SwapTrick    需要controller选择一个对象、作用于table    ：陵越、
-UnnamedBanTrick  需要controller选择一个对象、作用于table 欧阳少恭、
-CopyTrick：红玉、
+ComboTrick       不影响对战模式                             ：悭臾、百里屠苏、欧阳少恭、
+RevealTrick      不影响对战模式                             ：怪臾、
+DealTrick        不影响对战模式                             ：百里屠苏、
+CharTrick        不影响对战模式                             ：风晴雪、
+SwapTrick        需要controller选择一个对象、作用于table    ：陵越、
+UnnamedBanTrick  需要controller选择一个对象、作用于table    ：欧阳少恭、
+CopyTrick        需要controller选择一个对象、作用于table    ：红玉、
 
 （每一回合的过程）
 
 
                        【  回  合  开  始  】    
 
-+--------+                 +----------+                +--------+   
-|当前玩家|                 |服务器消息|                |对方玩家|
-+--------+                 +----------+                +--------+
-    |
-    |
- model.redeal()      Redeal,poolids,repoids
-    |           `---------------------------->  model.redeal(poolids, repoids)
-    v
- controller.obtain()                   等待对方行动
-    |                `---------------------------------------------_
-    v                                                               |
- >> controller.handleCopies() 【会重入】                            |
-  >> obtainVector.trickSelector("CopyTrick")                        |
-   >> obtainVector.getTrickSubjectObjectArrays("CopyTrick")         |
-    >> trick.selectTarget              ,-----> 点击触发             |
-     >> oppoinfo.showSelectionPanel --'     controller.selectCopy   |
-  << obtainVector.trickSelector                                 |   |
-  >> controller.handleSwaps()                                   |   |
-   >> obtainVector.trickSelector("SwapTrick")                   |   |等
-    >> obtainVector.getTrickSubjectObjectArrays("SwapTrick")    |   |待
-   >> trick.selectTarget              ,-----> 点击触发          |   |对
-    >> oppoinfo.showSelectionPanel --'   controller.selectSwap  |   |方
-      ...（其它trick）                             |            |   |行
-       |                                           `------+-----'   |动
-       |                                                  |         |
-       |                             　 [按顺序记下所做出的选择]    |
-       |                                                  |         |
-       |                                                  `---------+
++--------+                 +----------+                       +--------+   
+|当前玩家|                 |服务器消息|                       |对方玩家|
++--------+                 +----------+                       +--------+
+       |                          |                                 |
+       |                          |                                 |   
+       |"[第X回合]该你出牌了"     |              "[第X回合]对方出牌"|
+       |<-------------------------+-------------------------------->|
        |                                                            |
+       v                                                        等待|     
+ controller.obtain()                                            对方|     
+       |                                                        行动|     
+       |                                                            |
+       |  有可能触发一些特殊牌的技能                                |
+       |  选择会开新线程需要与主线程同步                            |
+       |                                                            |
+       +--> controller.selectCopy()-.                               |
+       |                            |                               |
+       |                            | 按顺序记下所做出的选择        |
+       +--> controller.selectBan()--+ 在barrier之后一起发给对方     |
+       |                            |                               |
+       |                            |                               |
+       +--> controller.selectSwap()-+                               |
+       |                            |                               | 
+       | .--------------------------'                               | 
+      ,' |                                                          |
+      |  V                                                          |
+   [--+---+---当前玩家的Barrier-----]                               |
+      |  |                        此回合中的入手、选择特殊牌目标信息|
+      `, `--------------------------------------------------------->|
+       |                                                            |
+ controller.postObtain()                                            |
+       |                                                            |
+       V                                                            |
+   model.dealOne()                                                  |
+       |  |                                                         |    
+       |  |                                                         |
+       |  |                                             发出的牌的ID|
+       |  `-------------------------------------------------------->|
+       |                   * * * * * * * * * * *                    |
+       |                  * 对方看到的obtain、  *                   |
+  如果同一季节超过6张     * dealOne和redeal     *                   |
+    则洗牌redeal          * 都是按顺序的        *                   |
+       |  |               * 因为websocket是TCP  *                   |
+       |  |                * * * * * * * * * * *    洗牌后的公共牌池|
+       |  `-------------------------------------------------------->|
+       |                                                            |
+  checkMatch1()                                                     |
+       |                                                            |
+       `------.    ,------------------------------------------------'
+              |    |                                               
+              |    |             服务器看到当前玩家的dealOne和              
+              |    |             对方的opponentObtain都完成后才宣告
+              |   ,'             回合结束           
+              V   |                    
+         [--------+------------------服务器上的Barrier-----------------]
+                  `.                                                 
+                   |   【  下  一  回  合  开  始  】                                              
+                   |
+       ,-----------+------------------------------------------------.
+       |                                                            |
+       |                                                            |
+       |                                                            V
+"[第X回合]对方出牌"                                       "[第X回合]该你出牌了" 
+       |                                                            |
+       |                                                            |
+       |                                                            V
+       |                                                   从controller.obtain()
+       |                                                       开始循环往复
        |                                                            |
        V                                                            V
-   model.dealOne()                              通过model.opponentObtain()及其连锁反应
-       |                                                 来看到对方的行动
-       |                                               【但是现在还不能行动】
-       |                                                            |
-       `------------------------------------------------------------+
-                                                                    |
-                                                                    V
-                                                通过model.dealOne()看到对方发的牌
-                                                　　　　【现在方能行动】
-                                                                    |
-                                                                    |
-                      【  下  一  回  合  开  始  】                |
-                                                                    |
-       ,------------------------------------------------------------'
-       |  对方变成当前玩家、当前玩家变成"对方"
-       |
-       V
- model.redeal()
-     (...)
-
+                                                                     
 在单机版中，上面所有的函数调用都是一次完成。
 而在对战时，得由多个消息进行驱动。
 一种方法是，在当前玩家侧，记下所有的消息，然后一起回放。
@@ -409,14 +429,7 @@ CopyTrick：红玉、
 问题现象：打出乐无异但是选取对象中只有一张失效了的陵越，点完后再次出现选择界面，但却误以为barrier已到（是否可能连续出现两次选择目标的界面？）
 解答：是可以连续出现两次选择界面，解决方法是把DecrementBarrier移到controller.handleCopies的下方，这样barrier的处理才正确（因为后者可能会增加barrier的计数器，而barrier一到0就会让服务器认为回合结束，所以要让后者把前者包起来。）
 
-重新开局时后手变先手
-会导致complete_specials变成[undefined]不知道是怎么回事
-
-发现：似乎在服务器看来做完了所有obtain的动作就算是回合结束（就是说服务器的工作就结束了），但是在客户端上还需要等到所有动画都播完、deal()完才算一个回合结束的
-解决办法：让两边都播放语音并且显示大消息框（而不只是在分数框显示一行字作为提示），这样时间上就同步了。
-
-发现：redeal()可能穿插在obtain开始与结束中，所以也要被纳入命令队列，保证两边看到选择事件顺序相同，不然就会引起数据一致性问题。
-这个问题和上述deal()是一个性质，也是在对方玩家动作过快的时候会触发的。（譬如说动画还没播完的时候就打出牌来）
+发现：重新开局时后手变先手时可能导致complete_specials变成[undefined]不知道是怎么回事
 
 发现bug：对方弃牌（model.opponentDiscard）中忘记加入toSpecial了。会引发以下问题：
   一方打出[闻人羽・天罡]&[安陆]，对方出错"subjects[i] is null]在tricks.js:25
@@ -425,16 +438,33 @@ CopyTrick：红玉、
   因为收到的对方的手牌ID是wry2b=闻人羽・天罡，该牌由之前的discard操作置换而来。
   而在另一个玩家的视角中，对方的闻人羽还没有变成特殊牌。
 
-发现bug：又一个数据一致性问题
-现象：一方打完了禺期，禺期已经在其table中，而另一方却发牌发出了禺期，导致无法将禺期从repository中移到pool中，引发char.card is undefined错误
-应该只会在自动测试时出现。加了个延迟
+-----------【redeal()与dealOne()之间的data race】---------------------
 
-发现bug：有一张牌无故消失；1号玩家桌上一共有52张牌，2号玩家一共只有51张。
+此bug简单的触发方法：在opponentObtain中，强制触发model.redeal()。这样就能撞车导致BOOM。
+
+此bug发生的原因是将单机版直接不经思索直接套用到对战版中发生的。因为在单机版中有以下流程：
+・P1 obtain
+・如有必要，洗牌  \________.----> 这两步在opponentObtain()中
+・P2 obtain       /
+・如有必要，洗牌            ----> 这一步在checkMatch1()中
+
+而因为在改装为对战版的过程中opponentObtain()时已经知道了对方会拿什么牌，所以洗牌就不能放在opponentObtain中，而是放在每个玩家的obtain最后。因为每个玩家都会obtain，所以也和单人版一样，每次行动后都会如果有必要的话就洗牌。
+
+也就是这样：
+・P1 obtain
+・如有必要，洗牌            ----> 这一步在P1的postObtain()中
+・P2 obtain        
+・如有必要，洗牌            ----> 这一步在P2的postObtain()中
+
+
+此bug的一种现象：一方打完了禺期，禺期已经在其table中，而另一方却发牌发出了禺期，导致无法将禺期从repository中移到pool中，引发char.card is undefined错误
+
+再仔细看会发现bug：有一张牌无故消失；1号玩家桌上一共有52张牌，2号玩家一共只有51张。
 出现于controller.opponentObtain处。
-从日志中看到，在对方的opponentObtain之后，牌数就从52减到了51。
-不知道原因。
+从日志中看到，在对方的opponentObtain之后，牌数就从52减到了51。因为opponentObtain没有执行完，拿取完第一张牌时会发现第二张没有了。
+有时候出现了这个Bug游戏还能继续正确运行，有时候就不行了。
 
-一次奇怪的数据竞争现场之两个玩家看到的事件顺序颠倒：
+从bug现场可以看到之两个玩家看到的事件顺序颠倒：
 Player10 vs Player9
   服务器看到的顺序             Player10看到的顺序              Player9看到的顺序
 ・P9 发牌 [古剑晗光]         ・P9 发牌 [古剑晗光]           ・P9 发牌 [古剑晗光]
@@ -443,26 +473,8 @@ Player10 vs Player9
 ・P10 发牌 [古剑焚寂]        ・P9 洗牌                     ・P10 发牌 [古剑焚寂]
 
 Player9出现了错误，因为Player9洗了牌，古剑焚寂已经在pool中，它的view无法在repo中找到。
-【！！】揭示了一个根本没考虑过的设计问题，那就是现在为止发出的所有消息都没有时间戳，所以只能依靠barrier来保证正确性。
-要么以集中式的方式管理顺序，要么以分布式的方式管理顺序。两者都可以。这回因为已经到了这一地步所以不得不用分布式的方式啦。只不过一开始没有想好。
-一种简单粗暴的解决方法是将deal的消息也塞入队列中，不过这样会导致整个过程序列化（因为是在队列出队时同步的。也就是以下状况：）
-之前：
-P1  [ obtain  ][ 动画    ][ deal ]
-P2             [对方动画  ][对方deal] [出错BOOM（划掉）]
 
-之后：
-P1  [ obtain  ][ 动画    ][ deal ]
-P2                               [对方动画  ][对方deal]
 
-虽然正确性有了但是游戏过程会变冗长。
+----------------------------------------------------------------------
 
-更好的方式，应该是将“回合结束”和“现在就可以开始播放双方的可能很冗长的动画了”这两件事情分离开来，不要使用同一个barrier：
-
-之前：
-                         Barrier
-P1  [obtain ][动画 ][deal ] |
-P2                          | [obtain][动画][deal]  <-- 皆指P2看到的P1的动作
-之后：       
-             Barrier 1        Barrier 2
-P1  [obtain ] |[动画]    |     [deal]|
-P2            |  [动画]  |           |[deal]   <-- 皆指P2看到的P1的动作
+自动测试开局时也可能导致问题，不过这应该和以上那些个问题都无关系。

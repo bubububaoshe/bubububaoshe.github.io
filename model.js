@@ -938,8 +938,10 @@ class Model {
     view.pool.init();
   }
   checkMatch1(){
-    while(model.overSeason())
-      model.redeal();
+    if (is_multiplayer == 0) { // changed for multiplayer
+      while(model.overSeason())
+        model.redeal();
+    }
     var matchable = model.hasMatch(model.player1);
     if(matchable) {
       if(!model.player1.matchable){

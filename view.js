@@ -134,8 +134,6 @@ class Sound{
     var onetimeFunc=function(){
         nextFunc.call();
         sound.audio.removeEventListener("ended", onetimeFunc);
-        if (ShouldSyncOnSound())
-          DecrementActionBarrier();
     };
     this.audio.addEventListener("ended", onetimeFunc);
     this.audio.addEventListener("error", onetimeFunc);
@@ -682,10 +680,6 @@ class View {
     }
     else {
       obtainVector.getHandChar().card.removeController(controller.activate);
-      // 与sound.combovoice的结束事件配对
-      if (ShouldSyncOnSound()) {
-        for (var i=0; i<comboCount; i++) IncrementActionBarrier();
-      }
       messenger.notifyPlayerCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
     }
   }

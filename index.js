@@ -154,6 +154,9 @@ class Game {
     this.snapshots = [ null, null ];
     this.turns = [ 0, 0 ];
     console.log("Game.Ctor, Player id: "+p0.player_id + ","+p1.player_id);
+    this.flag_dealone = false;
+    this.flag_oppo_obtain_redeal = false;
+    this.turn_num = 1;
   }
   
   Setup() { // 两个玩家该gamesetup()
@@ -169,6 +172,9 @@ class Game {
     this.turns[1] = 0;
     this.snapshots[0] = null; // For verification
     this.snapshots[1] = null; // For verification
+    this.flag_dealone = false;
+    this.flag_oppo_obtain_redeal = false;
+    this.turn_num = 1;
   }
   
   GetPlayerIndexBySocket(socket) {
@@ -222,9 +228,20 @@ class Game {
     }
   }
   
+  IsTurnEndBarrierReached() {
+    if (this.flag_dealone == true && this.flag_oppo_obtain_redeal == true) return true;
+    else return false;
+  }
+  
   OnStartOfTurn() {
-    this.players[this.curr_player].emit('Game_SelfTurn');
-    this.players[1-this.curr_player].emit('Game_OpponentTurn');
+    console.log('-------------------------Turn ' + this.turn_num + '---------------');
+    this.flag_dealone = false;
+    this.flag_oppo_obtain_redeal = false;
+    
+    this.players[this.curr_player].emit('Game_SelfTurn', this.turn_num);
+    this.players[1-this.curr_player].emit('Game_OpponentTurn', this.turn_num);
+    
+    this.turn_num += 1;
   }
   
   // Start recording action sequence &&
@@ -286,15 +303,12 @@ class Game {
     if (pidx != -1) {
       var other = this.players[1 - pidx];
       
-      other.emit('Game_OpponentObtain', this.obtain_actions[pidx]);
-      this.obtain_actions[pidx].length = 0;
       if (g_is_verify==true && snapshot != null && snapshot != undefined) {
         this.snapshots[pidx] = snapshot;
-        //this.VerifySnapshots();
       }
       
-      this.OnEndTurn();
-      this.OnStartOfTurn();
+      other.emit('Game_OpponentObtain', this.obtain_actions[pidx]);
+      this.obtain_actions[pidx].length = 0;
     }
   }
   
@@ -302,13 +316,19 @@ class Game {
     this.curr_player = 1 - this.curr_player;
   }
   
-  OnDealOne(socket, dealt_id) {
-    console.log('[OnDealOne] player ' + socket.player_id + ' dealt ' +
-      dealt_id);
+  OnPostObtainDealOne(socket, dealt_id) {
+    console.log('[OnPostObtainDealOne] player ' + socket.player_id + ' ended turn with DealOne');
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
       var other = this.players[1 - pidx];
-      this.obtain_actions[pidx].push(['controller.postObtain', dealt_id]);
+      
+      other.emit('Game_OpponentPostObtainDealOne', dealt_id);
+      
+      this.flag_dealone = true;
+      if (this.IsTurnEndBarrierReached()) {
+        this.OnEndTurn();
+        this.OnStartOfTurn();
+      }
     }
   }
   
@@ -330,6 +350,18 @@ class Game {
     if (pidx != -1) {
       var other = this.players[1 - pidx];
       other.emit('Game_OpponentRedeal', pool_ids, repo_ids);
+    }
+  }
+  
+  OnOpponentObtainRedealClear(socket) {
+    console.log('[OnOpponentObtainRedealClear] player ' + socket.player_id + ' acknowledged all changes from last turn');
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      this.flag_oppo_obtain_redeal = true;
+      if (this.IsTurnEndBarrierReached()) {
+        this.OnEndTurn();
+        this.OnStartOfTurn();
+      }
     }
   }
   
@@ -465,7 +497,7 @@ io.on('connection', function(socket) {
 	// From: controller.postObtain (?)
 	socket.on('Game_DealOne', (dealt_id) => {
 	  var g = FindGameBySocket(socket);
-	  if (g != null) g.OnDealOne(socket, dealt_id);  
+	  if (g != null) g.OnPostObtainDealOne(socket, dealt_id);  
 	});
 	
 	// From: model.discard
@@ -511,14 +543,26 @@ io.on('connection', function(socket) {
     if (g != null) g.OnTrickWithoutTarget(socket, trick_type);
 	});
 	
+	// 当ObtainEnd传去时，对方就开始播放有可能稍费时间的动画了。
 	socket.on('Game_ObtainEnd', (snapshot) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnObtainEnd(socket, snapshot);
 	});
 	
-	socket.on('Game_GameEnd', () => {
+	// 一回合结束以postObtain为标志。以下两个消息都是PostObtain发出的。
+	// 其会执行一次dealOne或直接宣告游戏结束。故需消息传至对方用以同步。
+	socket.on('Game_PostObtain_DealOne', (dealt_id) => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnPostObtainDealOne(socket, dealt_id);
+	});
+	socket.on('Game_PostObtain_GameEnd', () => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnGameEnd(socket);
+	});
+	
+	socket.on('Game_OpponentObtainRedealClear', () => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnOpponentObtainRedealClear(socket);
 	});
 	
 	socket.on('Game_VoteRestart', () => {

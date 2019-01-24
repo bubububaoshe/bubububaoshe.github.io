@@ -57,7 +57,7 @@
 			<div id="confirm_cancel_buttons" style="width:100%; margin-bottom: 0.5vw; margin-top: 0.5vw"> 
 			<div id="confirm_match" style="background-color:#66CC66;display:none">确认配对</div>
 			<div id="cancel_match" style="background-color:#CC6666;display:none">放弃配对</div>
-			<div style="background-color:#6666CC;" onclick='AUTOTEST_autostartmatch();'>T E S T</div>
+			<div style="background-color:#6666CC;" onclick='AUTOTEST_autostartmatch();'>放 弃 治 疗</div>
 		</div>
 		<hr/>
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
@@ -239,13 +239,14 @@
   var is_verify_per_round = false;
   var combo_notify_method = 1; // 1: 双方都显示全屏大通知
                                // 2: 发起方显示大通知，接收方显示小通知
-  var is_sync_on_sound = true; // 仅对2有效
-                               // 我觉得 因为postObtain中有个发牌动作 而postObtain前放音频 所以需要sync
-  function ShouldSyncOnSound() {
-    return (combo_notify_method == 2 && is_sync_on_sound == true);
-  }
   
-  // Barrier for "Obtain" stuff
+  // 这个Barrier用来同步所有的选择特殊牌的目标的动作，免得还没记下选项就送出去了：
+  //                                         | Barrier
+  //                                         |
+  //      _-----selectCopy()---Thread 2----> |
+  //     /                                   |
+  // obtain ------------Thread 1-----------> | ----> 送出
+  //
   var turnActionCount = 0;
   function IncrementActionBarrier() {
     turnActionCount += 1;
@@ -255,14 +256,13 @@
     turnActionCount -= 1;
     if (turnActionCount == 0) {
       console.log('<<< 行动完了');
-      console.log('MyCardsCount: ' + model.getMyCardsCount());
       if (is_verify_per_round == true)
         socket.emit('Game_ObtainEnd', model.getSnapshot());
       else
         socket.emit('Game_ObtainEnd');
     }
   }
-  
+
   // 按键事件
   document.getElementById("refresh_lobbystatus").addEventListener("click", function() {
     socket.emit('Info_RefreshOnlinePlayerCount');
@@ -567,7 +567,6 @@
     console.log('[先手开局] other_sp='+other_sp);
     messenger.hideFinalNotice(); // If from restart
     OtherPlayerSpecialCardFixup(other_sp);
-    console.log('MyCardsCount: ' + model.getMyCardsCount());
   });
   
   socket.on('Match_GameInitDefensive', (other_sp, snapshot) => {
@@ -581,47 +580,41 @@
     
     controller.gamestartDefensive(snapshot);
     OtherPlayerSpecialCardFixup(other_sp);
-    console.log('MyCardsCount: ' + model.getMyCardsCount());
   });
   
-  socket.on('Game_SelfTurn', () => {
-    if (remoteObtainActions == null || remoteObtainActions.length <= 0) { // for safety ?
-      console.log('<<< 对方行动回放完了_');
-      console.log('MyCardsCount: ' + model.getMyCardsCount());
-      view.unblockGame();
-    }
+  socket.on('Game_SelfTurn', (turn_idx) => {
     
     is_my_move = true;
     
-    var delay = 1;
-    if (messenger.mayErase() != true) delay += 2;
+    var delay = 0;
+    // 2 turns = 1回合
     delayedFunc(function() {
-      messenger.note('该你出牌了');
+      messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]该你出牌了');
     }, delay);
     
+    model.checkMatch1(); // 压力测试时发现似乎要加一下这个？头有点晕 @_@
     console.log('>>> 我方行动');
-    console.log('MyCardsCount: ' + model.getMyCardsCount());
   });
   
   // barrier: 这个要等待对方的动作都播放完成
-  socket.on('Game_OpponentTurn', () => {
+  socket.on('Game_OpponentTurn', (turn_idx) => {
     view.blockGame();
     is_my_move = false;
     
     var delay = 0;
-    if (messenger.mayErase() != true) delay += 1;
     delayedFunc(function() {
-      messenger.note('对方出牌');
+      messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]对方出牌');
     }, delay);
     
     console.log('>>> 对方行动');
-    console.log('MyCardsCount: ' + model.getMyCardsCount());
   });
   
   // Action sequence from last turn
-  // returns null if there are no more entries in the action buffer 
+  // returns null if the buffer hath underfloweth 
   function GetNextObtainAction() {
     var ret = null;
+    if (remoteObtainActions == null) return null;
+    
     if (remoteObtainActions.length < 1) ret = null;
     var a = remoteObtainActions[0];
     remoteObtainActions.splice(0, 1);
@@ -645,22 +638,25 @@
     }
     if (remoteObtainActions.length <= 0 && is_my_move) {
       console.log('<<< 对方行动完了');
-      console.log('MyCardsCount: ' + model.getMyCardsCount());
       view.unblockGame(); // 对方的动画未播放完亦即还没最后deal之前我方不能行动
     }
     return ret;
   }
+  function PeekNextObtainActionType() {
+    if (remoteObtainActions.length < 1) return null;
+    else return remoteObtainActions[0][0];
+  }
   
   // Will replay a whole sequce of actions
   socket.on('Game_OpponentObtain', (obtain_actions) => {
+    console.log('对方obtain有 ' + obtain_actions.length + ' 个动作');
     remoteObtainActions = obtain_actions;
+    // 如果延迟执行opponentObtain中的redeal()，那么“播放对方动作”
+    // 的事件将由OpponentObtain触发。
+    
     var obtain_ids = GetNextObtainAction(obtain_actions);
     controller.opponentObtain(obtain_ids[0], obtain_ids[1]);
-    // 最后一个Deal
-    GetNextObtainAction();
   });
-  
-  // DealOne 原本在这，现在移到上面的OpponentObtain中去了。
   
   socket.on('Game_OpponentDiscardOne', (discarded_id, added_id) => {
     console.log('OpponentDiscardOne ' + discarded_id + ", " + added_id);
@@ -670,6 +666,11 @@
   socket.on('Game_OpponentRedeal', (pool_ids, repo_ids) => {
     console.log('Opponent Redeal');
     model.redeal(pool_ids, repo_ids);
+  });
+  
+  socket.on('Game_OpponentPostObtainDealOne', (dealt_id) => {
+    console.log("[Opponent's postObtain DealOne] " + dealt_id);
+    model.dealOne(model.player0, dealt_id);
   });
   
   socket.on('Game_OpponentGameEnd', () => {
@@ -771,7 +772,7 @@
         while (IsInfoBannerPresent() == true) {
           await sleep(1000);
         }
-        await sleep(9999);
+        await sleep(3999);
         console.log('[AUTOTEST] Clicked final container');
         document.getElementById('finalcontainer').click();
         document.getElementById('finalcontainer').visibility = null;
@@ -793,7 +794,7 @@
           continue;
         }
         
-        await sleep(2333);
+        await sleep(2333); // 自动测试时这个如果设太短就会按得太急，会boom的
         // If game ended then break
         
         var mychars = model.player1.hand.characters;
@@ -801,7 +802,7 @@
         var activated = false;
         for (var i=0; i<mychars.length; i++) {
           model.activate(mychars[i]);
-          await sleep(700);
+          await sleep(400);
           var p = model.pool.characters;
           for (var j=0; j<p.length; j++) {
             if (p[j].card.card.classList.contains('glow')) {
@@ -809,11 +810,11 @@
               handc = mychars[i];
               activated = true;
               
-              await sleep(400);
+              await sleep(200);
               model.activate(mychars[i]); // Deactivate
-              await sleep(400);
+              await sleep(200);
               mychars[i].card.card.click();
-              await sleep(400);
+              await sleep(200);
               poolc.card.card.click();
               break;
             }

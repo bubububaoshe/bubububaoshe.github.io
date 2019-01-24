@@ -33,8 +33,8 @@ class Controller{
     model.activate(char);
   }
   obtain() {
-    IncrementActionBarrier(); // 这是用于postObtain里的dealOne的
-    IncrementActionBarrier(); // 这是用于obtain()本体的
+    IncrementActionBarrier();
+    
     var handc = model.activeChar;
     model.activate(handc);
     model.player1.hand.removeChar(handc);
@@ -49,21 +49,32 @@ class Controller{
     obtainVector.init(model.player1, handc, poolc);
     controller.handleCopies();
     
-    // 不太清楚怎么使用轮询（似乎要使用Promise.then()对远端进行比较大的改动），所以暂时采取在发起端记下所有事件的方式
-    // 做决定的函数是异步的，所以得要维持一个Counter，降为0时再告知服务器该回合结束了
-    // 这其实是一个作用于当前玩家在obtain期间产生的所有线程的barrier
     DecrementActionBarrier();
   }
-  opponentObtain(remote_handcid = null, remote_poolcid = null){ // Changed for multiplayer
-    console.log('MyCardsCountr: ' + model.getMyCardsCount());
-    console.log('[opponentObtain] ' + remote_handcid + ', ' + remote_poolcid);
+  
+  overSeasonRedeal() {
+    var STRESS = true;
+    if (STRESS == true) {
+      console.log("S T R E S S    T E S T ! ! !");
+      for (var i=0; i<10; i++) { // SMOKE TEST
+        model.redeal();
+      }
+    }
     while(model.overSeason())
       model.redeal();
-    console.log('MyCardsCounte: ' + model.getMyCardsCount());
+  }
+  
+  opponentObtain(remote_handcid = null, remote_poolcid = null){ // Changed for multiplayer
+    console.log('[opponentObtain] ' + remote_handcid + ', ' + remote_poolcid);
+    
+    
+    if (is_multiplayer == false) {
+      this.overSeasonRedeal();
+    }
+    
     var pick = (remote_handcid == null) ? model.aiSelectObtain() : 
       [model.player0.hand.getChar(remote_handcid),
        model.pool.getChar(remote_poolcid)]; // getSpecial 在接下来再调用
-    console.log('MyCardsCounst: ' + model.getMyCardsCount());
     if(pick == null){
       if(model.overSize()){
         model.redeal();
@@ -76,7 +87,6 @@ class Controller{
     }
     else {
       var hc = model.player0.hand.removeChar(pick[0]);
-      console.log('M2yCardsCount: ' + model.getMyCardsCount());
       var pc = model.pool.removeChar(pick[1]);
       if (pc == null) {
         console.log("ERROR!!!!  pick[1] is NULL!!!!");
@@ -87,15 +97,24 @@ class Controller{
       obtainVector.init(model.player0, hc, pc);
       controller.handleCopies();
     }
+    
+    if (is_multiplayer) { // 移到这里：只有所有对方动作都回放完了时，才回放最后的dealOne
+      if (PeekNextObtainActionType() == "controller.postObtain") {
+        model.dealOne(model.player0, GetNextObtainAction()[1]);
+      }
+    }
   }
   postObtain(pid){ // changed in multiplayer
     delayedFunc(function(){ 
       if(pid == 1){
         var dealt_id = model.dealOne(model.player1);
-        
         if (is_multiplayer == true) {
-          socket.emit('Game_DealOne', dealt_id);
-          DecrementActionBarrier(); // 对应obtain最开始的Increment
+          socket.emit('Game_PostObtain_DealOne', dealt_id);
+          
+          if (is_multiplayer) {
+            controller.overSeasonRedeal(); // redeal应该出现在两方行动之间，在对战版中，由opponentObtain()中移至此处
+            socket.emit('Game_OpponentObtainRedealClear'); // changed for multiplayer
+          }
         } else {
           delayedFunc(function(){
             controller.opponentObtain();
@@ -107,7 +126,7 @@ class Controller{
           //game end
           messenger.notifyFinal();
           if (is_multiplayer) {
-            socket.emit('Game_GameEnd');
+            socket.emit('Game_PostObtain_GameEnd');
           }
         }
         else {
@@ -270,8 +289,8 @@ class Controller{
       socket.emit('Game_SetCopyTrickTarget', this.id);
       console.log('CopyTrick ' + this.id);
     }
-    controller.handleCopies(); // May increase barrier ?
-    DecrementActionBarrier(); // 与trick.selectTarget("CopyTrick")对应
+    controller.handleCopies();
+    DecrementActionBarrier(); // 因为上一行的handleCopies可能增加barrier所以放这
   }
   selectSwap(){
     // user swaps with the opponent
