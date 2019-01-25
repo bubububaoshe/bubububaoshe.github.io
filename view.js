@@ -106,7 +106,9 @@ class Sound{
   constructor(){
     this.audio = document.getElementById("soundeffect");
     this.ac = new Audio('mp3/activate.mp3');
-    this.de = new Audio('mp3/deal.mp3');/*
+    this.de = new Audio('mp3/deal.mp3');
+    this.co = new Audio('mp3/combo.mp3');
+    /*
     this.wi = new Audio('mp3/win.mp3');
     this.lo = new Audio('mp3/fool.mp3');
     this.di = new Audio('mp3/discard.mp3');
@@ -114,31 +116,32 @@ class Sound{
   }
   play(name){
     sound.audio.src = "mp3/" + name + ".mp3";
-    sound.promisedPlay();
+    sound.promisedPlay(sound.audio);
   }
-  promisedPlay(){
+  promisedPlay(audio){
     //I don't a thing about promises, maybe i will learn about it someday
-    const playPromise = sound.audio.play();
+    const playPromise = audio.play();
     if (playPromise !== null){
         playPromise.catch(() => {//sound.audio.play();
         })
     }
   }
-  activate(){this.ac.play();}
-  deal(){this.de.play();}
+  activate(){this.promisedPlay(this.ac);}
+  deal(){this.promisedPlay(this.de);}
   win(){this.play("win");}
   lose(){this.play("fool");}
   discard(){this.play("discard");}
   draw(){this.play("draw");}
-  combovoice(nextFunc,name){
-    var onetimeFunc=function(){
-        nextFunc.call();
-        sound.audio.removeEventListener("ended", onetimeFunc);
-    };
-    this.audio.addEventListener("ended", onetimeFunc);
-    this.audio.addEventListener("error", onetimeFunc);
-    this.audio.src = "combomp3/" + name + ".mp3";
-    this.promisedPlay();
+  combovoice(nextFunc,combo){
+    if(COMBO_VOICE == "voiceon"){
+      this.audio.src = "combomp3/" + combo.getId() + ".mp3";
+      this.promisedPlay(this.audio);
+      setTimeout(nextFunc, combo.getAudioDuration()+500);
+    }
+    else{
+      this.promisedPlay(this.co);
+      delayedFunc(nextFunc, 2);
+    }
   }
 }
 class Card{
@@ -367,6 +370,7 @@ class Messenger {
   notifyPlayerCombo(preScore, comboCount, combos){
     if(comboCount > 0){
       var combo = combos[--comboCount];
+      if(combo == null) return;
       var inc = combo.getFullScore();
       messenger.animeScoreInc(1, preScore, inc);
       var chars = combo.characters;
@@ -384,7 +388,7 @@ class Messenger {
           messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
         },1);
       }
-      sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
+      sound.combovoice(nextFunc, combo);
     }
     else
       controller.postObtain(1);
@@ -392,6 +396,7 @@ class Messenger {
   notifyOppoCombo(preScore, comboCount, combos){
     if(comboCount > 0){
       var combo = combos[--comboCount];
+      if(combo == null) return;
       var inc = combo.getFullScore();
       messenger.animeScoreInc(0, preScore, inc);
       messenger.note("对方完成组合\n"+combo.getDesc());

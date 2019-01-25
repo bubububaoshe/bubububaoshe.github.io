@@ -67,18 +67,18 @@ class Controller{
   }
   postObtain(pid){
     delayedFunc(function(){
-      if(pid == 1){
-        model.dealOne(model.player1);
-        delayedFunc(function(){
-          controller.opponentObtain();
-        }, 2);
-      }
-      else{
-        if(model.player1.hand.getSize() == 0){
+      if(model.player0.hand.getSize() == 0 && model.player1.hand.getSize() == 0){
           //game end
           messenger.notifyFinal();
+      }
+      else {
+        if(pid == 1){
+          model.dealOne(model.player1);
+          delayedFunc(function(){
+            controller.opponentObtain();
+          }, 2);
         }
-        else {
+        else{
           model.dealOne(model.player0);
           model.checkMatch1();
           view.unblockGame();
