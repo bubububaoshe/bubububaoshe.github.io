@@ -26,14 +26,14 @@ class Controller{
         showPage("configurator");
     }, 2);
   }
-  activate(){
+  activate(event){
     var div = event.target.closest(".charcontainer");
     if (div != null) {
       var char = model.player1.hand.getChar(div.id);
       model.activate(char);
     }
   }
-  obtain(){
+  obtain(event){
     var div = event.target.closest(".charcontainer");
     if (div != null && div.firstElementChild.firstElementChild.classList.contains("glow")) {
       var handc = model.activeChar;
