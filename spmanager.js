@@ -157,7 +157,7 @@ class SPManager{
       setCookie(type+model.pack[i], arrs[i]);
   }
   loadSpecials(type){
-    var TEST = true;
+    var TEST = false;
     if (TEST) 
       //return COMPLETE_SPECIALS; // will become UNDEFINED upon restart?
       return [

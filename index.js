@@ -2,11 +2,7 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
-
-// 包含游戏的Model
-Model = require("./model.js");
-SPManager = require("./spmanager.js");
+var io = require('socket.io')(http, { origins: 'edgeofmap.com:*,bubububaoshe.github.io:*,localhost:*' });
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + "/index.html");
@@ -49,7 +45,7 @@ var g_is_verify = true;
 class PlayerMatcher {
 	constructor() {
 		this.match_queue = []; // 所有连上来的玩家
-		this.matched_pairs = []; // 
+		this.matched_pairs = []; 
 	}
 
 	OnNewPlayerReadyToMatch(p0) {
@@ -62,16 +58,21 @@ class PlayerMatcher {
 			var p0 = this.match_queue.pop();
 			var p1 = this.match_queue.pop();
 			this.matched_pairs.push([p0, p1]);
-			p0.emit("Match_FoundMatch", "已找到对手，请确认：");
-			p1.emit("Match_FoundMatch", "已找到对手，请确认：");
+			p0.can_be_found = false;
+			p1.can_be_found = false;
+			p0.matched = true;
+			p0.emit("Match_FoundMatch", p1.nickname, p1.avataridx, "已找到对手，请确认：");
+			p1.emit("Match_FoundMatch", p0.nickname, p0.avataridx, "已找到对手，请确认：");
 		}
 	}
 	
 	// P0 找 P1
 	BringTwoPlayersIntoPair(p0, p1) {
 	  this.matched_pairs.push([p0, p1]);
-	  p0.emit("Match_FoundMatch", "找到了这位小伙伴，请等待ta确认：");
-	  p1.emit("Match_FoundMatch", "玩家"+p0.player_id+"邀请你来一局，请确认是否开始：");
+	  p0.can_be_found = false;
+	  p1.can_be_found = false;
+	  p0.emit("Match_FoundMatch", p1.nickname, p1.avataridx, "找到了这位小伙伴，请等待ta确认：");
+	  p1.emit("Match_FoundMatch", p0.nickname, p0.avataridx, "玩家"+p0.player_id+"邀请你来一局，请确认是否开始：");
 	}
 
 	FindPairByPlayer(p) {
@@ -123,6 +124,8 @@ class PlayerMatcher {
 	    var other = null;
 	    if (pair[0] == p) other = pair[1]; else other = pair[0];
 	    other.emit('Match_OtherPlayerCancelsMatch');
+	    pair[0].can_be_found = true;
+	    pair[1].can_be_found = true;
 	  }
 	}
 	
@@ -377,20 +380,48 @@ class Game {
     }
   }
   
-  OnVoteRestart(socket) {
-    console.log('[OnVoteRestart] player ' + socket.player_id + ' votes to restart');
+  OnVotePlayAgain(socket) {
+    console.log('player ' + socket.player_id + ' votes to play again');
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
-      this.players[pidx].state = "voted_to_restart";
-      var other = this.players[1 - pidx];
-      if (other.state == "voted_to_restart") {
-        // Switch side & restart game
-        console.log('Starting new round');
-        var temp = this.players[1];
-        this.players[1] = this.players[0];
-        this.players[0] = temp;
-        this.Setup();
-      }
+      this.players[pidx].state = "voted_playagain";
+      this.CheckRestartState();
+    }
+  }
+  
+  OnVoteNotPlayAgain(socket) {
+    console.log('player ' + socket.player_id + ' votes to not play again');
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      this.players[pidx].state = "voted_not_playagain";
+      this.CheckRestartState();
+    }
+  }
+  
+  CheckRestartState() {
+    var state0 = this.players[0].state,
+        state1 = this.players[1].state;
+    if (state0 == "voted_playagain" && state1 == "voted_playagain") {
+      // Switch side & restart game
+      console.log('Starting new round');
+      var temp = this.players[1];
+      this.players[1] = this.players[0];
+      this.players[0] = temp;
+      this.Setup();
+    } else if ((state0 == "voted_playagain" && state1 == "voted_not_playagain") ||
+               (state0 == "voted_not_playagain" && state1 == "voted_not_playagain") ||
+               (state0 == "voted_not_playagain" && state1 == "voted_playagain")) {
+      console.log('Will not start new round, game ended.');
+      this.players[0].emit('Game_GotoMainMenu');
+      this.players[1].emit('Game_GotoMainMenu');
+      
+      // Destruct self
+      // No need to push to g_all_sockets again b/c socket's not removed unless a player gets offline
+      g_all_games.remove(this);
+      this.players[0].game = null;
+      this.players[1].game = null;
+      this.players[0].can_be_found = true;
+      this.players[1].can_be_found = true;
     }
   }
   
@@ -408,11 +439,30 @@ FindGameBySocket = function(socket) {
   return socket.game;
 }
 
+FindPlayerByIdOrNickname = function(socket, key) {
+  ret = [ ];
+  var N = g_all_sockets.length;
+  for (var i=0; i<N; i++) {
+    var s = g_all_sockets[i];
+    if (s == socket) continue;
+    else if (s == undefined) continue;
+    else if (s.can_be_found == false) continue;
+     
+    var name_match = (s.nickname.indexOf(key) != -1) || key=="";
+    var id_match = (s.player_id == key);
+    if (name_match || id_match) {
+      ret.push([s.player_id, s.nickname, s.avataridx]);
+    }
+  }
+  return ret;
+}
+
 // 抓到一个新连接
 io.on('connection', function(socket) {
 	g_all_sockets.push(socket);
 	socket.player_id = g_serial;
 	socket.match_confirmed = false;
+	socket.can_be_found = true; // 可否通过ID找到
 	g_serial += 1;
 	
 	socket.emit('Info_OnlinePlayerCount', g_all_sockets.length);
@@ -421,7 +471,7 @@ io.on('connection', function(socket) {
 	var bcast = true;
 	if (bcast) socket.broadcast.emit('Info_OnlinePlayerCount', g_all_sockets.length);
 	
-	console.log("player " + socket.player_id + " joined, " +
+	console.log("player " + socket.player_id + " joined, " + 
 	  g_all_sockets.length + " sockets, " + g_all_games.length + " games");
 
 	// 离线
@@ -437,7 +487,15 @@ io.on('connection', function(socket) {
 		  g_all_sockets.length + " sockets, " + g_all_games.length + " games");
 	});
 
-	socket.on('Match_ReadyToMatch', () => {
+	socket.on('Info_PlayerInfo', (nickname, avataridx) => {
+    socket.nickname = nickname;
+	  socket.avataridx = avataridx;
+	  console.log('Player Info: ID=' + socket.player_id + 
+	    ", nickname=" + nickname +
+	    ", avataridx=" + avataridx);
+	});
+	
+	socket.on('Match_ReadyToMatch', (nickname, avataridx) => {
 		g_playermatcher.OnNewPlayerReadyToMatch(socket);
 		g_playermatcher.MatchOnePair();
 	});
@@ -458,6 +516,12 @@ io.on('connection', function(socket) {
 	
 	socket.on('Info_RefreshOnlinePlayerCount', () => {
 	  socket.emit('Info_OnlinePlayerCount', g_all_sockets.length);
+	});
+	
+	socket.on('Match_FindOpponent', (key) => {
+	  var ret = FindPlayerByIdOrNickname(socket, key);
+	  console.log('FindOpponent [' + key + '] len='+ret.length);
+	  socket.emit('Match_FindOpponentResult', ret);
 	});
 	
 	// socket invites another player with iid
@@ -565,9 +629,14 @@ io.on('connection', function(socket) {
 	  if (g != null) g.OnOpponentObtainRedealClear(socket);
 	});
 	
-	socket.on('Game_VoteRestart', () => {
+	socket.on('Game_VotePlayAgain', () => {
 	  var g = FindGameBySocket(socket);
-	  if (g != null) g.OnVoteRestart(socket);
+	  if (g != null) g.OnVotePlayAgain(socket);
+	});
+	
+	socket.on('Game_VoteNotPlayAgain', () => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.OnVoteNotPlayAgain(socket);
 	});
 });
 

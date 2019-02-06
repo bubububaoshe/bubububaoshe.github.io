@@ -724,10 +724,20 @@ class View {
 }
 
 var sound, combos, model, controller, spmanager, messenger, view, oppoinfo, playerinfo, obtainVector;
+var avatar;
 var AI_LEVEL, COMBO_VOICE, SP_CARDS;
 
-function gamesetup(multiplayer = false){
-  is_multiplayer = multiplayer;
+function TearDownViews() {
+  var ids = ['hand1', 'hand0', 'pool', 'repository', 'table0', 'table1']
+  for (var i=0; i<ids.length; i++) {
+    var x = document.getElementById(ids[i]);
+    while (x.children.length > 0) {
+      x.removeChild(x.children[0]);
+    }
+  }
+}
+
+function gamesetup(){
   var pack = getInput("packinput");
   var p1 = parseInt(pack.charAt(1));
   var p2 = parseInt(pack.charAt(2));
@@ -742,8 +752,10 @@ function gamesetup(multiplayer = false){
   spmanager = new SPManager();
   messenger = new Messenger();
   view = new View();
+  TearDownViews();
   oppoinfo = new TableInfoView(model.player0);
   playerinfo = new TableInfoView(model.player1);
+  model.player1.avatar = avatar;
   showOpacity(document.getElementById("configurator"), false);
   model.setup();
   controller.gameinit();

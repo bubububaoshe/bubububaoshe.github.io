@@ -23,9 +23,10 @@ class Controller{
         controller.gameinit();
       }, 2);
     } else {
-      model.init();
-      console.log("Voted to restart");
-      socket.emit('Game_VoteRestart'); // Will swap defensive/offensive & restart if BOTH players click this button
+      ShowContinueDialog();
+      //model.init();
+      //console.log("Voted to restart");
+      //socket.emit('Game_VoteRestart'); // Will swap defensive/offensive & restart if BOTH players click this button
     }
   }
   activate(){
@@ -53,7 +54,7 @@ class Controller{
   }
   
   overSeasonRedeal() {
-    var STRESS = true;
+    var STRESS = false;
     if (STRESS == true) {
       console.log("S T R E S S    T E S T ! ! !");
       for (var i=0; i<10; i++) { // SMOKE TEST
@@ -345,6 +346,7 @@ class Controller{
     }
   }
   gamestart(){
+    console.log("haha");
     var should_skip = false;
     if (is_multiplayer == true && versus_rank == 0)
       should_skip = true; // changed in multiplayer
@@ -358,14 +360,21 @@ class Controller{
       
       // 初始化一个局面供调试珍稀牌功能用…
       model.start();
+    } else {
+      document.getElementById('avatarselection_blocker').style.display='block';
+      document.getElementById('offensive_wait_msg').style.display='block';
     }
     
     if(is_multiplayer == true) {
       if (versus_rank == 1) { // changed for multiplayer
         var s = model.getSnapshot();
-        console.log(s);
+        console.log('setup complete');
         socket.emit('Match_SetupComplete', PLAYER_SPECIALS[1], s);
+        document.getElementById('avatarselection_blocker').style.display='block';
+        document.getElementById('offensive_wait_msg').style.display='block';
+        // Wait for the other player to complete setup
       } else {
+        console.log('setup complete');
         socket.emit('Match_SetupComplete', PLAYER_SPECIALS[1], null);
       }
     }

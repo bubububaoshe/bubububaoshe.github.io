@@ -15,49 +15,13 @@
 	<link rel="stylesheet" type="text/css" href="tableinfo.css">
 </head>
 
-<body class="noselect">
+<body class="noselect" style="height:100%"> <!-- 100% height fix for FireFox! -->
 	<div id="configurator" class="flexbox transitopacity">
 		<div id="modeinput" class="segmented-control" style="width: 100%; color: #334422">
 			<input type="radio" name="gamemode" id="vs_ai"     checked onclick='SetGameMode(1);'>
 			<input type="radio" name="gamemode" id="vs_player" onclick='SetGameMode(2);'>
 			<label for="vs_ai"     data-value="独享的快乐">单人游戏</label>
 			<label for="vs_player" data-value="双倍的快乐">双人对战</label>
-		</div>
-		<hr/>
-		<div id="multiplayerinfo" style="width:100%; color:#112211">
-			<div style="width: 100%;">
-			<div id="lobbystatus">
-			当前在线人数：未知
-			</div>
-			<div id="myplayerid">
-			（ID）
-			</div>
-			<div id="refresh_lobbystatus">
-			[刷新]
-			</div>
-			</div>
-		</div>
-		<div id="multiplayertypeinput" class="segmented-control" style="width: 50%; color: #281B11">
-			<input type="radio" name="multiplayertype" id="multiplayertype1" checked>
-			<input type="radio" name="multiplayertype" id="multiplayertype2">
-			<label for="multiplayertype1" data-value="选人一起玩">选人一起玩</label>
-			<label for="multiplayertype2" data-value="随机匹配小伙伴">随机匹配小伙伴</label>
-		</div>
-		<div id="room_buttons" style="width: 100%; margin-bottom: 0.5vw; margin-top: 0.5vw">
-			<div id="inviteinput" class="inviteinput" style="width:35%">
-			对方ID：<input id="invitedid" type="text" size=5></input>
-			</div>
-			<div id="invitebutton">
-			邀请之
-			</div>
-			</div>
-			<div id="match_buttons" style="width: 100%; margin-bottom: 0.5vw; margin-top: 0.5vw">
-			<div id="start_match" style="background-color:#CCCC66;">随机寻找对手</div>
-			</div>
-			<div id="confirm_cancel_buttons" style="width:100%; margin-bottom: 0.5vw; margin-top: 0.5vw"> 
-			<div id="confirm_match" style="background-color:#66CC66;display:none">确认配对</div>
-			<div id="cancel_match" style="background-color:#CC6666;display:none">放弃配对</div>
-			<div style="background-color:#6666CC;" onclick='AUTOTEST_autostartmatch();'>放 弃 治 疗</div>
 		</div>
 		<hr/>
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
@@ -93,6 +57,77 @@
 			<label for="sp3" data-value="AI拥有所有珍稀牌">AI全珍稀牌</label>
 		</div>
 		<div id="comfirmSetting" class="confirmbutton">确定</div>
+		<div id="multiplayerinfo" style="width:100%; color:#112211; border: 1px #112211 solid; height: 16vw;">
+      <div id="avatar_and_nickname" style="width:50%; float:left;">
+      
+        <div style="height: 6vw">
+          <div id="avatar_nickname_hint" style="text-align:center;float:left;clear:both;">点击修改头像与昵称<br/>连线之后就不能改了</div>
+          <div id="curr_avatar" class="avatarpreview glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;" onclick="ShowAvatarSelectionMenu();"></div>
+          <div style="height: 6vw; margin-left: 0.5vw; vertical-align:middle; float:left;">
+            <input id="nickname_input" style="margin-top: 2vw; font-size:2vw; display:none"
+              type="text" size=10 onkeypress="NicknameInputKeypressEvent(event);"
+              blur="EndEditingNickname();"></input>
+            <div id="nickname_input_done" onclick="EndEditingNickname();" style="display:none;height:3vw">改好了</div>
+            <div id="nickname_disp" style="margin-top:1.5vw; font-size:2vw; display:block"
+              onclick="StartEditingNickname();">名字在这</div>
+          </div>
+        </div> <!-- End of 头像设置 -->
+      </div>
+      <div style="width:50%; float: left">
+        <!-- 连线前 -->
+        <div id="serverselect" class="segmented-control" style="width: 100%; color: #334422; opacity:0; display:none">
+            <input type="radio" name="servername" id="servername1">
+            <input type="radio" name="servername" id="servername2" checked>
+            <input type="radio" name="servername" id="servername3" disabled="true">
+            <label for="servername1" data-value="测试用服务器">localhost</label>
+            <label for="servername2" data-value="一号服务器">不要打雷</label>
+            <label for="servername3" data-value="不怕打雷" disabled>二号服务器</label>
+          </div>
+        <div id="connect_to_server" style="width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;" onclick='ConnectToServer();'>
+          [决定好了，连线]
+        </div>
+        <div id="reconnect" style="width:100%; height:5vw; background-color: #112211; display:none;">
+          <div style="margin-top:1.5vw; color:#fff" onclick='ReShowConnect();'>[重新尝试]</div>
+        </div>
+        
+        <!-- 连线后 -->
+        <!-- 当前服务器信息 -->
+        <div style="height:3vw; width:100%">
+          <div id="lobbystatus" style="float:left;"></div>
+          <div id="myplayerid" style="float:right; margin-right:1vw"></div>
+          <div style="clear:both;"></div>
+          <div id="refresh_lobbystatus" style="width:100%; display: none">
+            [刷新]
+          </div>
+        </div>
+        
+        <!-- 开始多人游戏 -->
+        <div id="multiplayerButtons" style="width:100%; display: none">
+          <div id="opponent_avatar_name" style="display:none">
+            <div style="height: 6vw">
+              <div id="oppo_avatar" class="avatarpreview glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;"></div>
+              <div style="height: 6vw; margin-left: 0.5vw; vertical-align:middle; float:left;">
+                <div id="oppo_nickname" style="margin-top:1.5vw; font-size:2vw; display:block">对手的名字
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="match_buttons" style="margin-bottom: 0.5vw; margin-top: 0.5vw">
+            <div id="find_opponent" class="multiplayerbutton" onclick="ShowOpponentFinderMenu();">查找玩家</div>
+            <div id="start_match" class="multiplayerbutton">随机匹配</div>
+          </div>
+          <div id="confirm_cancel_buttons" style="width:100%; margin-bottom: 0.5vw; margin-top: 0.5vw"> 
+            <div id="confirm_match" class="multiplayerbutton" style="background-color:#66CC66;display:none">确认</div>
+            <div id="cancel_match" class="multiplayerbutton" style="background-color:#CC6666;display:none">放弃</div>
+            <div style="clear: both; width:100%;"></div>
+            <div style="display:none;background-color:#6666CC;" onclick='AUTOTEST_autostartmatch();'>放 弃 治 疗</div>
+          </div>
+        </div>
+        
+      </div>
+      <div style="clear:both; width:100%;"></div>
+      <div>&nbsp;</div>
+		</div>
 	</div>
 	<div id="spselection" class="transitopacity">
 		<div class="selectionarea verticalflex">
@@ -111,7 +146,97 @@
 			<div id="gamestart" class="centeredtext"><div>开始
 游戏</div></div>
 		</div>
-	</div>
+	</div> <!-- End Configurator -->
+	
+	<div id="avatarselection" style="position: absolute; width: 100%; top:20%; height: 0; color: #EEE; text-align: center; z-index:100; transition:height 0.7s; overflow:hidden">
+    <div style="width: 60%; margin-left: 20%; background-color: #281B11; height: 40vw;  border: 1px #EEE solid;">
+      头像选择<br/>
+      <div class="backbutton" onclick="CloseAvatarSelectionMenu();"></div>
+      <span style="color: #999; font-size:1.3vw;">头像不会影响游戏流程，只是为了增加辨识度。</span>
+      <div style="overflow-y: scroll; font-size: 1.5vw; height:34vw" id="avatar_choices">
+        <!--
+        <div class="avatarsmallwrapper">
+          <div class="avatarpreview glow" style="background-image:url('avatars/avatar1.png'); margin-left:1vw"></div>
+          <div>鼎剑峰</div>
+        </div>
+        <div class="avatarsmallwrapper">
+          <div class="avatarpreview" style="background-image:url('avatars/avatar2.png'); margin-left:1vw"></div>
+          <div>百草谷</div>
+        </div>
+        <div class="avatarsmallwrapper">
+          <div class="avatarpreview" style="background-image:url('avatars/avatar3.png'); margin-left:1vw"></div>
+          <div>补天岭隘口</div>
+        </div>
+        -->
+      </div>
+    </div>
+  </div>
+  
+  <div id="opponentfinder" style="position: absolute; width: 100%; top: 25%; height: 0; color: #EEE; text-align: center;  z-index:100; transition: height 0.7s; overflow: hidden">
+    <div style="width: 60%; margin-left: 20%; background-color: #281B11; height: 26vw;  border: 1px #EEE solid;">
+    查找玩家<br/>
+      <div style="position:absolute; left:20%; top:0;"> <!-- Top Row -->
+        <div onclick="CloseOpponentFinderMenu();" style="width:4vw;height:4vw;background-size:100% 100%;background-image:url('avatars/back.png');float:left;"></div>
+        <div style="float:left;">
+          <div style="width:5vw; float:left; text-align: center; margin-left:1vw; margin-top: 0.5vw;">
+            <div id="oppofind_my_avatar" class="avatarpreview_small glow" style="background-image:url('avatars/avatar1.png'); margin-left:1vw"></div>
+          </div>
+          <div style="float:left; text-align:left;">
+            <div id="oppofind_my_nickname"></div>
+            <div id="oppofind_my_playerid"></div>
+          </div>
+        </div>
+      </div>
+      <span style="color: #999; font-size: 1.3vw;">可以输入昵称的一部分或临时ID来查找</span>
+    
+      <div style="clear:both;width:100%;"></div>
+      <hr/>
+      
+      <div id="room_buttons" style="margin-bottom: 0.5vw; margin-top: 0.5vw;">
+        <div id="inviteinput" class="inviteinput" style="float:left;">
+        ID或昵称：<input id="invitedid" type="text" size=10></input>
+        </div>
+        <div id="invitebutton" style="width:8vw; height:3vw; float:left; background-color:#442">
+        查找
+        </div>
+        <div id="find_opponent_info" style="float:left;">如果什么都不输入，就随机返回</div>
+        <div style="clear:both;"></div>
+        
+        <div id="opponentsearchresult" style="overflow-y:scroll;">
+          <!--
+          <div class="avatarsmallwrapper">
+            <div class="avatarpreview glow" style="background-image:url('avatars/avatar1.png'); margin-left:1vw"></div>
+            <div>呱呱呱</div>
+          </div>
+          <div class="avatarsmallwrapper">
+            <div class="avatarpreview" style="background-image:url('avatars/avatar2.png'); margin-left:1vw"></div>
+            <div>喵喵喵</div>
+          </div>
+          <div class="avatarsmallwrapper">
+            <div class="avatarpreview" style="background-image:url('avatars/avatar3.png'); margin-left:1vw"></div>
+            <div>汪汪汪</div>
+          </div>
+          -->
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="continuedialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:0px;">
+    <div style="color:#7a614f">还继续玩吗？</div>
+    <div style="color:#999">只有双方都选“继续玩”才会新开一局，不然就返回主菜单啦。</div>
+    <div style="width:24vw; margin-left:auto; margin-right:auto;">
+      <div id="vote_play_again" class='continue_dialog_button' onclick="VotePlayAgain();">
+      继续玩
+      </div>
+      <div id="vote_not_play_again" class='continue_dialog_button' onclick="VoteNotPlayAgain();">
+      不玩了
+      </div>
+      <div style="clear:both; width:100%;"></div>
+    </div>
+    <div id="vote_playagain_msg" style="color:#EEE;width:100%";></div>
+  </div>
+	
 	<div id="main">
 		<div id="scoreboard">
 			<div id="table0" class="cardstack"></div>
@@ -216,6 +341,14 @@
 			</div>
 		</div>
 	</div>
+	
+	<div id="avatarselection_blocker" style="position:absolute; top:0; left:0; width:100%; height:100%; background-color:#EBE6DF; opacity:0.6; z-index:99; display:none"></div>
+	<div id="offensive_wait_msg" style="width:100%;position:absolute;top:50%;z-index:100;display:none;">
+	  <div style="width:40vw;margin-left:auto;margin-right:auto;background-color:#281B11;border:1px #FFF solid;z-index:100;color:#EEE;font-size:2vw;">
+	  请等待另一名玩家选择完特殊牌
+	  </div>
+	</div>
+	
 	<audio id="soundeffect" src=""></audio>
 </body>
 </html>
@@ -225,10 +358,24 @@
 <script src="spmanager.js"></script>
 <script src="tableinfoview.js"></script>
 <script src="view.js"></script>
-<script src="/socket.io/socket.io.js"></script>
+<script src="avatar.js"></script>
+<script src="socket.io/socket.io.js"></script>
 <script type="text/javascript">
 
+  // 选取头像的面板
+  PopulateAvatarChoicePanel(document.getElementById('avatar_choices'));
+  avatar = new Avatar(0, 'url("avatars/avatar1.png")');
+  avatar.LoadFromCookie();
+  UpdateAvatarPreview();
+  
+  // Test
+  //if (window.location.href.indexOf('http://localhost/') == 0) {
+  //  document.getElementById('serverselect').style.display="block";
+  //  document.getElementById('servername1').click();
+  //}
+
   // New variables for multiplayer mode
+  var socket = null;
   var is_my_move = false;
   var g_my_player_id = -999;
   var is_multiplayer = false;
@@ -273,25 +420,36 @@
     document.getElementById("start_match").style.display = "inline-block";
     document.getElementById("confirm_match").style.display = "none";
     document.getElementById("cancel_match").style.display = "none";
+    document.getElementById('find_opponent').style.display = 'block';
+    HideOpponentAvatarPreview();
   });
-  document.getElementById("multiplayertype1").addEventListener("click", function(){
-    SetMultiplayerMode(1);
-  });
-  document.getElementById("multiplayertype2").addEventListener("click", function(){
-    SetMultiplayerMode(2);
-  });
+  //document.getElementById("multiplayertype1").addEventListener("click", function(){
+  //  SetMultiplayerMode(1);
+  //});
+  //document.getElementById("multiplayertype2").addEventListener("click", function(){
+  //  SetMultiplayerMode(2);
+  //});
   
   function SetGameMode(m) {
+    var x1 = document.getElementById('comfirmSetting');
+    var x3 = document.getElementById('aiinput');
+    var x4 = document.getElementById('spinput');
+    var x6 = document.getElementById('multiplayerinfo');
+    var x7 = document.getElementById('serverselect');
     if (m == 1) { // 单人模式
-      //document.getElementById("multiplayerinputs").style.display="none";
-      document.getElementById("singleplayerinputs").style.display="block";
+      x1.style.display = 'block';
+      x3.style.display = 'block';
+      x4.style.display = 'block';
+      x6.style.display = 'none';
+      x7.style.display = 'none';
+      is_multiplayer = false;
     } else { // 对战模式
-      //document.getElementById("multiplayerinputs").style.display="block";
-      //document.getElementById("singleplayerinputs").style.display="none";
-      
-      document.getElementById("start_match").style.display = "inline-block";
-      document.getElementById("confirm_match").style.display = "none";
-      document.getElementById("cancel_match").style.display = "none";
+      x1.style.display = 'none';
+      x3.style.display = 'none';
+      x4.style.display = 'none';
+      x6.style.display = 'block';
+      x7.style.display = 'block';
+      is_multiplayer = true;
     }
   }
   function SetMultiplayerMode(m) {
@@ -303,18 +461,12 @@
   // 多人的Step2：如果是邀请 就需要输入对方ID
   //            如果是随机 就要按一下”随机寻找对手“
   function ShowMultiplayerStep2() {
-    if (document.getElementById('multiplayertype1').checked == true) { // 邀
-      document.getElementById("room_buttons").style.display = "block";
-      document.getElementById("match_buttons").style.display = "none";
-    } else if (document.getElementById('multiplayertype2').checked == true) {
-      document.getElementById("room_buttons").style.display = "none";
-      document.getElementById("match_buttons").style.display = "block";
-    }
+    //document.getElementById("room_buttons").style.display = "none";
+    document.getElementById("match_buttons").style.display = "block";
   }
   
   function HideMultiplayerStep2() {
-    document.getElementById("room_buttons").style.display = "none";
-    document.getElementById("match_buttons").style.display = "none";
+    //document.getElementById("room_buttons").style.display = "none";
   }
   
   function ShowMultiplayerStep3() {
@@ -335,72 +487,314 @@
     document.getElementById('prestriction2').disabled = false;
   }
   
+  // 从【似乎没有连上】来此
+  function ReShowConnect() {
+    document.getElementById('serverselect').style.display = 'block';
+    document.getElementById('connect_to_server').style.display = 'block';
+    document.getElementById('reconnect').style.display = 'none';
+    lobbystatus.textContent = '';
+  }
+  
   // 邀请指定玩家
   // 如果邀请成功就当作匹配成功来处理...
   document.getElementById("invitebutton").addEventListener("click", function(){
-    var invited_id = document.getElementById("invitedid").value;
-    console.log('Invite ' + invited_id);
-    socket.emit('Match_InvitePlayer', invited_id);
+    var key = document.getElementById("invitedid").value;
+    //console.log('Invite ' + invited_id);
+    //socket.emit('Match_InvitePlayer', invited_id);
+    console.log('FindOpponent ' + key);
+    socket.emit('Match_FindOpponent', key);
   });
   
   // 开始匹配
   document.getElementById("start_match").addEventListener("click", function() {
-    socket.emit('Match_ReadyToMatch');
+    document.getElementById('find_opponent').style.display = 'none';
+    socket.emit('Match_ReadyToMatch', avatar.idx);
   });
   document.getElementById("confirm_match").addEventListener("click", function() {
     socket.emit('Match_ConfirmMatch');
   });
   // 来自服务器的消息
   var lobbystatus = document.getElementById("lobbystatus");
-  socket = io.connect();
-  socket.on('Info_OnlinePlayerCount', function(n) {
-    lobbystatus.innerHTML = "当前人数："+n;
-  });
-  socket.on('Info_MyPlayerId', function(pid) {
-    g_my_player_id = pid;
-    document.getElementById('myplayerid').textContent = 'ID: ' + pid;
-  });
-  socket.on('Match_ReadyToMatchAck', function() {
-    document.getElementById("start_match").style.display = "none";
-    document.getElementById("confirm_match").style.display = "none";
-    document.getElementById("cancel_match").style.display = "inline-block";
-    lobbystatus.innerHTML = "正在寻找同伴中";
-  });
-  socket.on('Match_FoundMatch', function(reason) {
-    // 邀请模式下，如果找到了被邀请的人，也走这里
-    HideMultiplayerStep2();
-    ShowMultiplayerStep3();
+  // Cross domain
+  
+  function DisableConnectButton() {
+    var x = document.getElementById('connect_to_server');
+  }
+  
+  function ConnectToServer() {
+    document.getElementById('vs_ai').disabled="disabled";
+    document.getElementById('avatar_nickname_hint').innerHTML = "<br/><br/>";
+    lobbystatus.textContent = '连线中・・・';
+    if (socket != null && socket.connected == true) {
+      lobbystatus.textContent = '已经连线啦。不用再连啦。';
+      return;
+    }
     
-    document.getElementById("start_match").style.display = "none";
-    document.getElementById("confirm_match").style.display = "inline-block";
-    document.getElementById("cancel_match").style.display = "inline-block";
-    lobbystatus.innerHTML = reason;
-  });
-  socket.on('Match_ConfirmMatchAck', function(msg) {
-    lobbystatus.innerHTML = msg;
-  });
-  socket.on('Match_OtherPlayerConfirmed', function() {
-    lobbystatus.innerHTML = "对方玩家已确认";
-  });
+    { // Hide UI elements
+      var ids = ['serverselect', 'connect_to_server'];
+      for (var i=0; i<ids.length; i++)
+        document.getElementById(ids[i]).style.display = 'none';
+    }
+    
+    delayedFunc(function() {
+      if (socket.connected == false) {
+        lobbystatus.textContent = '似乎没有连上...'
+        document.getElementById('reconnect').style.display = 'block';
+        document.getElementById('vs_ai').disabled = null;
+        document.getElementById('avatar_nickname_hint').opacity = 1;
+      }
+    }, 10);
+    
+    var s = 'localhost:3000';
+    if (document.getElementById('servername2').checked == true) s = '47.75.12.130:3000';
+    console.log('server:' + s);
+    socket = io(s);
+    console.log(socket);
+    
+    // Set callbacks
+    socket.on('Info_OnlinePlayerCount', function(n) {
+      lobbystatus.innerHTML = "当前人数："+n;
+    });
+    
+    socket.on('Info_MyPlayerId', function(pid) {
+      g_my_player_id = pid;
+      document.getElementById('myplayerid').textContent = '临时ID: ' + pid;
+      // Respond = my avatar idx & nickname
+      socket.emit('Info_PlayerInfo', avatar.GetNickname(), avatar.idx);
+    });
+    
+    socket.on('Match_ReadyToMatchAck', function() {
+      document.getElementById("start_match").style.display = "none";
+      document.getElementById("confirm_match").style.display = "none";
+      document.getElementById("cancel_match").style.display = "inline-block";
+      lobbystatus.innerHTML = "正在寻找同伴中";
+    });
+    
+    // o: [ID, Nickname, AvatarIdx]
+    socket.on('Match_FindOpponentResult', function(o) {
+      console.log('FindOpponentResult:');
+      console.log(o);
+      PopulateFoundOpponentList(o);
+    });
+    
+    socket.on('Match_FoundMatch', function(oppo_nickname, oppo_avataridx, reason) {
+      // 邀请模式下，如果找到了被邀请的人，也走这里
+      HideMultiplayerStep2();
+      ShowMultiplayerStep3();
+      document.getElementById('find_opponent').style.display='none';
+      document.getElementById("start_match").style.display = "none";
+      document.getElementById("confirm_match").style.display = "inline-block";
+      document.getElementById("cancel_match").style.display = "inline-block";
+      lobbystatus.innerHTML = reason;
+      CloseOpponentFinderMenu();
+      ShowOpponentAvatarPreview(oppo_nickname, oppo_avataridx);
+    });
+    
+    socket.on('Match_ConfirmMatchAck', function(msg) {
+      lobbystatus.innerHTML = msg;
+    });
+    
+    socket.on('Match_OtherPlayerConfirmed', function() {
+      lobbystatus.innerHTML = "对方玩家已确认";
+    });
+    
+    var AUTOTEST = true;
+    socket.on('Room_PlayerDisconnected', () => {
+      console.log('对方玩家已离线');
+    });
+    
+    socket.on('Match_OtherPlayerCancelsMatch', () => {
+      HideMultiplayerStep3();
+      ShowMultiplayerStep2();
+      document.getElementById('lobbystatus').textContent = '对方取消了匹配';
+      document.getElementById("start_match").style.display = "inline-block";
+      document.getElementById("confirm_match").style.display = "none";
+      document.getElementById("cancel_match").style.display = "none";
+      document.getElementById('find_opponent').style.display = 'block';
+      HideOpponentAvatarPreview();
+    });
+    
+    socket.on('Match_InvalidInvitation', (reason) => {
+      lobbystatus.textContent = reason;
+      console.log('邀请不成功' + reason);
+    });
+    
+    // sp evts
+    socket.on('Match_GameSetupOffensive', () => { // 先手开局
+      console.log('[先手选取特殊牌]');
+      versus_rank = 1;
+      gamesetup(true);
+      
+      
+      ShowVotePlayAgainForNewRound();
+    });
+    
+    socket.on('Match_GameSetupDefensive', (p0c, p1c, poolc, repoc) => { // 后手开局
+      console.log('[后手选取特殊牌]');
+      versus_rank = 0;
+      gamesetup(true);
+      
+      ShowVotePlayAgainForNewRound();
+    });
+    
+    socket.on('Match_GameInitOffensive', (other_sp) => {
+      console.log('[先手开局] other_sp='+other_sp);
+      document.getElementById('avatarselection_blocker').style.display='none';
+      document.getElementById('offensive_wait_msg').style.display='none';
+      messenger.hideFinalNotice(); // If from restart
+      OtherPlayerSpecialCardFixup(other_sp);
+    });
+    
+    socket.on('Match_GameInitDefensive', (other_sp, snapshot) => {
+      console.log('[后手开局], other_sp=' + other_sp);
+      document.getElementById('avatarselection_blocker').style.display='none';
+      document.getElementById('offensive_wait_msg').style.display='none';
+      messenger.hideFinalNotice(); // if from restart
+      
+      //       p0sp中的0表示后手          后一个1表示自己
+      snapshot.p0sp = PLAYER_SPECIALS[1].splice(0);
+      console.log(snapshot)
+      // 后手不用fixup，但是因为对方送来的snapshot里没有自己的specials，所以要加入
+      
+      controller.gamestartDefensive(snapshot);
+      OtherPlayerSpecialCardFixup(other_sp);
+    });
+    
+    socket.on('Game_SelfTurn', (turn_idx) => {
+      is_my_move = true;
+      var delay = 0;
+      // 2 turns = 1回合
+      delayedFunc(function() {
+        messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]该你出牌了');
+      }, delay);
+      model.checkMatch1(); // 压力测试时发现似乎要加一下这个？头有点晕 @_@
+      console.log('>>> 我方行动');
+    });
+    
+    // barrier: 这个要等待对方的动作都播放完成
+    socket.on('Game_OpponentTurn', (turn_idx) => {
+      view.blockGame();
+      is_my_move = false;
+      
+      var delay = 0;
+      delayedFunc(function() {
+        messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]对方出牌');
+      }, delay);
+      
+      console.log('>>> 对方行动');
+    });
+    
+    
+    // Will replay a whole sequce of actions
+    socket.on('Game_OpponentObtain', (obtain_actions) => {
+      console.log('对方obtain有 ' + obtain_actions.length + ' 个动作');
+      remoteObtainActions = obtain_actions;
+      // 如果延迟执行opponentObtain中的redeal()，那么“播放对方动作”
+      // 的事件将由OpponentObtain触发。
+      
+      var obtain_ids = GetNextObtainAction(obtain_actions);
+      controller.opponentObtain(obtain_ids[0], obtain_ids[1]);
+    });
+    
+    socket.on('Game_OpponentDiscardOne', (discarded_id, added_id) => {
+      console.log('OpponentDiscardOne ' + discarded_id + ", " + added_id);
+      model.opponentDiscard(discarded_id, added_id);
+    });
+    
+    socket.on('Game_OpponentRedeal', (pool_ids, repo_ids) => {
+      console.log('Opponent Redeal');
+      model.redeal(pool_ids, repo_ids);
+    });
+    
+    socket.on('Game_OpponentPostObtainDealOne', (dealt_id) => {
+      console.log("[Opponent's postObtain DealOne] " + dealt_id);
+      model.dealOne(model.player0, dealt_id);
+    });
+    
+    socket.on('Game_OpponentGameEnd', () => {
+      messenger.notifyFinal();
+    });
+   
+    socket.on('connect', () => {
+      document.getElementById('reconnect').style.display = 'none';
+      document.getElementById('multiplayerButtons').style.display = 'block';
+    }); 
+    
+    socket.on('Game_GotoMainMenu', () => {
+      document.getElementById('vote_playagain_msg').textContent = '因为大家没有都选继续，所以就返回主界面啦。';
+      delayedFunc(function() {
+        GotoMainMenu();
+        document.getElementById('vote_playagain_msg').textContent = '';
+      }, 7);
+    });
+  } // End ConnectToServer
+  
+  function ShowContinueDialog() {
+    document.getElementById('avatarselection_blocker').style.display='block';
+    ShowVotePlayAgainButtons(true);
+    document.getElementById('continuedialog').style.display = 'block';
+    delayedFunc(function() {
+      document.getElementById('continuedialog').style.height = '14vw';
+    }, 0.1);
+  }
+  
+  function ShowVotePlayAgainButtons(is_shown) {
+    var ids = [ 'vote_play_again', 'vote_not_play_again' ];
+    for (var i=0; i<2; i++) {
+      if (is_shown == true) {
+        document.getElementById(ids[i]).style.display = "block";
+      } else {
+        document.getElementById(ids[i]).style.display = "none";
+      }
+    }
+  }
+  
+  function ShowVotePlayAgainForNewRound(is_new_round) {
+    if (is_new_round == true) {
+      document.getElementById('vote_playagain_msg').textContent = '嗯新开一局就这么决定啦！';
+    } else {
+      document.getElementById('vote_playagain_msg').textContent = '（：';
+    } 
+    ShowVotePlayAgainButtons(false);
+    delayedFunc(function() {
+      document.getElementById('continuedialog').style.height = '0vw';
+      document.getElementById('vote_playagain_msg').textContent = '';
+    }, 4);
+    
+    delayedFunc(function() {
+      document.getElementById('continuedialog').style.display = 'none';
+      document.getElementById('avatarselection_blocker').style.display='none';
+      ShowVotePlayAgainButtons(true);
+    }, 6);
+  }
+  
+  function VotePlayAgain() {
+    if (is_multiplayer == true) {
+      model.init(); // 在重新开始之前总是要init()一下的
+      ShowVotePlayAgainButtons(false);
+      document.getElementById('vote_playagain_msg').textContent = '正在等待另一名玩家的决定...';
+      socket.emit('Game_VotePlayAgain');
+    } else {
+      console.log('Restart new round ...');
+      ShowVotePlayAgainForNewRound();
+      gamesetup(false);
+    }
+  }
+  
+  function VoteNotPlayAgain() {
+    if (is_multiplayer == true) {
+      ShowVotePlayAgainButtons(false);
+      document.getElementById('vote_playagain_msg').textContent = '正在等待另一名玩家的决定...';
+      model.init(); // 在重新开始之前总是要init()一下的
+      socket.emit('Game_VoteNotPlayAgain');
+    }
+  }
 
-  var AUTOTEST = true;
-  socket.on('Room_PlayerDisconnected', () => {
-    console.log('对方玩家已离线');
-  });
-  
-  socket.on('Match_OtherPlayerCancelsMatch', () => {
-    HideMultiplayerStep3();
-    ShowMultiplayerStep2();
-    document.getElementById('lobbystatus').textContent = '对方取消了匹配';
-    document.getElementById("start_match").style.display = "inline-block";
-    document.getElementById("confirm_match").style.display = "none";
-    document.getElementById("cancel_match").style.display = "none";
-  });
-  
-  socket.on('Match_InvalidInvitation', (reason) => {
-    lobbystatus.textContent = reason;
-    console.log('邀请不成功' + reason);
-  });
+  function GotoMainMenu() {
+    showOpacity(document.getElementById('main'), false);
+    showOpacity(document.getElementById('spselection'), false);
+    showOpacity(document.getElementById('configurator'), true);
+  }
   
   // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
   function sleep(ms) {
@@ -528,23 +922,6 @@
   
   // 默认打开多人模式
   document.getElementById('vs_player').click();
-  document.getElementById('multiplayertype2').click();
-  
-  
-  // sp evts
-  
-  socket.on('Match_GameSetupOffensive', () => { // 先手开局
-    console.log('[先手选取特殊牌]');
-    versus_rank = 1;
-    gamesetup(true);
-  });
-  
-  socket.on('Match_GameSetupDefensive', (p0c, p1c, poolc, repoc) => { // 后手开局
-    console.log('[后手选取特殊牌]');
-    versus_rank = 0;
-    gamesetup(true);
-  });
-  
   function OtherPlayerSpecialCardFixup(other_sp) {
     model.player0.specials.clear();
     var temp_sp = new Repository("special");
@@ -559,55 +936,8 @@
       if(!model.player0.hand.toSpecial(idx, model.player0.specials))
         idx ++;
     }
-    // <-- Deck.initDeck
-    
+    // <-- Deck.initDeck  
   }
-  
-  socket.on('Match_GameInitOffensive', (other_sp) => {
-    console.log('[先手开局] other_sp='+other_sp);
-    messenger.hideFinalNotice(); // If from restart
-    OtherPlayerSpecialCardFixup(other_sp);
-  });
-  
-  socket.on('Match_GameInitDefensive', (other_sp, snapshot) => {
-    console.log('[后手开局], other_sp=' + other_sp);
-    messenger.hideFinalNotice(); // if from restart
-    
-    //       p0sp中的0表示后手          后一个1表示自己
-    snapshot.p0sp = PLAYER_SPECIALS[1].splice(0);
-    console.log(snapshot)
-    // 后手不用fixup，但是因为对方送来的snapshot里没有自己的specials，所以要加入
-    
-    controller.gamestartDefensive(snapshot);
-    OtherPlayerSpecialCardFixup(other_sp);
-  });
-  
-  socket.on('Game_SelfTurn', (turn_idx) => {
-    
-    is_my_move = true;
-    
-    var delay = 0;
-    // 2 turns = 1回合
-    delayedFunc(function() {
-      messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]该你出牌了');
-    }, delay);
-    
-    model.checkMatch1(); // 压力测试时发现似乎要加一下这个？头有点晕 @_@
-    console.log('>>> 我方行动');
-  });
-  
-  // barrier: 这个要等待对方的动作都播放完成
-  socket.on('Game_OpponentTurn', (turn_idx) => {
-    view.blockGame();
-    is_my_move = false;
-    
-    var delay = 0;
-    delayedFunc(function() {
-      messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]对方出牌');
-    }, delay);
-    
-    console.log('>>> 对方行动');
-  });
   
   // Action sequence from last turn
   // returns null if the buffer hath underfloweth 
@@ -646,36 +976,6 @@
     if (remoteObtainActions.length < 1) return null;
     else return remoteObtainActions[0][0];
   }
-  
-  // Will replay a whole sequce of actions
-  socket.on('Game_OpponentObtain', (obtain_actions) => {
-    console.log('对方obtain有 ' + obtain_actions.length + ' 个动作');
-    remoteObtainActions = obtain_actions;
-    // 如果延迟执行opponentObtain中的redeal()，那么“播放对方动作”
-    // 的事件将由OpponentObtain触发。
-    
-    var obtain_ids = GetNextObtainAction(obtain_actions);
-    controller.opponentObtain(obtain_ids[0], obtain_ids[1]);
-  });
-  
-  socket.on('Game_OpponentDiscardOne', (discarded_id, added_id) => {
-    console.log('OpponentDiscardOne ' + discarded_id + ", " + added_id);
-    model.opponentDiscard(discarded_id, added_id);
-  });
-  
-  socket.on('Game_OpponentRedeal', (pool_ids, repo_ids) => {
-    console.log('Opponent Redeal');
-    model.redeal(pool_ids, repo_ids);
-  });
-  
-  socket.on('Game_OpponentPostObtainDealOne', (dealt_id) => {
-    console.log("[Opponent's postObtain DealOne] " + dealt_id);
-    model.dealOne(model.player0, dealt_id);
-  });
-  
-  socket.on('Game_OpponentGameEnd', () => {
-    messenger.notifyFinal();
-  });
   
   // AUTO TEST START
   //AUTOTEST_autostartmatch();
@@ -819,22 +1119,16 @@
               break;
             }
           }
-          
           if (activated == true) break;
         }
-        
         if (activated == false) { // 可能是只有一张牌且无法打出的情况，点击之
           if (model.player1.hand.characters[0] != undefined)
             model.player1.hand.characters[0].card.card.click();
           await sleep(1000);
         }
-        
         // do we need to select target ?
-        
-        
         await sleep(1000);
       }
-        
       // obtain
     }
   }
