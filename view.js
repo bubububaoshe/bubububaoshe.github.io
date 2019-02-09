@@ -121,6 +121,7 @@ class Sound{
     const playPromise = sound.audio.play();
     if (playPromise !== null){
         playPromise.catch(() => {//sound.audio.play();
+            console.log('promisedPlay has caught an exception');
         })
     }
   }
@@ -131,8 +132,9 @@ class Sound{
   discard(){this.play("discard");}
   draw(){this.play("draw");}
   combovoice(nextFunc,name){
+    console.log('>>combovoice');
     var onetimeFunc=function(){
-        nextFunc.call();
+        nextFunc.call();  
         sound.audio.removeEventListener("ended", onetimeFunc);
     };
     this.audio.addEventListener("ended", onetimeFunc);
@@ -425,6 +427,7 @@ class Messenger {
     });
   }
   notifyPlayerCombo(preScore, comboCount, combos){
+    console.log('>>>notifyPlayerCombo ' + preScore + " " + comboCount + " " + combos);
     if(comboCount > 0){
       var combo = combos[--comboCount];
       var inc = combo.getFullScore();
@@ -436,21 +439,52 @@ class Messenger {
       for(var i=0; i<chars.length; i++)
         posters.appendChild(messenger.createBannerPoster(chars[i]));
       showOpacity(banner, true);
-      var nextFunc = function(){
-        banner.style.opacity = 0;
-        delayedFunc(function(){
-          banner.style.visibility = "hidden";
-          posters.textContent = "";
-          messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
-        },1);
+      //var nextFunc = function(){
+      //  banner.style.opacity = 0;
+      //  delayedFunc(function(){
+      //    banner.style.visibility = "hidden";
+      //    posters.textContent = "";
+      //    messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
+      //  },1);
+      //}
+      //sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
+      
+      // Fix for mobile Chrome-based browsers
+      var name = (COMBO_VOICE == "voiceoff")?"combo":combo.getInit();
+      sound.audio.src = "combomp3/" + name + ".mp3";
+      const promise = sound.audio.play();
+      if (promise !== null) {
+        promise.then(() => {
+          console.log(promise);
+          var dur = sound.audio.duration;
+          console.log('duration of ' + name + ' = ' + dur);
+          
+          delayedFunc(function() {
+            banner.style.opacity = 0;
+          }, dur);
+          
+          delayedFunc(function(){
+            banner.style.visibility = "hidden";
+            posters.textContent = "";
+            messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
+          }, 2*(1 + dur)); // in units of 0.5 seconds
+        }).catch(error => {
+          console.log(error);
+          delayedFunc(function(){
+            banner.style.visibility = "hidden";
+            posters.textContent = "";
+            messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
+          },3);
+        });
       }
-      sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
     }
     else {
       controller.postObtain(1);
     }
+    console.log('<<<notifyPlayerCombo ' + preScore + " " + comboCount + " " + combos);
   }
   notifyOppoCombo(preScore, comboCount, combos){
+    console.log(">>>notifyOppoCombo " + preScore + " " + comboCount + " " + combos);
     if(comboCount > 0){
       var combo = combos[--comboCount];
       var inc = combo.getFullScore();
@@ -472,15 +506,42 @@ class Messenger {
         for(var i=0; i<chars.length; i++)
           posters.appendChild(messenger.createBannerPoster(chars[i]));
         showOpacity(banner, true);
-        var nextFunc = function(){
-          banner.style.opacity = 0;
+        //var nextFunc = function(){
+        //  banner.style.opacity = 0;
+        //  delayedFunc(function(){
+        //    banner.style.visibility = "hidden";
+        //    posters.textContent = "";
+        //    messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
+        //  },1);
+        //}
+        //sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
+        var name = (COMBO_VOICE == "voiceoff")?"combo":combo.getInit();
+      sound.audio.src = "combomp3/" + name + ".mp3";
+      const promise = sound.audio.play();
+      if (promise !== null) {
+        promise.then(() => {
+          console.log(promise);
+          var dur = sound.audio.duration;
+          console.log('duration of ' + name + ' = ' + dur);
+          
+          delayedFunc(function() {
+            banner.style.opacity = 0;
+          }, dur);
+          
           delayedFunc(function(){
             banner.style.visibility = "hidden";
             posters.textContent = "";
             messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
-          },1);
-        }
-        sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
+          }, 2*(1 + dur));
+        }).catch(error => {
+          console.log(error);
+          delayedFunc(function(){
+            banner.style.visibility = "hidden";
+            posters.textContent = "";
+            messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
+          },3);
+        });
+      }
       }
     }
   }
@@ -675,8 +736,12 @@ class View {
     view.swappedObtain(player, obtainVector.chars[1], obtainVector.swapChars[1]);
     messenger.animeScoreInc(player.id, obtainVector.preScore, charInc);
     if(player.id == 0){
+      // Make a copy of player.completeCombos?
+      var combos_copy = player.completeCombos.splice();
       messenger.notifyOppoCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
+      console.log('>>> controller.postObtain(0)');
       controller.postObtain(0);
+      console.log('>>> controller.postObtain(0)');
     }
     else {
       obtainVector.getHandChar().card.removeController(controller.activate);

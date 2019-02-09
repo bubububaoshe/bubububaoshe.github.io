@@ -75,7 +75,7 @@
       </div>
       <div style="width:50%; float: left">
         <!-- 连线前 -->
-        <div id="serverselect" class="segmented-control" style="width: 100%; color: #334422; opacity:0; display:none">
+        <div id="serverselect" class="segmented-control" style="width: 100%; color: #334422; opacity:1; display:none">
             <input type="radio" name="servername" id="servername1">
             <input type="radio" name="servername" id="servername2" checked>
             <input type="radio" name="servername" id="servername3" disabled="true">
@@ -403,10 +403,14 @@
     turnActionCount -= 1;
     if (turnActionCount == 0) {
       console.log('<<< 行动完了');
-      if (is_verify_per_round == true)
+      if (is_verify_per_round == true) {
         socket.emit('Game_ObtainEnd', model.getSnapshot());
-      else
+      }
+      else {
+        console.log('>>> 行动完了 emit ObtainEnd');
         socket.emit('Game_ObtainEnd');
+        console.log('<<< 行动完了 emit ObtainEnd');
+      }
     }
   }
 
@@ -545,7 +549,7 @@
       }
     }, 10);
     
-    var s = 'localhost:3000';
+    var s = '192.168.42.224:3000';
     if (document.getElementById('servername2').checked == true) s = '47.75.12.130:3000';
     console.log('server:' + s);
     socket = io(s);

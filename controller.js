@@ -106,7 +106,8 @@ class Controller{
     }
   }
   postObtain(pid){ // changed in multiplayer
-    delayedFunc(function(){ 
+    console.log('[postObtain] ' + pid);
+    delayedFunc(function(){
       if(pid == 1){
         var dealt_id = model.dealOne(model.player1);
         if (is_multiplayer == true) {

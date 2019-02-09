@@ -2,7 +2,12 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http, { origins: 'edgeofmap.com:*,bubububaoshe.github.io:*,localhost:*' });
+var os = require("os");
+var hostname = os.hostname();
+console.log('Hostname: '+hostname);
+var allowed_origins = 'edgeofmap.com:*,bubububaoshe.github.io:*,localhost:*';
+if (hostname == "xps-9550") { allowed_origins = '*.*' }
+var io = require('socket.io')(http, { origins: allowed_origins });
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + "/index.html");
