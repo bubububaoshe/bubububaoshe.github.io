@@ -105,9 +105,6 @@ class TableInfoView{
       tableviewcount ++;
       //create view
       this.createCharView();
-      var cards = this.container.querySelector('.charinfocontainer').children;
-      for(var i=0; i<cards.length; i++)
-        cards[i].addEventListener("click", controller.doNothing);
       this.createComboView();
     }
     this.fadeUnder("tableinfo", true);
@@ -138,6 +135,7 @@ class TableInfoView{
     this.fadeUnder("selectionpanel", false);
     container.getElementsByClassName('charinfocontainer')[0].textContent = "";
     container.getElementsByClassName('charinfocontainer')[1].textContent = "";
+    container.getElementsByClassName('charinfocontainer')[1].removeEventListener("click", controllerFunc);
   }
   showSelectionPanel(trick, msg, controllerFunc){
     // this char view is to select a target when a char trick is performed
@@ -146,10 +144,9 @@ class TableInfoView{
     var card = this.addSmallCard(char, container.getElementsByClassName('charinfocontainer')[0]);
     card.getElementsByTagName("p")[0].textContent = "从下方选择对方卡牌" + msg;
     var chartable = container.getElementsByClassName('charinfocontainer')[1];
+    chartable.addEventListener("click", controllerFunc);
     this.createCharView(chartable, trick);
     var cards = chartable.children;
-    for(var i=0; i<cards.length; i++)
-      cards[i].addEventListener("click", controllerFunc);
     //container.style.display = "block";
     showOpacity(container, true);
     this.fadeUnder("selectionpanel", true);
@@ -166,10 +163,8 @@ class TableInfoView{
     var container = document.getElementsByClassName("tableinfocontainer")[3];
     var chartable = container.querySelector(".charinfocontainer");
     var chars = model.player1.specials.characters;
-    for(var i=0; i<chars.length; i++){
+    for(var i=0; i<chars.length; i++)
       var schar = playerinfo.addSmallCard(chars[i], chartable);
-      schar.addEventListener("click", controller.doNothing);
-    }
     showOpacity(container, true);
     this.fadeUnder("tableinfo", true);
   }
@@ -180,50 +175,38 @@ class TableInfoView{
   exitSpecialsPick(){
     document.getElementById("sprepo").textContent = "";
     document.getElementById("sppick").textContent = "";
+    document.querySelector("#spselection .cover").style.visibility = null;
     showOpacity(document.getElementById("spselection"), false);
   }
   showSpecialsPick(){
     var repodiv = document.getElementById("sprepo");
     var pickdiv = document.getElementById("sppick");
     var repo = model.specialRepository;
-    //this func is called after gameinit and before gamestart
-    //so specialRepository includes all the special chars
-    for(var i=0; i<USER_SPECIAL_REPO.length; i++){
-      var char = repo.getChar(USER_SPECIAL_REPO[i]);
-      if(PLAYER_SPECIALS[1].includes(char.id)){
+    //this func is called after getsetup and before gameinit
+    //so spmanager.userSpecialRepository includes all the special chars that user may have
+    for(var i=0; i<spmanager.userSpecialRepository.getSize(); i++){
+      var char = spmanager.userSpecialRepository.characters[i];
+      if(model.player1.specialIDs.includes(char.id))
         var chardiv = this.addSmallCard(char, pickdiv, false);
-        chardiv.addEventListener("click", controller.spUnpick);
-      }
-      else{
+      else
         var chardiv = this.addSmallCard(char, repodiv, false);
-        if(spmanager.hasDuplicates(char.id, PLAYER_SPECIALS[1]))
-          this.enableCard(chardiv, false);
-        else
-          chardiv.addEventListener("click", controller.spPick);
-        this.spFullBlock();
-      }
     }
+    this.updateSpecialsPick();
   }
-  updateSPPick(){
+  updateSpecialsPick(){
     this.spDisableDuplicates();
     this.spFullBlock();
   }
   spDisableDuplicates(){
     var schars = document.getElementById("sprepo").children;
     for(var i=0; i<schars.length; i++)
-      if(spmanager.hasDuplicates(schars[i].id, PLAYER_SPECIALS[1])) {
+      if(spmanager.hasDuplicates(schars[i].id, model.player1.specialIDs))
         this.enableCard(schars[i], false);
-        schars[i].removeEventListener("click", controller.spPick);
-      }
-      else {
+      else
         this.enableCard(schars[i], true);
-        schars[i].addEventListener("click", controller.spPick);
-      }
-
-
   }
   spFullBlock(){
-    if(PLAYER_SPECIALS[1].length >= MAX_SP_NUM)
+    if(model.player1.specialIDs.length >= MAX_SP_NUM)
       document.querySelector("#spselection .cover").style.visibility = "visible";
     else
       document.querySelector("#spselection .cover").style.visibility = null;

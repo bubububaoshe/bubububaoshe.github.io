@@ -105,8 +105,10 @@ function createPoemPanel(char){
 class Sound{
   constructor(){
     this.audio = document.getElementById("soundeffect");
-    this.ac = new Audio('mp3/activate.mp3');/*
-    this.de = new Audio('mp3/deal.wav');
+    this.ac = new Audio('mp3/activate.mp3');
+    this.de = new Audio('mp3/deal.mp3');
+    this.co = new Audio('mp3/combo.mp3');
+    /*
     this.wi = new Audio('mp3/win.mp3');
     this.lo = new Audio('mp3/fool.mp3');
     this.di = new Audio('mp3/discard.mp3');
@@ -114,33 +116,32 @@ class Sound{
   }
   play(name){
     sound.audio.src = "mp3/" + name + ".mp3";
-    sound.promisedPlay();
+    sound.promisedPlay(sound.audio);
   }
-  promisedPlay(){
+  promisedPlay(audio){
     //I don't a thing about promises, maybe i will learn about it someday
-    const playPromise = sound.audio.play();
+    const playPromise = audio.play();
     if (playPromise !== null){
         playPromise.catch(() => {//sound.audio.play();
-            console.log('promisedPlay has caught an exception');
         })
     }
   }
-  activate(){this.play("activate");}
-  deal(){this.play("deal");}
+  activate(){this.promisedPlay(this.ac);}
+  deal(){this.promisedPlay(this.de);}
   win(){this.play("win");}
   lose(){this.play("fool");}
   discard(){this.play("discard");}
   draw(){this.play("draw");}
-  combovoice(nextFunc,name){
-    console.log('>>combovoice');
-    var onetimeFunc=function(){
-        nextFunc.call();  
-        sound.audio.removeEventListener("ended", onetimeFunc);
-    };
-    this.audio.addEventListener("ended", onetimeFunc);
-    this.audio.addEventListener("error", onetimeFunc);
-    this.audio.src = "combomp3/" + name + ".mp3";
-    this.promisedPlay();
+  combovoice(nextFunc,combo){
+    if(COMBO_VOICE == "voiceon"){
+      this.audio.src = "combomp3/" + combo.getId() + ".mp3";
+      this.promisedPlay(this.audio);
+      setTimeout(nextFunc, combo.getAudioDuration()+500);
+    }
+    else{
+      this.promisedPlay(this.co);
+      delayedFunc(nextFunc, 2);
+    }
   }
 }
 class Card{
@@ -158,7 +159,7 @@ class Card{
     cardContainer.classList.add("cardContainer", "transitall");
     this.card = document.createElement("div");
     cardContainer.appendChild(this.card);
-    this.card.id = char.id;
+    this.container.id = char.id;
     this.card.classList.add("card", "transitform");
     var front = document.createElement("div");
     this.card.appendChild(front);
@@ -168,10 +169,10 @@ class Card{
     this.card.appendChild(back);
     back.classList.add("cardback");
     this.container.appendChild(createInfobox(char));
-    this.container.addEventListener("click", controller.doNothing);
+    //this.container.addEventListener("touchstart", controller.doNothing, {passive:true});
   }
   setChar(char){
-    this.card.id = char.id;
+    this.container.id = char.id;
     var front = this.card.querySelector(".cardfront");
     front.style.backgroundImage = char.getPortrait();
     var hvinfo = this.container.querySelector(".hoverinfobox");
@@ -180,24 +181,29 @@ class Card{
   }
   moveto(deck){
     var container = this.container;
-    container.style.transform = "none";
-    container.classList.remove("transitall");
+    if(container.parentNode == null) {
+      deck.container.appendChild(container);
+    }
+    else {
+      //console.log(this.container.id+": " + this.container.parentNode.id+"-->"+deck.container.id);
+      container.style.transform = "none";
+      container.classList.remove("transitall");
+      var rect = container.getBoundingClientRect();
+      var l = rect.left;
+      var t = rect.top;
+      deck.container.appendChild(container);
+      rect = container.getBoundingClientRect();
+      l = l - rect.left;
+      t = t - rect.top;
 
-    var rect = container.getBoundingClientRect();
-    var l = rect.left;
-    var t = rect.top;
-    deck.container.appendChild(container);
-    rect = container.getBoundingClientRect();
-    l = l - rect.left;
-    t = t - rect.top;
-
-    container.style.zIndex = 99;
-    container.style.transform = "translate(" +l+ "px," +t+ "px)";
-    container.style.webkitTransform = "translate(" +l+ "px," +t+ "px)";
-    reflow();
-    container.classList.add("transitall");
-    container.style.transform = null;
-    container.style.zIndex = null;
+      container.style.zIndex = 99;
+      container.style.transform = "translate(" +l+ "px," +t+ "px)";
+      container.style.webkitTransform = "translate(" +l+ "px," +t+ "px)";
+      reflow();
+      container.classList.add("transitall");
+      container.style.transform = null;
+      container.style.zIndex = null;
+    }
   }
   activate(){
     this.container.firstElementChild.classList.add("pop");
@@ -209,17 +215,15 @@ class Card{
   }
   match(){
     this.card.classList.add("glow");
-    this.addController(controller.obtain);
   }
   unmatch(){
     this.card.classList.remove("glow");
-    this.removeController(controller.obtain);
   }
   faceup(){
     this.container.classList.add("faceup");
   }
   facedown(){
-    this.card.classList.remove("faceup");
+    this.container.classList.remove("faceup");
   }
   isFaceup(){
     this.card.classList.contains("faceup");
@@ -228,22 +232,7 @@ class Card{
     this.container.style.transform = 'rotate(' + deg + 'deg)';
   }
   unRotate(){
-    this.container.style.transform = 'none';
-  }
-  setZ(z){
-    this.container.style.zIndex = z;
-  }
-  setLeft(l){
-    this.container.style.left = l;
-  }
-  setTop(t){
-    this.container.style.top = t;
-  }
-  addController(func) {
-    this.card.addEventListener("click", func);
-  }
-  removeController(func) {
-    this.card.removeEventListener("click", func);
+    this.container.style.transform = null;
   }
 }
 class DeckDiv {
@@ -251,63 +240,40 @@ class DeckDiv {
     this.container = div;
     this.deck = deck;
   }
-  init(){
+  init_Multiplayer() {
     var chars = this.deck.characters;
     for(var i=0; i<chars.length; i++)
       chars[i].card.moveto(this);
   }
   toSpecial(char, sp){
-    char.card.setChar(sp);
-    sp.card = char.card;
     var me = this;
     delayedFunc(function(){
       sp.card.moveto(me);
     });
   }
-  reset(player){
-    var chars = this.deck.characters;
-    for(var i=0; i<chars.length; i++)
-      if(chars[i].isSpecial())
-        chars[i].card.moveto(player.specials.view);
-  }
   clear(){
-    var chars = this.deck.characters;
-    for(var i=0; i<chars.length; i++){
-      var card = chars[i].card;
-      if(this == view.table0){
-        card.removeController(controller.checkOppoInfo);
-        card.facedown();
-      }
-      else if(this == view.table1)
-        card.removeController(controller.checkPlayerInfo);
-      card.moveto(view.repository);
-    }
-  }
-  destroy(){
     this.container.textContent = "";
   }
-}
-class RepoDiv extends DeckDiv{
-  constructor(div, repo) {
-    super(div, repo);
+  addChar(char){
+    char.card.moveto(this);
+    char.card.facedown();
   }
-  init(){
-    var chars = this.deck.characters;
-    for(var i=0; i<chars.length; i++){
-      var card = new Card(chars[i]);
-      chars[i].card = card;
-      this.container.appendChild(card.container);
-      if(this == view.specials1)
-        card.addController(controller.checkPlayerSpecials);
-    }
+  addController(func, action){
+    if(action == null)
+      action = "click";
+    if(action == "touchstart")
+      this.container.addEventListener(action, func, {passive:true});
+    else
+      this.container.addEventListener(action, func);
   }
-  deleteSpecial(idx){
-    this.container.removeChild(this.container.children[idx]);
+  removeController(func, action){
+    if(action == null)
+      action = "click";
+    this.container.removeEventListener(action, func);
   }
-}
-class Hand0Div extends DeckDiv{
-  constructor(div, hand){
-    super(div, hand);
+  deleteSpecial(char){
+    this.container.removeChild(this.container.querySelector("#" + char.id));
+    //this.container.removeChild(this.container.children[idx]);
   }
   reveal(number){
     var hiddenChars = [];
@@ -323,17 +289,6 @@ class Hand0Div extends DeckDiv{
       hiddenChars.splice(idx, 1);
     }
   }
-}
-class Hand1Div extends DeckDiv {
-  constructor(div, hand) {
-    super(div, hand);
-  }
-  init(){
-    super.init();
-    for(var i=0; i<this.deck.getSize(); i++){
-      this.deck.characters[i].card.addController(controller.activate);
-    }
-  }
   activate(oldChar, newChar) {
     if (oldChar != null) {
       var card = oldChar.card;
@@ -344,14 +299,9 @@ class Hand1Div extends DeckDiv {
       card.activate();
     }
   }
-}
-class PoolDiv extends DeckDiv {
-  constructor(div, pool) {
-    super(div, pool);
-  }
   updateMatch(oldChar, newChar) {
     //update card matchs in pool according to seasons
-    //Match: glow, clickable
+    //Match: glow
     var oldSeason = oldChar==null?null:oldChar.season;
     var newSeason = newChar==null?null:newChar.season;
     if (oldSeason != newSeason) {
@@ -368,23 +318,19 @@ class PoolDiv extends DeckDiv {
 class Messenger {
   constructor(){
   }
-  init(){
+  clear(){
     this.note("");
     document.querySelector("#score0 div").textContent = 0;
     document.querySelector("#score1 div").textContent = 0;
   }
   hideFinalNotice(){
     var div = document.getElementById("finalcontainer");
-    div.removeEventListener("click", controller.restart);
+    document.getElementById("restart").removeEventListener("click", controller.restart);
+    document.getElementById("reconfig").removeEventListener("click", controller.restart);
     div.classList.remove("notransform");
     delayedFunc(function(){
       div.style.visibility = null;
     }, 4);
-  }
-  mayErase() {
-    var x = document.getElementById("infobox").firstElementChild.textContent;
-    if (x == "该你出牌了" || x == "对方行动") return true;
-    else return false;
   }
   note(msg){
     document.getElementById("infobox").firstElementChild.textContent = msg;
@@ -427,9 +373,9 @@ class Messenger {
     });
   }
   notifyPlayerCombo(preScore, comboCount, combos){
-    console.log('>>>notifyPlayerCombo ' + preScore + " " + comboCount + " " + combos);
     if(comboCount > 0){
       var combo = combos[--comboCount];
+      if(combo == null) return;
       var inc = combo.getFullScore();
       messenger.animeScoreInc(1, preScore, inc);
       var chars = combo.characters;
@@ -439,109 +385,47 @@ class Messenger {
       for(var i=0; i<chars.length; i++)
         posters.appendChild(messenger.createBannerPoster(chars[i]));
       showOpacity(banner, true);
-      //var nextFunc = function(){
-      //  banner.style.opacity = 0;
-      //  delayedFunc(function(){
-      //    banner.style.visibility = "hidden";
-      //    posters.textContent = "";
-      //    messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
-      //  },1);
-      //}
-      //sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
-      
-      // Fix for mobile Chrome-based browsers
-      var name = (COMBO_VOICE == "voiceoff")?"combo":combo.getInit();
-      sound.audio.src = "combomp3/" + name + ".mp3";
-      const promise = sound.audio.play();
-      if (promise !== null) {
-        promise.then(() => {
-          console.log(promise);
-          var dur = sound.audio.duration;
-          console.log('duration of ' + name + ' = ' + dur);
-          
-          delayedFunc(function() {
-            banner.style.opacity = 0;
-          }, dur);
-          
-          delayedFunc(function(){
-            banner.style.visibility = "hidden";
-            posters.textContent = "";
-            messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
-          }, 2*(1 + dur)); // in units of 0.5 seconds
-        }).catch(error => {
-          console.log(error);
-          delayedFunc(function(){
-            banner.style.visibility = "hidden";
-            posters.textContent = "";
-            messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
-          },3);
-        });
+      var nextFunc = function(){
+        banner.style.opacity = 0;
+        delayedFunc(function(){
+          banner.style.visibility = "hidden";
+          posters.textContent = "";
+          messenger.notifyPlayerCombo(preScore+inc, comboCount, combos);
+        },1);
       }
+      sound.combovoice(nextFunc, combo);
     }
-    else {
+    else
       controller.postObtain(1);
-    }
-    console.log('<<<notifyPlayerCombo ' + preScore + " " + comboCount + " " + combos);
   }
   notifyOppoCombo(preScore, comboCount, combos){
-    console.log(">>>notifyOppoCombo " + preScore + " " + comboCount + " " + combos);
     if(comboCount > 0){
       var combo = combos[--comboCount];
+      if(combo == null) return;
       var inc = combo.getFullScore();
       messenger.animeScoreInc(0, preScore, inc);
-      
-      // changed in multiplayer
-      if ((is_multiplayer == false) || (is_multiplayer == true && combo_notify_method == 2)) {
+      if (is_multiplayer == false) { // modified for multiplayer!
         messenger.note("对方完成组合\n"+combo.getDesc());
-        oppo_combo_notifications += 1;
         delayedFunc(function(){
           messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
         });
       } else {
-        // copy notifyPlayerCombo
-        var chars = combo.characters;
-        var banner = document.getElementById("infobanner");
-        var posters = banner.querySelector(".bannercards");
+        var chars = combo.characters,
+            banner = document.getElementById("infobanner"),
+            posters = banner.querySelector(".bannercards");
         messenger.setBannerHeadline(["对方完成组合", combo.getName(), "，获得", inc, "分"]);
-        for(var i=0; i<chars.length; i++)
+        for (var i=0; i<chars.length; i++)
           posters.appendChild(messenger.createBannerPoster(chars[i]));
         showOpacity(banner, true);
-        //var nextFunc = function(){
-        //  banner.style.opacity = 0;
-        //  delayedFunc(function(){
-        //    banner.style.visibility = "hidden";
-        //    posters.textContent = "";
-        //    messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
-        //  },1);
-        //}
-        //sound.combovoice(nextFunc, COMBO_VOICE == "voiceoff"?"combo":combo.getInit());
-        var name = (COMBO_VOICE == "voiceoff")?"combo":combo.getInit();
-      sound.audio.src = "combomp3/" + name + ".mp3";
-      const promise = sound.audio.play();
-      if (promise !== null) {
-        promise.then(() => {
-          console.log(promise);
-          var dur = sound.audio.duration;
-          console.log('duration of ' + name + ' = ' + dur);
-          
+        var nextFunc = function() {
+          banner.style.opacity = 0;
           delayedFunc(function() {
-            banner.style.opacity = 0;
-          }, dur);
-          
-          delayedFunc(function(){
             banner.style.visibility = "hidden";
             posters.textContent = "";
             messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
-          }, 2*(1 + dur));
-        }).catch(error => {
-          console.log(error);
-          delayedFunc(function(){
-            banner.style.visibility = "hidden";
-            posters.textContent = "";
-            messenger.notifyOppoCombo(preScore+inc, comboCount, combos);
-          },3);
-        });
-      }
+          }, 1);
+        };
+        sound.combovoice(nextFunc, combo);
       }
     }
   }
@@ -550,7 +434,7 @@ class Messenger {
     var div = document.getElementById("finalcontainer");
     if(model.player1.score > model.player0.score){
       if(spmanager.awardSpecials())
-        msg.textContent = "千秋戏王";
+        msg.textContent = "千秋\n戏王";
       else
         msg.textContent = "你赢了";
       sound.win();
@@ -560,10 +444,11 @@ class Messenger {
       sound.lose();
     }
     else {
-      msg.textContent = "平手";
+      msg.textContent = "难得\n糊涂";
       sound.draw();
     }
-    div.addEventListener("click", controller.restart);
+    document.getElementById("restart").addEventListener("click", controller.restart);
+    document.getElementById("reconfig").addEventListener("click", controller.restart);
     div.style.visibility = "visible";
     div.classList.add("notransform");
   }
@@ -591,15 +476,11 @@ class Messenger {
       swapposter.appendChild(messenger.createBannerPoster(chars[i]));
     }
     banner.addEventListener("click", nextFunc);
-    //reflow();
-    //banner.style.opacity = 1;
     showOpacity(banner, true);
   }
   exitNotifyOppoAction(nextFunc){
     var banner = document.getElementById("infobanner");
     banner.removeEventListener("click", nextFunc);
-    //banner.style.opacity = 0;
-    //banner.style.display = null;
     showOpacity(banner, false);
     banner.querySelector(".bannercards").textContent = "";
   }
@@ -609,7 +490,8 @@ class Messenger {
     messenger.setBannerHeadline(["恭喜对战", levels[AI_LEVEL-1]+"级AI", "超过" , minscore,"分，请抱好"]);
     var poster =  banner.querySelector(".bannercards").appendChild(document.createElement("div"));
     poster.classList.add("postercard");
-    poster.style.backgroundImage = "url('img/" + spid + ".jpg')";banner.addEventListener("click", function(){
+    poster.style.backgroundImage = "url('img/" + spid + ".jpg')";
+    banner.addEventListener("click", function(){
       messenger.exitNotifyOppoAction(controller.doNothing);
     });
     showOpacity(banner, true);
@@ -617,38 +499,27 @@ class Messenger {
 }
 class View {
   constructor() {
-    this.hand0 = new Hand0Div(document.getElementById("hand0"), model.player0.hand);
-    this.hand1 = new Hand1Div(document.getElementById("hand1"), model.player1.hand);
-    this.pool = new PoolDiv(document.getElementById("pool"), model.pool);
+    this.hand0 = new DeckDiv(document.getElementById("hand0"), model.player0.hand);
+    this.hand1 = new DeckDiv(document.getElementById("hand1"), model.player1.hand);
+    this.pool = new DeckDiv(document.getElementById("pool"), model.pool);
     this.table0 = new DeckDiv(document.getElementById("table0"), model.player0.table);
     this.table1 = new DeckDiv(document.getElementById("table1"), model.player1.table);
-    this.repository = new RepoDiv(document.getElementById("repository"), model.commonRepository);
-    this.specials0 = new RepoDiv(document.getElementById("specials0"), model.player0.specials);
-    this.specials1 = new RepoDiv(document.getElementById("specials1"), model.player1.specials);
+    this.repository = new DeckDiv(document.getElementById("repository"), model.commonRepository);
+    this.specials0 = new DeckDiv(document.getElementById("specials0"), model.player0.specials);
+    this.specials1 = new DeckDiv(document.getElementById("specials1"), model.player1.specials);
     this.setup();
   }
-  start(){
-    view.specials0.init();
-    view.specials1.init();
-    view.hand0.init();
-    view.hand1.init();
-    view.pool.init();
-    view.unblockGame();
-  }
   init(){
+    // add controllers
+    this.hand1.addController(controller.activate);
+    this.unblockGame();
+  }
+  clear(){
     view.blockGame();
-    messenger.init();
-    /*
-    this.pool.destroy();
-    this.table0.destroy();
-    this.table1.destroy();
-    this.repository.destroy();
-    this.specials0.destroy();
-    this.specials1.destroy();
-    */
-    this.repository.init();
+    messenger.clear();
   }
   setup(){
+    this.blockGame();
     this.setSizes();
     model.commonRepository.view = this.repository;
     model.player0.hand.view = this.hand0;
@@ -659,24 +530,33 @@ class View {
     model.player1.specials.view = this.specials1;
     model.pool.view = this.pool;
     document.documentElement.style.setProperty("--transition-sec", OPERATION_DELAY + "ms");
+
+    this.specials1.addController(controller.checkPlayerSpecials);
+    this.table0.addController(controller.checkOppoInfo);
+    this.table1.addController(controller.checkPlayerInfo);
+    this.pool.addController(controller.obtain);
+
+    document.getElementById("sprepo").addEventListener("click", controller.spPick);
+    document.getElementById("sppick").addEventListener("click", controller.spUnpick);
+
+    this.hand0.addController(controller.doNothing, "touchstart");
+    this.hand1.addController(controller.doNothing, "touchstart");
+    this.pool.addController(controller.doNothing, "touchstart");
+    for(var i=0; i<7; i++)
+      document.getElementsByClassName("charinfocontainer")[i].addEventListener("touchstart", controller.doNothing, {passive: true});
+
     window.addEventListener("resize", this.setSizes);
   }
   checkMatch1(){
-    var len = this.hand1.deck.getSize();
-    var chars = this.hand1.deck.characters;
-    if(model.player1.matchable){
+    if(model.player1.matchable) {
       messenger.notifyNoMatch("hidden");
-      for (var i = 0; i < len; i++) {
-        chars[i].card.removeController(controller.discard);
-        chars[i].card.addController(controller.activate);
-      }
+      this.hand1.removeController(controller.discard);
+      this.hand1.addController(controller.activate);
     }
     else {
       messenger.notifyNoMatch("show");
-      for (var i = 0; i < len; i++) {
-        chars[i].card.removeController(controller.activate);
-        chars[i].card.addController(controller.discard);
-      }
+      this.hand1.removeController(controller.activate);
+      this.hand1.addController(controller.discard);
       sound.discard();
     }
   }
@@ -686,67 +566,20 @@ class View {
   unblockGame(){
     document.getElementById("blocker").style.visibility = null;
   }
-  discard(player, oldChar, newChar) {
-    if (player.id == 1) {
-      //hand1 --> pool: remove discard listener
-      //repo --> hand1: add discard listener
-        oldChar.card.removeController(controller.discard);
-        newChar.card.addController(controller.discard);
-    }
-    else {
-      //reset revealed cards
-      oldChar.card.facedown();
-    }
-    oldChar.card.moveto(this.pool);
-    newChar.card.moveto(player.hand.view);
-  }
   dealOne(char) {
-    char.card.moveto(view.pool);
     sound.deal();
-  }
-  swappedObtain(player, char, swapChar){
-    var oppo, playerinfo, oppoinfo;
-    if(player.id==0){
-      oppo = model.player1;
-      playerinfo = controller.checkOppoInfo;
-      oppoinfo = controller.checkPlayerInfo;
-    }
-    else {
-      oppo = model.player0;
-      playerinfo = controller.checkPlayerInfo;
-      oppoinfo = controller.checkOppoInfo;
-    }
-    if(swapChar != null){
-      swapChar.card.moveto(player.table.view);
-      swapChar.card.removeController(oppoinfo);
-      swapChar.card.addController(playerinfo);
-      char.card.moveto(oppo.table.view);
-      char.card.addController(oppoinfo);
-    }
-    else{
-      char.card.moveto(player.table.view);
-      char.card.addController(playerinfo);
-    }
   }
   obtain() {
     var player = obtainVector.player;
     var charInc = obtainVector.charScoreInc;
     var comboCount = obtainVector.comboCount;
-    view.swappedObtain(player, obtainVector.chars[0], obtainVector.swapChars[0]);
-    view.swappedObtain(player, obtainVector.chars[1], obtainVector.swapChars[1]);
     messenger.animeScoreInc(player.id, obtainVector.preScore, charInc);
     if(player.id == 0){
-      // Make a copy of player.completeCombos?
-      var combos_copy = player.completeCombos.splice();
       messenger.notifyOppoCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
-      console.log('>>> controller.postObtain(0)');
       controller.postObtain(0);
-      console.log('>>> controller.postObtain(0)');
     }
-    else {
-      obtainVector.getHandChar().card.removeController(controller.activate);
+    else
       messenger.notifyPlayerCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
-    }
   }
   activate(oldChar, newChar) {
     this.hand1.activate(oldChar, newChar);
@@ -757,8 +590,10 @@ class View {
   setSizes() {
     //cardh, cardw, handoffset, pooloffset
     var maindiv = document.getElementById("main");
-    WINW = document.documentElement.clientWidth;
-    WINH =document.documentElement.clientHeight;
+    //WINW = document.documentElement.clientWidth;
+    //WINH =document.documentElement.clientHeight;
+    WINW = window.innerWidth;
+    WINH = window.innerHeight;
     MAINW = WINW;
     MAINH = WINH;
     if (MAINW / MAINH > MAX_MAIN_RATIO)
@@ -782,17 +617,14 @@ class View {
     setCSSInt("--main-height", MAINH);
     setCSSInt("--main-width", MAINW);
     setCSSInt("--win-height", WINH);
+    setCSSInt("--win-width", WINW);
     //var poolM = (MAINW*0.643*(1-2*0.028)-CARDW*2.5)/(INIT_CARD_NUM_POOL+1)- CARDW;
     var poolM = (MAINW*0.66*(1-2*0.028)-CARDW*1.3)/(INIT_CARD_NUM_POOL+1)- CARDW;
     setCSSInt("--pool-margin", poolM);
   }
 }
 
-var sound, combos, model, controller, spmanager, messenger, view, oppoinfo, playerinfo, obtainVector;
-var avatar;
-var AI_LEVEL, COMBO_VOICE, SP_CARDS;
-
-function TearDownViews() {
+function TearDownExistingViews() {
   var ids = ['hand1', 'hand0', 'pool', 'repository', 'table0', 'table1']
   for (var i=0; i<ids.length; i++) {
     var x = document.getElementById(ids[i]);
@@ -802,27 +634,43 @@ function TearDownViews() {
   }
 }
 
-function gamesetup(){
-  var pack = getInput("packinput");
-  var p1 = parseInt(pack.charAt(1));
-  var p2 = parseInt(pack.charAt(2));
-  AI_LEVEL = parseInt(getInput("aiinput").charAt(2));
-  COMBO_VOICE = getInput("voiceinput");
-  SP_CARDS = parseInt(getInput("spinput").charAt(2));
+var sound, combos, model, controller, spmanager, messenger, view, oppoinfo, playerinfo, obtainVector;
+var avatar;
+var AI_LEVEL, COMBO_VOICE, SP_CARDS;
+function setup(){
   sound = new Sound();
   combos = new Combos();
-  model = new Model(p1, p2);
   obtainVector = new ObtainVector();
-  controller = new Controller();
   spmanager = new SPManager();
   messenger = new Messenger();
+  model = new Model();
+  controller = new Controller();
   view = new View();
-  TearDownViews();
+  TearDownExistingViews();
   oppoinfo = new TableInfoView(model.player0);
   playerinfo = new TableInfoView(model.player1);
   model.player1.avatar = avatar;
-  showOpacity(document.getElementById("configurator"), false);
-  model.setup();
-  controller.gameinit();
+  var defaults = ["p12", "voiceon", "ai2", "sp1"];
+  var configs = getCookie("configurations");
+  if(configs.length == 0) configs = defaults;
+  for(var i = 0; i < configs.length; i++)
+    document.getElementById(configs[i]).checked = true;
+  showPage("configurator");
+  document.getElementById("comfirmSetting").addEventListener("click", controller.configure);
 }
-document.getElementById("comfirmSetting").addEventListener("click", gamesetup);
+function showPage(id){
+  var ids = ["configurator", "spselection"];
+  if(id == "main")
+    document.getElementById("main").style.display = "block";
+  else
+    document.getElementById("main").style.display = "none";
+  for(var i=0; i<2; i++)
+    if(ids[i] != id)
+      showOpacity(document.getElementById(ids[i]), false);
+    else
+      showOpacity(document.getElementById(id), true);
+}
+setup();
+//test
+//controller.configure();
+//controller.gamestart();

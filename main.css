@@ -1,18 +1,18 @@
 :root {
-  --page-background-color: #EBE6DF;
-  --page-background-image: url("img/background.jpg");
+  --page-background: #9a8e82;
+  --page-background2: #94897e;
   --gamezone-background: rgba(114,90,64,0.7);
   --board-background: rgba(114,90,64,0.6);
   --banner-background: rgba(42, 25, 10,0.5);
-  --text-color: #7a614f;
-  --text-hl-color:#f9ebae;/*eadeaa*/
-  --text-heading-color: #f9ebae;
-  --text-glow-color: #eadeaa;/*FFF6CE*/
-  --text-shadow-color: #281B11;/*#252120*/;
+  --banner-background4: rgba(42, 25, 10,0.9375);
+  --final-background: #594733;
+  --text-color: #ccb08d;
+  --text-hl-color:#f9ebae;
+  --text-glow-color: #eadeaa;
+  --text-shadow-color: #281B11;
   --text-warning-color: #DB4D3D;
   --card-shadow-color: rgba(0,0,0,0.4);
   --card-glow-color: #fceba4;
-  --final-background-color: rgba(40, 27, 17, 0.5);
   /*
   --transition-sec
   --card-width
@@ -21,16 +21,27 @@
   --main-height
   */
 }
-body {
-  background-color: var(--page-background-color);
-  background-image: var(--page-background-image);
-  background-size: cover;
+
+html,body {
+  box-sizing: border-box;
   margin: 0;
-  font-family: Helvetica,'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
-  text-align: center;
-  overflow: hidden;
+  padding: 0;
 }
-.noselect {
+*, *:before, *:after {
+  box-sizing: inherit;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+html .appcontainer, .appwrapper{
+  height: 100%;
+  width: 100%;
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .appcontainer {
+    margin-top: 5em;
+    position: relative;
+  }
+}
+#appcontainer.noselect {
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
      -khtml-user-select: none; /* Konqueror HTML */
@@ -39,14 +50,31 @@ body {
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }
+.appwrapper{
+  background: url("img/background.jpg"),
+    repeating-linear-gradient(to top left, var(--page-background), var(--page-background) 5px, var(--page-background2) 5px, var(--page-background2) 10px),
+    var(--page-background);
+  background-size: cover;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  font-family: Helvetica,'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
+  min-height: 100%;
+  text-align: center;
+}
 #main {
   position: fixed;
-  display: none;
+  top: 0;
+  bottom: 0;
+  left:0;
+  right: 0;
 }
 #scoreboard, #specialboard, #gamezonecontainer {
   position: relative;
   float: left;
   height: 100%;
+
 }
 #scoreboard, #specialboard {
   background: var(--board-background);
@@ -165,9 +193,7 @@ body {
   text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
   -webkit-text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
 }
-.faceup .card{
-  transform: rotateY(180deg);
-}
+
 .avatarpreview {
   width: 6vw;
   height: 6vw;
@@ -224,9 +250,7 @@ body {
   background-color:#566555;
   color:#aa917f;
 }
-
-/*---------------------for testing----------------------
-*/
+/*test
 #hand0 .charcontainer:hover .card{
   transform: rotateY(180deg);
-}
+*/

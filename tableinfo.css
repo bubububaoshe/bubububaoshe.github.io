@@ -79,7 +79,7 @@
 }
 .combocard{
   height: calc(var(--card-height)*0.6);
-  width: calc(var(--card-width)*6);
+  width: calc(var(--card-width)*7);
   margin-bottom: 1%;
   background-image : linear-gradient(to left,
                       rgba(58,46,35,0) 8%,
@@ -93,14 +93,14 @@
 }
 .combocard>div{
   float: left;
-  height: calc(var(--card-height)*0.5);
+  height: 100%;
   padding: calc(var(--card-height)*0.05) 0;
 }
 .combocard>div:first-child{
   width: 37%;
 }
 .combocard>div:last-child{
-  width: 60%;
+  width: 63%;
   text-align: left;
   padding-left: 3%;
 }
@@ -163,7 +163,7 @@
   box-shadow: 0px 0px 10px 1px var(--text-glow-color);
   margin-left: calc(50% - var(--card-width) * 0.39);
 }
-.tableinfocontainer>.charinfocontainer:first-child>.smallcard>p{
+.tableinfocontainer>.charinfocontainer:first-child>.smallchar>p{
   color: var(--text-hl-color);
   font-size: calc(var(--main-width)*0.017);
   margin-top: calc(var(--card-height)*0.1);
@@ -297,6 +297,7 @@
   width: 83%;
   height: 100%;
   float: left;
+  border-right: 1px solid var(--text-shadow-color);
 }
 #spselection .rightsidebar{
   width: 17%;
@@ -304,8 +305,6 @@
   float: left;
 }
 .selectionarea>div{
-  width: calc(100% - 1px);
-  border-right: 1px solid var(--text-shadow-color);
   overflow: auto;
 }
 .selectionarea>div:first-child{
@@ -320,8 +319,6 @@
 .selectionarea .charinfocontainer{
   margin: calc(var(--card-width)*0.1) auto;
   justify-content: flex-start;
-}
-.selectionarea .charinfocontainer{
   width: calc(var(--card-width)*0.88*8);
 }
 .selectionarea .smallchar{
@@ -340,14 +337,14 @@
   content: "满员";
 }
 .selectionarea .cover{
-  background-color: var(--page-background-color);
+  background-color: #ebe6df73;
   color: var(--text-shadow-color);
-  font-size: calc(var(--card-height));
+  font-size: var(--card-height);
   font-weight: bold;
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 0.2;
+  opacity: 0.5;
 }
 .rightsidebar>div:first-child{
   height: 60%;
@@ -360,13 +357,14 @@
   background-color: var(--banner-background);
 }
 .rightsidebar #gamestart{
+  height: 20%;
+}
+.button{
   font-size: calc(var(--main-height)*0.05);
   background-color: var(--text-shadow-color);
-  color: var(--page-background-color);
-  height: 20%;
-  cursor: hand;
+  color: var(--text-color);
+  cursor: pointer;
 }
-.rightsidebar #gamestart:hover, .rightsidebar #gamestart:active{
-  color: white;
-  text-shadow: 0 0 calc(var(--main-height)*0.01) white;
+.button:hover, .button:active{
+  font-weight: bold;
 }

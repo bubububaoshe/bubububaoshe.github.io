@@ -6,7 +6,7 @@ var os = require("os");
 var hostname = os.hostname();
 console.log('Hostname: '+hostname);
 var allowed_origins = 'edgeofmap.com:*,bubububaoshe.github.io:*,localhost:*';
-if (hostname == "xps-9550") { allowed_origins = '*.*' }
+if (hostname == "xps-9550") { allowed_origins = '*:*' }
 var io = require('socket.io')(http, { origins: allowed_origins });
 
 app.get('/', function(req, res){

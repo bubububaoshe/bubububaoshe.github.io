@@ -2,171 +2,176 @@
 maximum combo name size: 8
 maximum combo size: 6
 */
-DEFAULT_CHAR_POEM = "角色诗未录入\n珍稀牌也不太全\n牌面也截得不好...\n如果您可以帮忙\n请微博联系我\n@眉毛分你一半\n谢谢～";
+INIT_CARD_NUM_HAND = 10;
+INIT_CARD_NUM_POOL = 8;
+POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
+BONUS_THRESHOLDS = [170, 140, 110];
+MAX_SP_NUM = 15;
+
+DEFAULT_CHAR_POEM = "";
 COMMON_CHAR_LIST = [
-[
-  ["ly1", "陵越", 2, "冬"],
-  ["qy1", "悭臾", 2, "夏"],
-  ["fqx1", "风晴雪", 2, "春"],
-  ["tyc1", "天墉城", 2, "夏"],
-  ["hllp1", "黑龙鳞片", 2, "夏"],
-  ["gjfj1", "古剑焚寂", 2, "夏"],
-  ["zrl1", "紫榕林", 2, "秋"],
-  ["xf1", "巽芳", 2, "春"],
-  ["gjhy1", "古剑红玉", 2, "夏"],
-  ["qysnp1", "青玉司南佩", 2, "春"],
-  ["xl1", "襄铃", 2, "夏"],
-  ["blts1","百里屠苏", 2, "冬"],
-  ["fls1", "方兰生", 2, "春"],
-  ["yqs1", "尹千觞", 2, "秋"],
-  ["hy1", "红玉", 2, "秋"],
-  ["oysg1", "欧阳少恭", 2, "秋"],
-  ["qyt1", "青玉坛", 2, "秋"],
-  ["ys1", "榣山", 2, "秋"],
-  ["pl1", "蓬莱", 2, "夏"],
-  ["qc1", "琴川", 2, "春"],
-  ["al1", "安陆", 2, "秋"],
-  ["thg1", "桃花谷", 2, "春"],
-  ["yd1", "幽都", 2, "冬"],
-  ["jt1", "焦炭", 2, "夏"],
-  ["fl1", "凤来", 2, "春"],
-  ["bsd1", "百胜刀", 2, "冬"]
-],
-[
-  ["sy2", "沈夜", 2, "冬"],
-  ["sx2", "沈曦", 2, "春"],
-  ["lyc2", "流月城", 2, "冬"],
-  ["xyz2", "夏夷则", 2, "冬"],
-  ["ths2", "太华山", 2, "冬"],
-  ["hy2", "华月", 2, "冬"],
-  ["zm2", "昭明", 2, "春"],
-  ["ar2", "阿阮", 2, "春"],
-  ["yq2", "禺期", 2, "夏"],
-  ["ywy2", "乐无异", 2, "夏"],
-  ["wc2", "忘川", 2, "冬"],
-  ["lc2", "露草", 2, "春"],
-  ["qhzr2", "清和真人", 2, "秋"],
-  ["wmzj2", "无名之剑", 2, "秋"],
-  ["ca2", "长安", 2, "春"],
-  ["gjhg2", "古剑晗光", 2, "冬"],
-  ["jql2", "金麒麟", 2, "秋"],
-  ["ttzq2", "通天之器", 2, "秋"],
-  ["ws2", "巫山", 2, "夏"],
-  ["wry2", "闻人羽", 2, "秋"],
-  ["bcg2", "百草谷", 2, "夏"],
-  ["tzbz2", "兔子抱枕", 2, "秋"],
-  ["xy2", "谢衣", 2, "夏"],
-  ["jsh2", "静水湖", 2, "春"],
-  ["snm2", "神女墓", 2, "冬"],
-  ["hykh2", "华月箜篌", 2, "冬"]
-],
-[
-  ["sw3", "司危", 2, "春"],
-  ["bl3", "北洛", 2, "春"],
-  ["ywy3", "云无月", 2, "冬"],
-  ["cy3", "岑婴", 2, "夏"],
-  ["xg3", "玄戈", 2, "秋"],
-  ["ns3", "霓商", 2, "夏"],
-  ["jxy3", "姬轩辕", 2, "秋"],
-  ["jy3", "缙云", 2, "夏"],
-  ["bhl3", "半魂莲", 2, "秋"],
-  ["tl3", "天鹿", 2, "秋"],
-  ["wz3", "巫炤", 2, "冬"],
-  ["ts3", "太岁", 2, "春"],
-  ["sz3", "蜃珠", 2, "夏"],
-  ["wmzd3", "无名之地", 2, "冬"],
-  ["tlc3", "天鹿城", 2, "秋"],
-  ["wzg3", "巫之国", 2, "冬"],
-  ["xl3", "西陵", 2, "春"],
-  ["lz3", "嫘祖", 2, "夏"],
-  ["fls3", "风里沙", 2, "秋"],
-  ["lxj3", "凌星见", 2, "春"],
-  ["wyzl3", "乌衣长老", 2, "春"],
-  ["sj3", "鸤鸠", 2, "冬"],
-  ["yts3", "原天柿", 2, "秋"],
-  ["ycg3", "夜长庚", 2, "冬"],
-  ["gd3", "骨笛", 2, "冬"],
-  ["z3", "磔", 2, "夏"],
-  ["ys3", "玉梳", 2, "冬"],
-  ["mhz3", "梦魂枝", 2, "秋"],
-]
+  [
+    ['ly1','陵越',2,'冬','剑意御风凌山月，\n往事伴烛映霜雪。'],
+    ['qy1','悭臾',2,'夏','东海祖州识命魂，\n不周山下多古意。'],
+    ['fqx1','风晴雪',2,'春','青丝银栉别样梳，\n天付婆娑入画图。'],
+    ['tyc1','天墉城',2,'夏','昆仑山巅修至道，\n剑御四野灵空明。'],
+    ['hllp1','黑龙鳞片',2,'夏','浮云一别未虚掷，\n光阴荏冉故人来。'],
+    ['gjfj1','古剑焚寂',2,'夏','琴心剑魄今何在，\n留见星虹贯九天。'],
+    ['zrl1','紫榕林',2,'秋','湖天春色归路迷，\n幼狐梦醒眼迷离。'],
+    ['xf1','巽芳',2,'春','芳华如梦佳期逝，\n蓦然回首柔情旧。'],
+    ['gjhy1','古剑红玉',2,'夏','枫落龙渊宿此间，\n青锋不再伴恨眠。'],
+    ['qysnp1','青玉司南佩',2,'春','曲终人散心不悔，\n一魂一魄永相随。'],
+    ['xl1','襄铃',2,'夏','额前未肯点胭脂，\n懒把相思细细知。'],
+    ['blts1','百里屠苏',2,'冬','古剑铁衣映清辉，\n百劫阎浮一念微。'],
+    ['fls1','方兰生',2,'春','嫏嬛久觅紫云乡，\n半枕清风鹤梦长。'],
+    ['yqs1','尹千觞',2,'秋','江湖肝胆风波促，\n万里云山醉梦真。'],
+    ['hy1','红玉',2,'秋','九重环佩艳琳琅，\n一段红绡旖旎长。'],
+    ['oysg1','欧阳少恭',2,'秋','风前独坐弄琴筝，\n明灭蓬山九万程。'],
+    ['qyt1','青玉坛',2,'秋','试心桥上分阴阳，\n魂兮魄兮难辨章。'],
+    ['ys1','榣山',2,'秋','沧海桑田新几度，\n月明还照旧容颜。'],
+    ['pl1','蓬莱',2,'夏','青阶似洗驻岁华，\n蓬山曲径情无暇。'],
+    ['qc1','琴川',2,'春','杏花微雨沾衣湿，\n陌路少年檐下识。'],
+    ['al1','安陆',2,'秋','醉白楼旁杏林黄，\n岁首辞君别无恙。'],
+    ['thg1','桃花谷',2,'春','花开花落蜂蝶舞，\n日出日落泉叮咚。'],
+    ['yd1','幽都',2,'冬','娲皇故里聚先贤，\n风雨如晦葬龙渊。'],
+    ['jt1','焦炭',2,'夏','天地为炉生妙物，\n阴阳为炭造化功。'],
+    ['fl1','凤来',2,'春','神识邈邈拂丝弦，\n人间离散月又圆。'],
+    ['bsd1','百胜刀',2,'冬','白刃出鞘饮煞气，\n世事斗转换乾坤。']],
+  [
+    ['sy2','沈夜',2,'冬','时烬未烬陷永夜，\n归期无期月寒沉。'],
+    ['sx2','沈曦',2,'春','梦呓短歌消长夜，\n吉光片羽碎琉璃。'],
+    ['lyc2','流月城',2,'冬','月冷千山孤城悬，\n神木凋零远人间。'],
+    ['xyz2','夏夷则',2,'冬','八极乘龙巡碧落，\n一襟风雪载昆仑。'],
+    ['ths2','太华山',2,'冬','巍巍云巅鹤长唳，\n亭亭尘外山色霁。'],
+    ['hy2','华月',2,'冬','元月夜下箜篌引，\n不负相思不负君。'],
+    ['zm2','昭明',2,'春','星屑玉魄结剑还，\n光耀四野止寒夜。'],
+    ['ar2','阿阮',2,'春','楚梦沉醉朝复暮，\n清歌远上巫山低。'],
+    ['yq2','禺期',2,'夏','一世仙身为剑痴，\n晗光蕴灵万事知。'],
+    ['ywy2','乐无异',2,'夏','杨柳风前歌玉树，\n黄金堂下卧麒麟。'],
+    ['wc2','忘川',2,'冬','寂灭幻断前缘尽，\n旋刺斩决君子心。'],
+    ['lc2','露草',2,'春','天地灵韵凝霜骨，\n剑心支离相思苦。'],
+    ['qhzr2','清和真人',2,'秋','明哲通达出太华，\n山河秀丽诗酒花。'],
+    ['wmzj2','无名之剑',2,'秋','上古威仪难复现，\n敛光为华唤明心。'],
+    ['ca2','长安',2,'春','众人揽胜逐朝霞，\n游子笑折一枝花。'],
+    ['gjhg2','古剑晗光',2,'冬','传世利刃寒光荧，\n千秋凡铁宿魂灵。'],
+    ['jql2','金麒麟',2,'秋','江上熏风鸳鸯游，\n两小无猜赠麒麟。'],
+    ['ttzq2','通天之器',2,'秋','天道浩瀚难穷尽，\n若涉渊水正道心。'],
+    ['ws2','巫山',2,'夏','风飖轻举降暮雨，\n碧峭绵延匿神女。'],
+    ['wry2','闻人羽',2,'秋','朱颜流落东风里，\n月满千山倚筑歌。'],
+    ['bcg2','百草谷',2,'夏','横戈盘马草如茵，\n介胄执袍郁成阴。'],
+    ['tzbz2','兔子抱枕',2,'秋','长长折耳护稚童，\n圆圆黑眸沐春风。'],
+    ['xy2','谢衣',2,'夏','花落庭前浮图现，\n人间尽是晚晴天。'],
+    ['jsh2','静水湖',2,'春','水天一色洗尘嚣，\n帘栊垂落与神交。'],
+    ['snm2','神女墓',2,'冬','神农座下披华藻，\n行云带雨香陨早。'],
+    ['hykh2','华月箜篌',2,'冬','凝音织梦倚阑珊，\n清商抚羽月沉沦。']],
+  [
+    ["sw3", "司危", 2, "春", ""],
+    ["bl3", "北洛", 2, "春", ""],
+    ["ywy3", "云无月", 2, "冬", ""],
+    ["cy3", "岑婴", 2, "夏", ""],
+    ["xg3", "玄戈", 2, "秋", ""],
+    ["ns3", "霓商", 2, "夏", ""],
+    ["jxy3", "姬轩辕", 2, "秋", ""],
+    ["jy3", "缙云", 2, "夏", ""],
+    ["bhl3", "半魂莲", 2, "秋", ""],
+    ["tl3", "天鹿", 2, "秋", ""],
+    ["wz3", "巫炤", 2, "冬", ""],
+    ["ts3", "太岁", 2, "春", ""],
+    ["sz3", "蜃珠", 2, "夏", ""],
+    ["wmzd3", "无名之地", 2, "冬", ""],
+    ["tlc3", "天鹿城", 2, "秋", ""],
+    ["wzg3", "巫之国", 2, "冬", ""],
+    ["xl3", "西陵", 2, "春", ""],
+    ["lz3", "嫘祖", 2, "夏", ""],
+    ["fls3", "风里沙", 2, "秋", ""],
+    ["lxj3", "凌星见", 2, "春", ""],
+    ["wyzl3", "乌衣长老", 2, "春", ""],
+    ["sj3", "鸤鸠", 2, "冬", ""],
+    ["yts3", "原天柿", 2, "秋", ""],
+    ["ycg3", "夜长庚", 2, "冬", ""],
+    ["gd3", "骨笛", 2, "冬", ""],
+    ["z3", "磔", 2, "夏", ""],
+    ["ys3", "玉梳", 2, "冬", ""],
+    ["mhz3", "梦魂枝", 2, "秋", ""]
+  ]
 ];
 COMBO_LIST  = [
-  [ [ "风晴雪", "焦炭", "谢衣" ], "厨房功夫", 10, "cfgj"],
-  [ [ "谢衣", "乐无异"], "春风雨", 4, "cfy"],
-  [ [ "谢衣", "静水湖"], "重山隐", 4, "csy"] ,
-  [ [ "谢衣", "沈夜"], "孤月寒灯", 4, "gyhd"] ,
-  [ [ "谢衣", "忘川"], "别破军", 4, 'bpj'] ,
-  [ [ "谢衣", "通天之器"], "空留忆", 4, 'kly'] ,
-  [ [ "流月城", "谢衣"], "胡不归", 4, 'hbg'] ,
-  [ [ "流月城", "沈夜"], "永夜寒沉", 4, 'yyhc'] ,
-  [ [ "沈曦", "沈夜"], "三日遥", 4, 'sry'],
-  [ [ "流月城", "沈曦"], "月中生", 4, 'yzssx'] ,
-  [ [ "兔子抱枕", "沈曦"], "伴长眠", 4, 'bcm'] ,
-  [ [ "华月箜篌", "华月"], "廉贞曲", 4, 'lzq'] ,
-  [ [ "流月城", "华月"], "月之殇", 4, 'yzshy'] ,
-  [ [ "华月", "沈夜"], "护孤城", 4, 'hgc'] ,
-  [ [ "谢衣", "沈夜", "沈曦", "华月"], "烈山遗族", 20, 'lsyz'] ,
-  [ [ "谢衣", "沈夜", "沈曦", "流月城", "华月"], "红月", 40, 'hy'] ,
-  [ ["古剑晗光", "乐无异"], "家传宝贝", 5, 'jcbb'],
-  [ ["禺期", "古剑晗光", "乐无异"], "剑主之谊", 10, 'jjzy'],
-  [ ["长安", "乐无异"], "玉京游", 4, 'yjy'],
-  [ ["闻人羽", "乐无异"], "比肩行", 5, 'bjx'],
-  [ ["金麒麟", "闻人羽", "乐无异"], "长相忆", 10, 'cxy'],
-  [ ["百草谷", "闻人羽"], "星海天罡", 5, 'xhtg'],
-  [ ["夏夷则", "太华山"], "逸尘", 5, 'yc'],
-  [ ["夏夷则", "露草"], "待佳期", 4, 'lc'],
-  [ ["太华山", "清和真人"], "太华山人", 4, 'thsr'],
-  [ ["夏夷则", "清和真人"], "严师胜父", 4, 'yssf'],
-  [ ["夏夷则", "阿阮"], "光逐影", 5, 'gzy'],
-  [ ["夏夷则", "太华山", "清和真人"], "温茶相待", 10, 'wcxd'],
-  [ ["露草", "阿阮"], "共株生", 4, 'gzs'],
-  [ ["昭明", "阿阮"], "芳草心", 4, 'fcx'],
-  [ ["巫山", "阿阮"], "山鬼", 5, 'sg'],
-  [ ["神女墓", "巫山"], "神女静眠", 4, 'snjm'],
-  [ ["巫山", "露草", "阿阮"], "露草流萤", 10, 'lcly'],
-  [ ["巫山", "露草", "阿阮", "神女墓"], "巫山神女", 20, 'wssn'],
-  [ ["禺期", "红玉"], "古剑剑灵", 4, 'gjjl'],
-  [ ["禺期", "昭明"], "铸剑仙师", 4, 'zjxs'],
-  [ ["禺期", "无名之剑"], "历劫重生", 4, 'ljcs'],
-  [ ["禺期", "古剑晗光"], "未成之剑", 4, 'wczj'],
-  [ ["昭明", "无名之剑", "古剑晗光"], "千年一器", 10, 'qnyq'],
-  [ ["昭明", "无名之剑", "古剑晗光", "禺期"], "天地熔炉", 20, 'tdrl'],
-  [ ["昭明", "无名之剑", "古剑焚寂", "古剑红玉", "古剑晗光"], "古剑奇谭", 40, 'gjqt'],
-  [ ["夏夷则", "阿阮", "闻人羽", "乐无异"], "蓝衫偃师记", 20, 'lsysj'],
-  [ ["欧阳少恭", "青玉坛"], "丹芷长老", 4, 'dzzl'],
-  [ ["欧阳少恭", "凤来"], "揽琴独照", 4, 'lqdz'],
-  [ ["巽芳", "欧阳少恭"], "仙山眷侣", 4, 'xsjl'],
-  [ ["榣山", "欧阳少恭"], "故地重回", 4, 'gdch'],
-  [ ["悭臾", "欧阳少恭"], "榣山遗韵", 4, 'ysyy'],
-  [ ["欧阳少恭", "蓬莱"], "栖身之所", 4, 'xszs'],
-  [ ["巽芳", "蓬莱"], "蓬莱公主", 4, 'plgz'],
-  [ ["巽芳", "蓬莱", "欧阳少恭"], "芳华如梦", 10, 'fhrm'],
-  [ ["黑龙鳞片", "悭臾"], "应龙信物", 4, 'ylxw'],
-  [ ["榣山", "悭臾"], "水虺醉琴", 4, 'shzq'],
-  [ ["欧阳少恭", "方兰生"], "琴川友", 4, 'qcy'],
-  [ ["琴川", "方兰生"], "望乡", 4, 'wx'],
-  [ ["方兰生", "青玉司南佩"], "永相随", 4, 'yxs'],
-  [ ["百胜刀", "方兰生"], "无情客", 4, 'wqk'],
-  [ ["安陆", "红玉"], "明月青霜", 4, 'myqs'],
-  [ ["古剑红玉", "红玉"], "剑舞红袖", 4, 'jwhx'],
-  [ ["天墉城", "红玉"], "千古剑灵", 4,'qgjl'],
-  [ ["紫榕林", "襄铃"], "故林栖", 4, 'glx'],
-  [ ["风晴雪", "百里屠苏", "桃花谷"], "桃花幻梦", 10,'thhm'],
-  [ ["风晴雪", "百里屠苏"], "与子成说", 3, 'gycs'],
-  [ ["百里屠苏", "悭臾"], "乘龙归", 3, 'clg'],
-  [ ["百里屠苏", "天墉城"], "云涌昆仑", 3, 'yykl'],
-  [ ["天墉城", "陵越"], "天墉掌门", 4, 'tyzm'],
-  [ ["百里屠苏", "陵越", "天墉城"], "天墉旧事", 10, 'tyjs'],
-  [ ["百里屠苏", "古剑焚寂"], "焚焰血戮", 3, 'fyxl'],
-  [ ["黑龙鳞片", "百里屠苏"], "故友赠礼", 3, 'gyzl'],
-  [ ["百里屠苏", "欧阳少恭"], "琴心剑魄", 3, 'qxjp'],
-  [ ["尹千觞", "欧阳少恭"], "醉梦江湖", 4, 'zmjh'],
-  [ ["尹千觞", "幽都"], "幽都巫咸", 4, 'ydwx'],
-  [ ["风晴雪", "尹千觞", "幽都"], "幽夜苍茫", 10, 'yycm'],
-  [ ["风晴雪", "尹千觞"], "陌相逢", 4, 'mxf'],
-  [ ["风晴雪", "幽都"], "幽都灵女", 4, 'ydln'],
-  [ ["风晴雪", "方兰生", "百里屠苏", "红玉", "尹千觞", "襄铃"], "黑衣少侠传", 60, 'hysxz']
+  //[char name list], comboname, score, comboid, audio duration(ms)
+  [['风晴雪','焦炭','谢衣'],'厨房功夫',10,'cfgj',1097.143],
+  [['谢衣','乐无异'],'春风雨',4,'cfy',2351.02],
+  [['谢衣','静水湖'],'重山隐',4,'csy',1880.816],
+  [['谢衣','沈夜'],'孤月寒灯',4,'gyhd',2690.6119999999996],
+  [['谢衣','忘川'],'别破军',4,'bpj',2037.5510000000002],
+  [['谢衣','通天之器'],'空留忆',4,'kly',1645.714],
+  [['流月城','谢衣'],'胡不归',4,'hbg',1776.327],
+  [['流月城','沈夜'],'永夜寒沉',4,'yyhc',2351.02],
+  [['沈曦','沈夜'],'三日遥',4,'sry',2560],
+  [['流月城','沈曦'],'月中生',4,'yzssx',2063.6730000000002],
+  [['兔子抱枕','沈曦'],'伴长眠',4,'bcm',679.184],
+  [['华月箜篌','华月'],'廉贞曲',4,'lzq',1854.694],
+  [['流月城','华月'],'月之殇',4,'yzshy',2377.1429999999996],
+  [['华月','沈夜'],'护孤城',4,'hgc',2768.98],
+  [['谢衣','沈夜','沈曦','华月'],'烈山遗族',20,'lsyz',2037.5510000000002],
+  [['谢衣','沈夜','沈曦','流月城','华月'],'红月',40,'hy',2298.7760000000003],
+  [['古剑晗光','乐无异'],'家传宝贝',5,'jcbb',1671.837],
+  [['禺期','古剑晗光','乐无异'],'剑主之谊',10,'jjzy',1933.061],
+  [['长安','乐无异'],'玉京游',4,'yjy',2533.878],
+  [['百草谷','闻人羽'],'星海天罡',5,'xhtg',2324.898],
+  [['闻人羽','乐无异'],'比肩行',5,'bjx',1149.3880000000001],
+  [['金麒麟','闻人羽','乐无异'],'长相忆',10,'cxy',2246.531],
+  [['夏夷则','太华山'],'逸尘',5,'yc',1488.98],
+  [['夏夷则','露草'],'待佳期',4,'lc',1280],
+  [['太华山','清和真人'],'太华山人',4,'thsr',1619.5919999999999],
+  [['夏夷则','清和真人'],'严师胜父',4,'yssf',2351.02],
+  [['夏夷则','阿阮'],'光逐影',5,'gzy',1280],
+  [['夏夷则','太华山','清和真人'],'温茶相待',10,'wcxd',1906.9389999999999],
+  [['露草','阿阮'],'共株生',4,'gzs',2089.7960000000003],
+  [['昭明','阿阮'],'芳草心',4,'fcx',1593.469],
+  [['巫山','阿阮'],'山鬼',5,'sg',1828.571],
+  [['神女墓','巫山'],'神女静眠',4,'snjm',2455.5099999999998],
+  [['巫山','露草','阿阮'],'露草流萤',10,'lcly',2168.163],
+  [['巫山','露草','阿阮','神女墓'],'巫山神女',20,'wssn',2089.7960000000003],
+  [['禺期','红玉'],'古剑剑灵',4,'gjjl',2481.633],
+  [['禺期','昭明'],'铸剑仙师',4,'zjxs',1410.612],
+  [['禺期','无名之剑'],'历劫重生',4,'ljcs',2690.6119999999996],
+  [['禺期','古剑晗光'],'未成之剑',4,'wczj',2089.7960000000003],
+  [['昭明','无名之剑','古剑晗光'],'千年一器',10,'qnyq',2821.224],
+  [['昭明','无名之剑','古剑晗光','禺期'],'天地熔炉',20,'tdrl',2246.531],
+  [['昭明','无名之剑','古剑焚寂','古剑红玉','古剑晗光'],'古剑奇谭',40,'gjqt',2429.388],
+  [['夏夷则','阿阮','闻人羽','乐无异'],'蓝衫偃师记',20,'lsysj',2037.5510000000002],
+  [['欧阳少恭','青玉坛'],'丹芷长老',4,'dzzl',1985.306],
+  [['欧阳少恭','凤来'],'揽琴独照',4,'lqdz',2742.857],
+  [['巽芳','欧阳少恭'],'仙山眷侣',4,'xsjl',2351.02],
+  [['榣山','欧阳少恭'],'故地重回',4,'gdch',2612.2450000000003],
+  [['悭臾','欧阳少恭'],'榣山遗韵',4,'ysyy',2664.49],
+  [['欧阳少恭','蓬莱'],'栖身之所',4,'xszs',2272.6530000000002],
+  [['巽芳','蓬莱'],'蓬莱公主',4,'plgz',2795.102],
+  [['巽芳','蓬莱','欧阳少恭'],'芳华如梦',10,'fhrm',1645.714],
+  [['黑龙鳞片','悭臾'],'应龙信物',4,'ylxw',2246.531],
+  [['榣山','悭臾'],'水虺醉琴',4,'shzq',2351.02],
+  [['欧阳少恭','方兰生'],'琴川友',4,'qcy',2324.898],
+  [['琴川','方兰生'],'望乡',4,'wx',1985.306],
+  [['方兰生','青玉司南佩'],'永相随',4,'yxs',2194.286],
+  [['百胜刀','方兰生'],'无情客',4,'wqk',1724.0819999999999],
+  [['安陆','红玉'],'明月青霜',4,'myqs',2795.102],
+  [['古剑红玉','红玉'],'剑舞红袖',4,'jwhx',1488.98],
+  [['天墉城','红玉'],'千古剑灵',4,'qgjl',1645.714],
+  [['紫榕林','襄铃'],'故林栖',4,'glx',1071.02],
+  [['风晴雪','百里屠苏','桃花谷'],'桃花幻梦',10,'thhm',1776.327],
+  [['风晴雪','百里屠苏'],'与子成说',3,'gycs',2246.531],
+  [['百里屠苏','悭臾'],'乘龙归',3,'clg',1828.571],
+  [['百里屠苏','天墉城'],'云涌昆仑',3,'yykl',2168.163],
+  [['天墉城','陵越'],'天墉掌门',4,'tyzm',2298.7760000000003],
+  [['百里屠苏','陵越','天墉城'],'天墉旧事',10,'tyjs',2977.959],
+  [['百里屠苏','古剑焚寂'],'焚焰血戮',3,'fyxl',2533.878],
+  [['黑龙鳞片','百里屠苏'],'故友赠礼',3,'gyzl',2298.7760000000003],
+  [['百里屠苏','欧阳少恭'],'琴心剑魄',3,'qxjp',2899.592],
+  [['尹千觞','欧阳少恭'],'醉梦江湖',4,'zmjh',1645.714],
+  [['尹千觞','幽都'],'幽都巫咸',4,'ydwx',2533.878],
+  [['风晴雪','尹千觞'],'陌相逢',4,'mxf',2011.429],
+  [['风晴雪','幽都'],'幽都灵女',4,'ydln',2142.0409999999997],
+  [['风晴雪','尹千觞','幽都'],'幽夜苍茫',10,'yycm',2899.592],
+  [['风晴雪','方兰生','百里屠苏','红玉','尹千觞','襄铃'],'黑衣少侠传',60,'hysxz',1750.2040000000002]
   /*
   [ ["巫炤", "司危"], "西陵毒唯", 4],
   [ ["巫炤", "西陵"], "炤不保西", 3],
@@ -178,11 +183,6 @@ COMBO_LIST  = [
   [ ["巫炤", "欧阳少恭"], "放弃治疗", 4]
   */
 ];
-INIT_CARD_NUM_HAND = 10;
-INIT_CARD_NUM_POOL = 8;
-POOL_CAPACITY = INIT_CARD_NUM_POOL + 2;
-BONUS_THRESHOLDS = [170, 140, 110];
-MAX_SP_NUM = 15;
 
 function getRandom(max){
   //returns random in [0, max-1]
@@ -196,7 +196,6 @@ class Character {
     this.score = score;
     this.season = season;
     this.poem = poem;
-    this.card = null;//card class in view
     this.owner = null;//player
     this.disabled = false;
     this.swapped = false;
@@ -209,15 +208,14 @@ class Character {
     // special cards won't be upgraded once more
     // note: it does not only get the special, it does everything of an upgrade except assigning the new char
     if(this.isSpecial()) return this;
+    if(specials == null) return this;
     var sps = specials.characters;
     for(var i=0; i<sps.length; i++)
       if(sps[i].name == this.name){
         var sp = sps[i];
-        sp.card = this.card;
-        this.card.setChar(sp);
-        sp.disabled = this.disabled;
+        sp.inheritFrom(this);
         sps.splice(i, 1);
-        specials.view.deleteSpecial(i);
+        specials.view.deleteSpecial(sp);
         return sp;
       }
     return this;
@@ -242,6 +240,14 @@ class SpecialCharacter extends Character {
     super(id, name, score, season, poem);
     this.nameSuffix = nameSuffix;
     this.tricks = [];
+  }
+  inheritFrom(src){
+    //inherit game status from its common card
+    this.owner = src.owner;
+    this.disabled = src.disabled;
+    this.swapped = src.swapped;
+    src.card.setChar(this);
+    this.card = src.card;
   }
   enabled(){
     if (this.disabled || (this.swapped && this.noswap))
@@ -311,45 +317,45 @@ class Deck {
     this.characters = [];
     this.view = null;
   }
-  initDeck(size, commons, specials) {
-    for (var i = 0; i < size; i++)
-      this.addChar(commons.removeRandom());
-    var me = this;
-    if(specials!=null && specials.getSize()>0){
-      delayedFunc(function(){
-        for (var i = 0, idx = 0; i < size; i++){
-          if(!me.toSpecial(idx, specials))
-            idx ++;
-        }
-      },1);
+  init(size, commons, specials, x=null) {
+    if (x == null) {
+      for (var i = 0; i < size; i++)
+        this.addChar(commons.removeRandom());
+    } else { // for multiplayer debugging
+      size = x.length;
+      for (var i=0; i<x.length; i++)
+        this.addChar(commons.removeCharByID(x[i]));
     }
-  }
-  toSpecial(idx, specials){
-    var char = this.characters[idx];
-    for(var i=0; i<specials.getSize(); i++)
-      if(specials.characters[i].name == char.name) {
+    for (var i = 0, idx = 0; i < size; i++){
+      var char = this.characters[idx];
+      var upg = char.getSpecial(specials);
+      if(upg != char){
         this.characters.splice(idx, 1);
-        this.characters.push(specials.characters[i]);
-        if(idx != this.getSize())
-          this.view.toSpecial(char, specials.characters[i]);
-        specials.characters.splice(i, 1);
-        specials.view.deleteSpecial(i);
-        return true;
+        this.characters.push(upg);
+        this.view.toSpecial(char, upg);
       }
-    return false;
+      else
+        idx ++;
+    }
   }
   getSize(){
     return this.characters.length;
   }
   addChar(char) {
     this.characters.push(char);
+    if(this.view != null)
+      this.view.addChar(char);
+    return char;
   }
   addRandom(repo, specials) {
     if (repo.characters.length == 0) {
+      console.trace();
       alert("Empty deck!");
       return null;
     }
     var char = repo.removeRandom();
+    if(specials != null)
+      char = char.getSpecial(specials);
     this.addChar(char);
     return char;
   }
@@ -363,14 +369,10 @@ class Deck {
         return this.characters[i];
     return null;
   }
-  clear() {
-    this.view.clear();
-    this.characters.length = 0;
-  }
-  destroy(){
+  clear(){
     this.characters.length = 0;
     if(this.view != null)
-      this.view.destroy();
+      this.view.clear();
   }
   removeRandom() {
     var i = getRandom(this.characters.length);
@@ -379,15 +381,8 @@ class Deck {
     return char;
   }
   removeChar(char) {
-    var target = -1,
-      clen = this.characters.length;
-    for (var i = 0; i < clen; i++) {
-      if (this.characters[i] == char) {
-        target = i;
-        break;
-      }
-    }
-    if (target < 0) return null;
+    var target = this.characters.indexOf(char);
+    if(target < 0) return null;
     this.characters.splice(target, 1);
     return char;
   }
@@ -400,7 +395,7 @@ class Deck {
         break;
       }
     }
-    if (target < 0) return false;
+    if (target < 0) return null;
     var char = this.characters[target];
     this.characters.splice(target, 1);
     return char;
@@ -421,32 +416,27 @@ class Deck {
     return msg;
   }
 }
-class Repository extends Deck {
-  constructor(type) {
-    super();
-    this.type = type;
-  }
-  init(){
-    if (this.type == "common")
-    {
-      this.initCommonRepo(model.pack[0]);
-      this.initCommonRepo(model.pack[1]);
-    }
-    else if (this.type == "special"){
-      spmanager.initRepository(this, model.pack[0]);
-      spmanager.initRepository(this, model.pack[1]);
-      spmanager.initRepository(this, model.pack[0]);
-      spmanager.initRepository(this, model.pack[1]);
-    }
-    else
-      console.log("Illegal Repository Type: " + this.type);
-  }
-  initCommonRepo(version) {
-    var pack = COMMON_CHAR_LIST[version-1];
-    var len = pack.length;
+class CommonRepository extends Deck {
+  constructor() {super();}
+  init(pack){
+    for(var p = 0; p < 2; p++){
+      var ids = COMMON_CHAR_LIST[pack[p]-1];
+      var len = ids.length;
 
-    for (var i = 0; i < len; i++) {
-      let char = new Character(pack[i][0], pack[i][1], pack[i][2], pack[i][3]);
+      for (var i = 0; i < len; i++) {
+        var char = new Character(ids[i][0], ids[i][1], ids[i][2], ids[i][3], ids[i][4]);
+        char.card = new Card(char);
+        this.addChar(char);
+      }
+    }
+  }
+}
+class SpecialRepository extends Deck {
+  constructor() {super();}
+  init(ids){
+    for(var i=0; i<ids.length; i++) {
+      var char = spmanager.createSpecial(ids[i]);
+      char.card = new Card(char);
       this.addChar(char);
     }
   }
@@ -475,8 +465,11 @@ class TabledCombo{
   getName(){
     return COMBO_LIST[this.index][1];
   }
-  getInit(){
+  getId(){
     return COMBO_LIST[this.index][3];
+  }
+  getAudioDuration(){
+    return COMBO_LIST[this.index][4];
   }
   calculateFullScore(){
     this.fullScore = COMBO_LIST[this.index][2];
@@ -637,51 +630,46 @@ class Player {
     this.id = id;
     this.hand = new Deck();
     this.table = new Deck();
-    this.specials = new Deck();
+    this.specials = new SpecialRepository();
     this.score = 0;
     this.matchable = true;
     this.partialCombos = [];
     this.completeCombos = [];
+    this.specialIDs = [];
   }
-  init(){
-    this.table.destroy();
-    this.specials.destroy();
-    this.hand.destroy();
+  clear(){
+    this.table.clear();
+    this.specials.clear();
+    this.hand.clear();
     this.matchable = true;
     this.partialCombos.length = 0;
     this.completeCombos.length = 0;
     this.score = 0;
   }
-  start(chars = null) {
-    // In multiplayer mode the Opponent's Special cards need to be fetched remotely
-    if (this == model.player0 && is_multiplayer == true) {
-    } else {
-      spmanager.initPlayerSpecials(this);
-    }
-    if (chars == null) {
-      this.hand.initDeck(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
-    } else {
-      // FOR TESTING
-      for (var i=0; i<chars.length; i++) {
-        var c = model.commonRepository.removeCharByID(chars[i]);
-        if (c != undefined && c != false) {
+  init(x=null){
+    this.specials.init(this.specialIDs);
+    if (x != null) {
+      // ADD
+      for (var i=0; i<x.length; i++) {
+        var c = model.commonRepository.removeCharByID(x[i]);
+        var upg = c.getSpecial(this.specials);
+        if (c != undefined && c != null)
           this.hand.addChar(c);
-        } else {
-          console.log('[model.start] start with initializer id='+chars[i]+' returns undefined');
-        }
       }
-      var me = this;
-      // 这其实得要有一个barrier，等主线程的view.start()执行完了才能继续
-      // 不过现在的CPU性能都很高，所以当开始执行toSpecial的时候一定已经执行好了
-      // 或者说… 可能是因为JS的线程调度能够容纳这样的写法。
-      delayedFunc(function() {
-      if (me.specials.getSize() > 0) {
-        for (var i=0, idx=0; i<me.hand.characters.length; i++) {
-          if (!me.hand.toSpecial(idx, me.specials)) idx++;
+      // FIXUP
+      for (var i = 0, idx = 0; i < x.length; i++){
+        var char = this.hand.characters[idx];
+        var upg = char.getSpecial(this.specials);
+        if(upg != char){
+          this.hand.characters.splice(idx, 1);
+          this.hand.characters.push(upg);
+          this.hand.view.toSpecial(char, upg);
         }
+        else
+          idx ++;
       }
-      }, 1);
-      // Need Fixup ???
+    } else {
+      this.hand.init(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
     }
   }
   addTableChar(char) {
@@ -695,14 +683,14 @@ class Player {
     for(var i=0; i<oppo.table.getSize(); i++){
       oppo.table.characters[i].performTricks("NamedBanTrick", char);
     }
-    // do i ban someone?
+    //do i ban someone?
     var trick = char.getTrick("NamedBanTrick");
     if(trick != null)
       for(var i=0; i<oppo.table.getSize(); i++){
         if(trick.performTrick(oppo.table.characters[i]))
           oppo.recalculate(true);
       }
-    // do i benefit (from) others?
+    //do i benefit (from) others?
     for(var i=0; i<this.table.getSize(); i++){
       this.table.characters[i].performTricks("CharTrick", this);
     }
@@ -761,105 +749,86 @@ class Player {
   }
 }
 class Model {
-  constructor(p1, p2) {
-    this.pack = [p1, p2];
-    this.commonRepository = new Repository("common");
-    this.specialRepository = new Repository("special");
+  constructor() {
+    this.commonRepository = new CommonRepository();
     this.player0 = new Player(0);
     this.player1 = new Player(1);
     this.pool = new Deck();
     this.activeChar = null;
   }
-  start(snapshot = null){
-    if (snapshot == null) {
-      var TEST = false;
-      view.init(); // TESTING
-      if (TEST) {
-        model.poolStart(['gjhg2', 'ywy2', "bsd1", "qysnp1", "ca2", "tyc1", "zrl1"]);
-        model.player1.start(["hy1", "ly1", "oysg1", "fl1", "al1", "hllp1", "xl1", "ar2"]);
-        model.player0.start(["sy2", "qy1", "qc1",  "sx2", "gjfj1", "blts1", "fqx1"]);
-      }
-      else {
-        model.poolStart();
-        model.player0.start();
-        model.player1.start();
-      }
-      model.checkMatch1();
-      view.start();
-    } else { // for multiplayer
-      view.init();
-      
-      var my_id = versus_rank, oppo_id = 1-my_id;
-      var hands = [ snapshot.p0h, snapshot.p1h ]; // this is from Offender's perspective
-      var sps   = [ snapshot.p0sp,snapshot.p1sp];
-      var pool  = snapshot.pool;
-      
-      // Replicates the following functions
-      // --> model.player1.start()
-      //     --> spmanager.initPlayerSpecials(model.player1)
-      //     --> player1.hand.initDeck
-      var p1_h = hands[my_id], p1_sp = sps[my_id];
-      for (var i=0; i<p1_sp.length; i++)
-        model.player1.specials.addChar(model.specialRepository.removeCharByID(
-          p1_sp[i]));
-      for (var i=0; i<p1_h.length; i++)
-        model.player1.hand.addChar(model.commonRepository.removeCharByID(p1_h[i]));
-      
-      var p0_h = hands[oppo_id], p0_sp = sps[oppo_id];
-      for (var i=0; i<p0_h.length; i++)
-        model.player0.hand.addChar(model.commonRepository.removeCharByID(p0_h[i]));
-      
-      // --> model.poolStart()
-      for (var i=0; i<pool.length; i++)
-        model.pool.addChar(model.commonRepository.removeCharByID(pool[i]));
-      // <-- model.poolStart()
-      
-      view.start();
-      model.checkMatch1();
-      
-      // These two may require the view to be already okay??
-      for (var i = 0, idx = 0; i < model.player1.hand.characters.length; i++){
-        if(!model.player1.hand.toSpecial(idx, model.player1.specials))
-          idx ++;
-      } 
-      for (var i = 0, idx = 0; i < model.player0.hand.characters.length; i++){
-        if(!model.player0.hand.toSpecial(idx, model.player0.specials))
-          idx ++;
-      }
-    }
+  setPack(p1 ,p2){
+    this.pack = [p1, p2];
   }
   init(){
-    model.player1.init();
-    model.player0.init();
-    model.pool.destroy();
-    model.commonRepository.destroy();
-    model.specialRepository.destroy();
-    model.activeChar = null;
-    model.commonRepository.init();
-    model.specialRepository.init();
-  }
-  setup(){
-    model.commonRepository.init();
-    model.specialRepository.init();
-    window.addEventListener("beforeunload", function (event) {
+    model.commonRepository.init(this.pack);
+    var TEST = true;
+    if (TEST) {
+      model.player1.init([ "ws2", "xf1", "ca2", "gjfj1", "ys1", "tyc1", "thg1", "ths2", "bsd1" ]);
+      model.player0.init([ "hllp1", "hykh2", "wmzj2", "yd1", "qyt1", "xy2", "blts1", "fqx1", "qy1" ]);
+      this.pool.init(INIT_CARD_NUM_POOL, this.commonRepository, null, [ "yq2", "jql2", "ar2", "sx2", "gjhy1", "xl1", "fl1", "ttzq2" ]);
+    } else {
       model.player1.init();
       model.player0.init();
-      model.pool.destroy();
-      model.commonRepository.destroy();
-      model.specialRepository.destroy();
-      returnValue = undefined;
-    });
-  }
-  poolStart(ids = null){ // for testing
-    if (ids == null) {
-      this.pool.initDeck(INIT_CARD_NUM_POOL, this.commonRepository);
-    } else {
-      console.log('poolStart ' + ids)
-      for (var i=0; i<ids.length; i++) {
-        var x = this.commonRepository.removeCharByID(ids[i]);
-        this.pool.addChar(x);
-      }
+      this.pool.init(INIT_CARD_NUM_POOL, this.commonRepository);
     }
+    view.init();
+    model.checkMatch1();
+  }
+  init_Multiplayer(snapshot) {
+    model.commonRepository.init(this.pack);
+    view.init();
+    
+    // LOAD SNAPSHOT
+    var my_id = versus_rank, oppo_id = 1-my_id;
+    var hands = [ snapshot.p0h, snapshot.p1h ]; // this is from Offender's perspective
+    var sps   = [ snapshot.p0sp,snapshot.p1sp];
+    var pool  = snapshot.pool;
+    
+    // Replicates the following functions
+    // >> model.player1.init()
+    //   >> player.specials.init()
+    //   >> player.hand.init()
+    
+    // Populate MY special cards & 
+    var p1_h = hands[my_id], p1_sp = sps[my_id];
+    for (var i=0; i<p1_sp.length; i++) {
+      var ch = spmanager.createSpecial(p1_sp[i]);
+      ch.card = new Card(ch);
+      model.player1.specials.addChar(ch);
+    }
+    for (var i=0; i<p1_h.length;  i++) {
+      var ch = model.commonRepository.removeCharByID(p1_h[i]);
+      model.player1.hand.addChar(ch);
+    }
+    
+    // Populate Opponent's hand cards which MAY BE SPECIAL CARDS
+    // Downgrade temporarily & re-upgrade in the FixUp
+    var p0_h = hands[oppo_id], p0_sp = sps[oppo_id];
+    for (var i=0; i<p0_h.length;  i++) {
+      var ch = model.commonRepository.removeCharByID(p0_h[i]);
+      if (ch == null) {
+        var id = p0_h[i];
+        id = id.substr(0, (id.length-1));
+        ch = model.commonRepository.removeCharByID(id);
+      }
+      model.player0.hand.addChar(ch);
+    }
+    
+    // Populate Pool
+    for (var i=0; i<pool.length; i++) {
+      var ch = model.commonRepository.removeCharByID(pool[i]);
+      model.pool.addChar(ch);
+    }
+    
+    model.checkMatch1();
+  }
+  clear(){
+    model.player1.clear();
+    model.player0.clear();
+    model.pool.clear();
+    model.commonRepository.clear();
+    model.activeChar = null;
+    view.clear();
   }
   discard(player, char){
     if(char == null)
@@ -868,19 +837,17 @@ class Model {
       player.hand.removeChar(char);
     model.pool.addChar(char);
     var newChar = player.hand.addRandom(model.commonRepository, player.specials);
-    player.hand.toSpecial(player.hand.getSize()-1, player.specials);
-    view.discard(player, char, newChar);
-    
-    if (is_multiplayer) { // Added for multiplayer
+    console.log(player.id + "号放弃 "+ char.name + " 获得 " + newChar.name);
+    if (is_multiplayer) // for multiplayer
       socket.emit('Game_DiscardOne', char.id, newChar.id);
-      console.log('discard ' + char.id + ' for ' + newChar.id);
-    }
   }
   opponentDiscard(discarded_id, added_id) { // Only in multiplayer mode
     var discarded = model.player0.hand.getChar(discarded_id);
     model.player0.hand.removeChar(discarded)
     model.pool.addChar(discarded);
     var added = model.commonRepository.getChar(added_id);
+    var added_common = added.getCommonChar();
+    if (added != added_common) added = added_common;
     model.player0.hand.addChar(added);
     model.player0.hand.toSpecial(model.player0.hand.getSize()-1,
       model.player0.specials); // Fixup
@@ -893,7 +860,7 @@ class Model {
   overSeason(){
     //returns true:
     //if >= 6 cards of a certain season in pool and >= 3 cards of other seasons in pool+repository
-    var count = 0;;
+    var count = 0;
     var chars = this.pool.characters;
     var seasons = ["春", "夏", "秋", "冬"];
     for(var i=0; i<seasons.length; i++){
@@ -920,28 +887,15 @@ class Model {
     }
     return false;
   }
-  redeal(pool_ids = null, repo_ids = null) { // Changed for multiplayer
-    model.commonRepository.characters = model.commonRepository.characters.concat(model.pool.characters);
-    if (pool_ids == null) {
-      model.pool.clear();
-      model.pool.initDeck(INIT_CARD_NUM_POOL, model.commonRepository);
-      socket.emit('Game_Redeal', extractIDs(model.pool.characters),
-                                 extractIDs(model.commonRepository.characters));
-    } else {
-      model.pool.clear();
-      for (var i=0; i<pool_ids.length; i++) {
-        var c = model.commonRepository.removeCharByID(pool_ids[i]);
-        if (c != false) // 多人模式下有可能因为时序略有不一致导致此牌已经被对手打出了，所以要加这个..这个解法不太优雅，更好的方法应该是纳入队列中
-          model.pool.addChar(c);
-      }
-    }
-    view.pool.init();
+  redeal(){
+    for(var i=0; i<model.pool.getSize(); i++)
+      model.commonRepository.addChar(model.pool.characters[i]);
+    model.pool.characters.length = 0;
+    model.pool.init(INIT_CARD_NUM_POOL, model.commonRepository);
   }
   checkMatch1(){
-    if (is_multiplayer == 0) { // changed for multiplayer
-      while(model.overSeason())
-        model.redeal();
-    }
+    while(model.overSeason())
+      model.redeal();
     var matchable = model.hasMatch(model.player1);
     if(matchable) {
       if(!model.player1.matchable){
@@ -954,9 +908,11 @@ class Model {
         model.redeal();
         model.checkMatch1();
       }
-      else if(model.player1.matchable){
-        model.player1.matchable = false;
-        view.checkMatch1();
+      else {
+        if(model.player1.matchable){
+          model.player1.matchable = false;
+          view.checkMatch1();
+        }
       }
     }
   }
@@ -964,14 +920,9 @@ class Model {
     var match = this.pickLeft(player);
     return match != null;
   }
-  dealOne(player, the_char_id = null) {/*
-    var chars = player.table.characters;
-    var char = chars[chars.length -1].performTricks("DealTrick", player);
-    if(char == null)
-      char = chars[chars.length -2].performTricks("DealTrick", player);
-      */
-    var char = (the_char_id == null) ? obtainVector.performDeal() :
-      model.commonRepository.removeCharByID(the_char_id); // for multiplayer
+  dealOne(player, dealt_id = null) { // changed for multiplayer
+    var char = (dealt_id == null) ? obtainVector.performDeal() :
+      model.commonRepository.removeCharByID(dealt_id);
     if(char == null)
       char = model.pool.addRandom(model.commonRepository);
     else {
@@ -979,9 +930,6 @@ class Model {
       model.pool.addChar(char);
     }
     view.dealOne(char);
-    if (is_multiplayer) {
-      console.log('dealOne ' + char.id);
-    }
     return char.id; // for multiplayer
   }
   pickLeft(player){
@@ -1096,7 +1044,6 @@ class Model {
     var ac1 = player.addTableChar(obtainVector.playerTableChars[1]);
     obtainVector.charScoreInc = ac0[0] + ac1[0];
     obtainVector.comboCount =  ac0[1] + ac1[1];
-    
     controller.handleBans();
   }
   activate(char) {//player1 set a card active
@@ -1114,7 +1061,8 @@ class Model {
     msg += "卡池\n" + this.pool.getDesc();
     return msg;
   }
-  getSnapshot() { // 这个Snapshot不带view
+  
+  getSnapshot() { // no view; for starting a game
     return {
       'p0h' :extractIDs(model.player0.hand.characters),
       'p0sp':extractIDs(model.player0.specials.characters),
@@ -1124,25 +1072,21 @@ class Model {
       'p1table':extractIDs(model.player1.table.characters),
       'pool':extractIDs(model.pool.characters),
       'common_repo':extractIDs(model.commonRepository.characters),
-      'special_repo':extractIDs(model.specialRepository.characters),
+      'special_repo':spmanager.specialRepoIDs,
       'p0score': model.player0.score,
       'p1score': model.player1.score,
     };
   }
-  
-  getMyCardsCount() {
-    return model.player0.hand.characters.length +
-           model.player0.table.characters.length +
-           model.player1.hand.characters.length +
-           model.player1.table.characters.length +
-           model.pool.characters.length +
-           model.commonRepository.characters.length;
-  }
 }
-
 function extractIDs(characters) {
   var ret = [];
   for (var i=0; i<characters.length; i++)
     ret.push(characters[i].id);
   return ret;
+}
+function DUMP(what) {
+  if (what == 'h0') console.log(extractIDs(model.player0.hand.characters));
+  else if (what == 'h1') console.log(extractIDs(model.player1.hand.characters));
+  else if (what == 'sp0') console.log(extractIDs(model.player0.specials.characters));
+  else if (what == 'sp1') console.log(extractIDs(model.player1.specials.characters));
 }

@@ -31,7 +31,7 @@
 }
 
 /* flip */
-#pool .card, #hand1 .card, #table0 .card, #table1 .card, #specials1 .card{
+#pool .card, #hand1 .card, #table0 .card, #table1 .card, #specials1 .card, .faceup .card{
   transform: rotateY(180deg);
 }
 
@@ -51,10 +51,10 @@
 }
 
 /* repository deck effect */
-#repository .charcontainer:nth-child(n+5){
-  visibility: hidden;
+#repository .charcontainer:nth-child(n+5) .cardback{
+  box-shadow: none;
 }
-#repository .charcontainer:first-child{
+#repository .charcontainer:first-child){
   left: calc(var(--card-width) / 4);
   top: calc(var(--card-height) /30);
 }
@@ -121,10 +121,10 @@
 }
 
 /* hover effects */
-#pool>.charcontainer>.cardcontainer:hover, #hand1>.charcontainer>.cardcontainer:hover{
+#pool>.charcontainer:hover>.cardcontainer, #hand1>.charcontainer:hover>.cardcontainer{
   transform: translate(0, calc(var(--card-height)/-3));
 }
-#table0>.charcontainer>.cardcontainer:hover, #table1>.charcontainer>.cardcontainer:hover,  #specials1>.charcontainer>.cardcontainer:hover{
+#table0>.charcontainer:hover>.cardcontainer, #table1>.charcontainer:hover>.cardcontainer,  #specials1>.charcontainer:hover>.cardcontainer{
   transform: translate(0, calc(var(--card-height)/-4));
 }
 #pool>.charcontainer:nth-child(odd)>.cardcontainer:hover {

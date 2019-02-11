@@ -21,9 +21,9 @@ class ObtainVector{
   getNextTrick(type){
     var so = this.getTrickSubjectObjectArrays(type);
     var subjects = so[0], objects = so[1];
-    //console.log('[getNextTrick] ' + type);
-    //console.log('subjects:'); console.log(subjects);
-    //console.log('objects: '); console.log(objects);
+    if (subjects == null) {
+      console.log("BOOM");
+    }
     for(var i=0; i<subjects.length; i++){
       var trick = subjects[i].getTrick(type);
       if(trick != null && objects[i] == null){console.log("[计划释放技能]"+subjects[i].name+":"+trick.constructor.name);
@@ -81,13 +81,13 @@ class ObtainVector{
       if(trick != null && objects[i] == null)
         if(trick.selectTarget())
           return true;
-        else {
+        else{
           // multiplayer
-          // 每个不需目标的技能，都记一笔“没有目标”的记录
-          if (is_multiplayer) {
+          // 每个不需目标的技能，都记”没有目标”
+          if (is_multiplayer)
             socket.emit('Game_TrickWithoutTarget', type);
-          }
           trick.performTrick(null);
+          return this.trickSelector(type);
         }
     }
     return false;
@@ -232,7 +232,7 @@ class DealTrick extends Trick{
     this.names = names;
     this.definite = definite;
   }
-  performTrick() {console.log(this.owner.name+" 发牌");
+  performTrick() {
     //returns a char from <names> with <probility>
     var cans = [];
     var repo = model.commonRepository.characters;
@@ -240,9 +240,11 @@ class DealTrick extends Trick{
       for(var j=0; j<repo.length; j++)
         if(this.names[i] == repo[j].name)
           cans.push(repo[j]);
-    if(this.definite || getRandom(2)==1){
+    if(cans.length > 0 && (this.definite || getRandom(2)==1)){
+      console.log(this.owner.name+" 发牌");
       return cans[getRandom(cans.length)];
     }
+    console.log(this.owner.name+"放弃发牌");
     return null;
   }
   clone(){return new DealTrick(this.description, this.names, this.definite);}
@@ -270,7 +272,7 @@ class CharTrick extends Trick{
   // add <bonus> to tabled char with <cname>
   // note: only benefit chars on one's own side
   constructor(cname, bonus){
-    super(cname + "的分数增加" + bonus + "分");
+    super("己方" + cname + "的分数增加" + bonus + "分");
     this.charName = cname;
     this.bonus = bonus;
   }
@@ -304,11 +306,20 @@ class CharTrick extends Trick{
   clone(){return new CharTrick(this.charName, this.bonus);}
 }
 class UnnamedBanTrick extends Trick{
-  constructor(){
-    super("禁用对方任意一张珍稀牌的技能");
+  constructor(group, names){
+    if(group == null)
+      super("禁用对方任意一张珍稀牌的技能");
+    else {
+      super("禁用对方任意一张" + group + "珍稀牌的技能");
+      this.group = group;
+      this.names = names;
+    }
   }
   isValidTarget(char){
-    return char.getTrick("ComboTrick,CharTrick,NamedBanTrick")!=null;
+    if(this.names == null)
+      return char.getTrick("ComboTrick,CharTrick,NamedBanTrick")!=null;
+    else
+      return this.names.includes(char.name) && char.getTrick("ComboTrick,CharTrick,NamedBanTrick")!=null;
   }
   selectTarget(){return super.selectTarget("禁用其加分技能", controller.selectBan);}
   performTrick(char){
@@ -317,13 +328,12 @@ class UnnamedBanTrick extends Trick{
       char.disabled = true;
       char.owner.recalculate(true);
     }
-    else {
+    else
       console.log(this.owner.name + " 无禁用对象");
-    }
     this.disabled = true; //only works once
     return char;
   }
-  clone(){return new UnnamedBanTrick();}
+  clone(){return new UnnamedBanTrick(this.group, this.names);}
 }
 class NamedBanTrick extends Trick{
   constructor(name){

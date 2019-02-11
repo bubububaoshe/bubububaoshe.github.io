@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<widget xmlns   = "http://www.w3.org/ns/widgets"
+    xmlns:gap   = "http://phonegap.com/ns/1.0"
+    id          = "gj3.fanworks.bubububaoshe.qqx"
+    versionCode = "10"
+    version     = "1.0.0" >
+
+<!-- versionCode is optional and Android only -->
+
+  <name>千秋戏</name>
+
+  <description>
+   源自古剑奇谭3的卡牌插刀小游戏。
+  </description>
+
+  <author href="https://weibo.com/3802484189/" email="support@phonegap.com">
+      bubububaoshe
+  </author>
+
+  <!-- all platforms -->
+  <preference name="orientation" value="landscape" />
+  <preference name="fullscreen" value="true" />
+
+  <platform name="android">
+    <icon src="icon.png" width="512" height="512" />
+  </platform>
+</widget>

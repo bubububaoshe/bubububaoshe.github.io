@@ -16,66 +16,53 @@ class Controller{
   constructor(){
   }
   restart(){
-    if (is_multiplayer != true) { // Changed in multiplayer
+    if (is_multiplayer != true) { 
       messenger.hideFinalNotice();
-      model.init();
+      var id = this.id;
       delayedFunc(function(){
-        controller.gameinit();
+        model.clear();
+        if(id == "restart")
+          controller.gameinit();
+        else
+          showPage("configurator");
       }, 2);
     } else {
       ShowContinueDialog();
-      //model.init();
-      //console.log("Voted to restart");
-      //socket.emit('Game_VoteRestart'); // Will swap defensive/offensive & restart if BOTH players click this button
     }
   }
-  activate(){
-    var char = model.player1.hand.getChar(this.id);
-    model.activate(char);
-  }
-  obtain() {
-    IncrementActionBarrier();
-    
-    var handc = model.activeChar;
-    model.activate(handc);
-    model.player1.hand.removeChar(handc);
-    var orig_poolc_id = this.id; // 这里有个情况：对方玩家可能将此牌变成了特殊牌，所以应该记下原牌的ID
-    var poolc = model.pool.removeCharByID(this.id).getSpecial(model.player1.specials);
-   
-    if (is_multiplayer) { // WebSocket messages are in-order, so server will have entire sequence
-      socket.emit('Game_ObtainStart', handc.id, orig_poolc_id);
-      console.log('obtain ' + handc.id + ' & ' + orig_poolc_id);
+  activate(event){
+    var div = event.target.closest(".charcontainer");
+    if (div != null) {
+      var char = model.player1.hand.getChar(div.id);
+      model.activate(char);
     }
-      
-    obtainVector.init(model.player1, handc, poolc);
-    controller.handleCopies();
-    
-    DecrementActionBarrier();
   }
-  
-  overSeasonRedeal() {
-    var STRESS = false;
-    if (STRESS == true) {
-      console.log("S T R E S S    T E S T ! ! !");
-      for (var i=0; i<10; i++) { // SMOKE TEST
-        model.redeal();
+  obtain(event){
+    var div = event.target.closest(".charcontainer");
+    if (div != null && div.firstElementChild.firstElementChild.classList.contains("glow")) {
+      IncrementActionBarrier();
+      var handc = model.activeChar;
+      model.activate(handc);
+      model.player1.hand.removeChar(handc);
+      var orig_poolc_id = div.id;
+      var poolc = model.pool.removeCharByID(div.id).getSpecial(model.player1.specials);
+      if (is_multiplayer) {
+        socket.emit('Game_ObtainStart', handc.id, orig_poolc_id);
+        console.log('obtain ' + handc.id + ' & ' + orig_poolc_id);
       }
+      obtainVector.init(model.player1, handc, poolc);
+      controller.handleCopies();
+      DecrementActionBarrier();
     }
-    while(model.overSeason())
-      model.redeal();
   }
-  
-  opponentObtain(remote_handcid = null, remote_poolcid = null){ // Changed for multiplayer
-    console.log('[opponentObtain] ' + remote_handcid + ', ' + remote_poolcid);
-    
-    
+  opponentObtain(remote_handcid = null, remote_poolcid = null){
     if (is_multiplayer == false) {
-      this.overSeasonRedeal();
+      while(model.overSeason())
+        model.redeal();
     }
-    
-    var pick = (remote_handcid == null) ? model.aiSelectObtain() : 
+    var pick = (remote_handcid == null) ? model.aiSelectObtain() :
       [model.player0.hand.getChar(remote_handcid),
-       model.pool.getChar(remote_poolcid)]; // getSpecial 在接下来再调用
+       model.pool.getChar(remote_poolcid)];
     if(pick == null){
       if(model.overSize()){
         model.redeal();
@@ -90,11 +77,10 @@ class Controller{
       var hc = model.player0.hand.removeChar(pick[0]);
       var pc = model.pool.removeChar(pick[1]);
       if (pc == null) {
-        console.log("ERROR!!!!  pick[1] is NULL!!!!");
+        console.log("ERROR! pick[1] is NULL!");
         console.trace();
       }
       pc = pc.getSpecial(model.player0.specials);
-      console.log('[opponentObtain] hc='+hc+', pc='+pc);
       obtainVector.init(model.player0, hc, pc);
       controller.handleCopies();
     }
@@ -105,46 +91,45 @@ class Controller{
       }
     }
   }
-  postObtain(pid){ // changed in multiplayer
-    console.log('[postObtain] ' + pid);
+  postObtain(pid){
     delayedFunc(function(){
-      if(pid == 1){
-        var dealt_id = model.dealOne(model.player1);
-        if (is_multiplayer == true) {
-          socket.emit('Game_PostObtain_DealOne', dealt_id);
-          
-          if (is_multiplayer) {
-            controller.overSeasonRedeal(); // redeal应该出现在两方行动之间，在对战版中，由opponentObtain()中移至此处
-            socket.emit('Game_OpponentObtainRedealClear'); // changed for multiplayer
-          }
-        } else {
-          delayedFunc(function(){
-            controller.opponentObtain();
-          }, 2);
-        }
-      }
-      else{
-        if(model.player1.hand.getSize() == 0){
+      if(model.player0.hand.getSize() == 0 && model.player1.hand.getSize() == 0){
           //game end
           messenger.notifyFinal();
-          if (is_multiplayer) {
+          if (is_multiplayer)
             socket.emit('Game_PostObtain_GameEnd');
+      }
+      else {
+        if(pid == 1){
+          var dealt_id = model.dealOne(model.player1);
+          if (is_multiplayer == true) {
+            socket.emit('Game_PostObtain_DealOne', dealt_id);
+            // redeal应该出现在两方行动之间，在对战版中，由opponentObtain()中移至此处
+            while (model.overSeason())
+              model.redeal();
+            socket.emit('Game_OpponentObtainRedealClear'); // changed for multiplayer            
+          } else {
+            delayedFunc(function(){
+              controller.opponentObtain();
+            }, 2);
           }
         }
-        else {
-          if (is_multiplayer != true) { // changed in multiplayer
+        else{
+          if (is_multiplayer != true) // Added in multiplayer
             model.dealOne(model.player0);
-          }
           model.checkMatch1();
           view.unblockGame();
         }
       }
     });
   }
-  discard(){
-    var char = model.player1.hand.getChar(this.id);
-    model.discard(model.player1, char);
-    model.checkMatch1();
+  discard(event){
+    var div = event.target.closest(".charcontainer");
+    if (div != null) {
+      var char = model.player1.hand.getChar(div.id);
+      model.discard(model.player1, char);
+      model.checkMatch1();
+    }
   }
   checkPlayerInfo(){
     if(playerinfo.visible()){
@@ -191,21 +176,20 @@ class Controller{
   }
   handleCopies(){
     var type = "CopyTrick";
-    if(obtainVector.player.id == 1) {
-      var t = obtainVector.trickSelector(type);
-      if(!t)
+    if(obtainVector.player.id == 1){
+      if(!obtainVector.trickSelector(type))
         controller.handleSwaps();
     }
     else {
-      var trick = obtainVector.getNextTrick(type); // looks like const, so reentrant
+      var trick = obtainVector.getNextTrick(type);
       if(trick != null){
         var target = null;
-        if (is_multiplayer != true) { target = model.aiSelectCopy(trick); } // changed in multiplayer
+        if (is_multiplayer != true) target = model.aiSelectCopy(trick); // changed in multiplayer
         else {
           var target_id = GetNextObtainAction();
-          target = (target_id == null) ? 
+          target = (target_id == null) ?
             null :
-            model.player1.table.getChar(target_id); // from Table, according to tricks.js
+            model.player1.table.getChar(target_id);
         }
         obtainVector.setTrickTarget(type, target);
         if(target != null)
@@ -226,12 +210,12 @@ class Controller{
     else {
       if(obtainVector.getNextTrick(type) != null){
         var target = null;
-        if (is_multiplayer != true) { target = model.aiSelectSwap(); } // changed in multiplayer
+        if (is_multiplayer != true) target = model.aiSelectSwap();
         else {
           var target_id = GetNextObtainAction();
           target = (target_id == null) ?
             null :
-            model.player1.table.getChar(target_id); // from Table, according to tricks.js
+            model.player1.table.getChar(target_id);
         }
         obtainVector.setTrickTarget(type, target);
         if(target != null)
@@ -253,7 +237,7 @@ class Controller{
       var trick = obtainVector.getNextTrick(type);
       if(trick != null){
         var target = null;
-        if (is_multiplayer != true) { target = model.aiSelectBan(trick); } // changed in multiplayer
+        if (is_multiplayer != true) target = model.aiSelectBan(trick);
         else {
           var target_id = GetNextObtainAction();
           target = (target_id == null) ?
@@ -283,109 +267,124 @@ class Controller{
     messenger.exitNotifyOppoAction(controller.confirmBan);
     controller.handleBans();
   }
-  selectCopy(){ // modified in multiplayer
-    oppoinfo.exitSelectionPanel();
-    var type = "CopyTrick";
-    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    if (is_multiplayer) { // multiplayer
-      socket.emit('Game_SetCopyTrickTarget', this.id);
-      console.log('CopyTrick ' + this.id);
+  selectCopy(event){
+    var div = event.target.closest(".smallchar");
+    if (div != null) {
+      oppoinfo.exitSelectionPanel(controller.selectCopy);
+      var type = "CopyTrick";
+      obtainVector.setTrickTarget(type, model.player0.table.getChar(div.id));
+      if (is_multiplayer) // changed in multiplayer
+        socket.emit('Game_SetCopyTrickTarget', div.id);
+      controller.handleCopies();
     }
-    controller.handleCopies();
-    DecrementActionBarrier(); // 因为上一行的handleCopies可能增加barrier所以放这
-  }
-  selectSwap(){
-    // user swaps with the opponent
-    oppoinfo.exitSelectionPanel();
-    var type = "SwapTrick";
-    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    if (is_multiplayer) {
-      socket.emit('Game_SetSwapTrickTarget', this.id);
-      console.log('SwapTrick ' + this.id);
-    }
-    controller.handleCopies();
     DecrementActionBarrier();
   }
-  selectBan(){
-    oppoinfo.exitSelectionPanel();
-    var type = "UnnamedBanTrick";
-    obtainVector.setTrickTarget(type, model.player0.table.getChar(this.id));
-    if (is_multiplayer) {
-      socket.emit('Game_SetUnnamedBanTrickTarget', this.id);
-      console.log('UnnamedBanTrick ' + this.id);
+  selectSwap(event){
+    var div = event.target.closest(".smallchar");
+    if (div != null) {
+      // user swaps with the opponent
+      oppoinfo.exitSelectionPanel(controller.selectSwap);
+      var type = "SwapTrick";
+      obtainVector.setTrickTarget(type, model.player0.table.getChar(div.id));
+      if (is_multiplayer) // changed in multiplayer
+        socket.emit('Game_SetSwapTrickTarget', div.id);
+      controller.handleCopies();
     }
-    controller.handleBans();
     DecrementActionBarrier();
   }
-  doNothing(){
+  selectBan(event){
+    var div = event.target.closest(".smallchar");
+    if (div != null) {
+      oppoinfo.exitSelectionPanel(controller.selectBan);
+      var type = "UnnamedBanTrick";
+      obtainVector.setTrickTarget(type, model.player0.table.getChar(div.id));
+      if (is_multiplayer) // changed in multiplayer
+        socket.emit('Game_SetUnnamedBanTrickTarget', div.id);
+      controller.handleBans();
+    }
+    DecrementActionBarrier();
   }
-  spPick(){
-    PLAYER_SPECIALS[1].push(this.id);
-    document.getElementById("sppick").appendChild(this);
-    playerinfo.updateSPPick();
-    sound.activate();
-    this.removeEventListener("click", controller.spPick);
-    this.addEventListener("click", controller.spUnpick);
+  doNothing(){}
+  spPick(event){
+    var div = event.target.closest(".smallchar");
+    // opacity: if not set by js, or set by js =null, style.opacity is 0 (now matter what opacity it is in css)
+    // so if the div is not disabled, its opacity=0
+    if (div != null && div.firstElementChild.firstElementChild.style.opacity == 0) {
+      model.player1.specialIDs.push(div.id);
+      document.getElementById("sppick").appendChild(div);
+      playerinfo.updateSpecialsPick();
+      sound.activate();
+    }
   }
-  spUnpick(){
-    var idx = PLAYER_SPECIALS[1].indexOf(this.id);
-    PLAYER_SPECIALS[1].splice(idx, 1);
-    document.getElementById("sprepo").appendChild(this);
-    playerinfo.updateSPPick();
-    sound.activate();
-    this.removeEventListener("click", controller.spUnpick);
-    this.addEventListener("click", controller.spPick);
+  spUnpick(event){
+    var div = event.target.closest(".smallchar");
+    if (div != null) {
+      var idx = model.player1.specialIDs.indexOf(div.id);
+      model.player1.specialIDs.splice(idx, 1);
+      document.getElementById("sprepo").appendChild(div);
+      playerinfo.updateSpecialsPick();
+      sound.activate();
+    }
+  }
+  configure(){
+    var pack = getInput("packinput");
+    var p1 = parseInt(pack.charAt(1));
+    var p2 = parseInt(pack.charAt(2));
+    model.setPack(p1, p2);
+    var ai = getInput("aiinput");
+    AI_LEVEL = parseInt(ai.charAt(2));
+    COMBO_VOICE = getInput("voiceinput");
+    var sp = getInput("spinput");
+    SP_CARDS = parseInt(sp.charAt(2));
+    setCookie("configurations", [pack, ai, COMBO_VOICE, sp]);
+    spmanager.setup();
+    controller.gameinit();
   }
   gameinit(){
-    if(USER_SPECIAL_REPO.length == 0)
+    if(spmanager.userSpecialRepoIDs.length == 0)
       controller.gamestart();
     else{
-      document.getElementById("main").style.display = "none";
       playerinfo.showSpecialsPick();
-      showOpacity(document.getElementById("spselection"), true);
+      showPage("spselection");
       document.getElementById("gamestart").addEventListener("click", controller.gamestart);
     }
+    window.scrollTo(0,document.body.scrollHeight);
   }
   gamestart(){
-    console.log("haha");
-    var should_skip = false;
-    if (is_multiplayer == true && versus_rank == 0)
-      should_skip = true; // changed in multiplayer
+    console.log('[controller.gamestart]');
+    var should_skip = (is_multiplayer == true) && (versus_rank == 0);
     
+    // 以下情况需要发牌：
+    // 1. 单人模式。
+    // 2. 多人模式的先选特殊牌的人。
+    // 以下情况听从对方发牌：
+    // 1. 多人模式的后选特殊牌的人。
     if (should_skip == false) {
-      if(USER_SPECIAL_REPO.length > 0)
+      if(spmanager.userSpecialRepoIDs.length > 0)
         spmanager.saveSpecials();
-      spmanager.setAISpecials();
+      if (is_multiplayer == false) // changed for multiplayer
+        spmanager.setAISpecials();
       playerinfo.exitSpecialsPick();
-      document.getElementById("main").style.display = "block";
-      
-      // 初始化一个局面供调试珍稀牌功能用…
-      model.start();
+      showPage("main");
+      model.init();
     } else {
-      document.getElementById('avatarselection_blocker').style.display='block';
-      document.getElementById('offensive_wait_msg').style.display='block';
+      Versus_NotifyOtherPlayerSPSelection();
     }
     
-    if(is_multiplayer == true) {
-      if (versus_rank == 1) { // changed for multiplayer
-        var s = model.getSnapshot();
-        console.log('setup complete');
-        socket.emit('Match_SetupComplete', PLAYER_SPECIALS[1], s);
-        document.getElementById('avatarselection_blocker').style.display='block';
-        document.getElementById('offensive_wait_msg').style.display='block';
-        // Wait for the other player to complete setup
+    if (is_multiplayer == true) {
+      if (versus_rank == 1) {
+        socket.emit('Match_SetupComplete', model.player1.specialIDs, model.getSnapshot());
+        Versus_NotifyOtherPlayerSPSelection();
       } else {
-        console.log('setup complete');
-        socket.emit('Match_SetupComplete', PLAYER_SPECIALS[1], null);
+        socket.emit('Match_SetupComplete', model.player1.specialIDs, null);
       }
     }
   }
-  // 后手的人开始游戏用。后手玩家需要收到先手玩家的牌局
   gamestartDefensive(snapshot) {
-    if(USER_SPECIAL_REPO.length > 0)
+    if (spmanager.userSpecialRepoIDs.length > 0)
       spmanager.saveSpecials();
     playerinfo.exitSpecialsPick();
-    document.getElementById("main").style.display = "block";
-    model.start(snapshot);
+    showPage("main");
+    model.init_Multiplayer(snapshot);
   }
 }
