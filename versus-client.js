@@ -189,7 +189,7 @@ function ConnectToServer() {
     }
   }, 10);
   
-  var s = '192.168.0.22:3000';
+  var s = 'localhost:3000';
   if (document.getElementById('servername2').checked == true) s = '47.75.12.130:3000';
   console.log('server:' + s);
   socket = io(s);
@@ -286,6 +286,7 @@ function ConnectToServer() {
     document.getElementById('offensive_wait_msg').style.display='none';
     messenger.hideFinalNotice(); // If from restart
     OtherPlayerSpecialCardFixup(other_sp);
+    model.player1.SpecialFixup();
   });
   
   socket.on('Match_GameInitDefensive', (other_sp, snapshot) => {
@@ -301,6 +302,7 @@ function ConnectToServer() {
     // 后手也要fixup，因为只有过了barrier，两边才都知道对方和自己的特殊牌。
     controller.gamestartDefensive(snapshot);
     OtherPlayerSpecialCardFixup(other_sp);
+    model.player1.SpecialFixup();
   });
   
   socket.on('Game_SelfTurn', (turn_idx) => {
@@ -345,7 +347,10 @@ function ConnectToServer() {
   });
   
   socket.on('Game_OpponentRedeal', (pool_ids, repo_ids) => {
-    console.log('Opponent Redeal');
+    model.redeal(pool_ids, repo_ids);
+  });
+  
+  socket.on('Game_RedealEcho', (pool_ids, repo_ids) => {
     model.redeal(pool_ids, repo_ids);
   });
   
@@ -566,25 +571,8 @@ if (AutoStartAutoTest) {
 // 默认打开多人模式
 document.getElementById('vs_player').click();
 function OtherPlayerSpecialCardFixup(other_sp) {
-  model.player0.specials.clear();
-  for (var i=0; i<other_sp.length; i++) {
-    var ch = spmanager.createSpecial(other_sp[i]);
-    ch.card = new Card(ch);
-    model.player0.specials.addChar(ch);
-  }
-  view.specials0.init_Multiplayer();
-  
-  // --> Deck.initDeck
-  for (var i = 0, idx = 0; i < model.player0.hand.characters.length; i++){
-    var orig_char = model.player0.hand.characters[i];
-    var upg_char  = orig_char.getSpecial(model.player0.specials);
-    if (upg_char != orig_char) {
-      model.player0.hand.view.toSpecial(orig_char, upg_char);
-    } else {
-      idx ++;
-    }
-  }
-  // <-- Deck.initDeck  
+  model.player0.specials.init(other_sp);
+  model.player0.SpecialFixup();
 }
 
 // Action sequence from last turn
@@ -741,9 +729,17 @@ async function AUTOTEST_maingame() {
         await sleep(1000);
       }
       await sleep(3999);
-      console.log('[AUTOTEST] Clicked final container');
-      document.getElementById('finalcontainer').click();
-      document.getElementById('finalcontainer').visibility = null;
+      
+      var x1 = document.getElementById('vote_play_again'),
+          x2 = document.getElementById('finalcontainer');
+      if (document.getElementById('vote_play_again').style.display == 'block') {
+        x1.click();
+      } else {
+        console.log('[AUTOTEST] Clicked final container');
+        x2.click();
+        continue;
+      }
+      
       while (document.getElementById('spselection').style.opacity == 0) {
         await sleep(1000);
       }
@@ -805,4 +801,9 @@ function Versus_NotifyOtherPlayerSPSelection() {
   var ids = ['avatarselection_blocker', 'offensive_wait_msg'];
   for (var i=0; i<ids.length; i++)
     document.getElementById(ids[i]).style.display = 'block';
+}
+
+function TEST_STRESSTEST() {
+  for (var i=0; i<15; i++)
+    model.redeal();
 }

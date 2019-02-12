@@ -165,6 +165,7 @@ class Game {
     this.flag_dealone = false;
     this.flag_oppo_obtain_redeal = false;
     this.turn_num = 1;
+    this.round_num = 0;
   }
   
   Setup() { // 两个玩家该gamesetup()
@@ -242,7 +243,8 @@ class Game {
   }
   
   OnStartOfTurn() {
-    console.log('-------------------------Turn ' + this.turn_num + '---------------');
+    console.log('-------------------------Turn ' + this.turn_num + 
+      ', Round ' + this.round_num + ' ---------------');
     this.flag_dealone = false;
     this.flag_oppo_obtain_redeal = false;
     
@@ -358,6 +360,7 @@ class Game {
     if (pidx != -1) {
       var other = this.players[1 - pidx];
       other.emit('Game_OpponentRedeal', pool_ids, repo_ids);
+      socket.emit('Game_RedealEcho', pool_ids, repo_ids);
     }
   }
   
@@ -413,6 +416,7 @@ class Game {
       this.players[1] = this.players[0];
       this.players[0] = temp;
       this.Setup();
+      this.round_num += 1;
     } else if ((state0 == "voted_playagain" && state1 == "voted_not_playagain") ||
                (state0 == "voted_not_playagain" && state1 == "voted_not_playagain") ||
                (state0 == "voted_not_playagain" && state1 == "voted_playagain")) {

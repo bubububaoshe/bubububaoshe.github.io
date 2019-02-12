@@ -632,6 +632,7 @@ function TearDownExistingViews() {
       x.removeChild(x.children[0]);
     }
   }
+  view.clear();
 }
 
 var sound, combos, model, controller, spmanager, messenger, view, oppoinfo, playerinfo, obtainVector;

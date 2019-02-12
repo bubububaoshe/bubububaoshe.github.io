@@ -557,3 +557,8 @@ TypeError: combo is undefined[Learn More] view.js:456:11
 
 经过查找，似乎是因为在自己出牌时进入combosound()之后却没有播放音频，似乎所有的timer都停止了一般。
 （会不会是与promise的用法有关？……）
+更新：在新的上游commit下此碧油唧已被修复
+
+新Bug：两边同时redeal()的话，就会不同步，效果似乎等于双方交换牌局
+原因：新commit中的redeal会导致data race
+修理方法：自己redeal时，服务器也把自己redeal的结果传回来一份

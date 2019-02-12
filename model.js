@@ -657,19 +657,22 @@ class Player {
           this.hand.addChar(c);
       }
       // FIXUP
-      for (var i = 0, idx = 0; i < x.length; i++){
-        var char = this.hand.characters[idx];
-        var upg = char.getSpecial(this.specials);
-        if(upg != char){
-          this.hand.characters.splice(idx, 1);
-          this.hand.characters.push(upg);
-          this.hand.view.toSpecial(char, upg);
-        }
-        else
-          idx ++;
-      }
+      SpecialFixup();
     } else {
       this.hand.init(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
+    }
+  }
+  SpecialFixup() { // For multiplayer !
+    for (var i = 0, idx = 0; i < this.hand.characters.length; i++){
+      var char = this.hand.characters[idx];
+      var upg = char.getSpecial(this.specials);
+      if(upg != char){
+        this.hand.characters.splice(idx, 1);
+        this.hand.characters.push(upg);
+        this.hand.view.toSpecial(char, upg);
+      }
+      else
+        idx ++;
     }
   }
   addTableChar(char) {
@@ -761,7 +764,7 @@ class Model {
   }
   init(){
     model.commonRepository.init(this.pack);
-    var TEST = true;
+    var TEST = false;
     if (TEST) {
       model.player1.init([ "ws2", "xf1", "ca2", "gjfj1", "ys1", "tyc1", "thg1", "ths2", "bsd1" ]);
       model.player0.init([ "hllp1", "hykh2", "wmzj2", "yd1", "qyt1", "xy2", "blts1", "fqx1", "qy1" ]);
@@ -838,21 +841,20 @@ class Model {
     model.pool.addChar(char);
     var newChar = player.hand.addRandom(model.commonRepository, player.specials);
     console.log(player.id + "号放弃 "+ char.name + " 获得 " + newChar.name);
-    if (is_multiplayer) // for multiplayer
-      socket.emit('Game_DiscardOne', char.id, newChar.id);
+    if (is_multiplayer) {// for multiplayer -- 如果是特殊牌，要传回对应的普通牌ID
+      var orig_id = newChar.id;
+      if (newChar.isSpecial()) orig_id = orig_id.substr(0, orig_id.length-1);
+      socket.emit('Game_DiscardOne', char.id, orig_id);
+    }
   }
   opponentDiscard(discarded_id, added_id) { // Only in multiplayer mode
     var discarded = model.player0.hand.getChar(discarded_id);
     model.player0.hand.removeChar(discarded)
     model.pool.addChar(discarded);
     var added = model.commonRepository.getChar(added_id);
-    var added_common = added.getCommonChar();
-    if (added != added_common) added = added_common;
-    model.player0.hand.addChar(added);
-    model.player0.hand.toSpecial(model.player0.hand.getSize()-1,
-      model.player0.specials); // Fixup
     model.commonRepository.removeChar(added);
-    view.discard(model.player0, discarded, added);
+    model.player0.hand.addChar(added);
+    model.player0.SpecialFixup(); // The card may need to be turned into special card
   }
   overSize(){
     return this.pool.getSize() >= POOL_CAPACITY;
@@ -887,11 +889,45 @@ class Model {
     }
     return false;
   }
-  redeal(){
-    for(var i=0; i<model.pool.getSize(); i++)
-      model.commonRepository.addChar(model.pool.characters[i]);
+  redeal(pool_ids = null, repo_ids = null){ // Changed for multiplayer
+    // Potential for data race here
+    //for(var i=0; i<model.pool.getSize(); i++)
+    //  model.commonRepository.addChar(model.pool.characters[i]);
+    //model.pool.characters.length = 0;
+    var chars = model.pool.characters.slice(); // not splice
+    for (var i=0; i<chars.length; i++)
+      model.commonRepository.addChar(chars[i]);
     model.pool.characters.length = 0;
-    model.pool.init(INIT_CARD_NUM_POOL, model.commonRepository);
+    
+    if (pool_ids == null) { // Changed for multiplayer
+      model.pool.init(INIT_CARD_NUM_POOL, model.commonRepository);
+      var pool_ids = extractIDs(model.pool.characters);
+      socket.emit('Game_Redeal', pool_ids,
+                                 extractIDs(model.commonRepository.characters));
+      console.log('Self redeal ' + pool_ids);
+    } else {
+      var diff = false;
+      var my_pool_ids = extractIDs(model.pool.characters);
+      if (my_pool_ids.length != pool_ids) {
+        diff = true;
+      } else {
+        for (var i=0; i<my_pool_ids.length; i++) {
+          if (my_pool_ids[i] != pool_ids[i]) {
+            diff = true;
+            break;
+          }
+        }
+      }
+      if (diff == true) {
+        for (var i=0; i<pool_ids.length; i++) {
+          var id = pool_ids[i];
+          var c = model.commonRepository.removeCharByID(id);
+          if (c != null)
+            model.pool.addChar(c);
+        }
+      }
+      console.log("Opponent Redeal or Self Redeal Ack" + pool_ids + ', diff=' + diff)
+    }
   }
   checkMatch1(){
     while(model.overSeason())
