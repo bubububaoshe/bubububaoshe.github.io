@@ -165,7 +165,7 @@ class Game {
     this.flag_dealone = false;
     this.flag_oppo_obtain_redeal = false;
     this.turn_num = 1;
-    this.round_num = 0;
+    this.round_num = 1;
   }
   
   Setup() { // 两个玩家该gamesetup()
