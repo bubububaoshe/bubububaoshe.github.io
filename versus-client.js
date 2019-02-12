@@ -18,6 +18,8 @@ var is_multiplayer = false;
 var versus_rank = -999; // 0:先手； 1:后手
 var remoteObtainActions = null;
 
+var g_game_id = -999; // 所连上的游戏ID
+
 // Test
 var is_verify_per_round = false;
 var combo_notify_method = 1; // 1: 双方都显示全屏大通知
@@ -280,7 +282,7 @@ function ConnectToServer() {
     ShowVotePlayAgainForNewRound();
   });
   
-  socket.on('Match_GameInitOffensive', (other_sp) => {
+  socket.on('Match_GameInitOffensive', (other_sp, snapshot, game_id) => {
     console.log('[先手开局] other_sp='+other_sp);
     document.getElementById('avatarselection_blocker').style.display='none';
     document.getElementById('offensive_wait_msg').style.display='none';
@@ -374,6 +376,24 @@ function ConnectToServer() {
       GotoMainMenu();
       document.getElementById('vote_playagain_msg').textContent = '';
     }, 7);
+  });
+  
+  socket.on('Game_RestoreGameSnapshot', (game_id, snapshot) => {
+    console.log('[RestoreGameSnapshot] game_id='+game_id);
+    console.log(snapshot);
+    
+    // APPLY SNAPSHOT
+    TearDownExistingViews();
+    model.player1.clear();
+    model.player0.clear();
+    model.commonRepository.clear();
+    model.pool.clear();
+    model.commonRepository.init(model.pack);
+    model.player1.specialIDs = snapshot.p1sp.slice();
+    model.player1.init(snapshot.p1h);
+    model.player0.specialIDs = snapshot.p0sp.slice();
+    model.player0.init(snapshot.p0h);
+    model.pool.init(-999, model.commonRepository, null, snapshot.pool);
   });
 } // End ConnectToServer
 
@@ -803,7 +823,20 @@ function Versus_NotifyOtherPlayerSPSelection() {
     document.getElementById(ids[i]).style.display = 'block';
 }
 
+function LoadGameIDFromCookie() {
+  var gid = getCookie('last_game_id');
+  if (gid.length == 0) { }
+  else {
+    g_game_id = parseInt(gid[0]);
+    console.log('[LoadGameIDFromCookie] last_game_id=' + g_game_id);
+  }
+}
+
 function TEST_STRESSTEST() {
   for (var i=0; i<15; i++)
     model.redeal();
+}
+
+function TEST_GETSNAPSHOT() {
+  socket.emit('Game_RequestSnapshot');
 }

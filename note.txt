@@ -562,3 +562,8 @@ TypeError: combo is undefined[Learn More] view.js:456:11
 新Bug：两边同时redeal()的话，就会不同步，效果似乎等于双方交换牌局
 原因：新commit中的redeal会导致data race
 修理方法：自己redeal时，服务器也把自己redeal的结果传回来一份
+
+-------------------------------------
+
+断线重连必要功能之一：从快照恢复
+和开局是一样的，但是注意player.init()中如果有特殊牌的话需要转回成普通牌因为开局时repo中只有普通牌。发完了牌再转为特殊牌。

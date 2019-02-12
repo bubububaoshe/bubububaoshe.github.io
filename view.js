@@ -625,7 +625,8 @@ class View {
 }
 
 function TearDownExistingViews() {
-  var ids = ['hand1', 'hand0', 'pool', 'repository', 'table0', 'table1']
+  var ids = ['hand1', 'hand0', 'pool', 'repository', 'table0', 'table1',
+    'specials0', 'specials1' ];
   for (var i=0; i<ids.length; i++) {
     var x = document.getElementById(ids[i]);
     while (x.children.length > 0) {

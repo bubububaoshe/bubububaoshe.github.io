@@ -646,18 +646,24 @@ class Player {
     this.completeCombos.length = 0;
     this.score = 0;
   }
-  init(x=null){
+  init(x=null){ // init时不存在特殊牌，之后Fixup了才有特殊牌
     this.specials.init(this.specialIDs);
     if (x != null) {
       // ADD
       for (var i=0; i<x.length; i++) {
         var c = model.commonRepository.removeCharByID(x[i]);
-        var upg = c.getSpecial(this.specials);
+        // New case for snapshot restorartion: may be special card
+        {
+          if (c == null) {
+            var common_id = x[i].substr(0, x[i].length-1);
+            c = model.commonRepository.removeCharByID(common_id);
+          }
+        }
         if (c != undefined && c != null)
           this.hand.addChar(c);
       }
       // FIXUP
-      SpecialFixup();
+      this.SpecialFixup();
     } else {
       this.hand.init(INIT_CARD_NUM_HAND, model.commonRepository, this.specials);
     }

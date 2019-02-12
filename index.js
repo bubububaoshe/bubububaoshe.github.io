@@ -45,7 +45,6 @@ Array.prototype.RemovePair = function(x) {
 
 var g_all_sockets = [];
 var g_serial = 1;
-var g_is_verify = true;
 
 class PlayerMatcher {
 	constructor() {
@@ -151,6 +150,7 @@ class PlayerMatcher {
 
 g_playermatcher = new PlayerMatcher();
 g_all_games = [];
+g_serial_game = 1;
 
 class Game {
   constructor(p0, p1) {
@@ -166,6 +166,9 @@ class Game {
     this.flag_oppo_obtain_redeal = false;
     this.turn_num = 1;
     this.round_num = 1;
+    this.game_id = g_serial_game;
+    this.actions = []; // [ [rank, action, param] ]
+    g_serial_game += 1;
   }
   
   Setup() { // 两个玩家该gamesetup()
@@ -184,6 +187,7 @@ class Game {
     this.flag_dealone = false;
     this.flag_oppo_obtain_redeal = false;
     this.turn_num = 1;
+    this.actions = [];
   }
   
   GetPlayerIndexBySocket(socket) {
@@ -230,8 +234,8 @@ class Game {
         console.log('[both player finished]');
         this.players[0].state = 'in_game';
         this.players[1].state = 'in_game';
-        this.players[1].emit('Match_GameInitOffensive', this.initsp[0], this.snapshot);
-        this.players[0].emit('Match_GameInitDefensive', this.initsp[1], this.snapshot);
+        this.players[1].emit('Match_GameInitOffensive', this.initsp[0], this.snapshot, this.game_id);
+        this.players[0].emit('Match_GameInitDefensive', this.initsp[1], this.snapshot, this.game_id);
         this.OnStartOfTurn();
       }
     }
@@ -262,6 +266,8 @@ class Game {
     
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
+      this.actions.push([pidx, 'Obtain', [handc_id, poolc_id]]);
+      this.PrintActions();
       this.obtain_actions[pidx].length = 0;
       this.obtain_actions[pidx].push(['controller.obtain', handc_id, poolc_id]);      
     }
@@ -273,6 +279,7 @@ class Game {
       tgt_id);
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
+      this.actions.push([pidx, 'CopyTrick', tgt_id]);
       this.obtain_actions[pidx].push(['controller.selectCopy', tgt_id]);
     }
   }
@@ -283,6 +290,7 @@ class Game {
       tgt_id);
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
+      this.actions.push([pidx, 'SwapTrick', tgt_id]);
       this.obtain_actions[pidx].push(['controller.selectSwap', tgt_id]);
     }
   }
@@ -293,6 +301,7 @@ class Game {
       tgt_id);
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
+      this.actions.push([pidx, 'BanTrick', tgt_id]);
       this.obtain_actions[pidx].push(['controller.selectBan', tgt_id]);
     }
   }
@@ -302,6 +311,7 @@ class Game {
       'without any targets selected');
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
+      this.actions.push([pidx, 'TrickWithoutTarget']);
       this.obtain_actions[pidx].push(['obtainVector.trickSelector', null]);
     }
   }
@@ -311,11 +321,8 @@ class Game {
     console.log('[OnObtainEnd] player ' + socket.player_id + ' obtain end');
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
+      this.actions.push([pidx, 'ObtainEnd']);
       var other = this.players[1 - pidx];
-      
-      if (g_is_verify==true && snapshot != null && snapshot != undefined) {
-        this.snapshots[pidx] = snapshot;
-      }
       
       other.emit('Game_OpponentObtain', this.obtain_actions[pidx]);
       this.obtain_actions[pidx].length = 0;
@@ -331,7 +338,7 @@ class Game {
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
       var other = this.players[1 - pidx];
-      
+      this.actions.push([pidx, 'PostObtainDealOne', dealt_id]);
       other.emit('Game_OpponentPostObtainDealOne', dealt_id);
       
       this.flag_dealone = true;
@@ -347,6 +354,7 @@ class Game {
       discarded_id + ' & added ' + added_id);
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
+      this.actions.push([pidx, 'DiscardOne', [discarded_id, added_id]]);
       var other = this.players[1 - pidx];
       other.emit('Game_OpponentDiscardOne', discarded_id, added_id);
     }
@@ -354,10 +362,11 @@ class Game {
   
   OnRedeal(socket, pool_ids, repo_ids) {
     console.log('[OnRedeal] player ' + socket.player_id + ' redeals ');
-    console.log('pool_ids:'); console.log(pool_ids);
-    console.log('repo_ids:'); console.log(repo_ids);
+    console.log('pool_ids: ' + pool_ids.join(', '));
+    console.log('repo_ids: ' + repo_ids.join(', '));
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
+      this.actions.push([pidx, 'Redeal', [pool_ids, repo_ids]]);
       var other = this.players[1 - pidx];
       other.emit('Game_OpponentRedeal', pool_ids, repo_ids);
       socket.emit('Game_RedealEcho', pool_ids, repo_ids);
@@ -382,9 +391,6 @@ class Game {
     if (pidx != -1) {
       var other = this.players[1 - pidx];
       other.emit('Game_OpponentGameEnd');
-    }
-    if (g_is_verify) {
-      this.VerifySnapshots();
     }
   }
   
@@ -417,6 +423,8 @@ class Game {
       this.players[0] = temp;
       this.Setup();
       this.round_num += 1;
+      this.PrintActions();
+      this.actions.length = 0;
     } else if ((state0 == "voted_playagain" && state1 == "voted_not_playagain") ||
                (state0 == "voted_not_playagain" && state1 == "voted_not_playagain") ||
                (state0 == "voted_not_playagain" && state1 == "voted_playagain")) {
@@ -431,16 +439,32 @@ class Game {
       this.players[1].game = null;
       this.players[0].can_be_found = true;
       this.players[1].can_be_found = true;
+      this.PrintActions();
+      this.actions.length = 0;
     }
   }
   
-  VerifySnapshots() {
-    if (this.snapshots[0] != null && this.snapshots[1] != null) {
-      console.log('[VerifySnapshots], P0(id=' + this.players[0].player_id +
-        ') vs P1(id=' + this.players[1].player_id);
-      console.log('  Score: ' + this.snapshots[0].p0score + ' vs ' + this.snapshots[0].p1score +
-        ' | ' + this.snapshots[1].p0score + ' vs ' + this.snapshots[1].p1score);
+  RestoreSnapshot(socket) {
+    var pidx = this.GetPlayerIndexBySocket(socket);
+    if (pidx != -1) {
+      var snapshot = { };
+      var hands = [ this.snapshot.p1h, this.snapshot.p0h ];
+      var sps   = this.initsp;
+      snapshot.p1h = hands[1-pidx];
+      snapshot.p0h = hands[pidx];
+      snapshot.p1sp = sps[1-pidx];
+      snapshot.p0sp = sps[pidx];
+      snapshot.pool = this.snapshot.pool;
+      socket.emit('Game_RestoreGameSnapshot', this.game_id, snapshot);
     }
+  }
+  
+  PrintActions() {
+    console.log('>>>> REPLAY >>>>');
+    for (var i=0; i<this.actions.length; i++) {
+      console.log(this.actions[i]);
+    }
+    console.log('<<<<<<<<<<<<<<<<');
   }
 };
 
@@ -646,6 +670,11 @@ io.on('connection', function(socket) {
 	socket.on('Game_VoteNotPlayAgain', () => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnVoteNotPlayAgain(socket);
+	});
+	
+	socket.on('Game_RequestSnapshot', () => {
+	  var g = FindGameBySocket(socket);
+	  if (g != null) g.RestoreSnapshot(socket);
 	});
 });
 
