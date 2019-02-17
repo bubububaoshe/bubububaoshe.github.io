@@ -55,6 +55,15 @@ class Controller{
       DecrementActionBarrier();
     }
   }
+  // New for replaying action sequence
+  obtainForReplay(handcid = null, poolcid = null, seq) {
+    var handc = model.player1.hand.getChar(handcid);
+    model.activate(handc);
+    model.player1.hand.removeChar(handc);
+    var poolc = model.pool.removeCharByID(poolcid).getSpecial(model.player1.specials);
+    obtainVector.init(model.player1, handc, poolc);
+    controller.handleCopies(seq);
+  }
   opponentObtain(remote_handcid = null, remote_poolcid = null){
     if (is_multiplayer == false) {
       while(model.overSeason())
@@ -174,11 +183,11 @@ class Controller{
     else
       playerinfo.setPane(idx+1);
   }
-  handleCopies(){
+  handleCopies(seq = null){ // if seq is not null then I am replaying
     var type = "CopyTrick";
     if(obtainVector.player.id == 1){
       if(!obtainVector.trickSelector(type))
-        controller.handleSwaps();
+        controller.handleSwaps(seq);
     }
     else {
       var trick = obtainVector.getNextTrick(type);

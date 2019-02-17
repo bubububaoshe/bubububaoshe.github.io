@@ -255,3 +255,11 @@ html .appcontainer, .appwrapper{
 #hand0 .charcontainer:hover .card{
   transform: rotateY(180deg);
 */
+
+.notransition * { 
+  -webkit-transition: none !important; 
+  -moz-transition: none !important; 
+  -o-transition: none !important; 
+  -ms-transition: none !important; 
+  transition: none !important; 
+} 

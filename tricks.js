@@ -70,7 +70,7 @@ class ObtainVector{
     }
     return null;
   }
-  trickSelector(type){
+  trickSelector(type, seq = null){
     // only cards obtained by user may invoke a selection panel, AI would just select by algorithm
     // show unfinished selector for tricks of <type>
     // return true if selector is invoked, false otherwise.

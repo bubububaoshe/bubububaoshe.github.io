@@ -289,9 +289,10 @@ function ConnectToServer() {
     messenger.hideFinalNotice(); // If from restart
     OtherPlayerSpecialCardFixup(other_sp);
     model.player1.SpecialFixup();
+    g_game_id = game_id;
   });
   
-  socket.on('Match_GameInitDefensive', (other_sp, snapshot) => {
+  socket.on('Match_GameInitDefensive', (other_sp, snapshot, game_id) => {
     console.log('[后手开局], other_sp=' + other_sp);
     document.getElementById('avatarselection_blocker').style.display='none';
     document.getElementById('offensive_wait_msg').style.display='none';
@@ -305,6 +306,7 @@ function ConnectToServer() {
     controller.gamestartDefensive(snapshot);
     OtherPlayerSpecialCardFixup(other_sp);
     model.player1.SpecialFixup();
+    g_game_id = game_id;
   });
   
   socket.on('Game_SelfTurn', (turn_idx) => {
@@ -378,22 +380,11 @@ function ConnectToServer() {
     }, 7);
   });
   
-  socket.on('Game_RestoreGameSnapshot', (game_id, snapshot) => {
-    console.log('[RestoreGameSnapshot] game_id='+game_id);
+  socket.on('Game_RestoreGameState', (game_id, snapshot, action_seq) => {
+    console.log('[RestoreGameState] game_id='+game_id);
     console.log(snapshot);
-    
-    // APPLY SNAPSHOT
-    TearDownExistingViews();
-    model.player1.clear();
-    model.player0.clear();
-    model.commonRepository.clear();
-    model.pool.clear();
-    model.commonRepository.init(model.pack);
-    model.player1.specialIDs = snapshot.p1sp.slice();
-    model.player1.init(snapshot.p1h);
-    model.player0.specialIDs = snapshot.p0sp.slice();
-    model.player0.init(snapshot.p0h);
-    model.pool.init(-999, model.commonRepository, null, snapshot.pool);
+    ApplySnapshot(snapshot);
+    ApplyActionSequence(action_seq);
   });
 } // End ConnectToServer
 
@@ -838,5 +829,172 @@ function TEST_STRESSTEST() {
 }
 
 function TEST_GETSNAPSHOT() {
-  socket.emit('Game_RequestSnapshot');
+  socket.emit('Game_RequestSnapshot', g_game_id, versus_rank);
+}
+
+// FOR REPLAYING
+function ApplySnapshot(snapshot) {
+  // APPLY SNAPSHOT
+  TearDownExistingViews();
+  model.player1.clear();
+  model.player0.clear();
+  model.commonRepository.clear();
+  model.pool.clear();
+  model.commonRepository.init(model.pack);
+  model.player1.specialIDs = snapshot.p1sp.slice();
+  model.player1.init(snapshot.p1h);
+  model.player0.specialIDs = snapshot.p0sp.slice();
+  model.player0.init(snapshot.p0h);
+  model.pool.init(-999, model.commonRepository, null, snapshot.pool);
+}
+
+// FOR REPLAYING
+// 这里应该体现了这个游戏最最基本的循环过程罢。
+function ApplyActionSequence(seq) {
+  var players = [ model.player0,       model.player1 ];
+  var hands   = [ model.player0.hand,  model.player1.hand ];
+  var tables  = [ model.player0.table, model.player1.table ];
+  var specials= [ model.player0.specials, model.player1.specials ];
+  
+  if (seq.length < 1) {
+    document.body.classList.remove('notransition');
+    delayedFunc(function() {
+      document.querySelector("#score0 div").textContent = model.player0.score;
+      document.querySelector("#score1 div").textContent = model.player1.score;
+    }, 1);
+    return;
+  }
+  else {
+    document.body.classList.add('notransition');
+  }
+  
+  var a = seq[0];
+  seq = seq.slice(1);
+  var pid = a[0], action = a[1];
+  var oppopid = 1 - pid;
+  var sp = specials[pid];
+  if (action == 'Obtain') {
+    var hc = hands[pid].getChar(a[2][0]).getSpecial(sp),
+        pc = model.pool.getChar(a[2][1]).getSpecial(sp);
+    obtainVector.init(players[pid], hc, pc);
+  } else if (action == 'SwapTrick') {
+    obtainVector.getNextTrick('SwapTrick');
+    obtainVector.setTrickTarget('SwapTrick', tables[oppopid].getChar(a[2]));
+  } else if (action == 'ObtainEnd') {
+    model.obtain(true);
+  } else if (action == 'PostObtainDealOne') {
+    model.dealOne(players[pid], a[2]);
+  } else if (action == 'Redeal') {
+    model.redeal(a[2][0], a[2][1]);
+  } else if (action == 'DiscardOne') {
+    if (pid == 1) model.discardForReplay(a[2][0], a[2][1]);
+    else model.opponentDiscard(a[2][0], a[2][1]);
+  }
+  
+  console.log('Action: ' + a + ' SC0:' + model.player0.score + ', SC1:' +
+    model.player1.score);
+  
+  
+  delayedFunc(function() {
+    ApplyActionSequence(seq);
+  }, 0.1);
+}
+
+// SIMULATE
+function TEST_RESTORESNAPSHOT(rank = 1) {
+  var p1h =  [ 'zm2', 'fl1', 'lc2', 'jt1', 'thg1', 'wmzj2', 'xf1', 'tyc1', 'ly1a', 'oysg1a' ];
+  var p0h =  [ 'hykh2', 'wc2', 'xy2', 'yq2', 'hllp1', 'ths2', 'bcg2', 'sx2', 'ws2', 'al1' ];
+  var p1sp = [ 'blts1b', 'fqx1a', 'hy1a', 'ly1a', 'oysg1a', 'hy2a', 'qhzr2a', 'sx2a', 'sy2a', 'wry2b', 'xy2a', 'xyz2a', 'ywy2a' ];
+  var p0sp = [ 'blts1b', 'fqx1a', 'hy1a', 'ly1a', 'oysg1a', 'hy2a', 'qhzr2a', 'sx2a', 'sy2a', 'wry2b', 'xy2a', 'xyz2a', 'ywy2a' ];
+  var pool = [ 'ca2', 'qhzr2', 'wry2', 'hy1', 'xyz2', 'snm2', 'jsh2', 'ys1' ];
+  
+  var hands = [ p0h,  p1h  ];
+  var sps   = [ p0sp, p1sp ];
+  
+  var snapshot = {
+    'p1h': hands[rank],
+    'p0h': hands[1-rank],
+    'p1sp': sps[rank],
+    'p0sp': sps[1-rank],
+    'pool': pool,
+  }; 
+  ApplySnapshot(snapshot);
+  
+  var action_seq = [
+    [ 1, 'Obtain', [ 'zm2', 'ca2' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'gjfj1' ],
+    [ 0, 'Obtain', [ 'hykh2', 'snm2' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'hy2' ],
+    [ 1, 'Obtain', [ 'fl1', 'jsh2' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'bsd1' ],
+    [ 0, 'Obtain', [ 'ws2', 'gjfj1' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'yd1' ],
+    [ 1, 'Obtain', [ 'wmzj2', 'hy1' ] ],
+    [ 1, 'TrickWithoutTarget' ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'ywy2' ],
+    [ 0, 'Obtain', [ 'xy2a', 'ywy2' ] ],
+    [ 0, 'TrickWithoutTarget' ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'qy1' ],
+    [ 1, 'Obtain', [ 'ly1a', 'hy2' ] ], // 20
+    [ 1, 'SwapTrick', 'hykh2' ],
+    [ 1, 'SwapTrick', 'ws2' ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'qc1' ],
+    [ 0, 'Obtain', [ 'hllp1', 'qy1' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'qysnp1' ],
+    [ 1, 'Obtain', [ 'xf1', 'qc1' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'jql2' ],
+    [ 0, 'Obtain', [ 'al1', 'qhzr2' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'fls1' ],
+    [ 1, 'Obtain', [ 'oysg1a', 'wry2' ] ],
+    [ 1, 'BanTrick', 'xy2a' ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'ar2' ],
+    [ 0, 'Obtain', [ 'ths2', 'xyz2' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'zrl1' ],
+    [ 1, 'Obtain', [ 'lc2', 'qysnp1' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'yqs1' ],
+    [ 0, 'Obtain', [ 'sx2a', 'fls1' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'pl1' ],
+    [ 1, 'Obtain', [ 'tyc1', 'pl1' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'qyt1' ],
+    [ 0, 'Obtain', [ 'wc2', 'bsd1' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'gjhg2' ],
+    [ 1, 'Obtain', [ 'thg1', 'ar2' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'sy2' ],
+    [ 0, 'DiscardOne', [ 'yq2', 'gjhy1' ] ],
+    [ 0, 'Obtain', [ 'gjhy1', 'yq2' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'xl1' ],
+    [ 1, 'Obtain', [ 'jt1', 'xl1' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'ttzq2' ],
+    [ 1,
+      'Redeal',
+      [ [ 'jql2', 'ys1', 'yqs1', 'qyt1', 'zrl1', 'yd1', 'sy2', 'lyc2' ],
+        [ 'fqx1', 'blts1', 'tzbz2', 'gjhg2', 'ttzq2' ] ] ],
+    [ 0,
+      'Redeal',
+      [ [ 'fqx1', 'sy2', 'tzbz2', 'yd1', 'zrl1', 'ys1', 'gjhg2', 'lyc2' ],
+        [ 'blts1', 'jql2', 'yqs1', 'qyt1', 'ttzq2' ] ] ],
+    [ 0, 'DiscardOne', [ 'bcg2', 'ttzq2' ] ],
+    [ 0, 'Obtain', [ 'ttzq2', 'ys1' ] ],
+    [ 0, 'ObtainEnd' ],
+  ];
+  ApplyActionSequence(action_seq);
 }

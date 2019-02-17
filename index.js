@@ -236,6 +236,7 @@ class Game {
         this.players[1].state = 'in_game';
         this.players[1].emit('Match_GameInitOffensive', this.initsp[0], this.snapshot, this.game_id);
         this.players[0].emit('Match_GameInitDefensive', this.initsp[1], this.snapshot, this.game_id);
+        this.PrintSnapshot();
         this.OnStartOfTurn();
       }
     }
@@ -247,7 +248,7 @@ class Game {
   }
   
   OnStartOfTurn() {
-    console.log('-------------------------Turn ' + this.turn_num + 
+    console.log('------------------ Game ' + this.game_id + ' Turn ' + this.turn_num + 
       ', Round ' + this.round_num + ' ---------------');
     this.flag_dealone = false;
     this.flag_oppo_obtain_redeal = false;
@@ -444,19 +445,41 @@ class Game {
     }
   }
   
-  RestoreSnapshot(socket) {
-    var pidx = this.GetPlayerIndexBySocket(socket);
-    if (pidx != -1) {
-      var snapshot = { };
-      var hands = [ this.snapshot.p1h, this.snapshot.p0h ];
-      var sps   = this.initsp;
-      snapshot.p1h = hands[1-pidx];
-      snapshot.p0h = hands[pidx];
-      snapshot.p1sp = sps[1-pidx];
-      snapshot.p0sp = sps[pidx];
-      snapshot.pool = this.snapshot.pool;
-      socket.emit('Game_RestoreGameSnapshot', this.game_id, snapshot);
+  GetSnapshotForRestore(pidx) {
+    var snapshot = { };
+    var hands = [ this.snapshot.p1h, this.snapshot.p0h ];
+    var sps   = this.initsp;
+    snapshot.p1h = hands[1-pidx];
+    snapshot.p0h = hands[pidx];
+    snapshot.p1sp = sps[1-pidx];
+    snapshot.p0sp = sps[pidx];
+    snapshot.pool = this.snapshot.pool;
+    return snapshot;
+  }
+  
+  GetActionSequenceForRestore(pidx) {
+    var ret = this.actions.slice();
+    if (pidx == 0) { // 0是先手，0看自己是1，所以要倒过来
+      for (var i=0; i<ret.length; i++) ret[i][0] = 1 - ret[i][0];
     }
+    return ret;
+  }
+  
+  RestoreSnapshot(socket, rank) {
+    if (this.players[rank] == null) {
+      this.players[rank] = socket;
+    }
+    var snapshot = this.GetSnapshotForRestore(rank);
+    var action_seq = this.GetActionSequenceForRestore(rank);
+    socket.emit('Game_RestoreGameState', this.game_id, snapshot, action_seq);
+  }
+  
+  PrintSnapshot() {
+    console.log('>>>>>>>>>>>Snapshot --- for Defensive (0): >>>>>>>>>');
+    console.log(this.GetSnapshotForRestore(0));
+    console.log('>>>>>>>>>>>Snapshot --- for Offensive (1): >>>>>>>>>');
+    console.log(this.GetSnapshotForRestore(1));
+    console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
   }
   
   PrintActions() {
@@ -466,10 +489,23 @@ class Game {
     }
     console.log('<<<<<<<<<<<<<<<<');
   }
+  
+  OnPlayerDisconnect(socket) {
+    if (this.players[0] == socket) { this.players[0] = null; }
+    else if (this.players[1] == socket) { this.players[1] = null; }
+  }
 };
 
 FindGameBySocket = function(socket) {
   return socket.game;
+}
+
+FindGameByGameID = function(gid) {
+  for (var i=0; i<g_all_games.length; i++) {
+    var g = g_all_games[i];
+    if (g.game_id == gid) return g;
+  }
+  return null;
 }
 
 FindPlayerByIdOrNickname = function(socket, key) {
@@ -672,9 +708,15 @@ io.on('connection', function(socket) {
 	  if (g != null) g.OnVoteNotPlayAgain(socket);
 	});
 	
-	socket.on('Game_RequestSnapshot', () => {
-	  var g = FindGameBySocket(socket);
-	  if (g != null) g.RestoreSnapshot(socket);
+	socket.on('Game_RequestSnapshot', (game_id, rank) => {
+	  var g = FindGameByGameID(game_id);
+	  console.log('[Game_RequestSnapshot] game_id=' + game_id + ', rank=' + rank)
+	  if (g != null) {
+	    console.log('game found')
+	    g.RestoreSnapshot(socket, rank);
+	  } else {
+	    console.log('game not found')
+    }
 	});
 });
 

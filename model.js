@@ -839,7 +839,7 @@ class Model {
     model.activeChar = null;
     view.clear();
   }
-  discard(player, char){
+  discard(player, char, is_replay = false){
     if(char == null)
       char = player.hand.removeRandom();
     else
@@ -847,11 +847,20 @@ class Model {
     model.pool.addChar(char);
     var newChar = player.hand.addRandom(model.commonRepository, player.specials);
     console.log(player.id + "号放弃 "+ char.name + " 获得 " + newChar.name);
-    if (is_multiplayer) {// for multiplayer -- 如果是特殊牌，要传回对应的普通牌ID
+    if (is_multiplayer && (is_replay == false)) {// for multiplayer -- 如果是特殊牌，要传回对应的普通牌ID
       var orig_id = newChar.id;
       if (newChar.isSpecial()) orig_id = orig_id.substr(0, orig_id.length-1);
       socket.emit('Game_DiscardOne', char.id, orig_id);
     }
+  }
+  discardForReplay(discarded_id, added_id) { // Only in replay
+    var discarded = model.player1.hand.getChar(discarded_id);
+    model.player1.hand.removeChar(discarded)
+    model.pool.addChar(discarded);
+    var added = model.commonRepository.getChar(added_id);
+    model.commonRepository.removeChar(added);
+    model.player1.hand.addChar(added);
+    model.player1.SpecialFixup(); // The card may need to be turned into special card
   }
   opponentDiscard(discarded_id, added_id) { // Only in multiplayer mode
     var discarded = model.player0.hand.getChar(discarded_id);
@@ -1074,7 +1083,7 @@ class Model {
         return null;
     }
   }
-  obtain() {
+  obtain(is_replay = false) {
   // controller: pc is upgraded by player.specials and is removed from pool
   // controller: hs, ps are both upgraded by player.specials and are removed from oppo's table
   // hc/pc are specialchars if hs/ps are not null
@@ -1086,7 +1095,8 @@ class Model {
     var ac1 = player.addTableChar(obtainVector.playerTableChars[1]);
     obtainVector.charScoreInc = ac0[0] + ac1[0];
     obtainVector.comboCount =  ac0[1] + ac1[1];
-    controller.handleBans();
+    if (is_replay == false)
+      controller.handleBans();
   }
   activate(char) {//player1 set a card active
     if (this.activeChar == null || this.activeChar != char) {
