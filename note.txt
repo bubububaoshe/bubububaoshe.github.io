@@ -566,4 +566,15 @@ TypeError: combo is undefined[Learn More] view.js:456:11
 -------------------------------------
 
 断线重连必要功能之一：从快照恢复
-和开局是一样的，但是注意player.init()中如果有特殊牌的话需要转回成普通牌因为开局时repo中只有普通牌。发完了牌再转为特殊牌。
+恢复过程：玩家游戏的编号，服务器告知该玩家是先手还是后手，并送回snapshot
+
+断线重连恢复快照后无法选中牌 ---> 修复方法：view.hand1.addController(controller.activate)
+
+重连过程
+
+1. 断线玩家给服务器送[Game_RequestSnapshot, 游戏ID, 先后手]
+2. 服务器收到请求，进入Game.RestoreSnapshot，向断线玩家送回(Game_RestoreGameState, 初始时的快照, 动作序列)。快照与动作序列已经按照玩家的先后手作了调整，1表示玩家，2表示其对手。
+3. 断线玩家收到之后，在本地进行回放
+4. 回放完成时，向服务器送回[Game_SnapshotRestored]
+5. 服务器向两方重发回合开始消息[Game_SelfTurn 或 Game_OpponentTurn]（如果对方还在线的话。要是对方不在线（就是说两个玩家都掉线了）就不发）
+6. 向已在线的玩家再发Room_PlayerReconnected，提示“对方已上线”

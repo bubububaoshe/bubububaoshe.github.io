@@ -16,7 +16,7 @@ class Controller{
   constructor(){
   }
   restart(){
-    if (is_multiplayer != true) { 
+    if (is_multiplayer != true) {
       messenger.hideFinalNotice();
       var id = this.id;
       delayedFunc(function(){
@@ -55,15 +55,6 @@ class Controller{
       DecrementActionBarrier();
     }
   }
-  // New for replaying action sequence
-  obtainForReplay(handcid = null, poolcid = null, seq) {
-    var handc = model.player1.hand.getChar(handcid);
-    model.activate(handc);
-    model.player1.hand.removeChar(handc);
-    var poolc = model.pool.removeCharByID(poolcid).getSpecial(model.player1.specials);
-    obtainVector.init(model.player1, handc, poolc);
-    controller.handleCopies(seq);
-  }
   opponentObtain(remote_handcid = null, remote_poolcid = null){
     if (is_multiplayer == false) {
       while(model.overSeason())
@@ -93,7 +84,7 @@ class Controller{
       obtainVector.init(model.player0, hc, pc);
       controller.handleCopies();
     }
-    
+
     if (is_multiplayer) { // 移到这里：只有所有对方动作都回放完了时，才回放最后的dealOne
       if (PeekNextObtainActionType() == "controller.postObtain") {
         model.dealOne(model.player0, GetNextObtainAction()[1]);
@@ -116,7 +107,7 @@ class Controller{
             // redeal应该出现在两方行动之间，在对战版中，由opponentObtain()中移至此处
             while (model.overSeason())
               model.redeal();
-            socket.emit('Game_OpponentObtainRedealClear'); // changed for multiplayer            
+            socket.emit('Game_OpponentObtainRedealClear'); // changed for multiplayer
           } else {
             delayedFunc(function(){
               controller.opponentObtain();
@@ -362,7 +353,7 @@ class Controller{
   gamestart(){
     console.log('[controller.gamestart]');
     var should_skip = (is_multiplayer == true) && (versus_rank == 0);
-    
+
     // 以下情况需要发牌：
     // 1. 单人模式。
     // 2. 多人模式的先选特殊牌的人。
@@ -379,7 +370,7 @@ class Controller{
     } else {
       Versus_NotifyOtherPlayerSPSelection();
     }
-    
+
     if (is_multiplayer == true) {
       if (versus_rank == 1) {
         socket.emit('Match_SetupComplete', model.player1.specialIDs, model.getSnapshot());

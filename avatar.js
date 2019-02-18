@@ -2,8 +2,8 @@
 
 AVATAR_PREFIX = "avatars/";
 AVATAR_FILENAMES = [
-  "avatar1.png", "avatar2.png", "avatar3.png", "avatar5.png",  "avatar6.png", 
-  "avatar8.png", "avatar9.png", "avatar10.png", "avatar11.png", "avatar31.png", 
+  "avatar1.png", "avatar2.png", "avatar3.png", "avatar5.png",  "avatar6.png",
+  "avatar8.png", "avatar9.png", "avatar10.png", "avatar11.png", "avatar31.png",
   "avatar12.png", "avatar26.png", "avatar27.png",
   "avatar28.png", "avatar29.png", "avatar30.png",
   "avatar15.png", "avatar16.png", "avatar17.png", "avatar18.png", "avatar19.png", "avatar20.png",
@@ -25,7 +25,7 @@ AVATAR_NAMES = [
   "剑心・壹", "剑心・贰", "剑心・叁",
   "陈年女儿红", "玉女元参", "玉兔",
   "兔叽", "咯咯哒", "蜚兽", "泥偶", "呱呱・警觉", "呱呱・沉稳",
-  "玄甲壳", 
+  "玄甲壳",
   "龙小企", "龙小美", "龙小程", "龙小囧",
   "木灵灵", "龙星", "乘云", "通宝",
   "酱肘子", "小笼包", "诡异的光", "古剑奇谭", "青龙环",
@@ -75,6 +75,24 @@ function ShowAvatarSelectionMenu() {
   b.style.display = 'block';
 }
 
+function ShowGenericDialog(title="title", content="content") {
+  var b = document.getElementById('avatarselection_blocker');
+  var d = document.getElementById('genericdialog');
+  var t = document.getElementById('genericdialog_title');
+  var c = document.getElementById('genericdialog_content');
+  d.style.display = 'block';
+  b.style.display = 'block';
+  t.textContent = title;
+  c.textContent = content;
+}
+
+function HideGenericDialog() {
+  var b = document.getElementById('avatarselection_blocker');
+  var d = document.getElementById('genericdialog');
+  b.style.display = 'none';
+  d.style.display = 'none';
+}
+
 var nickname_input = document.getElementById('nickname_input');
 var nickname_disp  = document.getElementById('nickname_disp');
 var nickname_input_done = document.getElementById('nickname_input_done');
@@ -113,7 +131,7 @@ function PopulateAvatarChoicePanel(insert_point) {
     w.appendChild(p);
     w.appendChild(t);
     insert_point.appendChild(w);
-    
+
     w.bkimgurl = bkimgurl; // used for callback below
     w.idx = i;
     w.addEventListener('click', function() {
@@ -121,7 +139,7 @@ function PopulateAvatarChoicePanel(insert_point) {
       SetCurrentSelectedAvatar(this);
       CloseAvatarSelectionMenu();
     });
-    
+
     w.avatar = new Avatar(i);
   }
 }
@@ -141,9 +159,9 @@ class Avatar {
     var ix = getCookie('avatar_idx');
     if (ix != "") this.idx = ix;
     else this.idx = 0;
-    
+
     this.bkimgurl = 'url("' + AVATAR_PREFIX + AVATAR_FILENAMES[this.idx] + '")';
-    
+
     var n = getCookie('nickname');
     if (n != '') this.nickname = n[0];
     else this.nickname = '没有名字';
@@ -208,7 +226,7 @@ function PopulateFoundOpponentList(l) {
     w.appendChild(p);
     w.appendChild(t);
     result.appendChild(w);
-    
+
     w.id = id;
     w.addEventListener('click', function() {
       console.log('Opponent clicked: ID=' + this.id);
@@ -220,7 +238,7 @@ function PopulateFoundOpponentList(l) {
         var r = document.getElementById('opponentsearchresult').children;
         for (var i=0; i<r.length; i++) {
           var x = r[i];
-          if (this != x) 
+          if (this != x)
             x.children[0].classList.remove('glow');
         }
         this.children[0].classList.add('glow');

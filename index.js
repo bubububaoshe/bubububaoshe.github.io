@@ -49,7 +49,7 @@ var g_serial = 1;
 class PlayerMatcher {
 	constructor() {
 		this.match_queue = []; // 所有连上来的玩家
-		this.matched_pairs = []; 
+		this.matched_pairs = [];
 	}
 
 	OnNewPlayerReadyToMatch(p0) {
@@ -69,7 +69,7 @@ class PlayerMatcher {
 			p1.emit("Match_FoundMatch", p0.nickname, p0.avataridx, "已找到对手，请确认：");
 		}
 	}
-	
+
 	// P0 找 P1
 	BringTwoPlayersIntoPair(p0, p1) {
 	  this.matched_pairs.push([p0, p1]);
@@ -120,7 +120,7 @@ class PlayerMatcher {
 			other.emit("Match_OtherPlayerConfirmed");
 		}
 	}
-	
+
 	OnPlayerCancelsMatch(p) {
 	  var pair = this.FindPairByPlayer(p);
 	  this.match_queue.remove(p);
@@ -132,7 +132,7 @@ class PlayerMatcher {
 	    pair[1].can_be_found = true;
 	  }
 	}
-	
+
 	SetupGame(pair) {
 	  console.log("Should start a game now");
 	  this.matched_pairs.RemovePair(pair);
@@ -140,7 +140,7 @@ class PlayerMatcher {
 	  g_all_games.push(g);
 	  g.Setup();
 	}
-	
+
 	IsPlayerInMatchQueueOrMatched(p) {
 	  if (p in this.match_queue) return true;
 	  else if (this.FindPairByPlayer(p) != null) return true;
@@ -161,7 +161,7 @@ class Game {
     this.obtain_actions = [[], []];
     this.snapshots = [ null, null ];
     this.turns = [ 0, 0 ];
-    console.log("Game.Ctor, Player id: "+p0.player_id + ","+p1.player_id);
+    console.log("Game.Ctor, Player id: "+p0.player_id + ","+p1.player_id + ', game_id:'+g_serial_game);
     this.flag_dealone = false;
     this.flag_oppo_obtain_redeal = false;
     this.turn_num = 1;
@@ -170,7 +170,7 @@ class Game {
     this.actions = []; // [ [rank, action, param] ]
     g_serial_game += 1;
   }
-  
+
   Setup() { // 两个玩家该gamesetup()
     this.snapshot = null;
     this.players[0].game = this;
@@ -189,7 +189,7 @@ class Game {
     this.turn_num = 1;
     this.actions = [];
   }
-  
+
   GetPlayerIndexBySocket(socket) {
     if (socket == this.players[0]) return 0;
     else if (socket == this.players[1]) return 1;
@@ -203,31 +203,39 @@ class Game {
       return -1;
     }
   }
-  
+
   OnPlayerDisconnectedOrCanceled(p) {
     var pidx = this.GetPlayerIndexBySocket(p);
     console.log('[OnPlayerDisconnectedOrCanceled] player_id='+p.player_id);
     if (pidx != -1) {
-      g_all_games.remove(this);
       var other_socket = this.players[1-pidx];
-      other_socket.emit('Room_PlayerDisconnected');
+			if (other_socket != null) {
+      	other_socket.emit('Room_PlayerDisconnected');
+			}
+
+			this.players[pidx] = null;
+			if (this.players[1 - pidx] == null) {
+				// 双方都离线了
+				console.log('[Player Disconnect] Both players disconnected, the game will be disposed');
+				g_all_games.remove(this);
+			}
     }
   }
-  
+
   // 选好了特殊牌，存于sp中
   OnPlayerSetupComplete(p, sp, snapshot) {
     var pidx = this.GetPlayerIndexBySocket(p);
     this.initsp[pidx] = sp.slice(); // Clone
     console.log('[OnPlayerFinishedSetup] player_id='+p.player_id+', specials='+sp);
-    
+
     if ((snapshot != null) && (this.snapshot == null)) {
       this.snapshot = snapshot;
       console.log('[OnPlayerFinishedSetup] snpashot saved');
     }
-    
+
     if (pidx != -1) {
       p.state = "setup_complete";
-      var other = this.players[1 - pidx]; 
+      var other = this.players[1 - pidx];
       if (other.state == "setup") {
         other.emit('Game_OtherPlayerSetupComplete');
       } else {
@@ -241,39 +249,37 @@ class Game {
       }
     }
   }
-  
+
   IsTurnEndBarrierReached() {
     if (this.flag_dealone == true && this.flag_oppo_obtain_redeal == true) return true;
     else return false;
   }
-  
+
   OnStartOfTurn() {
-    console.log('------------------ Game ' + this.game_id + ' Turn ' + this.turn_num + 
+    console.log('------------------ Game ' + this.game_id + ' Turn ' + this.turn_num +
       ', Round ' + this.round_num + ' ---------------');
     this.flag_dealone = false;
     this.flag_oppo_obtain_redeal = false;
-    
+
     this.players[this.curr_player].emit('Game_SelfTurn', this.turn_num);
     this.players[1-this.curr_player].emit('Game_OpponentTurn', this.turn_num);
-    
-    this.turn_num += 1;
   }
-  
+
   // Start recording action sequence &&
   // record 'controller.obtain' action (b/c it is emitted from controller.obtain)
   OnObtainStart(socket, handc_id, poolc_id) {
     console.log('[OnObtainStart] player ' + socket.player_id + ' obtained ' +
       handc_id + ' & ' + poolc_id);
-    
+
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
       this.actions.push([pidx, 'Obtain', [handc_id, poolc_id]]);
       this.PrintActions();
       this.obtain_actions[pidx].length = 0;
-      this.obtain_actions[pidx].push(['controller.obtain', handc_id, poolc_id]);      
+      this.obtain_actions[pidx].push(['controller.obtain', handc_id, poolc_id]);
     }
   }
-  
+
   // Record 'CopyTrickTarget' action
   OnSetCopyTrickTarget(socket, tgt_id) {
     console.log('[OnSetCopyTrickTarget] player ' + socket.player_id + ' copies ' +
@@ -284,7 +290,7 @@ class Game {
       this.obtain_actions[pidx].push(['controller.selectCopy', tgt_id]);
     }
   }
-  
+
   // Record 'SwapTrickTarget' action
   OnSetSwapTrickTarget(socket, tgt_id) {
     console.log('[OnSetSwapTrickTarget] player ' + socket.player_id + ' swaps ' +
@@ -295,7 +301,7 @@ class Game {
       this.obtain_actions[pidx].push(['controller.selectSwap', tgt_id]);
     }
   }
-  
+
   // Record 'UnnamedBanTrickTarget' action
   OnSetUnnamedBanTrickTarget(socket, tgt_id) {
     console.log('[OnSetUnnamedBanTrickTarget] player ' + socket.player_id + ' bans ' +
@@ -306,7 +312,7 @@ class Game {
       this.obtain_actions[pidx].push(['controller.selectBan', tgt_id]);
     }
   }
-    
+
   OnTrickWithoutTarget(socket, trick_type) {
     console.log('[OnTrickWithoutTarget] player ' + socket.player_id + ' had a trick ' +
       'without any targets selected');
@@ -316,7 +322,7 @@ class Game {
       this.obtain_actions[pidx].push(['obtainVector.trickSelector', null]);
     }
   }
-  
+
   // End recording action sequence && forward to the other player
   OnObtainEnd(socket, snapshot) {
     console.log('[OnObtainEnd] player ' + socket.player_id + ' obtain end');
@@ -324,16 +330,17 @@ class Game {
     if (pidx != -1) {
       this.actions.push([pidx, 'ObtainEnd']);
       var other = this.players[1 - pidx];
-      
+
       other.emit('Game_OpponentObtain', this.obtain_actions[pidx]);
       this.obtain_actions[pidx].length = 0;
     }
   }
-  
+
   OnEndTurn() {
     this.curr_player = 1 - this.curr_player;
+		this.turn_num += 1;
   }
-  
+
   OnPostObtainDealOne(socket, dealt_id) {
     console.log('[OnPostObtainDealOne] player ' + socket.player_id + ' ended turn with DealOne');
     var pidx = this.GetPlayerIndexBySocket(socket);
@@ -341,7 +348,7 @@ class Game {
       var other = this.players[1 - pidx];
       this.actions.push([pidx, 'PostObtainDealOne', dealt_id]);
       other.emit('Game_OpponentPostObtainDealOne', dealt_id);
-      
+
       this.flag_dealone = true;
       if (this.IsTurnEndBarrierReached()) {
         this.OnEndTurn();
@@ -349,7 +356,7 @@ class Game {
       }
     }
   }
-  
+
   OnDiscardOne(socket, discarded_id, added_id) {
     console.log('[OnDiscardOne] player ' + socket.player_id + ' discarded ' +
       discarded_id + ' & added ' + added_id);
@@ -360,7 +367,7 @@ class Game {
       other.emit('Game_OpponentDiscardOne', discarded_id, added_id);
     }
   }
-  
+
   OnRedeal(socket, pool_ids, repo_ids) {
     console.log('[OnRedeal] player ' + socket.player_id + ' redeals ');
     console.log('pool_ids: ' + pool_ids.join(', '));
@@ -373,7 +380,7 @@ class Game {
       socket.emit('Game_RedealEcho', pool_ids, repo_ids);
     }
   }
-  
+
   OnOpponentObtainRedealClear(socket) {
     console.log('[OnOpponentObtainRedealClear] player ' + socket.player_id + ' acknowledged all changes from last turn');
     var pidx = this.GetPlayerIndexBySocket(socket);
@@ -385,7 +392,7 @@ class Game {
       }
     }
   }
-  
+
   OnGameEnd(socket) {
     console.log('[OnGameEnd] player ' + socket.player_id + ' says game end');
     var pidx = this.GetPlayerIndexBySocket(socket);
@@ -394,7 +401,7 @@ class Game {
       other.emit('Game_OpponentGameEnd');
     }
   }
-  
+
   OnVotePlayAgain(socket) {
     console.log('player ' + socket.player_id + ' votes to play again');
     var pidx = this.GetPlayerIndexBySocket(socket);
@@ -403,7 +410,7 @@ class Game {
       this.CheckRestartState();
     }
   }
-  
+
   OnVoteNotPlayAgain(socket) {
     console.log('player ' + socket.player_id + ' votes to not play again');
     var pidx = this.GetPlayerIndexBySocket(socket);
@@ -412,7 +419,7 @@ class Game {
       this.CheckRestartState();
     }
   }
-  
+
   CheckRestartState() {
     var state0 = this.players[0].state,
         state1 = this.players[1].state;
@@ -432,7 +439,7 @@ class Game {
       console.log('Will not start new round, game ended.');
       this.players[0].emit('Game_GotoMainMenu');
       this.players[1].emit('Game_GotoMainMenu');
-      
+
       // Destruct self
       // No need to push to g_all_sockets again b/c socket's not removed unless a player gets offline
       g_all_games.remove(this);
@@ -444,7 +451,7 @@ class Game {
       this.actions.length = 0;
     }
   }
-  
+
   GetSnapshotForRestore(pidx) {
     var snapshot = { };
     var hands = [ this.snapshot.p1h, this.snapshot.p0h ];
@@ -456,15 +463,20 @@ class Game {
     snapshot.pool = this.snapshot.pool;
     return snapshot;
   }
-  
+
   GetActionSequenceForRestore(pidx) {
-    var ret = this.actions.slice();
-    if (pidx == 0) { // 0是先手，0看自己是1，所以要倒过来
-      for (var i=0; i<ret.length; i++) ret[i][0] = 1 - ret[i][0];
-    }
+    var ret = [];
+		// create deep copy
+		for (var i=0; i<this.actions.length; i++) {
+			var a = this.actions[i].slice();
+			if (pidx == 0) {
+				a[0] = 1 - a[0];
+			}
+			ret.push(a);
+		}
     return ret;
   }
-  
+
   RestoreSnapshot(socket, rank) {
     if (this.players[rank] == null) {
       this.players[rank] = socket;
@@ -472,8 +484,9 @@ class Game {
     var snapshot = this.GetSnapshotForRestore(rank);
     var action_seq = this.GetActionSequenceForRestore(rank);
     socket.emit('Game_RestoreGameState', this.game_id, snapshot, action_seq);
+    socket.game = this;
   }
-  
+
   PrintSnapshot() {
     console.log('>>>>>>>>>>>Snapshot --- for Defensive (0): >>>>>>>>>');
     console.log(this.GetSnapshotForRestore(0));
@@ -481,7 +494,7 @@ class Game {
     console.log(this.GetSnapshotForRestore(1));
     console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
   }
-  
+
   PrintActions() {
     console.log('>>>> REPLAY >>>>');
     for (var i=0; i<this.actions.length; i++) {
@@ -489,11 +502,22 @@ class Game {
     }
     console.log('<<<<<<<<<<<<<<<<');
   }
-  
+
   OnPlayerDisconnect(socket) {
     if (this.players[0] == socket) { this.players[0] = null; }
     else if (this.players[1] == socket) { this.players[1] = null; }
   }
+
+	OnPlayerSnapshotRestored(socket) {
+		this.OnStartOfTurn();
+		var rank = this.GetPlayerIndexBySocket(socket);
+		if (rank != -999) {
+			var other_socket = this.players[1 - rank];
+			if (other_socket != null) {
+				other_socket.emit('Room_PlayerReconnected');
+			}
+		}
+	}
 };
 
 FindGameBySocket = function(socket) {
@@ -501,8 +525,10 @@ FindGameBySocket = function(socket) {
 }
 
 FindGameByGameID = function(gid) {
+	console.log('[FindGameByGameID] id='+gid);
   for (var i=0; i<g_all_games.length; i++) {
     var g = g_all_games[i];
+		console.log('game id=' + g.game_id);
     if (g.game_id == gid) return g;
   }
   return null;
@@ -516,7 +542,7 @@ FindPlayerByIdOrNickname = function(socket, key) {
     if (s == socket) continue;
     else if (s == undefined) continue;
     else if (s.can_be_found == false) continue;
-     
+
     var name_match = (s.nickname.indexOf(key) != -1) || key=="";
     var id_match = (s.player_id == key);
     if (name_match || id_match) {
@@ -533,14 +559,14 @@ io.on('connection', function(socket) {
 	socket.match_confirmed = false;
 	socket.can_be_found = true; // 可否通过ID找到
 	g_serial += 1;
-	
+
 	socket.emit('Info_OnlinePlayerCount', g_all_sockets.length);
 	socket.emit('Info_MyPlayerId', socket.player_id);
-	
+
 	var bcast = true;
 	if (bcast) socket.broadcast.emit('Info_OnlinePlayerCount', g_all_sockets.length);
-	
-	console.log("player " + socket.player_id + " joined, " + 
+
+	console.log("player " + socket.player_id + " joined, " +
 	  g_all_sockets.length + " sockets, " + g_all_games.length + " games");
 
 	// 离线
@@ -559,40 +585,40 @@ io.on('connection', function(socket) {
 	socket.on('Info_PlayerInfo', (nickname, avataridx) => {
     socket.nickname = nickname;
 	  socket.avataridx = avataridx;
-	  console.log('Player Info: ID=' + socket.player_id + 
+	  console.log('Player Info: ID=' + socket.player_id +
 	    ", nickname=" + nickname +
 	    ", avataridx=" + avataridx);
 	});
-	
+
 	socket.on('Match_ReadyToMatch', (nickname, avataridx) => {
 		g_playermatcher.OnNewPlayerReadyToMatch(socket);
 		g_playermatcher.MatchOnePair();
 	});
-	
+
 	socket.on('Match_CancelMatch', () => {
 	  g_playermatcher.OnPlayerCancelsMatch(socket);
 	});
-	
+
 	socket.on('Match_ConfirmMatch', () => {
 	  g_playermatcher.OnPlayerConfirmsMatch(socket);
 	});
-	
+
 	socket.on('Match_GameStartOffensiveAck', (p0c, p1c, poolc, repoc) => {
 	  console.log('Player ' + socket.player_id + ' GameStartOffensiveAck');
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.PassInitDataToP1(socket, p0c, p1c, poolc, repoc);
 	});
-	
+
 	socket.on('Info_RefreshOnlinePlayerCount', () => {
 	  socket.emit('Info_OnlinePlayerCount', g_all_sockets.length);
 	});
-	
+
 	socket.on('Match_FindOpponent', (key) => {
 	  var ret = FindPlayerByIdOrNickname(socket, key);
 	  console.log('FindOpponent [' + key + '] len='+ret.length);
 	  socket.emit('Match_FindOpponentResult', ret);
 	});
-	
+
 	// socket invites another player with iid
 	socket.on('Match_InvitePlayer', (iid) => {
 	  if (iid == socket.player_id) {
@@ -620,68 +646,68 @@ io.on('connection', function(socket) {
       }
     }
 	});
-	
+
 	socket.on('Match_SetupComplete', (sp, snapshot) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnPlayerSetupComplete(socket, sp, snapshot);
 	});
-	
+
 	// The following stuff shall reflect the procedures in a turn
 	// From: controller.postObtain (?)
 	socket.on('Game_DealOne', (dealt_id) => {
 	  var g = FindGameBySocket(socket);
-	  if (g != null) g.OnPostObtainDealOne(socket, dealt_id);  
+	  if (g != null) g.OnPostObtainDealOne(socket, dealt_id);
 	});
-	
+
 	// From: model.discard
 	socket.on('Game_DiscardOne', (discarded, added) => {
 	    var g = FindGameBySocket(socket);
 	  if (g != null) g.OnDiscardOne(socket, discarded, added);
 	});
-	
+
 	// From: model.redeal
 	socket.on('Game_Redeal', (pool_ids, repo_ids) =>{
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnRedeal(socket, pool_ids, repo_ids);
 	});
-	
+
 	// From: model.obtain()
 	//       Starts recording all actions in 1 turn
 	socket.on('Game_ObtainStart', (handc_id, poolc_id) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnObtainStart(socket, handc_id, poolc_id);
 	});
-	
+
 	// From: controller.selectCopy()
 	socket.on('Game_SetCopyTrickTarget', (tgt_id) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnSetCopyTrickTarget(socket, tgt_id);
 	});
-	
+
 	// From: controller.selectSwap()
 	socket.on('Game_SetSwapTrickTarget', (tgt_id) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnSetSwapTrickTarget(socket, tgt_id);
 	});
-	
+
 	// From: controller.selectBan()
 	socket.on('Game_SetUnnamedBanTrickTarget', (tgt_id) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnSetUnnamedBanTrickTarget(socket, tgt_id);
 	});
-	
+
 	// From: obtainVector.trickSelector(type)
 	socket.on('Game_TrickWithoutTarget', (trick_type) => {
     var g = FindGameBySocket(socket);
     if (g != null) g.OnTrickWithoutTarget(socket, trick_type);
 	});
-	
+
 	// 当ObtainEnd传去时，对方就开始播放有可能稍费时间的动画了。
 	socket.on('Game_ObtainEnd', (snapshot) => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnObtainEnd(socket, snapshot);
 	});
-	
+
 	// 一回合结束以postObtain为标志。以下两个消息都是PostObtain发出的。
 	// 其会执行一次dealOne或直接宣告游戏结束。故需消息传至对方用以同步。
 	socket.on('Game_PostObtain_DealOne', (dealt_id) => {
@@ -692,22 +718,22 @@ io.on('connection', function(socket) {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnGameEnd(socket);
 	});
-	
+
 	socket.on('Game_OpponentObtainRedealClear', () => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnOpponentObtainRedealClear(socket);
 	});
-	
+
 	socket.on('Game_VotePlayAgain', () => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnVotePlayAgain(socket);
 	});
-	
+
 	socket.on('Game_VoteNotPlayAgain', () => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnVoteNotPlayAgain(socket);
 	});
-	
+
 	socket.on('Game_RequestSnapshot', (game_id, rank) => {
 	  var g = FindGameByGameID(game_id);
 	  console.log('[Game_RequestSnapshot] game_id=' + game_id + ', rank=' + rank)
@@ -717,6 +743,12 @@ io.on('connection', function(socket) {
 	  } else {
 	    console.log('game not found')
     }
+	});
+
+	socket.on('Game_SnapshotRestored', () => {
+	  var g = FindGameBySocket(socket);
+		console.log('[Game_SnapshotRestored] will resend start-of-round messages');
+		g.OnPlayerSnapshotRestored(socket);
 	});
 });
 

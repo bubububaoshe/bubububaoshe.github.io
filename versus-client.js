@@ -15,7 +15,7 @@ var socket = null;
 var is_my_move = false;
 var g_my_player_id = -999;
 var is_multiplayer = false;
-var versus_rank = -999; // 0:先手； 1:后手
+var versus_rank = -999; // 1:先手选取特殊牌／发牌 0:后手
 var remoteObtainActions = null;
 
 var g_game_id = -999; // 所连上的游戏ID
@@ -175,13 +175,13 @@ function ConnectToServer() {
     lobbystatus.textContent = '已经连线啦。不用再连啦。';
     return;
   }
-  
+
   { // Hide UI elements
     var ids = ['serverselect', 'connect_to_server'];
     for (var i=0; i<ids.length; i++)
       document.getElementById(ids[i]).style.display = 'none';
   }
-  
+
   delayedFunc(function() {
     if (socket.connected == false) {
       lobbystatus.textContent = '似乎没有连上...'
@@ -190,39 +190,39 @@ function ConnectToServer() {
       document.getElementById('avatar_nickname_hint').opacity = 1;
     }
   }, 10);
-  
+
   var s = 'localhost:3000';
   if (document.getElementById('servername2').checked == true) s = '47.75.12.130:3000';
   console.log('server:' + s);
   socket = io(s);
   console.log(socket);
-  
+
   // Set callbacks
   socket.on('Info_OnlinePlayerCount', function(n) {
     lobbystatus.innerHTML = "当前人数："+n;
   });
-  
+
   socket.on('Info_MyPlayerId', function(pid) {
     g_my_player_id = pid;
     document.getElementById('myplayerid').textContent = '临时ID: ' + pid;
     // Respond = my avatar idx & nickname
     socket.emit('Info_PlayerInfo', avatar.GetNickname(), avatar.idx);
   });
-  
+
   socket.on('Match_ReadyToMatchAck', function() {
     document.getElementById("start_match").style.display = "none";
     document.getElementById("confirm_match").style.display = "none";
     document.getElementById("cancel_match").style.display = "inline-block";
     lobbystatus.innerHTML = "正在寻找同伴中";
   });
-  
+
   // o: [ID, Nickname, AvatarIdx]
   socket.on('Match_FindOpponentResult', function(o) {
     console.log('FindOpponentResult:');
     console.log(o);
     PopulateFoundOpponentList(o);
   });
-  
+
   socket.on('Match_FoundMatch', function(oppo_nickname, oppo_avataridx, reason) {
     // 邀请模式下，如果找到了被邀请的人，也走这里
     HideMultiplayerStep2();
@@ -235,20 +235,25 @@ function ConnectToServer() {
     CloseOpponentFinderMenu();
     ShowOpponentAvatarPreview(oppo_nickname, oppo_avataridx);
   });
-  
+
   socket.on('Match_ConfirmMatchAck', function(msg) {
     lobbystatus.innerHTML = msg;
   });
-  
+
   socket.on('Match_OtherPlayerConfirmed', function() {
     lobbystatus.innerHTML = "对方玩家已确认";
   });
-  
+
   var AUTOTEST = true;
   socket.on('Room_PlayerDisconnected', () => {
     console.log('对方玩家已离线');
+    ShowGenericDialog('游戏状态改变','对方玩家已离线，只有双方都再连线时游戏才会继续')
   });
-  
+
+  socket.on('Room_PlayerReconnected', () => {
+    HideGenericDialog();
+  });
+
   socket.on('Match_OtherPlayerCancelsMatch', () => {
     HideMultiplayerStep3();
     ShowMultiplayerStep2();
@@ -259,12 +264,12 @@ function ConnectToServer() {
     document.getElementById('find_opponent').style.display = 'block';
     HideOpponentAvatarPreview();
   });
-  
+
   socket.on('Match_InvalidInvitation', (reason) => {
     lobbystatus.textContent = reason;
     console.log('邀请不成功' + reason);
   });
-  
+
   // sp evts
   socket.on('Match_GameSetupOffensive', () => { // 先手开局
     console.log('[先手选取特殊牌]');
@@ -273,7 +278,7 @@ function ConnectToServer() {
     controller.configure();
     ShowVotePlayAgainForNewRound();
   });
-  
+
   socket.on('Match_GameSetupDefensive', (p0c, p1c, poolc, repoc) => { // 后手开局
     console.log('[后手选取特殊牌]');
     versus_rank = 0;
@@ -281,7 +286,7 @@ function ConnectToServer() {
     controller.configure();
     ShowVotePlayAgainForNewRound();
   });
-  
+
   socket.on('Match_GameInitOffensive', (other_sp, snapshot, game_id) => {
     console.log('[先手开局] other_sp='+other_sp);
     document.getElementById('avatarselection_blocker').style.display='none';
@@ -289,26 +294,30 @@ function ConnectToServer() {
     messenger.hideFinalNotice(); // If from restart
     OtherPlayerSpecialCardFixup(other_sp);
     model.player1.SpecialFixup();
+
     g_game_id = game_id;
+    SaveGameIDAndRankToCookie();
   });
-  
+
   socket.on('Match_GameInitDefensive', (other_sp, snapshot, game_id) => {
     console.log('[后手开局], other_sp=' + other_sp);
     document.getElementById('avatarselection_blocker').style.display='none';
     document.getElementById('offensive_wait_msg').style.display='none';
     messenger.hideFinalNotice(); // if from restart
-    
+
     //       p0sp中的0表示后手          后一个1表示自己
     snapshot.p0sp = model.player1.specialIDs;
     console.log(snapshot)
-    
+
     // 后手也要fixup，因为只有过了barrier，两边才都知道对方和自己的特殊牌。
     controller.gamestartDefensive(snapshot);
     OtherPlayerSpecialCardFixup(other_sp);
     model.player1.SpecialFixup();
+
+    SaveGameIDAndRankToCookie();
     g_game_id = game_id;
   });
-  
+
   socket.on('Game_SelfTurn', (turn_idx) => {
     is_my_move = true;
     var delay = 0;
@@ -317,61 +326,62 @@ function ConnectToServer() {
       messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]该你出牌了');
     }, delay);
     model.checkMatch1(); // 压力测试时发现似乎要加一下这个？头有点晕 @_@
+    view.unblockGame();
     console.log('>>> 我方行动');
   });
-  
+
   // barrier: 这个要等待对方的动作都播放完成
   socket.on('Game_OpponentTurn', (turn_idx) => {
     view.blockGame();
     is_my_move = false;
-    
+
     var delay = 0;
     delayedFunc(function() {
       messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]对方出牌');
     }, delay);
-    
+
     console.log('>>> 对方行动');
   });
-  
-  
+
+
   // Will replay a whole sequce of actions
   socket.on('Game_OpponentObtain', (obtain_actions) => {
     console.log('对方obtain有 ' + obtain_actions.length + ' 个动作');
     remoteObtainActions = obtain_actions;
     // 如果延迟执行opponentObtain中的redeal()，那么“播放对方动作”
     // 的事件将由OpponentObtain触发。
-    
+
     var obtain_ids = GetNextObtainAction(obtain_actions);
     controller.opponentObtain(obtain_ids[0], obtain_ids[1]);
   });
-  
+
   socket.on('Game_OpponentDiscardOne', (discarded_id, added_id) => {
     console.log('OpponentDiscardOne ' + discarded_id + ", " + added_id);
     model.opponentDiscard(discarded_id, added_id);
   });
-  
+
   socket.on('Game_OpponentRedeal', (pool_ids, repo_ids) => {
     model.redeal(pool_ids, repo_ids);
   });
-  
+
   socket.on('Game_RedealEcho', (pool_ids, repo_ids) => {
     model.redeal(pool_ids, repo_ids);
   });
-  
+
   socket.on('Game_OpponentPostObtainDealOne', (dealt_id) => {
     console.log("[Opponent's postObtain DealOne] " + dealt_id);
     model.dealOne(model.player0, dealt_id);
   });
-  
+
   socket.on('Game_OpponentGameEnd', () => {
     messenger.notifyFinal();
   });
- 
+
   socket.on('connect', () => {
     document.getElementById('reconnect').style.display = 'none';
     document.getElementById('multiplayerButtons').style.display = 'block';
-  }); 
-  
+  });
+
   socket.on('Game_GotoMainMenu', () => {
     document.getElementById('vote_playagain_msg').textContent = '因为大家没有都选继续，所以就返回主界面啦。';
     delayedFunc(function() {
@@ -379,10 +389,11 @@ function ConnectToServer() {
       document.getElementById('vote_playagain_msg').textContent = '';
     }, 7);
   });
-  
+
   socket.on('Game_RestoreGameState', (game_id, snapshot, action_seq) => {
     console.log('[RestoreGameState] game_id='+game_id);
     console.log(snapshot);
+    ShowGenericDialog('正在恢复游戏状态', '恢复完后才可继续操作');
     ApplySnapshot(snapshot);
     ApplyActionSequence(action_seq);
   });
@@ -413,13 +424,13 @@ function ShowVotePlayAgainForNewRound(is_new_round) {
     document.getElementById('vote_playagain_msg').textContent = '嗯新开一局就这么决定啦！';
   } else {
     document.getElementById('vote_playagain_msg').textContent = '（：';
-  } 
+  }
   ShowVotePlayAgainButtons(false);
   delayedFunc(function() {
     document.getElementById('continuedialog').style.height = '0vw';
     document.getElementById('vote_playagain_msg').textContent = '';
   }, 4);
-  
+
   delayedFunc(function() {
     document.getElementById('continuedialog').style.display = 'none';
     document.getElementById('avatarselection_blocker').style.display='none';
@@ -467,7 +478,7 @@ async function ScanMyHand() {
   var h_cand = undefined, p_cand = undefined, h_cand_idx = -999;
   var done = false;
   if (!is_my_move) return;
-  
+
   for (var i=0; i<cc.length; i++) {
     var c = cc[i];
     if (c.card.card.classList.contains("glow")) {
@@ -475,10 +486,10 @@ async function ScanMyHand() {
       await sleep(233);
     }
   }
-  
+
   for (var i=0; i<cc.length; i++) {
     var c = cc[i];
-    
+
     if (!is_my_move) return;
     await sleep(233);
     c.card.card.click();
@@ -506,19 +517,19 @@ async function ScanMyHand() {
       await sleep(233);
     }
   }
-  
+
   console.log(h_cand)
   console.log(p_cand)
-  
+
   if (done) {
   } else if(false) { // 置换？
-    
+
     if (h_cand != undefined && p_cand != undefined) {
       h_cand.card.card.click();
       p_cand.card.card.click();
       await sleep(700);
     } else {
-      
+
       var card1 = model.player1.hand.characters[0];
       await sleep(300);
       card1.card.card.click();
@@ -558,7 +569,7 @@ var AutoStartAutoTest = false;
 async function autostart() {
   while (true) {
     await sleep(1000);
-    var x = document.getElementById('start_match'); 
+    var x = document.getElementById('start_match');
     if (x.style.visibility == '') {
       x.click();
       console.log("Start clicked");
@@ -587,7 +598,7 @@ function OtherPlayerSpecialCardFixup(other_sp) {
 }
 
 // Action sequence from last turn
-// returns null if the buffer hath underfloweth 
+// returns null if the buffer hath underfloweth
 function GetNextObtainAction() {
   var ret = null;
   if (remoteObtainActions == null) return null;
@@ -650,7 +661,7 @@ async function AUTOTEST_autostartmatch() {
     await sleep(333);
     document.getElementById('connect_to_server').click();
   }
-  
+
   done = false;
   while (done == false) {
     await sleep(1000);
@@ -713,7 +724,7 @@ function IsGameBlocked() {
 async function AUTOTEST_maingame() {
   var state = "in_game";
   while (true) {
-    if (is_my_move != true && 
+    if (is_my_move != true &&
       (IsFinalNoticePresent() == false)) {
       await sleep(1000);
       continue;
@@ -728,19 +739,19 @@ async function AUTOTEST_maingame() {
       var s = document.getElementsByClassName('tableinfocontainer')[0];
       var cands = s.children[1].children;
       cands[0].click();
-      
+
       await sleep(1000);
       continue;
     } else if (IsFinalNoticePresent() == true) {
       var d = 20;
-      
+
       autotest_round += 1;
       console.log('[AUTOTEST] 第' + autotest_round + '局');
       while (IsInfoBannerPresent() == true) {
         await sleep(1000);
       }
       await sleep(3999);
-      
+
       var x1 = document.getElementById('vote_play_again'),
           x2 = document.getElementById('finalcontainer');
       if (document.getElementById('vote_play_again').style.display == 'block') {
@@ -750,16 +761,16 @@ async function AUTOTEST_maingame() {
         x2.click();
         continue;
       }
-      
+
       while (document.getElementById('spselection').style.opacity == 0) {
         await sleep(1000);
       }
       console.log('[AUTOTEST] Clicked game start');
       document.getElementById('gamestart').click();
       await sleep(5000);
-      
+
     } else {
-      
+
       // 不能在对方的动画还没显示完的时候就点牌，不然会导致数据破损
       // 除非允许一方的点击能够打断另一方正在播放的提示信息
       if (oppo_combo_notifications > 0) {
@@ -768,10 +779,10 @@ async function AUTOTEST_maingame() {
         await sleep(500);
         continue;
       }
-      
+
       await sleep(2333); // 自动测试时这个如果设太短就会按得太急，会boom的
       // If game ended then break
-      
+
       var mychars = model.player1.hand.characters;
       var handc = null, poolc = null;
       var activated = false;
@@ -784,7 +795,7 @@ async function AUTOTEST_maingame() {
             poolc = p[j];
             handc = mychars[i];
             activated = true;
-            
+
             await sleep(200);
             model.activate(mychars[i]); // Deactivate
             await sleep(200);
@@ -814,13 +825,32 @@ function Versus_NotifyOtherPlayerSPSelection() {
     document.getElementById(ids[i]).style.display = 'block';
 }
 
-function LoadGameIDFromCookie() {
+function SaveGameIDAndRankToCookie() {
+  setCookie('last_game_id', g_game_id);
+  setCookie('last_game_rank', versus_rank);
+  console.log('[versus] Saved game ID and rank to cookie');
+}
+
+function LoadGameIDAndRankFromCookie() {
   var gid = getCookie('last_game_id');
   if (gid.length == 0) { }
   else {
     g_game_id = parseInt(gid[0]);
-    console.log('[LoadGameIDFromCookie] last_game_id=' + g_game_id);
+    console.log('[Loaded Game ID from cookie] last_game_id=' + g_game_id);
   }
+  var rk  = getCookie('last_game_rank');
+  if (rk.length == 0) { }
+  else {
+    versus_rank = parseInt(rk[0]);
+    console.log('[Loaded Versus Rank from cookie] versus_rank=' + versus_rank);
+  }
+}
+
+function RestoreGameStateFromStartMenu() {
+  model.pack = [1,2]; // TODO: 如果以后有新的pack
+  showPage('main');
+  socket.emit('Game_RequestSnapshot', g_game_id, versus_rank);
+  view.hand1.addController('controller.activate');
 }
 
 function TEST_STRESSTEST() {
@@ -829,6 +859,7 @@ function TEST_STRESSTEST() {
 }
 
 function TEST_GETSNAPSHOT() {
+  model.pack = [1,2];
   socket.emit('Game_RequestSnapshot', g_game_id, versus_rank);
 }
 
@@ -855,27 +886,42 @@ function ApplyActionSequence(seq) {
   var hands   = [ model.player0.hand,  model.player1.hand ];
   var tables  = [ model.player0.table, model.player1.table ];
   var specials= [ model.player0.specials, model.player1.specials ];
-  
+
   if (seq.length < 1) {
     document.body.classList.remove('notransition');
     delayedFunc(function() {
       document.querySelector("#score0 div").textContent = model.player0.score;
       document.querySelector("#score1 div").textContent = model.player1.score;
+      if (socket.connected == true) {
+        socket.emit('Game_SnapshotRestored');
+      }
+      HideGenericDialog();
+      view.hand1.addController(controller.activate);
     }, 1);
     return;
   }
   else {
     document.body.classList.add('notransition');
   }
-  
+
   var a = seq[0];
+  var side = ['对方','己方'];
+  console.log('Action: ' + side[a[0]] + '(' + a +  ')' + ' SC0:' + model.player0.score + ', SC1:' +
+      model.player1.score);
+
+
   seq = seq.slice(1);
   var pid = a[0], action = a[1];
   var oppopid = 1 - pid;
   var sp = specials[pid];
+
   if (action == 'Obtain') {
-    var hc = hands[pid].getChar(a[2][0]).getSpecial(sp),
-        pc = model.pool.getChar(a[2][1]).getSpecial(sp);
+    var orig_hc = hands[pid].getChar(a[2][0]),
+        orig_pc = model.pool.getChar(a[2][1]);
+    var hc = orig_hc.getSpecial(sp),
+        pc = orig_pc.getSpecial(sp);
+    hands[pid].removeChar(orig_hc); // replicate the behavior of controller.obtain
+    model.pool.removeChar(orig_pc);
     obtainVector.init(players[pid], hc, pc);
   } else if (action == 'SwapTrick') {
     obtainVector.getNextTrick('SwapTrick');
@@ -890,11 +936,7 @@ function ApplyActionSequence(seq) {
     if (pid == 1) model.discardForReplay(a[2][0], a[2][1]);
     else model.opponentDiscard(a[2][0], a[2][1]);
   }
-  
-  console.log('Action: ' + a + ' SC0:' + model.player0.score + ', SC1:' +
-    model.player1.score);
-  
-  
+
   delayedFunc(function() {
     ApplyActionSequence(seq);
   }, 0.1);
@@ -907,19 +949,19 @@ function TEST_RESTORESNAPSHOT(rank = 1) {
   var p1sp = [ 'blts1b', 'fqx1a', 'hy1a', 'ly1a', 'oysg1a', 'hy2a', 'qhzr2a', 'sx2a', 'sy2a', 'wry2b', 'xy2a', 'xyz2a', 'ywy2a' ];
   var p0sp = [ 'blts1b', 'fqx1a', 'hy1a', 'ly1a', 'oysg1a', 'hy2a', 'qhzr2a', 'sx2a', 'sy2a', 'wry2b', 'xy2a', 'xyz2a', 'ywy2a' ];
   var pool = [ 'ca2', 'qhzr2', 'wry2', 'hy1', 'xyz2', 'snm2', 'jsh2', 'ys1' ];
-  
+
   var hands = [ p0h,  p1h  ];
   var sps   = [ p0sp, p1sp ];
-  
+
   var snapshot = {
     'p1h': hands[rank],
     'p0h': hands[1-rank],
     'p1sp': sps[rank],
     'p0sp': sps[1-rank],
     'pool': pool,
-  }; 
+  };
   ApplySnapshot(snapshot);
-  
+
   var action_seq = [
     [ 1, 'Obtain', [ 'zm2', 'ca2' ] ],
     [ 1, 'ObtainEnd' ],
