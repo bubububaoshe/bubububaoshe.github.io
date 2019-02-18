@@ -261,8 +261,9 @@ class Game {
     this.flag_dealone = false;
     this.flag_oppo_obtain_redeal = false;
 
-    this.players[this.curr_player].emit('Game_SelfTurn', this.turn_num);
-    this.players[1-this.curr_player].emit('Game_OpponentTurn', this.turn_num);
+		var p = this.players[this.curr_player], pp = this.players[1-this.curr_player];
+    if (p != null) p.emit('Game_SelfTurn', this.turn_num);
+    if (pp != null) pp.emit('Game_OpponentTurn', this.turn_num);
   }
 
   // Start recording action sequence &&
@@ -347,7 +348,7 @@ class Game {
     if (pidx != -1) {
       var other = this.players[1 - pidx];
       this.actions.push([pidx, 'PostObtainDealOne', dealt_id]);
-      other.emit('Game_OpponentPostObtainDealOne', dealt_id);
+			if (other != null) other.emit('Game_OpponentPostObtainDealOne', dealt_id);
 
       this.flag_dealone = true;
       if (this.IsTurnEndBarrierReached()) {
@@ -395,6 +396,7 @@ class Game {
 
   OnGameEnd(socket) {
     console.log('[OnGameEnd] player ' + socket.player_id + ' says game end');
+		this.actions.push([pidx, 'GameEnd']);
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
       var other = this.players[1 - pidx];
@@ -732,6 +734,16 @@ io.on('connection', function(socket) {
 	socket.on('Game_VoteNotPlayAgain', () => {
 	  var g = FindGameBySocket(socket);
 	  if (g != null) g.OnVoteNotPlayAgain(socket);
+	});
+
+	socket.on('Game_QuerySnapshotExists', (game_id, rank) => {
+		var g = FindGameByGameID(game_id);
+		if (g != null) {
+			console.log('[Game_QuerySnapshotExists] game_id=' + game_id + ' snapshot exists');
+			socket.emit('Game_SnapshotExists');
+		} else {
+			console.log('[Game_QuerySnapshotExists] game_id=' + game_id + ' snapshot does not exist');
+		}
 	});
 
 	socket.on('Game_RequestSnapshot', (game_id, rank) => {

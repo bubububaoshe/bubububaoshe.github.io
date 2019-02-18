@@ -238,6 +238,20 @@
     <div id="vote_playagain_msg" style="color:#EEE;width:100%";></div>
   </div>
 
+	<div id="restore_snapshot_dialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:0px;">
+		<div style="color:#7a614f">是否恢复之前的游戏？</div>
+		<div style="color:#999">details go here</div>
+		<div style="width:24vw; margin-left:auto; margin-right:auto;">
+      <div id="restore_snapshot_yes" class='continue_dialog_button' onclick="RestoreSnapshotButtonClicked(true);">
+      是
+      </div>
+      <div id="restore_snapshot_no" class='continue_dialog_button' onclick="RestoreSnapshotButtonClicked(false);">
+      否
+      </div>
+      <div style="clear:both; width:100%;"></div>
+    </div>
+	</div>
+
 	<div id="main">
 		<div id="scoreboard">
 			<div id="table0" class="cardstack"></div>

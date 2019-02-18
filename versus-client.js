@@ -397,6 +397,15 @@ function ConnectToServer() {
     ApplySnapshot(snapshot);
     ApplyActionSequence(action_seq);
   });
+
+  // Last game restore
+  socket.on('Game_SnapshotExists', () => {
+    ShowRestoreSnapshotDialog();
+  });
+
+  LoadGameIDAndRankFromCookie();
+  socket.emit('Game_QuerySnapshotExists', g_game_id, versus_rank);
+
 } // End ConnectToServer
 
 function ShowContinueDialog() {
@@ -892,7 +901,7 @@ function ApplyActionSequence(seq) {
     delayedFunc(function() {
       document.querySelector("#score0 div").textContent = model.player0.score;
       document.querySelector("#score1 div").textContent = model.player1.score;
-      if (socket.connected == true) {
+      if ((socket != null) && (socket.connected == true)) {
         socket.emit('Game_SnapshotRestored');
       }
       HideGenericDialog();
@@ -944,11 +953,11 @@ function ApplyActionSequence(seq) {
 
 // SIMULATE
 function TEST_RESTORESNAPSHOT(rank = 1) {
-  var p1h =  [ 'zm2', 'fl1', 'lc2', 'jt1', 'thg1', 'wmzj2', 'xf1', 'tyc1', 'ly1a', 'oysg1a' ];
-  var p0h =  [ 'hykh2', 'wc2', 'xy2', 'yq2', 'hllp1', 'ths2', 'bcg2', 'sx2', 'ws2', 'al1' ];
-  var p1sp = [ 'blts1b', 'fqx1a', 'hy1a', 'ly1a', 'oysg1a', 'hy2a', 'qhzr2a', 'sx2a', 'sy2a', 'wry2b', 'xy2a', 'xyz2a', 'ywy2a' ];
-  var p0sp = [ 'blts1b', 'fqx1a', 'hy1a', 'ly1a', 'oysg1a', 'hy2a', 'qhzr2a', 'sx2a', 'sy2a', 'wry2b', 'xy2a', 'xyz2a', 'ywy2a' ];
-  var pool = [ 'ca2', 'qhzr2', 'wry2', 'hy1', 'xyz2', 'snm2', 'jsh2', 'ys1' ];
+  var p1h =  [ 'xl1', 'ws2', 'qysnp1', 'hllp1', 'gjhy1', 'lc2', 'yq2', 'ywy2a', 'xyz2a', 'xy2a' ];
+  var p0h =  [ 'jsh2', 'thg1', 'ly1', 'bcg2', 'jql2', 'zm2', 'wry2', 'ths2', 'fls1', 'sx2' ];
+  var p1sp = [ 'blts1b', 'fqx1a', 'hy1a', 'ly1a', 'oysg1a', 'hy2a', 'sx2a', 'sy2a', 'wry2b', 'xy2a', 'xyz2a', 'ywy2a' ];
+  var p0sp = [  ];
+  var pool = [ 'fl1', 'yd1', 'qc1', 'hy2', 'xf1', 'jt1', 'ys1', 'ar2' ];
 
   var hands = [ p0h,  p1h  ];
   var sps   = [ p0sp, p1sp ];
@@ -963,80 +972,102 @@ function TEST_RESTORESNAPSHOT(rank = 1) {
   ApplySnapshot(snapshot);
 
   var action_seq = [
-    [ 1, 'Obtain', [ 'zm2', 'ca2' ] ],
+    [ 1, 'Obtain', [ 'xy2a', 'jt1' ] ],
     [ 1, 'ObtainEnd' ],
-    [ 1, 'PostObtainDealOne', 'gjfj1' ],
-    [ 0, 'Obtain', [ 'hykh2', 'snm2' ] ],
-    [ 0, 'ObtainEnd' ],
-    [ 0, 'PostObtainDealOne', 'hy2' ],
-    [ 1, 'Obtain', [ 'fl1', 'jsh2' ] ],
-    [ 1, 'ObtainEnd' ],
-    [ 1, 'PostObtainDealOne', 'bsd1' ],
-    [ 0, 'Obtain', [ 'ws2', 'gjfj1' ] ],
-    [ 0, 'ObtainEnd' ],
-    [ 0, 'PostObtainDealOne', 'yd1' ],
-    [ 1, 'Obtain', [ 'wmzj2', 'hy1' ] ],
-    [ 1, 'TrickWithoutTarget' ],
-    [ 1, 'ObtainEnd' ],
-    [ 1, 'PostObtainDealOne', 'ywy2' ],
-    [ 0, 'Obtain', [ 'xy2a', 'ywy2' ] ],
-    [ 0, 'TrickWithoutTarget' ],
-    [ 0, 'ObtainEnd' ],
-    [ 0, 'PostObtainDealOne', 'qy1' ],
-    [ 1, 'Obtain', [ 'ly1a', 'hy2' ] ], // 20
-    [ 1, 'SwapTrick', 'hykh2' ],
-    [ 1, 'SwapTrick', 'ws2' ],
-    [ 1, 'ObtainEnd' ],
-    [ 1, 'PostObtainDealOne', 'qc1' ],
-    [ 0, 'Obtain', [ 'hllp1', 'qy1' ] ],
-    [ 0, 'ObtainEnd' ],
-    [ 0, 'PostObtainDealOne', 'qysnp1' ],
-    [ 1, 'Obtain', [ 'xf1', 'qc1' ] ],
-    [ 1, 'ObtainEnd' ],
-    [ 1, 'PostObtainDealOne', 'jql2' ],
-    [ 0, 'Obtain', [ 'al1', 'qhzr2' ] ],
-    [ 0, 'ObtainEnd' ],
-    [ 0, 'PostObtainDealOne', 'fls1' ],
-    [ 1, 'Obtain', [ 'oysg1a', 'wry2' ] ],
-    [ 1, 'BanTrick', 'xy2a' ],
-    [ 1, 'ObtainEnd' ],
-    [ 1, 'PostObtainDealOne', 'ar2' ],
-    [ 0, 'Obtain', [ 'ths2', 'xyz2' ] ],
-    [ 0, 'ObtainEnd' ],
-    [ 0, 'PostObtainDealOne', 'zrl1' ],
-    [ 1, 'Obtain', [ 'lc2', 'qysnp1' ] ],
-    [ 1, 'ObtainEnd' ],
-    [ 1, 'PostObtainDealOne', 'yqs1' ],
-    [ 0, 'Obtain', [ 'sx2a', 'fls1' ] ],
+    [ 1, 'PostObtainDealOne', 'blts1' ],
+    [ 0, 'Obtain', [ 'jsh2', 'fl1' ] ],
     [ 0, 'ObtainEnd' ],
     [ 0, 'PostObtainDealOne', 'pl1' ],
-    [ 1, 'Obtain', [ 'tyc1', 'pl1' ] ],
-    [ 1, 'ObtainEnd' ],
-    [ 1, 'PostObtainDealOne', 'qyt1' ],
-    [ 0, 'Obtain', [ 'wc2', 'bsd1' ] ],
-    [ 0, 'ObtainEnd' ],
-    [ 0, 'PostObtainDealOne', 'gjhg2' ],
-    [ 1, 'Obtain', [ 'thg1', 'ar2' ] ],
-    [ 1, 'ObtainEnd' ],
-    [ 1, 'PostObtainDealOne', 'sy2' ],
-    [ 0, 'DiscardOne', [ 'yq2', 'gjhy1' ] ],
-    [ 0, 'Obtain', [ 'gjhy1', 'yq2' ] ],
-    [ 0, 'ObtainEnd' ],
-    [ 0, 'PostObtainDealOne', 'xl1' ],
-    [ 1, 'Obtain', [ 'jt1', 'xl1' ] ],
+    [ 1, 'Obtain', [ 'yq2', 'pl1' ] ],
     [ 1, 'ObtainEnd' ],
     [ 1, 'PostObtainDealOne', 'ttzq2' ],
-    [ 1,
-      'Redeal',
-      [ [ 'jql2', 'ys1', 'yqs1', 'qyt1', 'zrl1', 'yd1', 'sy2', 'lyc2' ],
-        [ 'fqx1', 'blts1', 'tzbz2', 'gjhg2', 'ttzq2' ] ] ],
+    [ 0, 'Obtain', [ 'thg1', 'qc1' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'bsd1' ],
+    [ 1, 'Obtain', [ 'qysnp1', 'xf1' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'qy1' ],
+    [ 0, 'Obtain', [ 'wry2', 'ttzq2' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'al1' ],
+    [ 1, 'Obtain', [ 'ywy2a', 'qy1' ] ],
+    [ 1, 'TrickWithoutTarget' ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'fqx1' ],
+    [ 0, 'Obtain', [ 'ly1', 'hy2' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'tyc1' ],
+    [ 1, 'Obtain', [ 'xyz2a', 'bsd1' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'gjfj1' ],
+    [ 0, 'Obtain', [ 'bcg2', 'tyc1' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'ca2' ],
+    [ 1, 'Obtain', [ 'lc2', 'fqx1' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'oysg1' ],
+    [ 0, 'Obtain', [ 'zm2', 'ar2' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'qhzr2' ],
+    [ 1, 'Obtain', [ 'gjhy1', 'gjfj1' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'zrl1' ],
+    [ 0, 'Obtain', [ 'jql2', 'ys1' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'gjhg2' ],
+    [ 1, 'DiscardOne', [ 'ws2', 'wmzj2' ] ],
+    [ 1, 'Obtain', [ 'wmzj2', 'qhzr2' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'qyt1' ],
+    [ 0, 'Obtain', [ 'ths2', 'yd1' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'sy2' ],
+    [ 1, 'Obtain', [ 'xl1', 'ws2' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'hy1' ],
+    [ 0, 'Obtain', [ 'fls1', 'ca2' ] ],
+    [ 0, 'ObtainEnd' ],
+    [ 0, 'PostObtainDealOne', 'tzbz2' ],
     [ 0,
       'Redeal',
-      [ [ 'fqx1', 'sy2', 'tzbz2', 'yd1', 'zrl1', 'ys1', 'gjhg2', 'lyc2' ],
-        [ 'blts1', 'jql2', 'yqs1', 'qyt1', 'ttzq2' ] ] ],
-    [ 0, 'DiscardOne', [ 'bcg2', 'ttzq2' ] ],
-    [ 0, 'Obtain', [ 'ttzq2', 'ys1' ] ],
-    [ 0, 'ObtainEnd' ],
+      [ [ 'zrl1', 'hy1', 'sy2', 'blts1', 'wc2', 'tzbz2', 'snm2', 'oysg1' ],
+        [ 'yqs1', 'lyc2', 'hykh2', 'al1', 'gjhg2', 'qyt1' ] ] ],
+    [ 1, 'DiscardOne', [ 'hllp1', 'hykh2' ] ],
+    [ 1, 'Obtain', [ 'hykh2', 'wc2' ] ],
+    [ 1, 'ObtainEnd' ],
+    [ 1, 'PostObtainDealOne', 'qyt1' ],
   ];
+
+  if (rank == 0) {
+    for (var i=0; i<action_seq.length; i++) {
+      action_seq[i][0] = 1 - action_seq[i][0];
+    }
+  }
+
   ApplyActionSequence(action_seq);
+}
+
+function ShowRestoreSnapshotDialog() {
+  document.getElementById('avatarselection_blocker').style.display='block';
+  document.getElementById('restore_snapshot_dialog').style.display = 'block';
+  delayedFunc(function() {
+    document.getElementById('restore_snapshot_dialog').style.height = '14vw';
+  }, 0.1);
+}
+
+function HideRestoreSnapshotDialog() {
+  document.getElementById('restore_snapshot_dialog').style.height = 0;
+  delayedFunc(function() {
+    document.getElementById('restore_snapshot_dialog').style.display = 'none';
+    document.getElementById('avatarselection_blocker').style.display = 'none';
+  }, 1);
+}
+
+function RestoreSnapshotButtonClicked(choice = no) {
+  HideRestoreSnapshotDialog();
+  if (choice == true) {
+    RestoreGameStateFromStartMenu();
+  } else {
+
+  }
 }

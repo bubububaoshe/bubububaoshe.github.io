@@ -208,10 +208,10 @@ html .appcontainer, .appwrapper{
   margin-left: 1vw;
 }
 
-#continuedialog {
-  position: absolute; 
-  top: 50%; 
-  width:100%; 
+#continuedialog, #restore_snapshot_dialog {
+  position: absolute;
+  top: 50%;
+  width:100%;
   z-index:100;
   background-color:#281B11;
   border:1px #7a614f solid;
@@ -227,9 +227,9 @@ html .appcontainer, .appwrapper{
 .backbutton {
   position: absolute;
   left: 20%; top: 0;
-  width: 5vw; 
-  height: 5vw; 
-  background-size: 100% 100%; 
+  width: 5vw;
+  height: 5vw;
+  background-size: 100% 100%;
   background-image: url('avatars/back.png');";
 }
 .multiplayerbutton {
@@ -256,10 +256,10 @@ html .appcontainer, .appwrapper{
   transform: rotateY(180deg);
 */
 
-.notransition * { 
-  -webkit-transition: none !important; 
-  -moz-transition: none !important; 
-  -o-transition: none !important; 
-  -ms-transition: none !important; 
-  transition: none !important; 
-} 
+.notransition * {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
+}
