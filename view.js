@@ -8,6 +8,7 @@ OPERATION_DELAY = 500; //delay in milliseconds between machine operations
 MOVE_DURATION = 2; //2 time units (OPERATION_DELAY)
 
 var CARDH=0, CARDW=0, WINW=0, WINH=0, MAINW=0, MAINH=0;
+var g_resource_prefix = "";
 
 function getCSSInt(name) {
   var cv = getComputedStyle(document.documentElement).getPropertyValue(name);
@@ -105,9 +106,9 @@ function createPoemPanel(char){
 class Sound{
   constructor(){
     this.audio = document.getElementById("soundeffect");
-    this.ac = new Audio('mp3/activate.mp3');
-    this.de = new Audio('mp3/deal.mp3');
-    this.co = new Audio('mp3/combo.mp3');
+    this.ac = new Audio(g_resource_prefix + 'mp3/activate.mp3');
+    this.de = new Audio(g_resource_prefix + 'mp3/deal.mp3');
+    this.co = new Audio(g_resource_prefix + 'mp3/combo.mp3');
     /*
     this.wi = new Audio('mp3/win.mp3');
     this.lo = new Audio('mp3/fool.mp3');
@@ -115,7 +116,7 @@ class Sound{
     this.dr = new Audio('mp3/draw.mp3');*/
   }
   play(name){
-    sound.audio.src = "mp3/" + name + ".mp3";
+    sound.audio.src = g_resource_prefix + "mp3/" + name + ".mp3";
     sound.promisedPlay(sound.audio);
   }
   promisedPlay(audio){
@@ -134,7 +135,7 @@ class Sound{
   draw(){this.play("draw");}
   combovoice(nextFunc,combo){
     if(COMBO_VOICE == "voiceon"){
-      this.audio.src = "combomp3/" + combo.getId() + ".mp3";
+      this.audio.src = g_resource_prefix + "combomp3/" + combo.getId() + ".mp3";
       this.promisedPlay(this.audio);
       setTimeout(nextFunc, combo.getAudioDuration()+500);
     }
@@ -494,7 +495,7 @@ class Messenger {
     messenger.setBannerHeadline(["恭喜对战", levels[AI_LEVEL-1]+"级AI", "超过" , minscore,"分，请抱好"]);
     var poster =  banner.querySelector(".bannercards").appendChild(document.createElement("div"));
     poster.classList.add("postercard");
-    poster.style.backgroundImage = "url('img/" + spid + ".jpg')";
+    poster.style.backgroundImage = "url('" + g_resource_prefix + "img/" + spid + ".jpg')";
     banner.addEventListener("click", function(){
       messenger.exitNotifyOppoAction(controller.doNothing);
     });

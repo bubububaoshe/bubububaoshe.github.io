@@ -39,7 +39,7 @@ AVATAR_NAMES = [
 ];
 
 function GetAvatarUrlByIdx(idx) {
-  return 'url("' + AVATAR_PREFIX + AVATAR_FILENAMES[idx] + '")';
+  return 'url("' + g_resource_prefix + AVATAR_PREFIX + AVATAR_FILENAMES[idx] + '")';
 }
 
 function SetCurrentSelectedAvatar(avatar_preview) {
@@ -124,7 +124,7 @@ function PopulateAvatarChoicePanel(insert_point) {
     w.classList.add('avatarsmallwrapper');
     var p = document.createElement('div');
     p.classList.add('avatarpreview');
-    var bkimgurl = 'url("' + AVATAR_PREFIX + AVATAR_FILENAMES[i] +'")';
+    var bkimgurl = 'url("' + g_resource_prefix + AVATAR_PREFIX + AVATAR_FILENAMES[i] +'")';
     p.style.backgroundImage = bkimgurl;
     var t = document.createElement('div');
     t.textContent = AVATAR_NAMES[i];
@@ -160,7 +160,7 @@ class Avatar {
     if (ix != "") this.idx = ix;
     else this.idx = 0;
 
-    this.bkimgurl = 'url("' + AVATAR_PREFIX + AVATAR_FILENAMES[this.idx] + '")';
+    this.bkimgurl = 'url("' + g_resource_prefix + AVATAR_PREFIX + AVATAR_FILENAMES[this.idx] + '")';
 
     var n = getCookie('nickname');
     if (n != '') this.nickname = n[0];

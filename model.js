@@ -224,7 +224,7 @@ class Character {
     this.owner = owner;
   }
   getPortrait() {
-    return "url('img/" + this.id + ".jpg')";
+    return "url('" + g_resource_prefix + "img/" + this.id + ".jpg')";
   }
   getDesc() {
     var msg = this.id + "：" + this.name + "，" + this.score + "分，" + this.season + "季, 归属玩家" + (this.owner == null ? "-" : this.owner.id) + "\n";
@@ -786,19 +786,19 @@ class Model {
   init_Multiplayer(snapshot) {
     model.commonRepository.init(this.pack);
     view.init();
-    
+
     // LOAD SNAPSHOT
     var my_id = versus_rank, oppo_id = 1-my_id;
     var hands = [ snapshot.p0h, snapshot.p1h ]; // this is from Offender's perspective
     var sps   = [ snapshot.p0sp,snapshot.p1sp];
     var pool  = snapshot.pool;
-    
+
     // Replicates the following functions
     // >> model.player1.init()
     //   >> player.specials.init()
     //   >> player.hand.init()
-    
-    // Populate MY special cards & 
+
+    // Populate MY special cards &
     var p1_h = hands[my_id], p1_sp = sps[my_id];
     for (var i=0; i<p1_sp.length; i++) {
       var ch = spmanager.createSpecial(p1_sp[i]);
@@ -809,7 +809,7 @@ class Model {
       var ch = model.commonRepository.removeCharByID(p1_h[i]);
       model.player1.hand.addChar(ch);
     }
-    
+
     // Populate Opponent's hand cards which MAY BE SPECIAL CARDS
     // Downgrade temporarily & re-upgrade in the FixUp
     var p0_h = hands[oppo_id], p0_sp = sps[oppo_id];
@@ -822,13 +822,13 @@ class Model {
       }
       model.player0.hand.addChar(ch);
     }
-    
+
     // Populate Pool
     for (var i=0; i<pool.length; i++) {
       var ch = model.commonRepository.removeCharByID(pool[i]);
       model.pool.addChar(ch);
     }
-    
+
     model.checkMatch1();
   }
   clear(){
@@ -913,7 +913,7 @@ class Model {
     for (var i=0; i<chars.length; i++)
       model.commonRepository.addChar(chars[i]);
     model.pool.characters.length = 0;
-    
+
     if (pool_ids == null) { // Changed for multiplayer
       model.pool.init(INIT_CARD_NUM_POOL, model.commonRepository);
       var pool_ids = extractIDs(model.pool.characters);
@@ -1113,7 +1113,7 @@ class Model {
     msg += "卡池\n" + this.pool.getDesc();
     return msg;
   }
-  
+
   getSnapshot() { // no view; for starting a game
     return {
       'p0h' :extractIDs(model.player0.hand.characters),

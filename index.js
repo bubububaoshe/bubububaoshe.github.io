@@ -5,8 +5,11 @@ var http = require('http').Server(app);
 var os = require("os");
 var hostname = os.hostname();
 console.log('Hostname: '+hostname);
-var allowed_origins = 'edgeofmap.com:*,bubububaoshe.github.io:*,localhost:*';
-if (hostname == "xps-9550") { allowed_origins = '*:*' }
+var allowed_origins = ['edgeofmap.com:*',
+                       'https://bubububaoshe.github.io:*',
+					   'localhost:*',
+					   'https://quadpixels.github.io:*'];
+//if (hostname == "xps-9550") { allowed_origins = '*:*' }
 var io = require('socket.io')(http, { origins: allowed_origins });
 
 app.get('/', function(req, res){
@@ -333,7 +336,8 @@ class Game {
       this.actions.push([pidx, 'ObtainEnd']);
       var other = this.players[1 - pidx];
 
-      other.emit('Game_OpponentObtain', this.obtain_actions[pidx]);
+      if (other != null)
+	    other.emit('Game_OpponentObtain', this.obtain_actions[pidx]);
       this.obtain_actions[pidx].length = 0;
     }
   }
@@ -427,8 +431,11 @@ class Game {
   }
 
   CheckRestartState() {
-    var state0 = this.players[0].state,
-        state1 = this.players[1].state;
+    var p0 = this.players[0];
+	var p1 = this.players[1];
+	var state0 = "", state1 = "";
+	if (p0 != null && p0 != undefined) state0 = this.players[0].state;
+    if (p1 != null && p1 != undefined) state1 = this.players[1].state;
     if (state0 == "voted_playagain" && state1 == "voted_playagain") {
       // Switch side & restart game
       console.log('Starting new round');
@@ -502,6 +509,8 @@ class Game {
     if (this.players[rank] == null) {
       this.players[rank] = socket;
     }
+	// fix
+	if (this.snapshot == null || this.snapshot == undefined) return;
     var snapshot = this.GetSnapshotForRestore(rank);
     var x = this.GetActionSequenceForRestore(rank);
 		var action_seq = x[0], trimmed = x[1];

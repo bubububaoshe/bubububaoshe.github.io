@@ -11,6 +11,8 @@ UpdateAvatarPreview();
     document.getElementById('serverselect').style.display="block";
     document.getElementById('servername1').disabled = null;
     document.getElementById('servername1').click();
+  } else if (h.indexOf('http://edgeofmap.com') == 0) {
+    g_resource_prefix = "https://quadpixels.github.io/";
   }
 }
 
@@ -288,7 +290,7 @@ function ConnectToServer(is_reconnect = false) {
     versus_rank = 1;
     setup();
     controller.configure();
-    ShowVotePlayAgainForNewRound();
+    ShowVotePlayAgainForNewRound(true);
   });
 
   socket.on('Match_GameSetupDefensive', (p0c, p1c, poolc, repoc) => { // 后手开局
@@ -296,7 +298,7 @@ function ConnectToServer(is_reconnect = false) {
     versus_rank = 0;
     setup();
     controller.configure();
-    ShowVotePlayAgainForNewRound();
+    ShowVotePlayAgainForNewRound(true);
   });
 
   socket.on('Match_GameInitOffensive', (other_sp, snapshot, game_id) => {
@@ -402,7 +404,7 @@ function ConnectToServer(is_reconnect = false) {
     document.getElementById('vote_playagain_msg').textContent = '因为大家没有都选继续，所以就返回主界面啦。';
     delayedFunc(function() {
       GotoMainMenu();
-      document.getElementById('vote_playagain_msg').textContent = '';
+      ShowVotePlayAgainForNewRound(false)
     }, 7);
   });
 
@@ -453,7 +455,7 @@ function ShowVotePlayAgainForNewRound(is_new_round) {
   }
   ShowVotePlayAgainButtons(false);
   delayedFunc(function() {
-    document.getElementById('continuedialog').style.height = '0vw';
+    document.getElementById('continuedialog').style.height = '0';
     document.getElementById('vote_playagain_msg').textContent = '';
   }, 4);
 
@@ -461,7 +463,7 @@ function ShowVotePlayAgainForNewRound(is_new_round) {
     document.getElementById('continuedialog').style.display = 'none';
     document.getElementById('avatarselection_blocker').style.display='none';
     ShowVotePlayAgainButtons(true);
-  }, 6);
+  }, 4.8);
 }
 
 function VotePlayAgain() {
@@ -472,7 +474,7 @@ function VotePlayAgain() {
     socket.emit('Game_VotePlayAgain');
   } else {
     console.log('Restart new round ...');
-    ShowVotePlayAgainForNewRound();
+    ShowVotePlayAgainForNewRound(true);
     gamesetup(false);
   }
 }
