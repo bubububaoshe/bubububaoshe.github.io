@@ -170,6 +170,10 @@ class Card{
     back.classList.add("cardback");
     this.container.appendChild(createInfobox(char));
     //this.container.addEventListener("touchstart", controller.doNothing, {passive:true});
+
+    // 不知道有什么更好的方法来隐藏头像面板，所以就先这样子了...
+    this.container.addEventListener('mouseover', function(){document.getElementById("avatarboxes").style.opacity=0;});
+    this.container.addEventListener('mouseout',  function(){document.getElementById("avatarboxes").style.opacity=1;});
   }
   setChar(char){
     this.container.id = char.id;
@@ -513,6 +517,7 @@ class View {
     // add controllers
     this.hand1.addController(controller.activate);
     this.unblockGame();
+    if (is_multiplayer == false) HideAvatarBoxes();
   }
   clear(){
     view.blockGame();

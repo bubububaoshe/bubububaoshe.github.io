@@ -4,11 +4,15 @@ avatar = new Avatar(0, 'url("avatars/avatar1.png")');
 avatar.LoadFromCookie();
 UpdateAvatarPreview();
 
-// Test
-//if (window.location.href.indexOf('http://localhost/') == 0) {
-//  document.getElementById('serverselect').style.display="block";
-//  document.getElementById('servername1').click();
-//}
+{
+  var h = window.location.href;
+  console.log('window.location.href = ' + h);
+  if (h.indexOf('http://localhost/') == 0) {
+    document.getElementById('serverselect').style.display="block";
+    document.getElementById('servername1').disabled = null;
+    document.getElementById('servername1').click();
+  }
+}
 
 // New variables for multiplayer mode
 var socket = null;
@@ -19,6 +23,8 @@ var versus_rank = -999; // 1:先手选取特殊牌／发牌 0:后手
 var remoteObtainActions = null;
 
 var g_game_id = -999; // 所连上的游戏ID
+var g_nicknames = ['', ''];
+var g_avataridxes = [0, 0];
 
 // Test
 var is_verify_per_round = false;
@@ -95,7 +101,7 @@ function SetGameMode(m) {
     x6.style.display = 'block';
     x7.style.display = 'block';
     is_multiplayer = true;
-    x8.textContent = '下次再会';
+    x8.textContent = '重新设置';
   }
 }
 function SetMultiplayerMode(m) {
@@ -167,29 +173,31 @@ function DisableConnectButton() {
   var x = document.getElementById('connect_to_server');
 }
 
-function ConnectToServer() {
-  document.getElementById('vs_ai').disabled="disabled";
-  document.getElementById('avatar_nickname_hint').innerHTML = "<br/><br/>";
-  lobbystatus.textContent = '连线中・・・';
-  if (socket != null && socket.connected == true) {
-    lobbystatus.textContent = '已经连线啦。不用再连啦。';
-    return;
-  }
-
-  { // Hide UI elements
-    var ids = ['serverselect', 'connect_to_server'];
-    for (var i=0; i<ids.length; i++)
-      document.getElementById(ids[i]).style.display = 'none';
-  }
-
-  delayedFunc(function() {
-    if (socket.connected == false) {
-      lobbystatus.textContent = '似乎没有连上...'
-      document.getElementById('reconnect').style.display = 'block';
-      document.getElementById('vs_ai').disabled = null;
-      document.getElementById('avatar_nickname_hint').opacity = 1;
+function ConnectToServer(is_reconnect = false) {
+  if (is_reconnect == false) {
+    document.getElementById('vs_ai').disabled="disabled";
+    document.getElementById('avatar_nickname_hint').innerHTML = "<br/><br/>";
+    lobbystatus.textContent = '连线中・・・';
+    if (socket != null && socket.connected == true) {
+      lobbystatus.textContent = '已经连线啦。不用再连啦。';
+      return;
     }
-  }, 10);
+
+    { // Hide UI elements
+      var ids = ['serverselect', 'connect_to_server'];
+      for (var i=0; i<ids.length; i++)
+        document.getElementById(ids[i]).style.display = 'none';
+    }
+
+    delayedFunc(function() {
+      if (socket.connected == false) {
+        lobbystatus.textContent = '似乎没有连上...'
+        document.getElementById('reconnect').style.display = 'block';
+        document.getElementById('vs_ai').disabled = null;
+        document.getElementById('avatar_nickname_hint').opacity = 1;
+      }
+    }, 10);
+  }
 
   var s = 'localhost:3000';
   if (document.getElementById('servername2').checked == true) s = '47.75.12.130:3000';
@@ -206,6 +214,8 @@ function ConnectToServer() {
     g_my_player_id = pid;
     document.getElementById('myplayerid').textContent = '临时ID: ' + pid;
     // Respond = my avatar idx & nickname
+    g_nicknames[1] = avatar.GetNickname(); // TODO: 把上次的nickname也恢复了
+    g_avataridxes[1] = avatar.idx;
     socket.emit('Info_PlayerInfo', avatar.GetNickname(), avatar.idx);
   });
 
@@ -234,6 +244,8 @@ function ConnectToServer() {
     lobbystatus.innerHTML = reason;
     CloseOpponentFinderMenu();
     ShowOpponentAvatarPreview(oppo_nickname, oppo_avataridx);
+    g_nicknames[0] = oppo_nickname;
+    g_avataridxes[0] = oppo_avataridx;
   });
 
   socket.on('Match_ConfirmMatchAck', function(msg) {
@@ -289,20 +301,19 @@ function ConnectToServer() {
 
   socket.on('Match_GameInitOffensive', (other_sp, snapshot, game_id) => {
     console.log('[先手开局] other_sp='+other_sp);
-    document.getElementById('avatarselection_blocker').style.display='none';
-    document.getElementById('offensive_wait_msg').style.display='none';
+    HideWaitMessage();
     messenger.hideFinalNotice(); // If from restart
     OtherPlayerSpecialCardFixup(other_sp);
     model.player1.SpecialFixup();
 
     g_game_id = game_id;
     SaveGameIDAndRankToCookie();
+    PopulateAndShowAvatarBoxes();
   });
 
   socket.on('Match_GameInitDefensive', (other_sp, snapshot, game_id) => {
     console.log('[后手开局], other_sp=' + other_sp);
-    document.getElementById('avatarselection_blocker').style.display='none';
-    document.getElementById('offensive_wait_msg').style.display='none';
+    HideWaitMessage();
     messenger.hideFinalNotice(); // if from restart
 
     //       p0sp中的0表示后手          后一个1表示自己
@@ -314,8 +325,9 @@ function ConnectToServer() {
     OtherPlayerSpecialCardFixup(other_sp);
     model.player1.SpecialFixup();
 
-    SaveGameIDAndRankToCookie();
     g_game_id = game_id;
+    SaveGameIDAndRankToCookie();
+    PopulateAndShowAvatarBoxes();
   });
 
   socket.on('Game_SelfTurn', (turn_idx) => {
@@ -382,6 +394,10 @@ function ConnectToServer() {
     document.getElementById('multiplayerButtons').style.display = 'block';
   });
 
+  socket.on('disconnect', () => {
+    ShowWaitMessage('啊！你好像离线了。请刷新页面并重新连接来恢复目前的游戏。');
+  });
+
   socket.on('Game_GotoMainMenu', () => {
     document.getElementById('vote_playagain_msg').textContent = '因为大家没有都选继续，所以就返回主界面啦。';
     delayedFunc(function() {
@@ -396,6 +412,7 @@ function ConnectToServer() {
     ShowGenericDialog('正在恢复游戏状态', '恢复完后才可继续操作');
     ApplySnapshot(snapshot);
     ApplyActionSequence(action_seq);
+    // TODO: 把对方的头像与名字恢复一下
   });
 
   // Last game restore
@@ -413,7 +430,7 @@ function ShowContinueDialog() {
   ShowVotePlayAgainButtons(true);
   document.getElementById('continuedialog').style.display = 'block';
   delayedFunc(function() {
-    document.getElementById('continuedialog').style.height = '14vw';
+    document.getElementById('continuedialog').style.height = '17vw';
   }, 0.1);
 }
 
@@ -828,16 +845,22 @@ async function AUTOTEST_maingame() {
   }
 }
 
-function Versus_NotifyOtherPlayerSPSelection() {
+function ShowWaitMessage(msg = "请等待另一名玩家选择完特殊牌") {
   var ids = ['avatarselection_blocker', 'offensive_wait_msg'];
   for (var i=0; i<ids.length; i++)
     document.getElementById(ids[i]).style.display = 'block';
+  document.getElementById('wait_msg_content').textContent = msg;
+}
+
+function HideWaitMessage() {
+  document.getElementById('avatarselection_blocker').style.display='none';
+  document.getElementById('offensive_wait_msg').style.display='none';
 }
 
 function SaveGameIDAndRankToCookie() {
   setCookie('last_game_id', g_game_id);
   setCookie('last_game_rank', versus_rank);
-  console.log('[versus] Saved game ID and rank to cookie');
+  console.log('[versus] Saved game ID=' + g_game_id + ' and rank=' + versus_rank + ' to cookie');
 }
 
 function LoadGameIDAndRankFromCookie() {
@@ -1047,11 +1070,23 @@ function TEST_RESTORESNAPSHOT(rank = 1) {
   ApplyActionSequence(action_seq);
 }
 
-function ShowRestoreSnapshotDialog() {
-  document.getElementById('avatarselection_blocker').style.display='block';
-  document.getElementById('restore_snapshot_dialog').style.display = 'block';
+function ShowRestoreSnapshotDialog(msg = null) {
+  var b = document.getElementById('avatarselection_blocker');
+  var d = document.getElementById('restore_snapshot_dialog');
+  var i = document.getElementById('restore_dialog_info');
+  d.style.display = 'block';
+  b.style.display = 'block';
+  if (msg == null) {
+    var side;
+    if (versus_rank == 1) side = '，先手';
+    else if (versus_rank == 0) side = '，后手';
+    else side = '';
+    i.textContent = '游戏ID=' + g_game_id + side;
+  } else {
+    i.textContent = msg;
+  }
   delayedFunc(function() {
-    document.getElementById('restore_snapshot_dialog').style.height = '14vw';
+    document.getElementById('restore_snapshot_dialog').style.height = '17vw';
   }, 0.1);
 }
 

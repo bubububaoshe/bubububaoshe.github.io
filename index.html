@@ -1,7 +1,7 @@
 <!DOCUMENTTYPE html>
 <html>
 <head>
-	<title>千秋戏</title>
+	<title>千秋戏 - 开发版</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="height=device-height,
                       width=device-width, initial-scale=1.0,
@@ -18,7 +18,7 @@
 <div class="appcontainer noselect">
 	<div class="appwrapper">
 	<div id="configurator" class="flexbox transitopacity">
-	  <div style="background-color:#66f" onclick="AUTOTEST_autostartmatch()">自动测试</div>
+	  <div id="btn_autotest" style="background-color:#66f; display:none" onclick="AUTOTEST_autostartmatch()">自动测试</div>
 
 		<div id="modeinput" class="segmented-control" style="width: 100%; color: #334422">
 			<input type="radio" name="gamemode" id="vs_ai"     checked onclick='SetGameMode(1);'>
@@ -79,12 +79,12 @@
       <div style="width:50%; float: left">
         <!-- 连线前 -->
         <div id="serverselect" class="segmented-control" style="width: 100%; color: #334422; opacity:1; display:none">
-            <input type="radio" name="servername" id="servername1">
+            <input type="radio" name="servername" id="servername1" disabled="true">
             <input type="radio" name="servername" id="servername2" checked>
-            <input type="radio" name="servername" id="servername3" disabled="true">
-            <label for="servername1" data-value="测试用服务器">192.168.0.22</label>
-            <label for="servername2" data-value="一号服务器">不要打雷</label>
-            <label for="servername3" data-value="不怕打雷" disabled>二号服务器</label>
+            <!--<input type="radio" name="servername" id="servername3" disabled="true">-->
+            <label for="servername1" data-value="测试用服务器">localhost</label>
+            <label for="servername2" data-value="默认服务器">不要打雷</label>
+            <!--<label for="servername3" data-value="不怕打雷" disabled>二号服务器</label>-->
           </div>
         <div id="connect_to_server" style="width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;" onclick='ConnectToServer();'>
           [决定好了，连线]
@@ -131,6 +131,13 @@
       <div style="clear:both; width:100%;"></div>
       <div>&nbsp;</div>
 		</div>
+
+		<div style="width:100%">
+			<br/>
+			原版以及原作者Github：
+			<br/>
+			<a style="color:#281b11" href="https://bubububaoshe.github.io/">https://bubububaoshe.github.io/</a>
+		  <a style="color:#281b11" href="https://github.com/bubububaoshe/bubububaoshe.github.io">https://github.com/bubububaoshe/bubububaoshe.github.io</a></div>
 	</div>
 	<div id="spselection" class="transitopacity">
 		<div class="selectionarea verticalflex">
@@ -149,12 +156,13 @@
 		</div>
 	</div>
 
-	<div id="avatarselection" style="position: absolute; width: 100%; top:20%; height: 0; color: #EEE; text-align: center; z-index:100; transition:height 0.7s; overflow:hidden">
+	<div id="avatarselection" class="configurator_popup_window">
 		<div style="width: 60%; margin-left: 20%; background-color: #281B11; height: 40vw;  border: 1px #EEE solid;">
 		头像选择<br/>
 			<div class="backbutton" onclick="CloseAvatarSelectionMenu();"></div>
 			<span style="color: #999; font-size:1.3vw;">头像不会影响游戏流程，只是为了增加辨识度。</span>
-			<div style="overflow-y: scroll; font-size: 1.5vw; height:34vw" id="avatar_choices">
+			<div style="overflow-y: scroll;
+			            font-size: 1.5vw; height:34vw" id="avatar_choices">
         <!--
         <div class="avatarsmallwrapper">
           <div class="avatarpreview glow" style="background-image:url('avatars/avatar1.png'); margin-left:1vw"></div>
@@ -173,34 +181,56 @@
 		</div>
 	</div>
 
-  <div id="opponentfinder" style="position: absolute; width: 100%; top: 25%; height: 0; color: #EEE; text-align: center;  z-index:100; transition: height 0.7s; overflow: hidden">
-    <div style="width: 60%; margin-left: 20%; background-color: #281B11; height: 26vw;  border: 1px #EEE solid;">
-    查找玩家<br/>
+  <div id="opponentfinder" class="configurator_popup_window">
+    <div style="width: 60%; margin-left: 20%;
+		            background-color: #281B11; height: 40vw;
+								border: 1px #EEE solid;">
+		  <div style="height:6vw">
+			  <div>查找玩家</div>
+			  <div style="color: #999; font-size: 1.3vw;">可以输入昵称的一部分或临时ID来查找</div>
+		  </div>
       <div style="position:absolute; left:20%; top:0;"> <!-- Top Row -->
-        <div onclick="CloseOpponentFinderMenu();" style="width:4vw;height:4vw;background-size:100% 100%;background-image:url('avatars/back.png');float:left;"></div>
+        <div onclick="CloseOpponentFinderMenu();"
+				     style="width:4vw; height:4vw;
+						        background-size:100% 100%;
+										background-image:url('avatars/back.png');
+										float:left;">
+				</div>
         <div style="float:left;">
-          <div style="width:5vw; float:left; text-align: center; margin-left:1vw; margin-top: 0.5vw;">
-            <div id="oppofind_my_avatar" class="avatarpreview_small glow" style="background-image:url('avatars/avatar1.png'); margin-left:1vw"></div>
+          <div style="width:7vw;
+					            float:left; text-align: center;
+											margin-left:0.2vw; margin-top: 0.5vw;">
+            <div id="oppofind_my_avatar" class="avatarpreview_small glow"
+						style="background-image:url('avatars/avatar1.png');
+						       margin-left:1vw;
+									 margin-top:0.5vw;">
+						</div>
           </div>
-          <div style="float:left; text-align:left;">
-            <div id="oppofind_my_nickname"></div>
-            <div id="oppofind_my_playerid"></div>
+          <div style="float:left;
+					            text-align:left;
+											margin-top:1vw">
+            <div id="oppofind_my_nickname" style="font-size:1.5vw"></div>
+            <div id="oppofind_my_playerid" style="font-size:1.5vw"></div>
           </div>
         </div>
       </div>
-      <span style="color: #999; font-size: 1.3vw;">可以输入昵称的一部分或临时ID来查找</span>
-
       <div style="clear:both;width:100%;"></div>
       <hr/>
 
-      <div id="room_buttons" style="margin-bottom: 0.5vw; margin-top: 0.5vw;">
+      <div id="room_buttons" style="margin-bottom: 0.5vw; margin-top: 0.5vw; font-size:2vw">
         <div id="inviteinput" class="inviteinput" style="float:left;">
-        ID或昵称：<input id="invitedid" type="text" size=10></input>
+        ID或昵称：
+				<input id="invitedid" type="text" size=10
+				  style="border:1px #ccc solid;
+					       background-color:#333333;
+								 color:#EEE;
+								 margin-right:0.5vw; height:3vw;
+								 font-size:2vw;"></input>
         </div>
-        <div id="invitebutton" style="width:8vw; height:3vw; float:left; background-color:#442">
+        <div id="invitebutton" style="width:8vw; height:3.5vw; float:left; background-color:#442">
         查找
         </div>
-        <div id="find_opponent_info" style="float:left;">如果什么都不输入，就随机返回</div>
+        <div id="find_opponent_info" style="float:left;">如果什么都不输入，就会随机返回一些结果，嘿嘿</div>
         <div style="clear:both;"></div>
 
         <div id="opponentsearchresult" style="overflow-y:scroll;">
@@ -239,8 +269,8 @@
   </div>
 
 	<div id="restore_snapshot_dialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:0px;">
-		<div style="color:#7a614f">是否恢复之前的游戏？</div>
-		<div style="color:#999">details go here</div>
+		<div style="color:#EEE">是否恢复之前的游戏？</div>
+		<div style="color:#aa9976" id="restore_dialog_info"></div>
 		<div style="width:24vw; margin-left:auto; margin-right:auto;">
       <div id="restore_snapshot_yes" class='continue_dialog_button' onclick="RestoreSnapshotButtonClicked(true);">
       是
@@ -341,6 +371,48 @@
 		<div id="specialboard">
 			<div id="specials0" class="cardstack"></div>
 			<div id="hoverinfobox" class="bignotice"></div>
+			<div id="avatarboxes" class="bignotice"
+			     style="position:absolute;
+					        padding:0;
+									margin:0;
+									z-index:0;
+									height:20vw;
+									width:100%;
+									transition: opacity 0.3s;">
+					<div id="avatarbox0" style="height:8vw;position:absolute;top:0;">
+						<div style="width:7vw;
+						            float:left; text-align: center;
+												margin-left:0.2vw; margin-top: 0.5vw;">
+	            <div id="avatarbox0_avatar" class="avatarpreview"
+							style="background-image:url('');
+							       margin-left:1vw;
+										 margin-top:0.5vw;">
+							</div>
+	          </div>
+	          <div style="float:left; text-align:left;
+												margin-top:1vw; width:9vw; height:6vw;
+												align-items:center; display:flex;">
+							<!-- https://stackoverflow.com/questions/8865458/how-do-i-vertically-center-text-with-css -->
+	            <div id="avatarbox0_nickname" style="font-size:1.5vw"></div>
+	          </div>
+					</div>
+					<div id="avatarbox1" style="height:8vw;position:absolute;bottom:0;">
+						<div style="width:7vw;
+												float:left; text-align: center;
+												margin-left:0.2vw; margin-top: 0.5vw;">
+							<div id="avatarbox1_avatar" class="avatarpreview"
+							style="background-image:url('');
+										 margin-left:1vw;
+										 margin-top:0.5vw;">
+							</div>
+						</div>
+						<div style="float:left; text-align:left;
+												margin-top:1vw; width:9vw; height:6vw;
+												align-items:center; display:flex;">
+							<div id="avatarbox1_nickname" style="font-size:1.5vw"></div>
+						</div>
+					</div>
+			</div>
 			<div id="specials1" class="cardstack"></div>
 		</div>
 	</div>
@@ -366,7 +438,7 @@
 	<div id="offensive_wait_msg" style="width:100%;position:absolute;top:50%;z-index:100;display:none;">
 	  <div style="width:40vw;margin-left:auto;margin-right:auto;
 		            background-color:#281B11;border:1px #FFF solid;
-								z-index:100;color:#EEE;font-size:2vw;">
+								z-index:100;color:#EEE;font-size:2vw;", id="wait_msg_content">
 	  请等待另一名玩家选择完特殊牌
 	  </div>
 	</div>
@@ -374,7 +446,7 @@
 	                               z-index:100;display:none;background-color:#281B11;
 																 border:1px #FFF solid;color:#EEE;">
 		<div id="genericdialog_title" style="color:#7a614f">标题</div>
-		<div id="genericdialog_content" style="width:24vw; margin-left:auto; margin-right:auto;"></div>
+		<div id="genericdialog_content" style="margin-left:auto; margin-right:auto;"></div>
 	</div>
 
 	<audio id="soundeffect" src=""></audio>

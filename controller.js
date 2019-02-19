@@ -368,13 +368,13 @@ class Controller{
       showPage("main");
       model.init();
     } else {
-      Versus_NotifyOtherPlayerSPSelection();
+      ShowWaitMessage();
     }
 
     if (is_multiplayer == true) {
       if (versus_rank == 1) {
         socket.emit('Match_SetupComplete', model.player1.specialIDs, model.getSnapshot());
-        Versus_NotifyOtherPlayerSPSelection();
+        ShowWaitMessage();
       } else {
         socket.emit('Match_SetupComplete', model.player1.specialIDs, null);
       }

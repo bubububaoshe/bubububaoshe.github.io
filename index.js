@@ -457,7 +457,7 @@ class Game {
   GetSnapshotForRestore(pidx) {
     var snapshot = { };
     var hands = [ this.snapshot.p1h, this.snapshot.p0h ];
-    var sps   = this.initsp;
+    var sps   = [ this.initsp[1], this.initsp[0] ] ;
     snapshot.p1h = hands[1-pidx];
     snapshot.p0h = hands[pidx];
     snapshot.p1sp = sps[1-pidx];
@@ -466,17 +466,30 @@ class Game {
     return snapshot;
   }
 
+  // Note: may need to trim
   GetActionSequenceForRestore(pidx) {
     var ret = [];
-		// create deep copy
+		var trimmed = false;
+
+		var this_turn = [];
+		const EndTurnMarkers = [ 'PostObtainDealOne', 'GameEnd' ];
+		// create deep copy, and trim if needed
 		for (var i=0; i<this.actions.length; i++) {
 			var a = this.actions[i].slice();
 			if (pidx == 0) {
 				a[0] = 1 - a[0];
 			}
-			ret.push(a);
+		  this_turn.push(a);
+			if (EndTurnMarkers.includes(a[1])) {
+				for (var j=0; j<this_turn.length; j++) {
+					ret.push(this_turn[j]);
+				}
+				this_turn.length = 0;
+			}
 		}
-    return ret;
+		if (this_turn.length > 0)
+		  trimmed = true;
+    return [ret, trimmed];
   }
 
   RestoreSnapshot(socket, rank) {
@@ -484,9 +497,23 @@ class Game {
       this.players[rank] = socket;
     }
     var snapshot = this.GetSnapshotForRestore(rank);
-    var action_seq = this.GetActionSequenceForRestore(rank);
+    var x = this.GetActionSequenceForRestore(rank);
+		var action_seq = x[0], trimmed = x[1];
     socket.emit('Game_RestoreGameState', this.game_id, snapshot, action_seq);
     socket.game = this;
+
+    if (trimmed == true) {
+			var other_socket = this.players[1 - rank];
+			var snapshot_other = this.GetSnapshotForRestore(1 - rank);
+			var x1 = this.GetActionSequenceForRestore(1 - rank);
+			var action_seq_other = x[0];
+			other_socket.emit('Game_RestoreGameState', this.game_id, snapshot_other, action_seq_other);
+
+			var len0 = this.actions.length;
+			this.actions = this.actions.slice(0, action_seq.length);
+			var len1 = this.actions.length;
+			console.log('[RestoreSnapshot] Trimming Actions! Length before: ' + len0 + ', after: ' + len1);
+		}
   }
 
   PrintSnapshot() {

@@ -259,3 +259,22 @@ function ShowOpponentAvatarPreview(oppo_nickname, oppo_avataridx) {
 function HideOpponentAvatarPreview() {
   document.getElementById('opponent_avatar_name').style.display = 'none';
 }
+
+// 游戏中的玩家头像与名字
+function PopulateAndShowAvatarBoxes() {
+  var a0 = document.getElementById('avatarbox0_avatar'),
+      a1 = document.getElementById('avatarbox1_avatar'),
+      n0 = document.getElementById('avatarbox0_nickname'),
+      n1 = document.getElementById('avatarbox1_nickname'),
+      ab = document.getElementById('avatarboxes');
+  a0.style.backgroundImage = GetAvatarUrlByIdx(g_avataridxes[0]);
+  a1.style.backgroundImage = GetAvatarUrlByIdx(g_avataridxes[1]);
+  n0.textContent = g_nicknames[0];
+  n1.textContent = g_nicknames[1];
+  ab.style.display = 'block';
+}
+
+function HideAvatarBoxes() {
+  var ab = document.getElementById('avatarboxes');
+  ab.style.display = 'none';
+}

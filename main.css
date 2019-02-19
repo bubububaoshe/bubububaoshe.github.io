@@ -202,13 +202,13 @@ html .appcontainer, .appwrapper{
 }
 
 .avatarpreview_small {
-  width: 3vw;
-  height:3vw;
+  width: 5vw;
+  height:5vw;
   background-size: 100% 100%;
   margin-left: 1vw;
 }
 
-#continuedialog, #restore_snapshot_dialog {
+#continuedialog, #restore_snapshot_dialog, #offensive_wait_msg {
   position: absolute;
   top: 50%;
   width:100%;
@@ -216,7 +216,7 @@ html .appcontainer, .appwrapper{
   background-color:#281B11;
   border:1px #7a614f solid;
   transition: height 0.7s;
-  height: 14vw;
+  padding: 2vw;
 }
 
 .avatarsmallwrapper {
@@ -249,6 +249,17 @@ html .appcontainer, .appwrapper{
   line-height:5vw;
   background-color:#566555;
   color:#aa917f;
+}
+
+.configurator_popup_window {
+  position: absolute;
+	width: 100%; top: 25%;
+  height: 0;
+  color: #EEE;
+  text-align: center;
+  z-index:100;
+	transition: height 0.7s;
+  overflow: hidden;
 }
 
 /*test
