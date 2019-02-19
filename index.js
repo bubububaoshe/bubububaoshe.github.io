@@ -127,7 +127,8 @@ class PlayerMatcher {
 	  if (pair != null) {
 	    var other = null;
 	    if (pair[0] == p) other = pair[1]; else other = pair[0];
-	    other.emit('Match_OtherPlayerCancelsMatch');
+		if (other != undefined && other != null)
+			other.emit('Match_OtherPlayerCancelsMatch');
 	    pair[0].can_be_found = true;
 	    pair[1].can_be_found = true;
 	  }
@@ -365,7 +366,8 @@ class Game {
     if (pidx != -1) {
       this.actions.push([pidx, 'DiscardOne', [discarded_id, added_id]]);
       var other = this.players[1 - pidx];
-      other.emit('Game_OpponentDiscardOne', discarded_id, added_id);
+	  if (other != undefined && other != null)
+		  other.emit('Game_OpponentDiscardOne', discarded_id, added_id);
     }
   }
 
@@ -377,7 +379,8 @@ class Game {
     if (pidx != -1) {
       this.actions.push([pidx, 'Redeal', [pool_ids, repo_ids]]);
       var other = this.players[1 - pidx];
-      other.emit('Game_OpponentRedeal', pool_ids, repo_ids);
+      if (other != undefined && other != null)
+		  other.emit('Game_OpponentRedeal', pool_ids, repo_ids);
       socket.emit('Game_RedealEcho', pool_ids, repo_ids);
     }
   }
@@ -400,7 +403,8 @@ class Game {
     var pidx = this.GetPlayerIndexBySocket(socket);
     if (pidx != -1) {
       var other = this.players[1 - pidx];
-      other.emit('Game_OpponentGameEnd');
+	  if (other != null && other != undefined)
+		  other.emit('Game_OpponentGameEnd');
     }
   }
 
@@ -439,8 +443,10 @@ class Game {
                (state0 == "voted_not_playagain" && state1 == "voted_not_playagain") ||
                (state0 == "voted_not_playagain" && state1 == "voted_playagain")) {
       console.log('Will not start new round, game ended.');
-      this.players[0].emit('Game_GotoMainMenu');
-      this.players[1].emit('Game_GotoMainMenu');
+	  if (this.players[0] != null)
+		  this.players[0].emit('Game_GotoMainMenu');
+      if (this.players[1] != null)
+		  this.players[1].emit('Game_GotoMainMenu');
 
       // Destruct self
       // No need to push to g_all_sockets again b/c socket's not removed unless a player gets offline
@@ -507,7 +513,8 @@ class Game {
 			var snapshot_other = this.GetSnapshotForRestore(1 - rank);
 			var x1 = this.GetActionSequenceForRestore(1 - rank);
 			var action_seq_other = x[0];
-			other_socket.emit('Game_RestoreGameState', this.game_id, snapshot_other, action_seq_other);
+			if (other_socket != null && other_socket != undefined)
+				other_socket.emit('Game_RestoreGameState', this.game_id, snapshot_other, action_seq_other);
 
 			var len0 = this.actions.length;
 			this.actions = this.actions.slice(0, action_seq.length);
@@ -572,7 +579,9 @@ FindPlayerByIdOrNickname = function(socket, key) {
     else if (s == undefined) continue;
     else if (s.can_be_found == false) continue;
 
-    var name_match = (s.nickname.indexOf(key) != -1) || key=="";
+    var n = s.nickname, name_match = false;
+    if (n != undefined)
+	name_match = (s.nickname.indexOf(key) != -1) || key=="";
     var id_match = (s.player_id == key);
     if (name_match || id_match) {
       ret.push([s.player_id, s.nickname, s.avataridx]);

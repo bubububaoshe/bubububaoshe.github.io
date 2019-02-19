@@ -578,3 +578,9 @@ TypeError: combo is undefined[Learn More] view.js:456:11
 4. 回放完成时，向服务器送回[Game_SnapshotRestored]
 5. 服务器向两方重发回合开始消息[Game_SelfTurn 或 Game_OpponentTurn]（如果对方还在线的话。要是对方不在线（就是说两个玩家都掉线了）就不发）
 6. 向已在线的玩家再发Room_PlayerReconnected，提示“对方已上线”
+
+-------------------------------------
+
+新bug：
+因为现在允许玩家掉线，而不巧的是用了“将Game.player[0或1]设为null”的方式标记玩家掉线，所以引起了数据竞争，导致所有用到Game.player0或1的地方都会因为null而出错…所以加入了null检查。
+null变为非null的条件是掉线的玩家重新连上来；连上来后游戏应该就会照样继续的。
