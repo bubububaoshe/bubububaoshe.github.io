@@ -115,10 +115,11 @@ class Controller{
           }
         }
         else{
-          if (is_multiplayer != true) // Added in multiplayer
+          if (is_multiplayer != true) {// Added in multiplayer
             model.dealOne(model.player0);
+            view.unblockGame();
+          }
           model.checkMatch1();
-          view.unblockGame();
         }
       }
     });

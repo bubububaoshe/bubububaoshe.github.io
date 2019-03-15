@@ -1,5 +1,5 @@
 <div id="txt"></div>
-<audio id="audio_duration" src="combomp3/ysyy.mp3"></audio>
+<audio id="audio_duration" src="https://quadpixels.github.io/combomp3/ysyy.mp3"></audio>
 <style>
   #txt{
     white-space: pre;
@@ -100,7 +100,7 @@ var i = -1;
 function duration(){
   i++;
   if(i==size) return;
-  myVid.src = "combomp3/" + cs[i][3] + ".mp3";
+  myVid.src = g_resource_prefix + "combomp3/" + cs[i][3] + ".mp3";
   myVid.load();
   myVid.oncanplay = function () {
    //div.textContent += i + ": " +  myVid.duration*1000 + "\n";

@@ -917,8 +917,10 @@ class Model {
     if (pool_ids == null) { // Changed for multiplayer
       model.pool.init(INIT_CARD_NUM_POOL, model.commonRepository);
       var pool_ids = extractIDs(model.pool.characters);
-      socket.emit('Game_Redeal', pool_ids,
-                                 extractIDs(model.commonRepository.characters));
+      if (is_multiplayer) {
+        socket.emit('Game_Redeal', pool_ids,
+                                   extractIDs(model.commonRepository.characters));
+      }
       console.log('Self redeal ' + pool_ids);
     } else {
       var diff = false;

@@ -10,14 +10,24 @@ AVATAR_FILENAMES = [
   "avatar21.png",
   "avatar32.png", "avatar33.png", "avatar34.png", "avatar35.png",
   "avatar36.png", "avatar37.png", "avatar38.png", "avatar39.png",
-  "avatar40.png", "avatar41.png", "avatar42.png", "avatar43.png", "avatar44.png",
+  "avatar40.png", "avatar41.png", "avatar42.png", "avatar44.png",
   "avatar45.png", "avatar46.png", "avatar47.png", "avatar48.png",
   "avatar49.png", "avatar50.png", "avatar51.png", "avatar52.png",
   "avatar53.png", "avatar54.png", "avatar55.png",
   "avatar56.png",
-  "avatar57.png", "avatar58.png", "avatar59.png", "avatar60.png", "avatar61.png",
+  "avatar57.png", "avatar58.png", "avatar59.png", "avatar71.png", "avatar60.png", "avatar72.png", "avatar61.png", "avatar73.png",
   "avatar62.png", "avatar63.png", "avatar64.png", "avatar65.png", "avatar66.png",
+
+  "avatar74.png", "avatar75.png", "avatar76.png",
+  "avatar77.png", "avatar78.png", "avatar79.png",
+  "avatar80.png", "avatar81.png", "avatar82.png",
+  "avatar83.png", "avatar84.png", "avatar85.png",
+  "avatar86.png", "avatar87.png", "avatar88.png",
+  "avatar89.png", "avatar90.png", "avatar91.png",
+
+
   "avatar67.png", "avatar68.png", "avatar69.png", "avatar70.png",
+  "avatar43.png",
 ];
 AVATAR_NAMES = [
   "太华山・鼎剑峰", "百草谷", "补天岭", "江都", "长安",
@@ -28,14 +38,22 @@ AVATAR_NAMES = [
   "玄甲壳",
   "龙小企", "龙小美", "龙小程", "龙小囧",
   "木灵灵", "龙星", "乘云", "通宝",
-  "酱肘子", "小笼包", "诡异的光", "古剑奇谭", "青龙环",
+  "酱肘子", "小笼包", "诡异的光",  "青龙环",
   "太极八卦镜", "瑶山水镜", "冰丝玉剑穗", "含香紫玉珠",
   "挖宝魔镜", "百兽镂金囊", "玉泉酿", "炎火盔",
   "小龙人・沉思", "小龙人・欢颜", "小龙人·乖巧",
   "七夕・相逢",
-  "萌兔", "团子", "乐无异", "夏夷则", "江看花",
+  "萌兔", "团子", "乐无异", "闻人羽", "夏夷则", "阿阮", "江看花", "阿绵",
   "神一道天", "雷霆震", "熙焰焚", "雪翎", "彤绡",
+  "天罡・昔时", "天罡・旧颜", "虎啸",
+  "斩风・昔时", "斩风・旧颜", "狼嗥",
+  "御剑・昔时", "御剑・旧颜", "鹤唳",
+  "妙法・昔时", "妙法・旧颜", "鹿鸣",
+  "司命・昔时", "司命・旧颜", "鸾鸣",
+  "咒隐・昔时", "咒隐・旧颜", "蛇音",
+
   "己亥・新禧", "己亥・庆岁", "己亥・大壮", "碧油唧",
+  "古剑奇谭",
 ];
 
 function GetAvatarUrlByIdx(idx) {

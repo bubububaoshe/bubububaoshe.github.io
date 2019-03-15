@@ -159,7 +159,7 @@
 		<div style="width: 60%; margin-left: 20%; background-color: #281B11; height: 40vw;  border: 1px #EEE solid;">
 		头像选择<br/>
 			<div class="backbutton" onclick="CloseAvatarSelectionMenu();"></div>
-			<span style="color: #999; font-size:1.3vw;">头像不会影响游戏流程，只是为了增加辨识度。</span>
+			<span style="color: #999; font-size:1.3vw;">头像的选择不会影响游戏流程。</span>
 			<div style="overflow-y: scroll;
 			            font-size: 1.5vw; height:34vw" id="avatar_choices">
         <!--
@@ -459,6 +459,30 @@
 <script src="spmanager.js"></script>
 <script src="tableinfoview.js"></script>
 <script src="view.js"></script>
+<script type="text/javascript">
+
+{
+  var h = window.location.href;
+  console.log('window.location.href = ' + h);
+  if ((h.indexOf('http://localhost') == 0) ||
+	    (h.indexOf('file://') == 0)) {
+		console.log('Running on Localhost');
+    document.getElementById('serverselect').style.display="block";
+    document.getElementById('servername1').disabled = null;
+    document.getElementById('servername1').click();
+		var x=document.getElementsByClassName('appwrapper');
+		if (x.length > 0) {
+			x = x[0];
+			x.style.backgroundImage = "url('img/background.jpg')";
+		}
+		g_resource_prefix = "";
+  } else if (h.indexOf('http://edgeofmap.com') == 0) {
+    g_resource_prefix = "https://quadpixels.github.io/";
+  } else if (h.indexOf('http://47.75.12.130') == 0) {
+    g_resource_prefix = "https://quadpixels.github.io/";
+  }
+}
+</script>
 <script src="avatar.js"></script>
 <script src="socket.io/socket.io.js"></script>
 <script src="versus-client.js"></script>

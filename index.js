@@ -6,10 +6,14 @@ var os = require("os");
 var hostname = os.hostname();
 console.log('Hostname: '+hostname);
 var allowed_origins = ['edgeofmap.com:*',
-                       'https://bubububaoshe.github.io:*',
-					   'localhost:*',
-					   'https://quadpixels.github.io:*'];
-//if (hostname == "xps-9550") { allowed_origins = '*:*' }
+//                       'https://bubububaoshe.github.io:*',
+//					   'localhost:*',
+//					   'https://quadpixels.github.io:*',
+					   '*:*'];
+if (hostname == "xps-9550") {
+  allowed_origins = '*:*';
+  console.log('Running on localhost; allowing all incoming connections.');
+}
 var io = require('socket.io')(http, { origins: allowed_origins });
 
 app.get('/', function(req, res){
@@ -509,12 +513,22 @@ class Game {
     if (this.players[rank] == null) {
       this.players[rank] = socket;
     }
-	// fix
-	if (this.snapshot == null || this.snapshot == undefined) return;
+		// fix
+		if (this.snapshot == null || this.snapshot == undefined) return;
     var snapshot = this.GetSnapshotForRestore(rank);
     var x = this.GetActionSequenceForRestore(rank);
 		var action_seq = x[0], trimmed = x[1];
-    socket.emit('Game_RestoreGameState', this.game_id, snapshot, action_seq);
+
+		// 把昵称与头像idx传回去・・・
+		var nn0   = this.GetNickname(0),  nn1   = this.GetNickname(1),
+		    aidx0 = this.GetAvatarIdx(0), aidx1 = this.GetAvatarIdx(1);
+		var nicknames  =  [ nn0,   nn1 ];
+		var avataridxes = [ aidx0, aidx1 ];
+		if (rank == 0) {
+			nicknames.reverse(); avataridxes.reverse();
+		}
+
+    socket.emit('Game_RestoreGameState', this.game_id, nicknames, avataridxes, snapshot, action_seq);
     socket.game = this;
 
     if (trimmed == true) {
@@ -522,8 +536,11 @@ class Game {
 			var snapshot_other = this.GetSnapshotForRestore(1 - rank);
 			var x1 = this.GetActionSequenceForRestore(1 - rank);
 			var action_seq_other = x[0];
+			nicknames.reverse();
+			avataridxes.reverse();
+
 			if (other_socket != null && other_socket != undefined)
-				other_socket.emit('Game_RestoreGameState', this.game_id, snapshot_other, action_seq_other);
+				other_socket.emit('Game_RestoreGameState', this.game_id, nicknames, avataridxes, snapshot_other, action_seq_other);
 
 			var len0 = this.actions.length;
 			this.actions = this.actions.slice(0, action_seq.length);
@@ -532,11 +549,24 @@ class Game {
 		}
   }
 
+  do_PrettyPrintDict(x) {
+    var k = Object.keys(x);
+    console.log('{');
+    for (var i=0; i<k.length; i++) {
+      var entry = x[k[i]];
+      if (typeof(entry) == 'object')
+        console.log(' "' + k[i] + '": [\'' + entry.join('\', \'') + '\'],');
+      else
+        console.log(' "' + k[i] + '": ' + entry + ',')
+    }
+    console.log('}');
+  }
+
   PrintSnapshot() {
     console.log('>>>>>>>>>>>Snapshot --- for Defensive (0): >>>>>>>>>');
-    console.log(this.GetSnapshotForRestore(0));
+    this.do_PrettyPrintDict(this.GetSnapshotForRestore(0));
     console.log('>>>>>>>>>>>Snapshot --- for Offensive (1): >>>>>>>>>');
-    console.log(this.GetSnapshotForRestore(1));
+    this.do_PrettyPrintDict(this.GetSnapshotForRestore(1));
     console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
   }
 
@@ -561,6 +591,18 @@ class Game {
 			if (other_socket != null) {
 				other_socket.emit('Room_PlayerReconnected');
 			}
+		}
+	}
+
+	GetNickname(rank) {
+		if (this.players[rank] != undefined) {
+			return this.players[rank].nickname;
+		}
+	}
+
+	GetAvatarIdx(rank) {
+		if (this.players[rank] != undefined) {
+			return this.players[rank].avataridx;
 		}
 	}
 };
@@ -634,7 +676,8 @@ io.on('connection', function(socket) {
 	  socket.avataridx = avataridx;
 	  console.log('Player Info: ID=' + socket.player_id +
 	    ", nickname=" + nickname +
-	    ", avataridx=" + avataridx);
+	    ", avataridx=" + avataridx +
+      ", socket:");
 	});
 
 	socket.on('Match_ReadyToMatch', (nickname, avataridx) => {
@@ -812,3 +855,31 @@ io.on('connection', function(socket) {
 http.listen(3000, function() {
 	console.log("Listening on port 3000");
 });
+
+function delayedFunc(func, secs){
+  setTimeout(function() {
+    func.call();
+  }, Math.floor(secs * 1000));
+}
+
+KickOutInactiveSockets = function() {
+  var victims = [];
+  for (var i=0; i<g_all_sockets.length; i++) {
+    var s = g_all_sockets[i];
+    if (true) {
+      if (s.kick_countdown == undefined) {
+        s.kick_countdown = 3;
+      }
+      s.kick_countdown -= 1;
+      console.log('countdown ..');
+      if (s.kick_countdown == 0) {
+        console.log('Kicking an inactive socket; # of all sockets:' + g_all_sockets.length);
+        s.disconnect();
+        g_all_sockets.remove(s);
+      }
+    }
+  }
+  delayedFunc(function() { KickOutInactiveSockets(); }, 2);
+}
+
+// KickOutInactiveSockets(); // TODO

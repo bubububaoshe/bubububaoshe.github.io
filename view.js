@@ -168,13 +168,23 @@ class Card{
     front.style.backgroundImage = char.getPortrait();
     var back = document.createElement("div");
     this.card.appendChild(back);
+
     back.classList.add("cardback");
+    // Redirect resource for Android and local runs: override
+    if (g_resource_prefix == "") {
+      back.style.backgroundImage="url('img/back.jpg')";
+    } else {
+      back.style.backgroundImage="url('" + g_resource_prefix + "img/back.jpg')";
+    }
+
     this.container.appendChild(createInfobox(char));
     //this.container.addEventListener("touchstart", controller.doNothing, {passive:true});
 
     // 不知道有什么更好的方法来隐藏头像面板，所以就先这样子了...
-    this.container.addEventListener('mouseover', function(){document.getElementById("avatarboxes").style.opacity=0;});
-    this.container.addEventListener('mouseout',  function(){document.getElementById("avatarboxes").style.opacity=1;});
+    if (char != undefined && char.isSpecial() != true) {
+      this.container.addEventListener('mouseover', function(){document.getElementById("avatarboxes").style.opacity=0;});
+      this.container.addEventListener('mouseout',  function(){document.getElementById("avatarboxes").style.opacity=1;});
+    }
   }
   setChar(char){
     this.container.id = char.id;
@@ -492,7 +502,8 @@ class Messenger {
   notifyAward(minscore, spid){
     var banner = document.getElementById("infobanner");
     var levels = ["炤", "洛", "危"];
-    messenger.setBannerHeadline(["恭喜对战", levels[AI_LEVEL-1]+"级AI", "超过" , minscore,"分，请抱好"]);
+    if (is_multiplayer == true) messenger.setBannerHeadline(["恭喜双人对战", "超过" , minscore,"分，请抱好"]);
+    else messenger.setBannerHeadline(["恭喜对战", levels[AI_LEVEL-1]+"级AI", "超过" , minscore,"分，请抱好"]);
     var poster =  banner.querySelector(".bannercards").appendChild(document.createElement("div"));
     poster.classList.add("postercard");
     poster.style.backgroundImage = "url('" + g_resource_prefix + "img/" + spid + ".jpg')";
@@ -584,8 +595,11 @@ class View {
       messenger.notifyOppoCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
       controller.postObtain(0);
     }
-    else
+    else {
       messenger.notifyPlayerCombo(obtainVector.preScore+charInc, comboCount, player.completeCombos);
+      if (is_multiplayer) // 打完了牌应该把信息界面显示出来……吧？
+        document.getElementById("avatarboxes").style.opacity=1;
+    }
   }
   activate(oldChar, newChar) {
     this.hand1.activate(oldChar, newChar);
