@@ -4,7 +4,6 @@ SPECIAL_CHAR_LIST = [
   []
 ];
 
-
 class SPManager{
   constructor(){}
   setup(){
@@ -16,6 +15,7 @@ class SPManager{
       this.userSpecialRepoIDs.push(this.specialRepoIDs[getRandom(this.specialRepoIDs.length)]);
     //this.userSpecialRepoIDs = this.specialRepoIDs;
     this.userSpecialRepository = new SpecialRepository();
+    console.log(this.userSpecialRepoIDs);
     this.userSpecialRepository.init(this.userSpecialRepoIDs);
   }
   createSpecial(id) {
@@ -291,28 +291,4 @@ class SPManager{
         return true;}
     return false;
   }
-}
-function setCookie(cname, carray, exdays = 9999) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-    var expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=" + carray.toString() + "; " + expires;
-}
-function getCookie(cname) {
-    var name = cname + "=";
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-          var val = c.substring(name.length, c.length);
-            if(val.length > 0)
-              return val.split(",");
-            else
-              return [];
-        }
-    }
-    return [];
 }

@@ -1,0 +1,27 @@
+<div id="div0"></div>
+<form action="" method="post" id="form0">
+  <input type="text" name="beiluo" value=""  id=input1 hidden></input>
+  <input type="text" name="yingyingying" value="" id=input2 hidden></input>
+  <input type="submit" hidden>
+</form>
+
+<script type="text/javascript">
+  var h = window.location.href;
+  h = h.substr(h.indexOf('?') + 1);
+  h = h.split('&');
+  var url = null;
+  var b = null, y = null; // bei luo and ying ying ying
+  for (var i=0; i<h.length; i++) {
+    var kv = h[i];
+    kv = kv.split('=');
+    if (kv[0] == 'beiluo')            b = kv[1];
+    else if (kv[0] == 'yingyingying') y = kv[1];
+    else if (kv[0] == 'action')     url = kv[1];
+  }
+  if (b != null && y != null && url != null) {
+    document.getElementById('form0').action = url;
+    document.getElementById('input1').value = b;
+    document.getElementById('input2').value = y;
+    document.getElementById('form0').submit();
+  }
+</script>

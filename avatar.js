@@ -114,21 +114,30 @@ function HideGenericDialog() {
 var nickname_input = document.getElementById('nickname_input');
 var nickname_disp  = document.getElementById('nickname_disp');
 var nickname_input_done = document.getElementById('nickname_input_done');
+
 function StartEditingNickname() {
   if (socket != undefined && socket.connected == true) return;
   nickname_input.style.display = 'block';
   nickname_input.value = avatar.GetNickname();
-  nickname_disp.style.display = 'none';
   nickname_input_done.style.display = 'block';
+
+  var s = document.getElementById('nicknameinputwindow');
+  var b = document.getElementById('avatarselection_blocker');
+  s.style.height  = "12vw";
+  b.style.display = 'block';
 }
 function EndEditingNickname() {
   avatar.SetNickname(nickname_input.value);
   nickname_input.style.display = 'none';
-  nickname_disp.style.display = 'block';
   nickname_input_done.style.display = 'none';
   document.getElementById('curr_avatar').style.backgroundImage = avatar.bkimgurl;
   nickname_disp.textContent = avatar.GetNickname();
   avatar.SaveToCookie();
+
+  var s = document.getElementById('nicknameinputwindow');
+  var b = document.getElementById('avatarselection_blocker');
+  s.style.height  = "0vw";
+  b.style.display = 'none';
 }
 
 function NicknameInputKeypressEvent(event) {
@@ -181,7 +190,7 @@ class Avatar {
     this.bkimgurl = 'url("' + g_resource_prefix + AVATAR_PREFIX + AVATAR_FILENAMES[this.idx] + '")';
 
     var n = getCookie('nickname');
-    if (n != '') this.nickname = n[0];
+    if (n != null && n.length > 0) this.nickname = n;
     else this.nickname = '没有名字';
   }
   SaveToCookie() {

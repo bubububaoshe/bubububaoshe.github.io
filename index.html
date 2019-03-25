@@ -67,10 +67,6 @@
           <div id="avatar_nickname_hint" style="text-align:center;float:left;clear:both;">点击修改头像与昵称<br/>连线之后就不能改了</div>
           <div id="curr_avatar" class="avatarpreview glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;" onclick="ShowAvatarSelectionMenu();"></div>
           <div style="height: 6vw; margin-left: 0.5vw; vertical-align:middle; float:left;">
-            <input id="nickname_input" style="margin-top: 2vw; font-size:2vw; display:none"
-              type="text" size=10 onkeypress="NicknameInputKeypressEvent(event);"
-              blur="EndEditingNickname();"></input>
-            <div id="nickname_input_done" onclick="EndEditingNickname();" style="display:none;height:3vw">改好了</div>
             <div id="nickname_disp" style="margin-top:1.5vw; font-size:2vw; display:block"
               onclick="StartEditingNickname();">名字在这</div>
           </div>
@@ -132,11 +128,13 @@
       <div>&nbsp;</div>
 		</div>
 
-		<div style="width:100%">
+		<div style="width:100%" id="footer">
 			<br/>
 			原版以及原作者主页：
 			<br/>
 			<a style="color:#281b11" href="https://bubububaoshe.github.io/">https://bubububaoshe.github.io/</a> | <a style="color:#281b11" href="https://github.com/bubububaoshe/bubububaoshe.github.io">[github]</a></div>
+			<br/>
+			<div><a onclick="ShowUpdateInfo();" style="color:#281b11" href="#">更新记录</a></div>
 	</div>
 	<div id="spselection" class="transitopacity">
 		<div class="selectionarea verticalflex">
@@ -176,6 +174,44 @@
           <div>补天岭隘口</div>
         </div>
         -->
+			</div>
+		</div>
+	</div>
+
+	<div id="nicknameinputwindow" class="configurator_popup_window" style="top:10%">
+		<div style="width: 60%; margin-left: 20%;
+		            background-color: #281B11; height: 40vw;
+								border: 1px #EEE solid;">
+			<div style="height:2vw;color:#777766">请输入昵称：</div>
+			<input id="nickname_input" style="margin-top: 2vw; margin-left: auto; margin-right: auto; font-size:2vw; display:none"
+				type="text" size=10 onkeypress="NicknameInputKeypressEvent(event);"
+				blur="EndEditingNickname();"></input>
+			<div id="nickname_input_done" onclick="EndEditingNickname();"
+			     style="display:none;width:12vw; height:3vw; margin-top: 1vw; margin-left:auto; margin-right:auto; background-color:#566555;color:#aa917f;">按此确认</div>
+		</div>
+	</div>
+
+	<div id="updateinfowindow" class="configurator_popup_window">
+		<div style="width: 60%; margin-left: 20%; padding:2vw;
+		            background-color: #281B11; height: 40vw;
+								font-size: 1.5vw;
+								border: 1px #EEE solid;">
+			<div id="updateinfo_content" style="text-align:left;">
+				<div>
+		    （似乎还没有更新信息。）
+				</div>
+			</div>
+			<div style="width:20vw; height:3vw; background-color:#aa917f;
+			            background-color:#566555; margin-top:1vw; margin-left:auto;
+									margin-right:auto; text-align:center;"
+			  onclick="FetchUpdateInfo(0);">
+				查看全部更新记录
+			</div>
+			<div style="width:12vw; height:3vw; background-color:#aa917f;
+			            background-color:#566555; margin-top:1vw; margin-left:auto;
+									margin-right:auto; text-align:center;"
+			  onclick="HideUpdateInfo();">
+				关闭
 			</div>
 		</div>
 	</div>
@@ -453,39 +489,126 @@
 </div>
 </body>
 </html>
+
+<script type="text/javascript">
+  // GLOBAL VARIABLES!
+  var is_using_localstore = false;
+	var g_resource_prefix = "";
+	var g_version_id = 9999;
+	var g_update_url = "http://edgeofmap.com/qqxupd/index.php"
+	//var g_update_url = "http://localhost/qqxupd/index.php";
+
+  //
+	function IsDebug() {
+	  var h = window.location.href;
+		if (h.indexOf('http://localhost') == 0) return true;
+	  else return false;
+	}
+
+	function IsResourceLocal() {
+		var h = window.location.href;
+		if (h.indexOf('file://') == 0) return true;
+		else if (h.indexOf('http://localhost') == 0) return true;
+		else return false;
+	}
+
+	function IsInCordova() {
+		var h = window.location.href;
+		if (h.indexOf('file://') == 0) return true;
+		else return false;
+	}
+
+	function ShowSomething() {
+		var f = document.getElementById('footer');
+		var blah = "Cookie=" + document.cookie;
+		blah = blah + ", localStorage.length=" + localStorage.length;
+		f.textContent = blah;
+	}
+
+	function EnableDebugSwitches() {
+		document.getElementById('serverselect').style.display="block";
+		document.getElementById('servername1').disabled = null;
+		document.getElementById('servername1').click();
+		BONUS_THRESHOLDS = [170/2, 140/2, 110/2];
+
+		var f = document.getElementById('footer');
+		f.addEventListener("click", function() {
+			ShowSomething();
+		});
+	}
+
+	var configurator_click_count2 = 0;
+	var configurator_click_count1 = 0;
+	function Debug1Clicked() {
+		if (document.getElementById('configurator').style.visibility == "visible") {
+			configurator_click_count1 += 1;
+			if (configurator_click_count1 == 10) {
+				EnableDebugSwitches();
+			}
+		}
+	}
+	function Debug2Clicked() {
+		if (document.getElementById('configurator').style.visibility == "visible") {
+			configurator_click_count2 += 1;
+			if (configurator_click_count2 == 10) {
+				setCookie("nickname", "haha!");
+				localStorage.setItem('localStorageTest', 1);
+			}
+		}
+	}
+
+	//ShowSomething();
+
+	{
+		var is_dbg = IsDebug();
+
+		if (is_dbg) {
+			EnableDebugSwitches();
+			is_using_localstore = true;
+			//g_update_url = "http://localhost/qqxupd/index.php";
+			console.log("[DBG] Will use localstore");
+		}
+
+		if (IsInCordova()) {
+			is_using_localstore = true;
+		}
+	}
+
+	{
+		var c = document.getElementById('vs_player');
+		c.addEventListener('click', Debug1Clicked);
+	      c = document.getElementById('vs_ai');
+		c.addEventListener('click', Debug2Clicked);
+	}
+
+	{
+		var is_loc = IsResourceLocal();
+	  if (is_loc) {
+			console.log("Resources are will be fetched from local");
+			var x=document.getElementsByClassName('appwrapper');
+			if (x.length > 0) {
+				x = x[0];
+				x.style.backgroundImage = "url('img/background.jpg')";
+			}
+			g_resource_prefix = "";
+	  } else {
+			console.log("Resources will be fetched from remote");
+	    g_resource_prefix = "https://quadpixels.github.io/";
+	  }
+	}
+</script>
+<script src="cookieAndLocalStore.js"></script>
 <script src="tricks.js"></script>
 <script src="model.js"></script>
 <script src="controller.js"></script>
 <script src="spmanager.js"></script>
 <script src="tableinfoview.js"></script>
 <script src="view.js"></script>
-<script type="text/javascript">
-
-{
-  var h = window.location.href;
-  console.log('window.location.href = ' + h);
-  if ((h.indexOf('http://localhost') == 0) ||
-	    (h.indexOf('file://') == 0)) {
-		console.log('Running on Localhost');
-    document.getElementById('serverselect').style.display="block";
-    document.getElementById('servername1').disabled = null;
-    document.getElementById('servername1').click();
-		var x=document.getElementsByClassName('appwrapper');
-		if (x.length > 0) {
-			x = x[0];
-			x.style.backgroundImage = "url('img/background.jpg')";
-		}
-		g_resource_prefix = "";
-  } else if (h.indexOf('http://edgeofmap.com') == 0) {
-    g_resource_prefix = "https://quadpixels.github.io/";
-  } else if (h.indexOf('http://47.75.12.130') == 0) {
-    g_resource_prefix = "https://quadpixels.github.io/";
-  }
-}
-</script>
 <script src="avatar.js"></script>
 <script src="socket.io/socket.io.js"></script>
 <script src="versus-client.js"></script>
 <script type="text/javascript">
+
+FetchUpdateInfo(g_version_id);
 
 </script>

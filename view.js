@@ -8,7 +8,6 @@ OPERATION_DELAY = 500; //delay in milliseconds between machine operations
 MOVE_DURATION = 2; //2 time units (OPERATION_DELAY)
 
 var CARDH=0, CARDW=0, WINW=0, WINH=0, MAINW=0, MAINH=0;
-var g_resource_prefix = "";
 
 function getCSSInt(name) {
   var cv = getComputedStyle(document.documentElement).getPropertyValue(name);
