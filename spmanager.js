@@ -41,7 +41,7 @@ class SPManager{
           char.setNoswap();
       break;
       case "sw3a":
-          char = new SpecialCharacter("sw3a", "司危", "嫣然", 4, "秋", "垂髻粉腮犹带笑，\n不见城深春易老。");
+          char = new SpecialCharacter("sw3a", "司危", "嫣然", 4, "夏", "垂髻粉腮犹带笑，\n不见城深春易老。");
           trick = new DealTrick("下一回合一定出现一个西陵角色", ["巫炤", "司危", "嫘祖"], true);
           char.addTrick(trick);
           trick = new UnnamedBanTrick("《古剑奇谭三》", ["巫炤", "司危", "嫘祖", "北洛", "云无月", "岑婴", "姬轩辕", "刘兄", "玄戈&霓商"]);
