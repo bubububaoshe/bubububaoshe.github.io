@@ -210,7 +210,7 @@ function ConnectToServer(is_reconnect = false) {
   }
 
   var s = 'http://localhost:3000';
-  if (document.getElementById('servername2').checked == true) s = 'http://47.75.12.130:3000';
+  if (document.getElementById('servername2').checked == true) s = g_server_url;
   console.log('server:' + s);
   socket = io(s);
   console.log(socket);
@@ -411,8 +411,10 @@ function ConnectToServer(is_reconnect = false) {
   });
 
   socket.on('connect', () => {
+    document.getElementById('lobbystatus').textContent = '连接好啦。';
     document.getElementById('reconnect').style.display = 'none';
     document.getElementById('multiplayerButtons').style.display = 'block';
+    ShowMultiplayerStep2();
   });
 
   socket.on('disconnect', () => {
@@ -420,7 +422,7 @@ function ConnectToServer(is_reconnect = false) {
   });
 
   socket.on('Game_GotoMainMenu', () => {
-    document.getElementById('vote_playagain_msg').textContent = '因为大家没有都选继续，所以就返回主界面啦。';
+    document.getElementById('vote_playagain_msg').textContent = '因为大家没有都选继续，所以就返回主菜单啦。';
     delayedFunc(function() {
       GotoMainMenu();
       ShowVotePlayAgainForNewRound(false)
@@ -509,10 +511,36 @@ function VoteNotPlayAgain() {
   }
 }
 
-function GotoMainMenu() {
-  showOpacity(document.getElementById('main'), false);
-  showOpacity(document.getElementById('spselection'), false);
-  showOpacity(document.getElementById('configurator'), true);
+function GotoMainMenu() { // 从多人状态退回主菜单
+  
+  messenger.hideFinalNotice();
+  view.unblockGame();
+
+  { // hide match result
+    document.getElementById("start_match").style.display = "inline-block";
+    document.getElementById("confirm_match").style.display = "none";
+    document.getElementById("cancel_match").style.display = "none";
+    document.getElementById('find_opponent').style.display = 'block';
+    HideOpponentAvatarPreview();
+  }
+
+  document.getElementById('main').style.display = "none";
+  showPage('configurator');
+  ReShowConnect();
+  HideMultiplayerStep3();
+  document.getElementById('vs_ai').disabled = null;
+  model.clear(); // clearing the model; same as single player mode
+  
+  document.getElementById('myplayerid').textContent="";
+  
+  { // disconnect
+    if (socket != undefined)
+      socket.removeAllListeners();
+    if (socket != undefined && socket.connected == true)
+      socket.disconnect();
+    socket.close();
+    socket = null;
+  }
 }
 
 // https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
