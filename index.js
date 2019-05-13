@@ -72,8 +72,8 @@ class PlayerMatcher {
 			p0.can_be_found = false;
 			p1.can_be_found = false;
 			p0.matched = true;
-			p0.emit("Match_FoundMatch", p1.nickname, p1.avataridx, "已找到对手，请确认：");
-			p1.emit("Match_FoundMatch", p0.nickname, p0.avataridx, "已找到对手，请确认：");
+			p0.emit("Match_FoundMatch", p1.nickname, p1.avataridx, "请选择牌组并确认：");
+			p1.emit("Match_FoundMatch", p0.nickname, p0.avataridx, "请选择牌组并确认：");
 		}
 	}
 
@@ -145,6 +145,7 @@ class PlayerMatcher {
 	  console.log("Should start a game now");
 	  this.matched_pairs.RemovePair(pair);
 	  var g = new Game(pair[0], pair[1]);
+	  g.pack = pair[0].pack; // 假定两人的pack是相同的
 	  g_all_games.push(g);
 	  g.Setup();
 	}
@@ -177,6 +178,7 @@ class Game {
     this.game_id = g_serial_game;
     this.actions = []; // [ [rank, action, param] ]
     g_serial_game += 1;
+    this.pack = [1, 2];
   }
 
   Setup() { // 两个玩家该gamesetup()
@@ -185,8 +187,8 @@ class Game {
     this.players[1].game = this;
     this.players[0].state = "setup";
     this.players[1].state = "setup";
-    this.players[0].emit('Match_GameSetupDefensive');
-    this.players[1].emit('Match_GameSetupOffensive');
+    this.players[0].emit('Match_GameSetupDefensive', this.pack);
+    this.players[1].emit('Match_GameSetupOffensive', this.pack);
     // Statistics
     this.turns[0] = 0;
     this.turns[1] = 0;
@@ -196,6 +198,14 @@ class Game {
     this.flag_oppo_obtain_redeal = false;
     this.turn_num = 1;
     this.actions = [];
+  }
+  
+  SetPack(p) { 
+    this.pack = p.slice();
+    if (this.players[0] != undefined)
+      this.players[0].emit('Info_SetPack', this.pack);
+    if (this.players[1] != undefined)
+      this.players[1].emit('Info_SetPack', this.pack);
   }
 
   GetPlayerIndexBySocket(socket) {
@@ -671,13 +681,23 @@ io.on('connection', function(socket) {
 		  g_all_sockets.length + " sockets, " + g_all_games.length + " games");
 	});
 
-	socket.on('Info_PlayerInfo', (nickname, avataridx) => {
+	socket.on('Info_PlayerInfo', (nickname, avataridx, pack) => {
     socket.nickname = nickname;
 	  socket.avataridx = avataridx;
 	  console.log('Player Info: ID=' + socket.player_id +
 	    ", nickname=" + nickname +
 	    ", avataridx=" + avataridx +
       ", socket:");
+	});
+	
+	socket.on('Info_SetPack', (pack) => {
+	  var p = g_playermatcher.FindPairByPlayer(socket);
+	  if (p != null) {
+	    p[0].pack = pack;
+	    p[1].pack = pack;
+	    p[0].emit('Info_SetPack', pack);
+	    p[1].emit('Info_SetPack', pack);
+	  }
 	});
 
 	socket.on('Match_ReadyToMatch', (nickname, avataridx) => {

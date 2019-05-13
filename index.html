@@ -26,15 +26,19 @@
 			<label for="vs_ai"     data-value="独享的快乐">单人游戏</label>
 			<label for="vs_player" data-value="双倍的快乐">双人对战</label>
 		</div>
-		<hr/>
+		
+		<div id="packselect_info">
+		</div>
+		
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
-			<input type="radio" name="version" id="p12">
-			<input type="radio" name="version" id="p13" disabled="true">
-			<input type="radio" name="version" id="p23" disabled="true">
+			<input type="radio" name="version" id="p12" onclick='SetPack([1,2]);'>
+			<input type="radio" name="version" id="p13" onclick='SetPack([1,3]);'>
+			<input type="radio" name="version" id="p23" onclick='SetPack([2,3]);'>
 			<label for="p12" data-value="1+2 代人物">1+2</label>
 			<label for="p13" data-value="1+3 代人物">1+3</label>
 			<label for="p23" data-value="2+3 代人物">2+3</label>
 		</div>
+		
 		<div id="voiceinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="voice" id="voiceon">
 			<input type="radio" name="voice" id="voiceoff">

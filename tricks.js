@@ -21,9 +21,6 @@ class ObtainVector{
   getNextTrick(type){
     var so = this.getTrickSubjectObjectArrays(type);
     var subjects = so[0], objects = so[1];
-    if (subjects == null) {
-      console.log("BOOM");
-    }
     for(var i=0; i<subjects.length; i++){
       var trick = subjects[i].getTrick(type);
       if(trick != null && objects[i] == null){console.log("[计划释放技能]"+subjects[i].name+":"+trick.constructor.name);

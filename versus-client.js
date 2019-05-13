@@ -89,6 +89,7 @@ document.getElementById("cancel_match").addEventListener("click", function(){
 //});
 
 function SetGameMode(m) {
+  var pinfo = document.getElementById('packselect_info');
   var x1 = document.getElementById('comfirmSetting');
   var x3 = document.getElementById('aiinput');
   var x4 = document.getElementById('spinput');
@@ -104,6 +105,7 @@ function SetGameMode(m) {
     is_multiplayer = false;
     // 显示“重新设置”
     x8.textContent = '重新设置';
+    pinfo.textContent = '';
   } else { // 对战模式
     x1.style.display = 'none';
     x3.style.display = 'none';
@@ -112,6 +114,7 @@ function SetGameMode(m) {
     x7.style.display = 'block';
     is_multiplayer = true;
     x8.textContent = '重新设置';
+    pinfo.textContent = '在连线后，当一方的牌组设定改变时，另一方也会随之改变。';
   }
 }
 function SetMultiplayerMode(m) {
@@ -228,6 +231,16 @@ function ConnectToServer(is_reconnect = false) {
     g_avataridxes[1] = avatar.idx;
     socket.emit('Info_PlayerInfo', avatar.GetNickname(), avatar.idx);
   });
+  
+  socket.on('Info_SetPack', function(p) {
+    var sp = p.join(""), divname=""
+    if (sp == '12') { divname = "p12" }
+    else if (sp == '13') { divname = 'p13' }
+    else if (sp == '23') { divname = 'p23' }
+    if (divname != '') {
+      document.getElementById(divname).checked = true;
+    }
+  });
 
   socket.on('Match_ReadyToMatchAck', function() {
     document.getElementById("start_match").style.display = "none";
@@ -293,20 +306,23 @@ function ConnectToServer(is_reconnect = false) {
     console.log('邀请不成功' + reason);
   });
 
+  // 增加牌局选项
   // sp evts
-  socket.on('Match_GameSetupOffensive', () => { // 先手开局
-    console.log('[先手选取特殊牌]');
+  socket.on('Match_GameSetupOffensive', (pack) => { // 先手开局
+    console.log('[先手选取特殊牌], pack=' + pack);
     versus_rank = 1;
     setup();
+    model.setPack(pack[0], pack[1]);
     controller.configure();
     ShowVotePlayAgainForNewRound(true);
     oppoTurnActionCount = 0;
   });
 
-  socket.on('Match_GameSetupDefensive', (p0c, p1c, poolc, repoc) => { // 后手开局
-    console.log('[后手选取特殊牌]');
+  socket.on('Match_GameSetupDefensive', (pack) => { // 后手开局
+    console.log('[后手选取特殊牌], pack=' + pack);
     versus_rank = 0;
     setup();
+    model.setPack(pack[0], pack[1]);
     controller.configure();
     ShowVotePlayAgainForNewRound(true);
     oppoTurnActionCount = 0;
@@ -874,5 +890,12 @@ function RestoreSnapshotButtonClicked(choice = no) {
     RestoreGameStateFromStartMenu();
   } else {
 
+  }
+}
+
+// 向服务器送出pack信息，当服务器回传时更新界面
+function SetPack(p) {
+  if (is_multiplayer && (socket != undefined)) {
+    socket.emit('Info_SetPack', p);
   }
 }

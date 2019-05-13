@@ -1,8 +1,9 @@
 SPECIAL_CHAR_LIST = [
   ["blts1b", "fqx1a", "hy1a", "ly1a", "oysg1a", "qy1a","xl1a", "yqs1a", "fls1a", "xf1a", "blts1a", "fqx1b", "fls1b", "xl1b", "hy1b", "yqs1b"],
   ["hy2a", "qhzr2a", "sx2a", "sy2a", "wry2b", "xy2a", "xyz2a", "xyz2b", "ywy2a", "ywy2b", "yq2a", "wry2a", "ar2b", "ar2a"],
-  []
+  ["bl3a", "bl3b","ywy3a", "ywy3b", "cy3a", "cy3b", "jxy3b", "jxy3a", "jy3a", "wz3a", "sw3a", "xgns3a", "lz3a", "lx3a"]
 ];
+
 
 class SPManager{
   constructor(){}
@@ -15,12 +16,97 @@ class SPManager{
       this.userSpecialRepoIDs.push(this.specialRepoIDs[getRandom(this.specialRepoIDs.length)]);
     //this.userSpecialRepoIDs = this.specialRepoIDs;
     this.userSpecialRepository = new SpecialRepository();
-    console.log(this.userSpecialRepoIDs);
     this.userSpecialRepository.init(this.userSpecialRepoIDs);
   }
   createSpecial(id) {
     var char, trick;
     switch (id) {
+      case "lx3a":
+          char = new SpecialCharacter("lx3a", "刘兄", "比木", 4, "春", "寒渊梦远几时真，\n但将笔砚换君钗。");
+          trick = new ComboTrick("玳之梦", 30);
+          char.addTrick(trick);
+          trick = new DealTrick("若巫之国在公共卡池中，\n则下一回合一定出现巫之国", ["巫之国"], true);
+          char.addTrick(trick);
+      break;
+      case "lz3a":
+          char = new SpecialCharacter("lz3a", "嫘祖", "梦中人", 4, "夏", "昔年共饮一枝春，\n今朝唯余梦中人。");
+          trick = new SwapTrick();
+          char.addTrick(trick);
+          char.setNoswap();
+      break;
+      case "xgns3a":
+          char = new SpecialCharacter("xgns3a", "玄戈&霓商", "流光", 4, "冬", "朔风凛凛掠尘去，\n故人凭栏晓天寒。");
+          trick = new SwapTrick();
+          char.addTrick(trick);
+          char.setNoswap();
+      break;
+      case "sw3a":
+          char = new SpecialCharacter("sw3a", "司危", "嫣然", 4, "夏", "垂髻粉腮犹带笑，\n不见城深春易老。");
+          trick = new DealTrick("下一回合一定出现一个西陵角色", ["巫炤", "司危", "嫘祖"], true);
+          char.addTrick(trick);
+          trick = new UnnamedBanTrick("《古剑奇谭三》", ["巫炤", "司危", "嫘祖", "北洛", "云无月", "岑婴", "姬轩辕", "刘兄", "玄戈&霓商"]);
+          char.addTrick(trick);
+      break;
+      case "wz3a":
+          char = new SpecialCharacter("wz3a", "巫炤", "吞恨", 4, "冬", "寒灯一芯尽，\n角楼囚霜星，\n独站群崖底，\n风物皆无情。");
+          trick = new ComboTrick("西陵曲", 30);
+          char.addTrick(trick);
+          trick = new UnnamedBanTrick();
+          char.addTrick(trick);
+      break;
+      case "jy3a":
+          char = new SpecialCharacter("jy3a", "缙云", "卸甲", 4, "秋", "玄甲浸苍烟，\n皓首远人间，\n十载常独坐，\n半身是离绝。");
+          trick = new ComboTrick("以玉为戈", 30);
+          char.addTrick(trick);
+          trick = new RevealTrick(1);
+          char.addTrick(trick);
+      break;
+      case "jxy3a":
+          char = new SpecialCharacter("jxy3a", "姬轩辕", "绣春", 4, "春", "乾坤承转昔年事，\n余音茫茫赠熏风。");
+          trick = new CopyTrick();
+          char.addTrick(trick);
+      break;
+      case "jxy3b":
+          char = new SpecialCharacter("jxy3b", "姬轩辕", "玄鹿", 6, "春", "天意多无据，\n人间寄多情，\n华岁逢故交，\n崆峒惜旦暮。");
+          trick = new DealTrick("下一回合一定出现一个《古剑奇谭三》的主要角色", ["北洛", "云无月", "岑婴", "姬轩辕"], true);
+          char.addTrick(trick);
+          trick = new ComboTrick("眠霜卧雪", 30);
+          char.addTrick(trick);
+      break;
+      case "cy3b":
+          char = new SpecialCharacter("cy3b", "岑缨", "菡萏", 6, "夏", "彤霞染层静，\n云渊展鸿图，\n少年相谈笑，\n辩发垂肩行。");
+          trick = new DealTrick("下一回合一定出现一个《古剑奇谭三》的主要角色", ["北洛", "云无月", "岑婴", "姬轩辕"], true);
+          char.addTrick(trick);
+          trick = new RevealTrick(2);
+          char.addTrick(trick);
+      break;
+      case "cy3a":
+          char = new SpecialCharacter("cy3a", "岑缨", "劲装", 4, "夏", "江天绘幅远无垠，\n一页春秋一叶舟。");
+          trick = new ComboTrick("一见喜", 30);
+          char.addTrick(trick);
+      break;
+      case "ywy3b":
+          char = new SpecialCharacter("ywy3b", "云无月", "魇魅", 6, "冬", "华翎一展云蔽月，\n敢以长歌魇鬼神。");
+          trick = new UnnamedBanTrick();
+          char.addTrick(trick);
+          trick = new CharTrick("北洛", 30);
+          char.addTrick(trick);
+      break;
+      case "ywy3a":
+          char = new SpecialCharacter("ywy3a", "云无月", "华裳", 4, "冬", "清眸剪沧海，\n罗袂舞桑田，\n红尘本无意，\n重逢竟有期。");
+          trick = new RevealTrick(1);
+          char.addTrick(trick);
+      break;
+      case "bl3b":
+          char = new SpecialCharacter("bl3b", "北洛", "辟邪", 6, "秋", "微茫窥无尽，\n垂辉映中天，\n杂音没金足，\n狂啸列穹宇。");
+          trick = new ComboTrick("首山梦时书", 30);
+          char.addTrick(trick);
+      break;
+      case "bl3a":
+          char = new SpecialCharacter("bl3a", "北洛", "冕服", 4, "秋", "阵云循涌炎风震，\n清辉灼烁万物生。");
+          trick = new CharTrick("北洛", 10);
+          char.addTrick(trick);
+      break;
       case "yqs1b":
           char = new SpecialCharacter("yqs1b", "尹千觞", "大狗", 6, "秋", "久把江湖宿，\n落拓年复年，\n唤醪濯尘骨，\n钓月伴酒仙。");
           trick = new ComboTrick("醉梦江湖", 20);
@@ -42,39 +128,39 @@ class SPManager{
           trick = new DealTrick("下一回合一定出现一个《古剑奇谭一》的主要角色", ["百里屠苏", "风晴雪", "红玉", "尹千觞", "方兰生", "襄铃"], true);
           char.addTrick(trick);
       break;
-    case "fls1b":
-        char = new SpecialCharacter("fls1b", "方兰生", "蓝鲲", 6, "春", "庭中生嘉树，\n华叶自飘摇，\n温然发秀质，\n馥兰映琼瑶。");
-        trick = new ComboTrick("永相随", 20);
-        char.addTrick(trick);
-        trick = new RevealTrick(1);
-        char.addTrick(trick);
-    break;
-    case "fqx1b":
-        char = new SpecialCharacter("fqx1b", "风晴雪", "绵羊", 6, "春", "寿无金石固，\n随时爱景光，\n与君一执手，\n衣袖十年香。");
-        trick = new DealTrick("若焦炭在公共卡池中，则下一回合一定出现焦炭则", ["焦炭"], true);
-        char.addTrick(trick);
-        trick = new ComboTrick("厨房功夫", 20);
-        char.addTrick(trick);
-    break;
-    case "blts1a":
-        char = new SpecialCharacter("blts1a", "百里屠苏", "天墉", 4, "冬", "许向长空倾碧血，\n由他业火寸心摧。");
-        trick = new CharTrick("古剑焚寂", 15);
-        char.addTrick(trick);
-        trick = new DealTrick("下一回合一定出现一个《古剑奇谭一》的主要角色", ["百里屠苏", "风晴雪", "红玉", "尹千觞", "方兰生", "襄铃"], true);
-        char.addTrick(trick);
-    break;
-    case "ar2a":
-        char = new SpecialCharacter("ar2a", "阿阮", "神女", 4, "春", "云垂水镜参差影，\n十二峰头月欲西。");
-        trick = new ComboTrick("露草流萤", 15);
-        char.addTrick(trick);
-    break;
-    case "ar2b":
-        char = new SpecialCharacter("ar2b", "阿阮", "山鬼", 6, "春", "崔嵬未起逐风舞，\n羲和停云坠玉露。");
-        trick = new DealTrick("若夏夷则在公共卡池中，则下一回合一定出现夏夷则", ["夏夷则"], true);
-        char.addTrick(trick);
-        trick = new RevealTrick(1);
-        char.addTrick(trick);
-    break;
+      case "fls1b":
+          char = new SpecialCharacter("fls1b", "方兰生", "蓝鲲", 6, "春", "庭中生嘉树，\n华叶自飘摇，\n温然发秀质，\n馥兰映琼瑶。");
+          trick = new ComboTrick("永相随", 20);
+          char.addTrick(trick);
+          trick = new RevealTrick(1);
+          char.addTrick(trick);
+      break;
+      case "fqx1b":
+          char = new SpecialCharacter("fqx1b", "风晴雪", "绵羊", 6, "春", "寿无金石固，\n随时爱景光，\n与君一执手，\n衣袖十年香。");
+          trick = new DealTrick("若焦炭在公共卡池中，则下一回合一定出现焦炭", ["焦炭"], true);
+          char.addTrick(trick);
+          trick = new ComboTrick("厨房功夫", 20);
+          char.addTrick(trick);
+      break;
+      case "blts1a":
+          char = new SpecialCharacter("blts1a", "百里屠苏", "天墉", 4, "冬", "许向长空倾碧血，\n由他业火寸心摧。");
+          trick = new CharTrick("古剑焚寂", 15);
+          char.addTrick(trick);
+          trick = new DealTrick("下一回合一定出现一个《古剑奇谭一》的主要角色", ["百里屠苏", "风晴雪", "红玉", "尹千觞", "方兰生", "襄铃"], true);
+          char.addTrick(trick);
+      break;
+      case "ar2a":
+          char = new SpecialCharacter("ar2a", "阿阮", "神女", 4, "春", "云垂水镜参差影，\n十二峰头月欲西。");
+          trick = new ComboTrick("露草流萤", 15);
+          char.addTrick(trick);
+      break;
+      case "ar2b":
+          char = new SpecialCharacter("ar2b", "阿阮", "山鬼", 6, "春", "崔嵬未起逐风舞，\n羲和停云坠玉露。");
+          trick = new DealTrick("若夏夷则在公共卡池中，则下一回合一定出现夏夷则", ["夏夷则"], true);
+          char.addTrick(trick);
+          trick = new RevealTrick(1);
+          char.addTrick(trick);
+      break;
       case "wry2a":
           char = new SpecialCharacter("wry2a", "闻人羽", "闺秀", 4, "秋", "塞雪连城堕婆娑，\n云雕怒马走冰河。");
           trick = new DealTrick("增加《古剑奇谭二》主要角色出现的概率", ["闻人羽", "乐无异", "夏夷则", "阿阮"], false);

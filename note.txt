@@ -1,3 +1,9 @@
+setting for a pack:
+  26 cards
+  6-7 cards per season
+
+
+
 try event delegation
 destroy: remove controllers
 

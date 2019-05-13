@@ -329,9 +329,11 @@ class Controller{
   }
   configure(){
     var pack = getInput("packinput");
-    var p1 = parseInt(pack.charAt(1));
-    var p2 = parseInt(pack.charAt(2));
-    model.setPack(p1, p2);
+    if (!is_multiplayer) { // 多人模式下由服务器当时的状态决定
+      var p1 = parseInt(pack.charAt(1));
+      var p2 = parseInt(pack.charAt(2));
+      model.setPack(p1, p2);
+    }
     var ai = getInput("aiinput");
     AI_LEVEL = parseInt(ai.charAt(2));
     COMBO_VOICE = getInput("voiceinput");
