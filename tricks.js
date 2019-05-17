@@ -276,7 +276,7 @@ class CharTrick extends Trick{
     var chars = player.table.characters;
     var last = chars[chars.length -1];
     if(last == this.owner) {
-      for(var i=0; i<chars.length-1; i++)
+      for(var i=0; i<chars.length; i++)
         if(chars[i].name == this.charName){console.log(this.owner.name+" 加持 "+this.charName);
           player.score += this.bonus;
           return;
