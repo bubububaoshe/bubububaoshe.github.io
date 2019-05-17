@@ -270,7 +270,7 @@ class CharTrick extends Trick{
   }
   performTrick(player) {
     /* check the players latest tabled char
-      if it's me, check all previous tabled chars and add bonus if applicable
+      if it's me, check all the tabled chars and add bonus if applicable
       if it's not me, check the last tabled char and add bonus if applicable
     */
     var chars = player.table.characters;
