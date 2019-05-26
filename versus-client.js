@@ -682,7 +682,7 @@ function TEST_GETSNAPSHOT() {
 function ApplySnapshot(snapshot) {
   // APPLY SNAPSHOT
   TearDownExistingViews();
-
+  model.setPack(snapshot.pack[0], snapshot.pack[1]);
   model.player1.clear();
   model.player0.clear();
   model.commonRepository.clear();

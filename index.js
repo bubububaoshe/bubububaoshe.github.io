@@ -490,6 +490,7 @@ class Game {
     snapshot.p1sp = sps[1-pidx];
     snapshot.p0sp = sps[pidx];
     snapshot.pool = this.snapshot.pool;
+    snapshot.pack = this.pack;
     return snapshot;
   }
 
