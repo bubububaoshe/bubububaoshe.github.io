@@ -309,6 +309,8 @@ function ConnectToServer(is_reconnect = false) {
   // 增加牌局选项
   // sp evts
   socket.on('Match_GameSetupOffensive', (pack) => { // 先手开局
+    // 默认：1+2
+    if (pack == null) pack = [1, 2];
     console.log('[先手选取特殊牌], pack=' + pack);
     versus_rank = 1;
     setup();
@@ -320,6 +322,7 @@ function ConnectToServer(is_reconnect = false) {
 
   socket.on('Match_GameSetupDefensive', (pack) => { // 后手开局
     console.log('[后手选取特殊牌], pack=' + pack);
+    if (pack == null) pack = [1, 2];
     versus_rank = 0;
     setup();
     model.setPack(pack[0], pack[1]);
