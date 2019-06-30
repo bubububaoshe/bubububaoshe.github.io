@@ -253,7 +253,7 @@ html .appcontainer, .appwrapper{
 
 .configurator_popup_window {
   position: absolute;
-	width: 100%; top: 15%;
+	width: 100%; top: 10%;
   height: 0;
   color: #EEE;
   text-align: center;
