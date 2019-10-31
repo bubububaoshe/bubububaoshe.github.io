@@ -253,6 +253,17 @@ html .appcontainer, .appwrapper{
   color:#aa917f;
 }
 
+.register_popup_window {
+  position: absolute;
+  width: 100%; top: 10%;
+  height: 0;
+  color: #EEE;
+  text-align: center;
+  z-index:100;
+  transition: height 0.7s;
+  overflow: hidden;
+}
+
 .configurator_popup_window {
   position: absolute;
   width: 100%; top: 10%;
