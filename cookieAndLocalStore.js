@@ -42,18 +42,18 @@ function do_getCookie(name, cookie_content) {
 var g_update_info = null;
 
 function FetchUpdateInfo(curr_version_id) {
-  var x = document.createElement('iframe');
-  x.src = "./upd_form.html?beiluo=wangpixie&yingyingying=" + curr_version_id + "&action=" + g_update_url;
-  x.style.borderWidth = 0;
-  x.style.width = "100%";
-  x.style.height = "25vw";
-  var uc = document.getElementById('updateinfo_content');
-
-  while (uc.children.length > 0) {
-    uc.removeChild(uc.children[0]);
-  }
-
-  uc.appendChild(x);
+  // var x = document.createElement('iframe');
+  // x.src = "./upd_form.html?beiluo=wangpixie&yingyingying=" + curr_version_id + "&action=" + g_update_url;
+  // x.style.borderWidth = 0;
+  // x.style.width = "100%";
+  // x.style.height = "25vw";
+  // var uc = document.getElementById('updateinfo_content');
+  //
+  // while (uc.children.length > 0) {
+  //   uc.removeChild(uc.children[0]);
+  // }
+  //
+  // uc.appendChild(x);
 
   //var x = new XMLHttpRequest();
   //x.open("POST", g_update_url, true);

@@ -3,6 +3,10 @@
 <head>
 	<title>千秋戏 - 开发版</title>
 	<meta charset="UTF-8">
+	<meta name='apple-mobile-web-app-capable' content='yes' />
+	<meta name='full-screen' content='yes' />
+	<meta name='x5-fullscreen' content='true' />
+	<meta name='360-fullscreen' content='true' />
 	<meta name="viewport" content="height=device-height,
                       width=device-width, initial-scale=1.0,
                       minimum-scale=1.0, maximum-scale=1.0,
@@ -220,6 +224,79 @@
 			</div>
 		</div>
 	</div>
+
+	<div id="register" class="configurator_popup_window">
+		<div style="width: 60%; margin-left: 20%;
+				background-color: #281B11; height: 40vw;
+							border: 1px #EEE solid;">
+			<div style="height:6vw">
+				<div>查找玩家</div>
+				<div style="color: #999; font-size: 1.3vw;">可以输入昵称的一部分或临时ID来查找</div>
+			</div>
+			<div style="position:absolute; left:20%; top:0;"> <!-- Top Row -->
+				<div onclick="CloseOpponentFinderMenu();"
+					 style="width:4vw; height:4vw;
+							background-size:100% 100%;
+									background-image:url('avatars/back.png');
+									float:left;">
+				</div>
+				<div style="float:left;">
+					<div style="width:7vw;
+							float:left; text-align: center;
+										margin-left:0.2vw; margin-top: 0.5vw;">
+						<div id="oppofind_my_avatar" class="avatarpreview_small glow"
+							 style="background-image:url('avatars/avatar1.png');
+						   margin-left:1vw;
+								 margin-top:0.5vw;">
+						</div>
+					</div>
+					<div style="float:left;
+							text-align:left;
+										margin-top:1vw">
+						<div id="oppofind_my_nickname" style="font-size:1.5vw"></div>
+						<div id="oppofind_my_playerid" style="font-size:1.5vw"></div>
+					</div>
+				</div>
+			</div>
+			<div style="clear:both;width:100%;"></div>
+			<hr/>
+
+			<div id="room_buttons" style="margin-bottom: 0.5vw; margin-top: 0.5vw; font-size:2vw">
+				<div id="inviteinput" class="inviteinput" style="float:left;">
+					ID或昵称：
+					<input id="invitedid" type="text" size=10
+						   style="border:1px #ccc solid;
+					   background-color:#333333;
+							 color:#EEE;
+							 margin-right:0.5vw; height:3vw;
+							 font-size:2vw;"></input>
+				</div>
+				<div id="invitebutton" style="width:8vw; height:3.5vw; float:left; background-color:#442">
+					查找
+				</div>
+				<div id="find_opponent_info" style="float:left;">如果什么都不输入，就会随机返回一些结果，嘿嘿</div>
+				<div style="clear:both;"></div>
+
+				<div id="opponentsearchresult" style="overflow-y:scroll;">
+					<!--
+					<div class="avatarsmallwrapper">
+					  <div class="avatarpreview glow" style="background-image:url('avatars/avatar1.png'); margin-left:1vw"></div>
+					  <div>呱呱呱</div>
+					</div>
+					<div class="avatarsmallwrapper">
+					  <div class="avatarpreview" style="background-image:url('avatars/avatar2.png'); margin-left:1vw"></div>
+					  <div>喵喵喵</div>
+					</div>
+					<div class="avatarsmallwrapper">
+					  <div class="avatarpreview" style="background-image:url('avatars/avatar3.png'); margin-left:1vw"></div>
+					  <div>汪汪汪</div>
+					</div>
+					-->
+				</div>
+			</div>
+		</div>
+	</div>
+
 
   <div id="opponentfinder" class="configurator_popup_window">
     <div style="width: 60%; margin-left: 20%;
@@ -495,16 +572,16 @@
 </body>
 </html>
 <script type="text/javascript">
-  var g_server_url = 'http://47.75.12.130:3002';
+    var g_server_url = 'https://server.amadues.cn:3000';
 </script>
-<script src="http://edgeofmap.com/qqxupd/1000autumns.js"></script>
+<!--<script src="http://edgeofmap.com/qqxupd/1000autumns.js"></script>-->
 
 <script type="text/javascript">
   // GLOBAL VARIABLES!
   var is_using_localstore = false;
 	var g_resource_prefix = "";
 	var g_version_id = 1010;
-	var g_update_url = "http://edgeofmap.com/qqxupd/index.php"
+	// var g_update_url = "http://edgeofmap.com/qqxupd/index.php"
 	//var g_update_url = "http://localhost/qqxupd/index.php";
 
   //
@@ -602,7 +679,9 @@
 			g_resource_prefix = "";
 	  } else {
 			console.log("Resources will be fetched from remote");
-	    g_resource_prefix = "https://quadpixels.github.io/";
+          g_resource_prefix = "";
+	    // g_resource_prefix = "https://quadpixels.github.io/";
+        //   g_resource_prefix = "https://qianqiuxi.net/";
 	  }
 	}
 </script>

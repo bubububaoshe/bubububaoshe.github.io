@@ -51,7 +51,8 @@ html .appcontainer, .appwrapper{
                                   supported by Chrome and Opera */
 }
 .appwrapper{
-  background: url("https://quadpixels.github.io/img/background.jpg"),
+  /*background: url("https://quadpixels.github.io/img/background.jpg"),*/
+  background: url("img/background.jpg"),
     repeating-linear-gradient(to top left, var(--page-background), var(--page-background) 5px, var(--page-background2) 5px, var(--page-background2) 10px),
     var(--page-background);
   background-size: cover;
@@ -175,7 +176,8 @@ html .appcontainer, .appwrapper{
   transition: background-image var(--transition-sec);
 }
 .cardback{
-  background-image: url("https://quadpixels.github.io/img/back.jpg");
+  /*background-image: url("https://quadpixels.github.io/img/back.jpg");*/
+  background-image: url("img/back.jpg");
 }
 .glow{
   box-shadow: 0px 0px 0.6vw 0.4vw var(--card-glow-color);
@@ -253,12 +255,12 @@ html .appcontainer, .appwrapper{
 
 .configurator_popup_window {
   position: absolute;
-	width: 100%; top: 10%;
+  width: 100%; top: 10%;
   height: 0;
   color: #EEE;
   text-align: center;
   z-index:100;
-	transition: height 0.7s;
+  transition: height 0.7s;
   overflow: hidden;
 }
 
