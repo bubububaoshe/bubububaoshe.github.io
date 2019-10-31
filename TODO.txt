@@ -1,0 +1,14 @@
+Enhances
+1. Split server code base & client code base
+2. Refactor the js files
+3. Compress the resources and use http2.0+ to reduce transfer latency
+
+Fixes
+Not found till now
+
+Features
+1. Register & Sign-in module
+2. User related info ( Treasure cards, win & lose, friends? )
+3. Chat window
+4. Multi Players ( 3-4 )
+
