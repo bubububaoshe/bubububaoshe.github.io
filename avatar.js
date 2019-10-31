@@ -217,6 +217,7 @@ function CloseOpponentFinderMenu() {
   s.style.height = "0";
 }
 
+//TODO move the opponent finder to a single module
 function ShowOpponentFinderMenu() {
   var s = document.getElementById('opponentfinder');
   var b = document.getElementById('avatarselection_blocker');
