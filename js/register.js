@@ -22,6 +22,8 @@ function authToken(username, token){
         if(authResponse['status'] === status_succeed) {
             switchAvatarAndLoginPanel(true);
             nickname_disp.textContent = avatar.GetNickname();
+        } else {
+            switchAvatarAndLoginPanel(false);
         }
     });
 }
@@ -67,16 +69,15 @@ function closeRegisterWindow(){
  * @Param isLogin, if true call login process, or call register process
  */
 function getInputUsernameAndPwdThenRegister(isLogin){
-    console.log("register");
     let username = document.getElementById("username_input").value;
     let password = document.getElementById("password_input").value;
     let confirmPassword = document.getElementById("confirm_password_input").value;
     if(username.length===0){
-        console.log("please input username!");
+        showRegMsg("请输入名字!");
     } else if(password.length<8){
-        console.log("password too short!");
-    } else if(password!==confirmPassword){
-        console.log("password not match!");
+        showRegMsg("密码太短!");
+    } else if(password!==confirmPassword && !isLogin){
+        showRegMsg("密码不符!");
     } else {
         if(isLogin){
             login(username, password);
@@ -114,8 +115,7 @@ function login(username, password){
             nickname_disp.textContent = avatar.GetNickname();
         } else{
             //if auto login fail, switch to manually login
-            //TODO show error and recall user to login
-            popRegisterWindow(true);
+            showRegMsg("密码或用户名错误!");
         }
     });
 }
