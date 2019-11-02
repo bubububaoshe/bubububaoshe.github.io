@@ -8,7 +8,8 @@ Not found till now
 
 Features
 1. Register & Sign-in module
-2. User related info ( Treasure cards, win & lose, friends? )
-3. Chat window
-4. Multi Players ( 3-4 )
+2. Count down time
+3. User related info ( Treasure cards, win & lose, friends? )
+4. Chat window
+5. Multi Players ( 3-4 )
 

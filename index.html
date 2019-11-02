@@ -17,13 +17,16 @@
 	<link rel="stylesheet" type="text/css" href="decks.css">
 	<link rel="stylesheet" type="text/css" href="notifications.css">
 	<link rel="stylesheet" type="text/css" href="tableinfo.css">
+	<base target="_blank">
 </head>
 
 <div class="appcontainer noselect">
 	<div class="appwrapper">
 	<div id="configurator" class="flexbox transitopacity">
 
-		<div id="register_window" class="register_popup_window" style="height: 34vw;">
+		<div id="register_window" class="register_popup_window"
+			 <!--style="height: 34vw;"-->
+		>
 			<div style="width:50%; position: relative;
 				background-color: #281B11; height: 25vw;
 							border: 1px #EEE solid;">
@@ -48,8 +51,14 @@
 					<input id="confirm_password_input" type="password" name="yourpw" value = "">
 				</div>
 				<br>
+				<div id="login_submit"
+					 onclick="getInputUsernameAndPwdThenRegister(true)"
+					 style="width:50%; height:15%;line-height: 250%; margin-top:5%; background: #fceba4; color: #000000; cursor: pointer;"
+				>
+					登陆
+				</div>
 				<div id="register_submit"
-					 onclick="getInputUsernameAndPwdThenRegister()"
+					 onclick="getInputUsernameAndPwdThenRegister(false)"
 					 style="width:50%; height:15%;line-height: 250%; margin-top:5%; background: #fceba4; color: #000000; cursor: pointer;"
 					 >
 					注册
@@ -108,29 +117,35 @@
 			<label for="sp3" data-value="AI拥有所有珍稀牌">AI全珍稀牌</label>
 		</div>
 		<div id="comfirmSetting" class="confirmbutton">确认此设置</div>
-		<div id="multiplayerinfo" style="width:100%; color:#112211; border: 1px #112211 solid; height: 16vw; font-size:2vw;">
+		<div id="multiplayerinfo" style="width:100%; color:#112211; border: 1px #112211 solid; height: 11.2vw; font-size:2vw;">
 
 	  <!--头像设置 登录注册部分-->
       <div id="avatar_and_nickname" style="width:50%; float:left;">
-		  <div style="height: 55%">
-			<div id="avatar_nickname_hint" style="text-align:center;float:left;clear:both;">点击修改头像与昵称<br/>连线之后就不能改了</div>
+		  <div id='avatar_panel' style="margin-top:1vw; display: none;height: 55%">
+			<!--<div id="avatar_nickname_hint" style="text-align:center;float:left;clear:both;">点击修改头像与昵称<br/>连线之后就不能改了</div>-->
 			<div id="curr_avatar" class="avatarpreview glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;" onclick="ShowAvatarSelectionMenu();">
 
 			</div>
-			<div style="height: 6vw; margin-left: 0.5vw; vertical-align:middle; float:left;">
+			<div style="height: 6vw; margin-left: 2vw; margin-top:-0.5vw;vertical-align:middle; float:left;">
 				<div id="nickname_disp"
-						style="margin-top:1.5vw; font-size:2vw; display:block"
-						onclick="StartEditingNickname();">
+						style="margin-top:1.5vw; font-size:2vw; display:block">
 					名字在这
 				</div>
 			</div>
+			<!--<div id="logoff_button">-->
+
+			<!--</div>-->
+		    <div id="logoff_button" style="width:60%;padding:3%; margin-left:2vw; color:white; font-size:1.5vw; display:inline-block; ;cursor:pointer; background:#281b11"
+			   onclick="logoff(	); ">
+			  退出
+		    </div>
 		  </div>
-		  <div style="text-align:center;float:left;clear:both;width:100%;height:30%;margin-top: 3%" id="signinBox">
-			  <div id="signinButton" style="width:40%;padding:3%; margin-top:1.5vw;color:white; font-size:2vw; display:inline-block; ;cursor:pointer; background:#281b11"
+		  <div style="text-align:center;float:left;clear:both;width:100%;height:30%;margin-top: 3%" id="login_panel">
+			  <div id="login_button" style="width:40%;padding:3%; margin-top:2.5vw;color:white; font-size:2vw; display:inline-block; ;cursor:pointer; background:#281b11"
 				   onclick="popRegisterWindow(true); ">
 				  登陆
 			  </div>
-			  <div id="registerButton" style="width:40%;padding:3%; margin-top:1.5vw;color:white; font-size:2vw; display:inline-block; ;cursor:pointer; background:#281b11"
+			  <div id="register_button" style="width:40%;padding:3%; margin-top:2.5vw;color:white; font-size:2vw; display:inline-block; ;cursor:pointer; background:#281b11"
 				   onclick="popRegisterWindow(false);">
 				  注册
 			  </div>
@@ -195,12 +210,14 @@
 
 		<div style="width:100%" id="footer">
 			<br/>
-			原版以及原作者主页：
+			原版以及原作者主页:
 			<br/>
 			<a style="color:#281b11" href="https://bubububaoshe.github.io/">https://bubububaoshe.github.io/</a> | <a style="color:#281b11" href="https://github.com/bubububaoshe/bubububaoshe.github.io">[github]</a></div>
 			<br/>
-			<div><a onclick="ShowUpdateInfo();" style="color:#281b11" href="#">更新记录</a></div>
-	</div>
+			<a style="color:#281b11" href="https://github.com/Aicitel/bubububaoshe.github.io/">当前更新分支</a> | <a style="color:#281b11" href="https://github.com/Aicitel">有没有美术妹子来拯救直男审美啊啊</a></div>
+
+			<!--<div><a onclick="ShowUpdateInfo();" style="color:#281b11" href="#">更新记录</a></div>-->
+		</div>
 	<div id="spselection" class="transitopacity">
 		<div class="selectionarea verticalflex">
 			<div>
@@ -659,7 +676,7 @@
 			var x=document.getElementsByClassName('appwrapper');
 			if (x.length > 0) {
 				x = x[0];
-				x.style.backgroundImage = "url('img/background.jpg')";
+				// x.style.backgroundImage = "url('img/background.jpg')";
 			}
 			g_resource_prefix = "";
 	  } else {
@@ -670,6 +687,8 @@
 	  }
 	}
 </script>
+<script src="js/tool/ajax.js"></script>
+
 <script src="cookieAndLocalStore.js"></script>
 <script src="tricks.js"></script>
 <script src="model.js"></script>

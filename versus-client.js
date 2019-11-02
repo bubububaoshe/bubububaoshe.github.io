@@ -189,7 +189,7 @@ function DisableConnectButton() {
 function ConnectToServer(is_reconnect = false) {
   if (is_reconnect == false) {
     document.getElementById('vs_ai').disabled="disabled";
-    document.getElementById('avatar_nickname_hint').innerHTML = "<br/><br/>";
+    // document.getElementById('avatar_nickname_hint').innerHTML = "<br/><br/>";
     lobbystatus.textContent = '连线中・・・';
     if (socket != null && socket.connected == true) {
       lobbystatus.textContent = '已经连线啦。不用再连啦。';

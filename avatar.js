@@ -77,6 +77,7 @@ function CloseAvatarSelectionMenu() {
 }
 
 function ShowAvatarSelectionMenu() {
+  //TODO need hide the avatar selection panel instead of short drop here
   if (socket != undefined && socket.connected == true) return;
   var s = document.getElementById('avatarselection');
   var b = document.getElementById('avatarselection_blocker');
@@ -111,11 +112,13 @@ function HideGenericDialog() {
   d.style.display = 'none';
 }
 
+//TODO move the var binding to scoped function
 var nickname_input = document.getElementById('nickname_input');
 var nickname_disp  = document.getElementById('nickname_disp');
 var nickname_input_done = document.getElementById('nickname_input_done');
 
 function StartEditingNickname() {
+  //TODO need hide the avatar selection panel instead of short drop here
   if (socket != undefined && socket.connected == true) return;
   nickname_input.style.display = 'block';
   nickname_input.value = avatar.GetNickname();
