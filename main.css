@@ -196,13 +196,20 @@ html .appcontainer, .appwrapper{
   text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
   -webkit-text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
 }
-
-.avatarpreview {
+.avatarselect {
   margin-top: 1vw;
   width: 7vw;
   height: 7vw;
   background-size: 100% 100%;
   margin-left: -3vw;
+}
+
+.avatarpreview {
+  margin-top: 1vw;
+  width: 6vw;
+  height: 6vw;
+  background-size: 100% 100%;
+  margin-left: 2vw;
 }
 
 .avatarpreview_small {
