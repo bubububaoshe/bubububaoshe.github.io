@@ -9,6 +9,12 @@ function setCookie(cname, carray, exdays = 9999) {
     document.cookie = cname + "=" + carray.toString() + "; " + expires;
   }
 }
+function removeCookie(cname){
+    if (is_using_localstore == true) {
+        window.localStorage.removeItem(cname);
+    }
+}
+
 function getCookie(cname) {
   if (is_using_localstore == true) {
     var ret = window.localStorage.getItem(cname);

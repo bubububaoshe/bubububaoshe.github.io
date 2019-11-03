@@ -3,7 +3,7 @@
  * To avoid jquery or other 3rd-party library compliance issues
  */
 
-// const serverHost = "http://server.amadues.cn:8080";
+// const serverHost = "https://server.amadues.cn:8081";
 const serverHost = "http://localhost:8080";
 
 /**

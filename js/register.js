@@ -22,6 +22,7 @@ function authToken(username, token){
         if(authResponse['status'] === status_succeed) {
             switchAvatarAndLoginPanel(true);
             nickname_disp.textContent = avatar.GetNickname();
+            switchConnectButton(true);
         } else {
             switchAvatarAndLoginPanel(false);
         }
@@ -32,6 +33,9 @@ function authToken(username, token){
  * Logoff the current user
  */
 function logoff() {
+    removeCookie('nickname');
+    removeCookie('token');
+    switchConnectButton(false);
     switchAvatarAndLoginPanel(false);
 }
 
@@ -44,6 +48,7 @@ function popRegisterWindow(isLogin) {
     let confirmPwdWindow = document.getElementById('confirm_password_block');
     let registerSubmit = document.getElementById('register_submit');
     let loginSubmit = document.getElementById('login_submit');
+    showRegMsg('');
     if(isLogin){
         confirmPwdWindow.style.display = 'none';
         loginSubmit.style.display = '';
@@ -53,7 +58,7 @@ function popRegisterWindow(isLogin) {
         registerSubmit.style.display = '';
         loginSubmit.style.display = 'none';
     }
-    registerWindow.style.height = "34vw";
+    registerWindow.style.height = "45vh";
 }
 
 /**
@@ -74,7 +79,7 @@ function getInputUsernameAndPwdThenRegister(isLogin){
     let confirmPassword = document.getElementById("confirm_password_input").value;
     if(username.length===0){
         showRegMsg("请输入名字!");
-    } else if(password.length<8){
+    } else if(password.length<1){
         showRegMsg("密码太短!");
     } else if(password!==confirmPassword && !isLogin){
         showRegMsg("密码不符!");
@@ -111,13 +116,31 @@ function login(username, password){
             switchAvatarAndLoginPanel(true);
             avatar.SetNickname(username);
             avatar.SaveToCookie();
+            //TODO unlock connect button
             setCookie('token', loginResponse['token']);
             nickname_disp.textContent = avatar.GetNickname();
+            switchConnectButton(true);
         } else{
             //if auto login fail, switch to manually login
-            showRegMsg("密码或用户名错误!");
+            let message = loginResponse['message'];
+            if(loginResponse['status'] === undefined){
+                message = '服务器爆炸啦，请稍后重试!';
+            } else {
+                message = '用户名或密码错误!';
+            }
+            showRegMsg(message);
         }
     });
+}
+
+/**
+ * Switch connect_to_server button status
+ */
+function switchConnectButton(isActive){
+    let connectButtonMask = document.getElementById("connect_to_server_mask");
+    let connectButton = document.getElementById("connect_to_server");
+    connectButtonMask.style.display = isActive?'none':'';
+    connectButton.style.display = isActive?'':'none';
 }
 
 /**

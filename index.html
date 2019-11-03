@@ -24,14 +24,13 @@
 	<div class="appwrapper">
 	<div id="configurator" class="flexbox transitopacity">
 
-		<div id="register_window" class="register_popup_window"
-			 <!--style="height: 34vw;"-->
-		>
-			<div style="width:50%; position: relative;
-				background-color: #281B11; height: 25vw;
+		<!--<div id="register_window" class="register_popup_window" style="height: 34vw;" >-->
+		<div id="register_window" class="register_popup_window" >
+			<div style="width:100%; position: relative;
+				background-color: #281B11; height:100%;
 							border: 1px #EEE solid;">
 				<!-- Top Row -->
-				<div style="position:relative; left:-42%; top:1%;">
+				<div style="position:relative; margin-left:6vw; left:-50%; top:1vw;">
 					<div onclick="closeRegisterWindow();"
 						 style="left:1vw; top:1vw; width:4vw; height:4vw;
 							background-size:100% 100%;
@@ -41,26 +40,24 @@
 				</div>
 				<br>
 				输入名字：
-				<input id="username_input" type="text" name="yourname" value = ""><br>
+				<input style="width: 70%;height: 5vh;" id="username_input" type="text" name="yourname" value = ""><br>
 				<br>
 				输入密码：
-				<input id="password_input" type="password" name="yourpw" value = ""><br>
+				<input style="width: 70%;height: 5vh" id="password_input" type="password" name="yourpw" value = ""><br>
 				<br>
-				<div id="confirm_password_block">
+				<div style="width: 100%;height: 5vh" id="confirm_password_block">
 					确认密码：
-					<input id="confirm_password_input" type="password" name="yourpw" value = "">
+					<input style="width: 70%;height: 5vh"  id="confirm_password_input" type="password" name="yourpw" value = "">
 				</div>
 				<br>
 				<div id="login_submit"
 					 onclick="getInputUsernameAndPwdThenRegister(true)"
-					 style="width:50%; height:15%;line-height: 250%; margin-top:5%; background: #fceba4; color: #000000; cursor: pointer;"
-				>
+					 style="width:50%; height:5vh;line-height: 5vh; margin-top:1vh; background: #fceba4; color: #000000; cursor: pointer;">
 					登陆
 				</div>
 				<div id="register_submit"
 					 onclick="getInputUsernameAndPwdThenRegister(false)"
-					 style="width:50%; height:15%;line-height: 250%; margin-top:5%; background: #fceba4; color: #000000; cursor: pointer;"
-					 >
+					 style="width:50%; height:5vh;line-height: 5vh; margin-top:1vh; background: #fceba4; color: #000000; cursor: pointer;">
 					注册
 				</div>
 				<br><br>
@@ -117,7 +114,7 @@
 			<label for="sp3" data-value="AI拥有所有珍稀牌">AI全珍稀牌</label>
 		</div>
 		<div id="comfirmSetting" class="confirmbutton">确认此设置</div>
-		<div id="multiplayerinfo" style="width:100%; color:#112211; border: 1px #112211 solid; height: 11.2vw; font-size:2vw;">
+		<div id="multiplayerinfo" style="width:100%; color:#112211; border: 1px #112211 solid; height: 16vw; font-size:2vw;">
 
 	  <!--头像设置 登录注册部分-->
       <div id="avatar_and_nickname" style="width:50%; float:left;">
@@ -135,8 +132,8 @@
 			<!--<div id="logoff_button">-->
 
 			<!--</div>-->
-		    <div id="logoff_button" style="width:60%;padding:3%; margin-left:2vw; color:white; font-size:1.5vw; display:inline-block; ;cursor:pointer; background:#281b11"
-			   onclick="logoff(	); ">
+		    <div id="logoff_button" style="width:50%;padding:3%; margin-left:2vw; color:white; font-size:1.5vw; display:inline-block; ;cursor:pointer; background:#281b11"
+			   onclick="logoff(); ">
 			  退出
 		    </div>
 		  </div>
@@ -162,7 +159,10 @@
             <label for="servername2" data-value="默认服务器">不要打雷</label>
             <!--<label for="servername3" data-value="不怕打雷" disabled>二号服务器</label>-->
           </div>
-        <div id="connect_to_server" style="width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;" onclick='ConnectToServer();'>
+	    <div id="connect_to_server_mask" style="width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;cursor: default">
+		  [请先登录！]
+	    </div>
+        <div id="connect_to_server" style="display:none; width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;" onclick='ConnectToServer();'>
           [决定好了，连线]
         </div>
         <div id="reconnect" style="width:100%; height:5vw; background-color: #112211; display:none;">
@@ -214,7 +214,7 @@
 			<br/>
 			<a style="color:#281b11" href="https://bubububaoshe.github.io/">https://bubububaoshe.github.io/</a> | <a style="color:#281b11" href="https://github.com/bubububaoshe/bubububaoshe.github.io">[github]</a></div>
 			<br/>
-			<a style="color:#281b11" href="https://github.com/Aicitel/bubububaoshe.github.io/">当前更新分支</a> | <a style="color:#281b11" href="https://github.com/Aicitel">有没有美术妹子来拯救直男审美啊啊</a></div>
+			<a style="color:#281b11" href="https://github.com/Aicitel/bubububaoshe.github.io/">当前更新分支</a> | <a style="color:#281b11" href="https://github.com/Aicitel">求活的美术拯救直男审美</a></div>
 
 			<!--<div><a onclick="ShowUpdateInfo();" style="color:#281b11" href="#">更新记录</a></div>-->
 		</div>
@@ -698,8 +698,9 @@
 <script src="view.js"></script>
 <script src="avatar.js"></script>
 <script src="socket.io/socket.io.js"></script>
-<script src="versus-client.js"></script>
 <script src="js/register.js"></script>
+
+<script src="versus-client.js"></script>
 <script type="text/javascript">
 
 FetchUpdateInfo(g_version_id);
