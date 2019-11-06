@@ -3,6 +3,9 @@
  * To avoid jquery or other 3rd-party library compliance issues
  */
 
+const status_succeed = 'SUCCEED';
+const status_fail = 'FAIL';
+
 // const serverHost = "https://server.amadues.cn:8081";
 const serverHost = "http://localhost:8080";
 
@@ -12,13 +15,15 @@ const serverHost = "http://localhost:8080";
  * @Param header, header to call with
  * @returns {object} server response
  */
-//TODO maybe CROS
 function postRequest(payload, url, header){
     //TODO add compliance for IE6-
     return new Promise(function(resolve, reject) {
         let xhr = new XMLHttpRequest();
         xhr.open('post', url);
         xhr.setRequestHeader("Content-type","application/json");
+        for(let key in header){
+            xhr.setRequestHeader(key, header[key]);
+        }
         xhr.send(JSON.stringify(payload));
         xhr.onreadystatechange = function () {
             if(xhr.readyState !== 4) return;

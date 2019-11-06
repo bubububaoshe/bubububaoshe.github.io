@@ -76,10 +76,10 @@
 			<label for="vs_ai"     data-value="独享的快乐">单人游戏</label>
 			<label for="vs_player" data-value="双倍的快乐">双人对战</label>
 		</div>
-		
+
 		<div id="packselect_info">
 		</div>
-		
+
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="version" id="p12" onclick='SetPack([1,2]);'>
 			<input type="radio" name="version" id="p13" onclick='SetPack([1,3]);'>
@@ -88,7 +88,7 @@
 			<label for="p13" data-value="1+3 代人物">1+3</label>
 			<label for="p23" data-value="2+3 代人物">2+3</label>
 		</div>
-		
+
 		<div id="voiceinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="voice" id="voiceon">
 			<input type="radio" name="voice" id="voiceoff">
@@ -118,26 +118,35 @@
 
 	  <!--头像设置 登录注册部分-->
       <div id="avatar_and_nickname" style="width:50%; float:left;">
-		  <div id='avatar_panel' style="margin-top:1vw; display: none;height: 55%">
+		  <div id='avatar_panel' style="margin-top:1vw; display: none;height: 55%; width: 100%">
 			<!--<div id="avatar_nickname_hint" style="text-align:center;float:left;clear:both;">点击修改头像与昵称<br/>连线之后就不能改了</div>-->
-			<div id="curr_avatar" class="avatarselect glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;" onclick="ShowAvatarSelectionMenu();">
+			<div id="curr_avatar" class="avatarpreview glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;" onclick="ShowAvatarSelectionMenu();">
 
 			</div>
-			<div style="height: 6vw; margin-left: 2vw; margin-top:-0.5vw;vertical-align:middle; float:left;">
-				<div id="nickname_disp"
-						style="margin-top:1.5vw; font-size:2vw; display:block">
+			<div style="width: 60%; height: 6vh; margin-left: 2vw; vertical-align:middle; float:left;">
+				<div id="nickname_disp" style="float:left; font-size:2vw; display:block">
 					名字在这
 				</div>
+				<div id="logoff_button" style="float:right;width:50%; color:white; font-size:2vw; display:block;cursor:pointer; background:#281b11"
+							onclick="logoff(); ">
+					退出
+				</div>
+				<div id="title_panel" style="margin-top:0.5vh; font-size: 2vw;color: yellow; float: left;">
+					称号: [--]
+				</div>
 			</div>
-			<!--<div id="logoff_button">-->
 
-			<!--</div>-->
-		    <div id="logoff_button" style="width:50%;padding:3%; margin-left:2vw; color:white; font-size:1.5vw; display:inline-block; ;cursor:pointer; background:#281b11"
-			   onclick="logoff(); ">
-			  退出
-		    </div>
+
 		  </div>
-		  <div style="text-align:center;float:left;clear:both;width:100%;height:30%;margin-top: 3%" id="login_panel">
+		  <div id="win_lose_panel" style="display:none;text-align:center;float:left;clear:both;width:100%;height:30%;margin-top: 3%" >
+			  <div id="win_panel" style="font-size: 2vw;color: #DB4D3D; float:left;margin-left: 2vw">
+				  胜: --
+			  </div>
+			  <div id="lose_panel" style="font-size: 2vw;color: green; float: left;margin-left: 2vw">
+				  负: --
+			  </div>
+		  </div>
+		  <div id="login_panel" style="text-align:center;float:left;clear:both;width:100%;height:30%;margin-top: 3%" >
 			  <div id="login_button" style="width:40%;padding:3%; margin-top:2.5vw;color:white; font-size:2vw; display:inline-block; ;cursor:pointer; background:#281b11"
 				   onclick="popRegisterWindow(true); ">
 				  登陆
@@ -212,12 +221,19 @@
 			<br/>
 			原版以及原作者主页:
 			<br/>
-			<a style="color:#281b11" href="https://bubububaoshe.github.io/">https://bubububaoshe.github.io/</a> | <a style="color:#281b11" href="https://github.com/bubububaoshe/bubububaoshe.github.io">[github]</a></div>
-			<br/>
-			<a style="color:#281b11" href="https://github.com/Aicitel/bubububaoshe.github.io/">当前更新分支</a> | <a style="color:#281b11" href="https://github.com/Aicitel">求活的美术拯救直男审美</a></div>
+			<a style="color:#281b11" href="https://bubububaoshe.github.io/">https://bubububaoshe.github.io/</a> | <a style="color:#281b11" href="https://github.com/bubububaoshe/bubububaoshe.github.io">[github]</a>
+		</div>
+			<br>
+			<a style="color:#281b11" href="https://github.com/Aicitel/bubububaoshe.github.io/">当前更新分支</a> | <a style="color:#281b11" href="https://github.com/Aicitel">求活的美术拯救直男审美</a>
+
+			<br>
+			<div style="width:100%;font-size: 1.5vw">
+			<del>找牌友</del>测试建议群:914630192 <del>欢迎小白鼠</del>
+			</div>
+	</div>
 
 			<!--<div><a onclick="ShowUpdateInfo();" style="color:#281b11" href="#">更新记录</a></div>-->
-		</div>
+	</div>
 	<div id="spselection" class="transitopacity">
 		<div class="selectionarea verticalflex">
 			<div>
@@ -434,7 +450,7 @@
 					</div>
 					<div id= "restart" class="button centeredtext">
 						<div id="finalmsg" class="bignotice"></div>
-						<div class="bannertext">再来亿局</div>
+						<div class="bannertext2">再来亿局</div>
 					</div>
 					<div class="string"></div>
 				</div>
@@ -574,7 +590,7 @@
 </body>
 </html>
 <script type="text/javascript">
-    var g_server_url = 'https://server.amadues.cn:3000';
+    // var g_server_url = 'https://server.amadues.cn:3000';
 </script>
 <!--<script src="http://edgeofmap.com/qqxupd/1000autumns.js"></script>-->
 
@@ -698,7 +714,9 @@
 <script src="view.js"></script>
 <script src="avatar.js"></script>
 <script src="socket.io/socket.io.js"></script>
-<script src="js/register.js"></script>
+<script src="js/interact/gameManager.js"></script>
+<script src="js/interact/register.js"></script>
+<script src="js/interact/info.js"></script>
 
 <script src="versus-client.js"></script>
 <script type="text/javascript">

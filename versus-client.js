@@ -215,7 +215,8 @@ function ConnectToServer(is_reconnect = false) {
     }, 10);
   }
 
-  var s = 'https://server.amadues.cn:3000';
+  // var s = 'https://server.amadues.cn:3000';
+  var s = 'http://127.0.0.1:3000';
   // if (document.getElementById('servername2').checked == true) s = g_server_url;
   console.log('server:' + s);
   socket = io(s);
@@ -334,6 +335,11 @@ function ConnectToServer(is_reconnect = false) {
     oppoTurnActionCount = 0;
   });
 
+  // get game token, update token and win lose info to crud server after finish
+  socket.on('Match_GameToken', (token) => {
+      gameManager.setCurrentGameToken(token);
+  });
+
   socket.on('Match_GameInitOffensive', (other_sp, snapshot, game_id) => {
     console.log('[先手开局] other_sp='+other_sp);
     HideWaitMessage();
@@ -429,7 +435,7 @@ function ConnectToServer(is_reconnect = false) {
   });
 
   socket.on('Game_OpponentGameEnd', () => {
-    messenger.notifyFinal();
+    // messenger.notifyFinal();
   });
 
   socket.on('connect', () => {
@@ -537,6 +543,13 @@ function GotoMainMenu() { // 从多人状态退回主菜单
   
   messenger.hideFinalNotice();
   view.unblockGame();
+
+  //update user info
+  {
+      let logoffButton = document.getElementById('logoff_button');
+      logoffButton.style.display = 'none';
+      getUserWinAndLostInfo();
+  }
 
   { // hide match result
     document.getElementById("start_match").style.display = "inline-block";

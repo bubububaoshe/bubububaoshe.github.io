@@ -306,6 +306,7 @@ CopyTrick:
    
 
 【双方匹配阶段】
+//TODO split server to middleware ( this ) & server ( CRUD backend, register server )
 
 1. 玩家 ----> 服务器  'connect' 表示登陆；服务器会记下该玩家
 2. 玩家 <---- 服务器  'Info_OnlinePlayerCount' 附带当前人数
@@ -321,8 +322,8 @@ CopyTrick:
 4. 玩家1 ---> 服务器  'Match_ConfirmMatch' 表示确定匹配。谁先确定谁就是先手，不过也可以交换。
    玩家2 <--- 服务器  'Match_OtherPlayerConfirmed' 服务器会通知玩家2按确定
    玩家2 ---> 服务器  'Match_ConfirmMatch'
-   玩家1&2 <- 服务器  'Match_GameSetupDefensive' 传给后手玩家
-                      'Match_GameSetupOffensive' 传给先手玩家
+   玩家1&2 <- 服务器  'Match_GameSetupDefensive & gameToken' 传给后手玩家
+                      'Match_GameSetupOffensive & gameToken' 传给先手玩家
 
                       +----------------------------------------------------------+
                       |                             B                            |
@@ -356,6 +357,10 @@ CopyTrick:
    后手玩家 <------'    'Match_GameInitDefensive' 带先手玩家所选的特殊牌和发牌结果(snapshot)
                                                   此时后手玩家再调用与model.setup()相当的部分，但是用snapshot代替Deck.removeRandom()
                                                   然后后手玩家再调用对方的特殊牌的view的初始化部分，fixup
+
+（对局结束结算后）
+7. 先手玩家 & 后手玩家 ---> 服务器（CRUD) 发送对局结果与过程信息
+
 
 （总共的Tricks类别）
 ComboTrick       不影响对战模式                             ：悭臾、百里屠苏、欧阳少恭、
@@ -579,7 +584,7 @@ TypeError: combo is undefined[Learn More] view.js:456:11
 -------------------------------------
 
 断线重连必要功能之一：从快照恢复
-恢复过程：玩家游戏的编号，服务器告知该玩家是先手还是后手，并送回snapshot
+恢复过程：玩家游戏的编号，恢复局的token，服务器告知该玩家是先手还是后手，并送回snapshot
 
 断线重连恢复快照后无法选中牌 ---> 修复方法：view.hand1.addController(controller.activate)
 

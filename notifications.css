@@ -31,11 +31,11 @@
   justify-content: space-between;
 }
 .bannertext{
+  margin-left: 25%;
   font-size: calc(var(--card-height)*0.2);
   color: var(--text-color);
 }
 .bannertext2{
-  margin-left: 25%;
   font-size: calc(var(--card-height)*0.2);
   color: var(--text-color);
 }

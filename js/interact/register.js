@@ -2,9 +2,6 @@
  * Register module for user register and login
  */
 
-const status_succeed = 'SUCCEED';
-const status_fail = 'FAIL';
-
 /**
  * Check cookie and send auth to server to confirm login status,
  * If fail, clear avatar cookie
@@ -20,9 +17,7 @@ function authToken(username, token){
     let AuthPromise = sendAuthRequest(username, token);
     AuthPromise.then(authResponse=>{
         if(authResponse['status'] === status_succeed) {
-            switchAvatarAndLoginPanel(true);
-            nickname_disp.textContent = avatar.GetNickname();
-            switchConnectButton(true);
+            updateLoginRelatedInfo();
         } else {
             switchAvatarAndLoginPanel(false);
         }
@@ -37,6 +32,19 @@ function logoff() {
     removeCookie('token');
     switchConnectButton(false);
     switchAvatarAndLoginPanel(false);
+}
+
+/**
+ * Update ui components:
+ *  connection_button
+ *  win_lose_title_panel
+ *  avatar_nickame_panel
+ */
+function updateLoginRelatedInfo(){
+    nickname_disp.textContent = avatar.GetNickname();
+    switchAvatarAndLoginPanel(true);
+    switchConnectButton(true);
+    getUserWinAndLostInfo();
 }
 
 /**
@@ -79,7 +87,7 @@ function getInputUsernameAndPwdThenRegister(isLogin){
     let confirmPassword = document.getElementById("confirm_password_input").value;
     if(username.length===0){
         showRegMsg("请输入名字!");
-    } else if(password.length<1){
+    } else if(password.length<8){
         showRegMsg("密码太短!");
     } else if(password!==confirmPassword && !isLogin){
         showRegMsg("密码不符!");
@@ -113,13 +121,13 @@ function login(username, password){
     loginPromise.then(loginResponse=>{
         if(loginResponse['status'] === status_succeed) {
             closeRegisterWindow();
-            switchAvatarAndLoginPanel(true);
             avatar.SetNickname(username);
             avatar.SaveToCookie();
-            //TODO unlock connect button
             setCookie('token', loginResponse['token']);
-            nickname_disp.textContent = avatar.GetNickname();
-            switchConnectButton(true);
+            // nickname_disp.textContent = avatar.GetNickname();
+            // switchAvatarAndLoginPanel(true);
+            // switchConnectButton(true);
+            updateLoginRelatedInfo()
         } else{
             //if auto login fail, switch to manually login
             let message = loginResponse['message'];
@@ -150,7 +158,9 @@ function switchConnectButton(isActive){
 function switchAvatarAndLoginPanel(showAvatar){
     let avatarPanel = document.getElementById("avatar_panel");
     let loginPanel = document.getElementById("login_panel");
+    let winLosePanel = document.getElementById("win_lose_panel");
     avatarPanel.style.display = showAvatar?'':'none';
+    winLosePanel.style.display = showAvatar?'':'none';
     loginPanel.style.display = showAvatar?'none':'';
 }
 
