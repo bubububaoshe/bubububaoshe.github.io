@@ -7,25 +7,32 @@ Enhances
 目前web端resource太多体积很大传输过慢，代码侧考虑添加优化，运维侧考虑添加多HOST参与静态分发
 4. Quite a lot data binding work, maybe SPA framework could make the development easier.
 上框架会让数据绑定工作简单很多，但是对移动端的兼容性比较堪忧，性能上也会有一定挑战
+5. Mobile font adaptation
+移动端有些尺寸下界面还是怪怪的...
 
 Fixes
+1. Fix too many special card style in pick stage
+牌太多待选区的底色样式无法自适应
+
 修复历史详见note.txt
 
 Features
 1. Register & Sign-in module
 注册登录模块
-2. Reconnect hint
+2. Invite link
+邀请链接
+3. Reconnect hint
 掉线提示
-3. User game statistics & rank
+4. User game statistics & rank
 用户对据统计&排位
-4. Count down time
+5. Count down time
 烧绳啦！
-5. User related info ( Treasure cards, win & lose, friends? )
+6. User related info ( Treasure cards, win & lose, friends? )
 主要是好友
-6. Chat window
+7. Chat window
 聊天窗口
-7. Replay
+8. Replay
 类似蜘蛛纸牌的回放
-8. Multi Players ( 3-4 )
+9. Multi Players ( 3-4 )
 多人麻将
 

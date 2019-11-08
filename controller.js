@@ -340,7 +340,7 @@ class Controller{
     var sp = getInput("spinput");
     SP_CARDS = parseInt(sp.charAt(2));
     setCookie("configurations", [pack, ai, COMBO_VOICE, sp]);
-    spmanager.setup();
+    spmanager.setup(is_multiplayer);
     controller.gameinit();
   }
   gameinit(){

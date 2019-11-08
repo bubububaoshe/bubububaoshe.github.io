@@ -222,6 +222,10 @@ function ConnectToServer(is_reconnect = false) {
   socket = io(s);
   console.log(socket);
 
+  socket.on('Chat_Receive', function(speaker,content){
+    receiveChat(speaker, content);
+  });
+
   // Set callbacks
   socket.on('Info_OnlinePlayerCount', function(n) {
     //lobbystatus.innerHTML = "当前人数："+n+"; socket.io.uri=" + socket.io.uri;
@@ -229,7 +233,7 @@ function ConnectToServer(is_reconnect = false) {
 
   socket.on('Info_MyPlayerId', function(pid) {
     g_my_player_id = pid;
-    document.getElementById('myplayerid').textContent = '临时ID: ' + pid;
+    // document.getElementById('myplayerid').textContent = '临时ID: ' + pid;
     // Respond = my avatar idx & nickname
     g_nicknames[1] = avatar.GetNickname();
     g_avataridxes[1] = avatar.idx;
@@ -316,6 +320,7 @@ function ConnectToServer(is_reconnect = false) {
     // 默认：1+2
     if (pack == null) pack = [1, 2];
     console.log('[先手选取特殊牌], pack=' + pack);
+    MAX_SP_NUM = 5;
     versus_rank = 1;
     setup();
     model.setPack(pack[0], pack[1]);
@@ -326,6 +331,7 @@ function ConnectToServer(is_reconnect = false) {
 
   socket.on('Match_GameSetupDefensive', (pack) => { // 后手开局
     console.log('[后手选取特殊牌], pack=' + pack);
+    MAX_SP_NUM = 5;
     if (pack == null) pack = [1, 2];
     versus_rank = 0;
     setup();
@@ -566,7 +572,7 @@ function GotoMainMenu() { // 从多人状态退回主菜单
   document.getElementById('vs_ai').disabled = null;
   model.clear(); // clearing the model; same as single player mode
   
-  document.getElementById('myplayerid').textContent="";
+  // document.getElementById('myplayerid').textContent="";
   
   { // disconnect
     if (socket != undefined)

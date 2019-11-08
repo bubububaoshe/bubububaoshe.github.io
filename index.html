@@ -17,6 +17,7 @@
 	<link rel="stylesheet" type="text/css" href="decks.css">
 	<link rel="stylesheet" type="text/css" href="notifications.css">
 	<link rel="stylesheet" type="text/css" href="tableinfo.css">
+	<link rel="stylesheet" type="text/css" href="assets/chatPanel.css">
 	<base target="_blank">
 </head>
 
@@ -131,7 +132,7 @@
 							onclick="logoff(); ">
 					退出
 				</div>
-				<div id="title_panel" style="margin-top:0.5vh; font-size: 2vw;color: yellow; float: left;">
+				<div id="title_panel" style="clear:both;margin-top:0.2vh; font-size: 2vw;color: yellow; float: left;">
 					称号: [--]
 				</div>
 			</div>
@@ -182,7 +183,7 @@
         <!-- 当前服务器信息 -->
         <div style="height:3vw; width:100%">
           <div id="lobbystatus" style="float:left;"></div>
-          <div id="myplayerid" style="float:right; margin-right:1vw"></div>
+          <!--<div id="myplayerid" style="float:right; margin-right:1vw"></div>-->
           <div style="clear:both;"></div>
           <div id="refresh_lobbystatus" style="width:100%; display: none">
             [刷新]
@@ -190,7 +191,7 @@
         </div>
 
         <!-- 开始多人游戏 -->
-        <div id="multiplayerButtons" style="width:100%; display: none;margin-top: -1vw">
+        <div id="multiplayerButtons" style="width:100%; display: none;margin-top: 0vw">
           <div id="opponent_avatar_name" style="display: none">
             <div style="height: 6vw; float: left; width:50%">
               <div id="oppo_avatar" class="avatarpreview glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;"></div>
@@ -218,18 +219,16 @@
 		</div>
 
 		<div style="width:100%" id="footer">
-			<br/>
 			原版以及原作者主页:
 			<br/>
 			<a style="color:#281b11" href="https://bubububaoshe.github.io/">https://bubububaoshe.github.io/</a> | <a style="color:#281b11" href="https://github.com/bubububaoshe/bubububaoshe.github.io">[github]</a>
-		</div>
 			<br>
 			<a style="color:#281b11" href="https://github.com/Aicitel/bubububaoshe.github.io/">当前更新分支</a> | <a style="color:#281b11" href="https://github.com/Aicitel">求活的美术拯救直男审美</a>
-
 			<br>
 			<div style="width:100%;font-size: 1.5vw">
-			<del>找牌友</del>测试建议群:914630192 <del>欢迎小白鼠</del>
+				<del>找牌友</del>测试建议群:914630192 <del>欢迎小白鼠</del>
 			</div>
+		</div>
 	</div>
 
 			<!--<div><a onclick="ShowUpdateInfo();" style="color:#281b11" href="#">更新记录</a></div>-->
@@ -246,7 +245,7 @@
 		</div>
 		<div class="rightsidebar verticalflex">
 			<div></div>
-			<div id="selectioninfo" class="centeredtext"><div>从上方牌库<br />选择特殊牌<br />到下方牌组<br />最多选15张</div></div>
+			<div id="selectioninfo" class="centeredtext"><div>选择特殊牌<br />到下方牌组<br />最多选15张<br />(对战模式下5张)</div></div>
 			<div id="gamestart" class="centeredtext button"><div>开始<br />游戏</div></div>
 		</div>
 	</div>
@@ -506,6 +505,23 @@
 		<div id="specialboard">
 			<div id="specials0" class="cardstack"></div>
 			<div id="hoverinfobox" class="bignotice"></div>
+			<!--聊天框部分 start-->
+			<div id="chat_panel_pop_button" class="chatButton" style="right:0;" onclick="popChatPanel()">
+				<span>对话</span>
+			</div>
+			<div id="chat_panel" class="chatPanel" style="display:none;" >
+				<div id="chat_history_panel" class="chatPanelHistory">
+					<span class="opponent_chat">
+						对局开始！
+					</span>
+				</div>
+				<textarea id="chat_input"></textarea>
+				<div id="chat_panel_send_button" class="chatButton" style="right:calc(6.25vh + 6.25vw);" onclick="sendChat()">
+					<span>发送</span>
+				</div>
+			</div>
+			<!--聊天框部分 end-->
+
 			<div id="avatarboxes" class="bignotice"
 			     style="position:absolute;
 					        padding:0;
@@ -577,22 +593,14 @@
 	  请等待另一名玩家选择完特殊牌
 	  </div>
 	</div>
-	<div id="genericdialog" style="width:100%;position:absolute;top:50%;
-	                               z-index:100;display:none;background-color:#281B11;
-																 border:1px #FFF solid;color:#EEE;">
-		<div id="genericdialog_title" style="color:#7a614f">标题</div>
-		<div id="genericdialog_content" style="margin-left:auto; margin-right:auto;"></div>
-	</div>
-
 	<audio id="soundeffect" src=""></audio>
 </div>
 </div>
 </body>
 </html>
 <script type="text/javascript">
-    // var g_server_url = 'https://server.amadues.cn:3000';
+
 </script>
-<!--<script src="http://edgeofmap.com/qqxupd/1000autumns.js"></script>-->
 
 <script type="text/javascript">
   // GLOBAL VARIABLES!
@@ -704,6 +712,7 @@
 	}
 </script>
 <script src="js/tool/ajax.js"></script>
+<script src="socket.io/socket.io.js"></script>
 
 <script src="cookieAndLocalStore.js"></script>
 <script src="tricks.js"></script>
@@ -713,12 +722,12 @@
 <script src="tableinfoview.js"></script>
 <script src="view.js"></script>
 <script src="avatar.js"></script>
-<script src="socket.io/socket.io.js"></script>
+<script src="versus-client.js"></script>
 <script src="js/interact/gameManager.js"></script>
 <script src="js/interact/register.js"></script>
 <script src="js/interact/info.js"></script>
+<script src="js/interact/chat.js"></script>
 
-<script src="versus-client.js"></script>
 <script type="text/javascript">
 
 FetchUpdateInfo(g_version_id);
