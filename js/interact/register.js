@@ -28,13 +28,21 @@ function authToken(username, token){
  * Logoff the current user
  */
 function logoff() {
+    loginStatus = false;
     removeCookie('nickname');
     removeCookie('token');
     switchConnectButton(false);
     switchAvatarAndLoginPanel(false);
-    switchMultiPlayerButtons(false);
+    switchMultiPlayerButtons(loginStatus);
+    switchLobbyStatus(loginStatus);
     if(socket!==null && socket !== undefined){
-        loginStatus = false;
+        //TODO centralize with versus-client disconect
+        if (socket !== undefined) {
+            socket.removeAllListeners();
+        }
+        if (socket !== undefined && socket.connected === true) {
+            socket.disconnect();
+        }
         socket.close();
         socket = null;
     }
@@ -46,9 +54,16 @@ function logoff() {
  */
 function switchMultiPlayerButtons(isActive) {
     document.getElementById('multiplayerButtons').style.display = isActive?'block':'none';
-    document.getElementById('lobbystatus').style.display = isActive?'block':'none';
 }
 
+/**
+ * Switch lobby message display
+ * @param isActive
+ */
+function switchLobbyStatus(isActive) {
+    document.getElementById('lobbystatus').style.display = isActive?'block':'none';
+    document.getElementById('reconnect').style.display = isActive?'block':'none';
+}
 /**
  * Update ui components:
  *  connection_button
@@ -56,10 +71,12 @@ function switchMultiPlayerButtons(isActive) {
  *  avatar_nickame_panel
  */
 function updateLoginRelatedInfo(){
+    loginStatus = true;
     nickname_disp.textContent = avatar.GetNickname();
     switchAvatarAndLoginPanel(true);
     switchConnectButton(true);
-    switchMultiPlayerButtons(loginStatus);
+    switchMultiPlayerButtons(loginStatus && socket!=null && socket.connected === true);
+    switchLobbyStatus(loginStatus);
     getUserWinAndLostInfo();
     ConnectToServer();
 }

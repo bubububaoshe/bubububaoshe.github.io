@@ -207,17 +207,22 @@ function ConnectToServer(is_reconnect = false) {
     }
 
     delayedFunc(function() {
-      if (socket.connected == false) {
+      //User logoff
+      if (socket == null && loginStatus === false){
+        //TODO
+      }
+      else if (socket.connected == false) {
         lobbystatus.textContent = '似乎没有连上...';// socket.io.uri=' + socket.io.uri + "; location.origin=" + location.origin;
         document.getElementById('reconnect').style.display = 'block';
         document.getElementById('vs_ai').disabled = null;
-        document.getElementById('avatar_nickname_hint').opacity = 1;
+        switchMultiPlayerButtons();
+        // document.getElementById('avatar_nickname_hint').opacity = 1;
       }
     }, 10);
   }
   var s = 'http://127.0.0.1:3000';
   if(online) {
-      var s = 'https://server.amadues.cn:3000';
+      s = 'https://server.amadues.cn:3000';
   }
   // if (document.getElementById('servername2').checked == true) s = g_server_url;
   console.log('server:' + s);
