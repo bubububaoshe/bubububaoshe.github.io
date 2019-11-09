@@ -9,7 +9,7 @@ class SPManager{
   constructor(){}
   setup(is_multiplayer){
     //when multi players, set all special cards available
-    this.specialRepoIDs = SPECIAL_CHAR_LIST[model.pack[0]-1].concat(SPPECIAL_CHAR_LIST[model.pack[1]-1]);
+    this.specialRepoIDs = SPECIAL_CHAR_LIST[model.pack[0]-1].concat(SPECIAL_CHAR_LIST[model.pack[1]-1]);
     this.userSpecialRepoIDs = this.specialRepoIDs;
     this.userSpecialRepoIDs = is_multiplayer?this.specialRepoIDs:this.loadSpecials("qqxspecials");
     if(this.userSpecialRepoIDs.length > 0) {

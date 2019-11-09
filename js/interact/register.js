@@ -1,12 +1,12 @@
 /**
  * Register module for user register and login
  */
-
+var loginStatus = false;
 /**
  * Check cookie and send auth to server to confirm login status,
  * If fail, clear avatar cookie
  */
-function checkCookie(){
+function checkCookieAndLogin(){
     authToken(getCookie('nickname')[0], getCookie('token')[0]);
 }
 
@@ -32,6 +32,21 @@ function logoff() {
     removeCookie('token');
     switchConnectButton(false);
     switchAvatarAndLoginPanel(false);
+    switchMultiPlayerButtons(false);
+    if(socket!==null && socket !== undefined){
+        loginStatus = false;
+        socket.close();
+        socket = null;
+    }
+}
+
+/**
+ * Switch multi player components display
+ * @param isActive
+ */
+function switchMultiPlayerButtons(isActive) {
+    document.getElementById('multiplayerButtons').style.display = isActive?'block':'none';
+    document.getElementById('lobbystatus').style.display = isActive?'block':'none';
 }
 
 /**
@@ -44,7 +59,9 @@ function updateLoginRelatedInfo(){
     nickname_disp.textContent = avatar.GetNickname();
     switchAvatarAndLoginPanel(true);
     switchConnectButton(true);
+    switchMultiPlayerButtons(loginStatus);
     getUserWinAndLostInfo();
+    ConnectToServer();
 }
 
 /**
@@ -87,7 +104,7 @@ function getInputUsernameAndPwdThenRegister(isLogin){
     let confirmPassword = document.getElementById("confirm_password_input").value;
     if(username.length===0){
         showRegMsg("请输入名字!");
-    } else if(password.length<8){
+    } else if(password.length<1){
         showRegMsg("密码太短!");
     } else if(password!==confirmPassword && !isLogin){
         showRegMsg("密码不符!");
@@ -248,5 +265,3 @@ async function sendAuthRequest(username, token){
     }
     return response;
 }
-
-checkCookie();

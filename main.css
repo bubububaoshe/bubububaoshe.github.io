@@ -251,6 +251,7 @@ html .appcontainer, .appwrapper{
   line-height:4vw;
   margin-left:1vw;
   float:left;
+  cursor: pointer;
 }
 .continue_dialog_button {
   float: left;

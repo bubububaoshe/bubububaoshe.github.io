@@ -204,6 +204,7 @@
           <div id="match_buttons" style="margin-bottom: 0.5vw; margin-top: 0.5vw">
             <div id="find_opponent" class="multiplayerbutton" onclick="ShowOpponentFinderMenu();">查找玩家</div>
             <div id="start_match" class="multiplayerbutton">随机匹配</div>
+			<div id="share_button" class="multiplayerbutton" onclick="shareLink()">点击邀请</div>
           </div>
           <div id="confirm_cancel_buttons" style="width:50%; margin-bottom: 0.5vw; margin-top: 0.5vw">
             <div id="confirm_match" class="multiplayerbutton" style="background-color:#66CC66;display:none">确认</div>
@@ -593,15 +594,20 @@
 	  请等待另一名玩家选择完特殊牌
 	  </div>
 	</div>
+
+	<div id="genericdialog" style="width:100%;position:absolute;top:50%;
+	                               z-index:100;display:none;background-color:#281B11;
+																 border:1px #FFF solid;color:#EEE;">
+		<div id="genericdialog_title" style="color:#7a614f">标题</div>
+		<div id="genericdialog_content" style="margin-left:auto; margin-right:auto;"></div>
+	</div>
+
 	<audio id="soundeffect" src=""></audio>
+
 </div>
 </div>
 </body>
 </html>
-<script type="text/javascript">
-
-</script>
-
 <script type="text/javascript">
   // GLOBAL VARIABLES!
   var is_using_localstore = false;
@@ -711,6 +717,9 @@
 	  }
 	}
 </script>
+<script type="text/javascript">
+	const online = true;
+</script>
 <script src="js/tool/ajax.js"></script>
 <script src="socket.io/socket.io.js"></script>
 
@@ -727,9 +736,19 @@
 <script src="js/interact/register.js"></script>
 <script src="js/interact/info.js"></script>
 <script src="js/interact/chat.js"></script>
+<script src="js/interact/shareLink.js"></script>
 
 <script type="text/javascript">
 
-FetchUpdateInfo(g_version_id);
+	// FetchUpdateInfo(g_version_id);
+	/**
+	 * Check cookie and login.
+	 */
+	checkCookieAndLogin();
+
+	/**
+	 * Parse link and if there is inviter, jump to login.
+	 */
+    setTimeout(parseLink, 200);
 
 </script>

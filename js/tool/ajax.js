@@ -6,8 +6,10 @@
 const status_succeed = 'SUCCEED';
 const status_fail = 'FAIL';
 
-// const serverHost = "https://server.amadues.cn:8081";
-const serverHost = "http://localhost:8080";
+var serverHost = "http://localhost:8080";
+if(online) {
+    serverHost = "https://server.amadues.cn:8081";
+}
 
 /**
  * Post ajax with payload

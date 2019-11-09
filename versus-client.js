@@ -79,6 +79,7 @@ document.getElementById("cancel_match").addEventListener("click", function(){
   document.getElementById("confirm_match").style.display = "none";
   document.getElementById("cancel_match").style.display = "none";
   document.getElementById('find_opponent').style.display = 'block';
+  document.getElementById('share_button').style.display = 'block';
   HideOpponentAvatarPreview();
 });
 //document.getElementById("multiplayertype1").addEventListener("click", function(){
@@ -188,8 +189,8 @@ function DisableConnectButton() {
 
 function ConnectToServer(is_reconnect = false) {
   if (is_reconnect == false) {
-    let logoffButton = document.getElementById('logoff_button');
-    logoffButton.style.display = 'none';
+    // let logoffButton = document.getElementById('logoff_button');
+    // logoffButton.style.display = 'none';
     document.getElementById('vs_ai').disabled="disabled";
 
     // document.getElementById('avatar_nickname_hint').innerHTML = "<br/><br/>";
@@ -214,16 +215,29 @@ function ConnectToServer(is_reconnect = false) {
       }
     }, 10);
   }
-
-  // var s = 'https://server.amadues.cn:3000';
   var s = 'http://127.0.0.1:3000';
+  if(online) {
+      var s = 'https://server.amadues.cn:3000';
+  }
   // if (document.getElementById('servername2').checked == true) s = g_server_url;
   console.log('server:' + s);
   socket = io(s);
   console.log(socket);
 
+  /**
+   * Receive others' chat and show in panel.
+   * @param speaker{string} speaker name
+   * @param content{string} chat content
+   */
   socket.on('Chat_Receive', function(speaker,content){
     receiveChat(speaker, content);
+  });
+
+  /**
+   *
+   */
+  socket.on('Invited_Confirmed_Ack', function(){
+
   });
 
   // Set callbacks
@@ -253,6 +267,7 @@ function ConnectToServer(is_reconnect = false) {
   socket.on('Match_ReadyToMatchAck', function() {
     document.getElementById("start_match").style.display = "none";
     document.getElementById("confirm_match").style.display = "none";
+    document.getElementById('share_button').style.display = 'none';
     document.getElementById("cancel_match").style.display = "inline-block";
     lobbystatus.innerHTML = "正在寻找同伴中";
   });
@@ -270,6 +285,7 @@ function ConnectToServer(is_reconnect = false) {
     ShowMultiplayerStep3();
     document.getElementById('find_opponent').style.display='none';
     document.getElementById("start_match").style.display = "none";
+    document.getElementById("share_button").style.display = "none";
     document.getElementById("confirm_match").style.display = "inline-block";
     document.getElementById("cancel_match").style.display = "inline-block";
     lobbystatus.innerHTML = reason;
@@ -306,6 +322,7 @@ function ConnectToServer(is_reconnect = false) {
     document.getElementById("confirm_match").style.display = "none";
     document.getElementById("cancel_match").style.display = "none";
     document.getElementById('find_opponent').style.display = 'block';
+    document.getElementById('share_button').style.display = 'block';
     HideOpponentAvatarPreview();
   });
 
@@ -446,13 +463,19 @@ function ConnectToServer(is_reconnect = false) {
 
   socket.on('connect', () => {
     document.getElementById('lobbystatus').textContent = '连接好啦。';
+    document.getElementById('lobbystatus').style.display = 'block';
     document.getElementById('reconnect').style.display = 'none';
     document.getElementById('multiplayerButtons').style.display = 'block';
+    loginStatus = true;
     ShowMultiplayerStep2();
   });
 
   socket.on('disconnect', () => {
-    ShowWaitMessage('啊！你好像离线了。请点此消息刷新页面并重新连接来恢复目前的游戏。', function(){location.reload();});
+    if(loginStatus === true) {
+        ShowWaitMessage('啊！你好像离线了。请点此消息刷新页面并重新连接来恢复目前的游戏。', function () {
+            location.reload();
+        });
+    }
   });
 
   socket.on('Game_GotoMainMenu', () => {
@@ -552,8 +575,8 @@ function GotoMainMenu() { // 从多人状态退回主菜单
 
   //update user info
   {
-      let logoffButton = document.getElementById('logoff_button');
-      logoffButton.style.display = 'none';
+      // let logoffButton = document.getElementById('logoff_button');
+      // logoffButton.style.display = 'none';
       getUserWinAndLostInfo();
   }
 
@@ -562,6 +585,7 @@ function GotoMainMenu() { // 从多人状态退回主菜单
     document.getElementById("confirm_match").style.display = "none";
     document.getElementById("cancel_match").style.display = "none";
     document.getElementById('find_opponent').style.display = 'block';
+    document.getElementById('share_button').style.display = 'block';
     HideOpponentAvatarPreview();
   }
 

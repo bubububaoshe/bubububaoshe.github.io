@@ -13,6 +13,8 @@ Enhances
 Fixes
 1. Fix too many special card style in pick stage
 牌太多待选区的底色样式无法自适应
+2. match panel & confirm panel need be centralize into one div to control display
+这几个按钮display分开处理得抽成个方法
 
 修复历史详见note.txt
 
