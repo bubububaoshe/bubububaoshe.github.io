@@ -37,7 +37,7 @@ html .appcontainer, .appwrapper{
 }
 @media (max-height: 500px) and (orientation: landscape) {
   .appcontainer {
-    margin-top: 5em;
+    /*margin-top: 5em;*/
     position: relative;
   }
 }
@@ -221,7 +221,7 @@ html .appcontainer, .appwrapper{
 
 #continuedialog, #restore_snapshot_dialog, #offensive_wait_msg {
   position: absolute;
-  top: 50%;
+  top: 30%;
   width:100%;
   z-index:100;
   background-color:#281B11;
@@ -256,11 +256,13 @@ html .appcontainer, .appwrapper{
 .continue_dialog_button {
   float: left;
   margin: 1vw;
-  width:10vw;
-  height:5vw;
-  line-height:5vw;
+  width:calc(7vw + 7vh);
+  height:calc(2.5vw + 2.5vh);
+  line-height:calc(2.5vw + 2.5vh);
   background-color:#566555;
   color:#aa917f;
+  cursor: pointer;
+  text-align:center;
 }
 
 .register_popup_window {

@@ -388,20 +388,23 @@
     </div>
   </div>
 
-  <div id="continuedialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:0px;">
-    <div style="color:#7a614f">还继续玩吗？</div>
-    <div style="color:#999">只有双方都选“继续玩”才会新开一局，不然就返回主菜单啦。</div>
-    <div style="width:24vw; margin-left:auto; margin-right:auto;">
-      <div id="vote_play_again" class='continue_dialog_button' onclick="VotePlayAgain();">
-      继续玩
-      </div>
-      <div id="vote_not_play_again" class='continue_dialog_button' onclick="VoteNotPlayAgain();">
-      不玩了
-      </div>
-      <div style="clear:both; width:100%;"></div>
-    </div>
-    <div id="vote_playagain_msg" style="color:#EEE;width:100%";></div>
-  </div>
+	<div id="continuedialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:calc(13vw + 13vh);">
+		<div style="color:#7a614f">还继续玩吗？</div>
+		<div style="color:#999">只有双方都选“继续玩”才会新开一局，不然就返回主菜单啦。</div>
+		<div style="width:100%; margin-left:auto; margin-right:auto;">
+			<div id="vote_play_again" class='continue_dialog_button' onclick="VotePlayAgain();">
+				继续玩
+			</div>
+			<div id="vote_not_play_again" class='continue_dialog_button' onclick="VoteNotPlayAgain();">
+				不玩了
+			</div>
+			<div id="back_button" class='continue_dialog_button' onclick="HideBarAndBack2Menu();">
+				退出
+			</div>
+			<div style="clear:both; width:100%;"></div>
+		</div>
+		<div id="vote_playagain_msg" style="color:#EEE;width:100%";></div>
+	</div>
 
 	<div id="restore_snapshot_dialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:0px;">
 		<div style="color:#EEE">是否恢复之前的游戏？</div>

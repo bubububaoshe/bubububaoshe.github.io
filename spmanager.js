@@ -15,7 +15,7 @@ class SPManager{
     if(this.userSpecialRepoIDs.length > 0) {
         model.player1.specialIDs = this.loadSpecials("qqxspecialpicks");
         if(model.player1.specialIDs.length>5 && is_multiplayer){
-            model.player1.specialIDs = model.player1.specialIDs.slice(0, 5);
+            model.player1.specialIDs = model.player1.specialIDs.slice(0, MAX_SP_NUM_MULTI);
         }
     }
     else {

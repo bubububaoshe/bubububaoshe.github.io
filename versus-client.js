@@ -313,8 +313,15 @@ function ConnectToServer(is_reconnect = false) {
 
   var AUTOTEST = true;
   socket.on('Room_PlayerDisconnected', () => {
+    //if match has been notified end, just drop current game as well.
     console.log('对方玩家已离线');
-    ShowGenericDialog('游戏状态改变','对方玩家已离线，只有双方都再连线时游戏才会继续')
+    //TODO fix the condition to a state store ( even a variable ) instead of judge by frontend component
+    if(document.getElementById("finalcontainer").style.visibility = "visible"){
+        alert('对方玩家已退出');
+        HideBarAndBack2Menu();
+    } else {
+        ShowGenericDialog('游戏状态改变', '对方玩家已离线，只有双方都再连线时游戏才会继续')
+    }
   });
 
   socket.on('Room_PlayerReconnected', () => {
@@ -345,7 +352,7 @@ function ConnectToServer(is_reconnect = false) {
     // 默认：1+2
     if (pack == null) pack = [1, 2];
     console.log('[先手选取特殊牌], pack=' + pack);
-    MAX_SP_NUM = 5;
+    MAX_SP_NUM = MAX_SP_NUM_MULTI;
     versus_rank = 1;
     setup();
     model.setPack(pack[0], pack[1]);
@@ -356,7 +363,7 @@ function ConnectToServer(is_reconnect = false) {
 
   socket.on('Match_GameSetupDefensive', (pack) => { // 后手开局
     console.log('[后手选取特殊牌], pack=' + pack);
-    MAX_SP_NUM = 5;
+    MAX_SP_NUM = MAX_SP_NUM_MULTI;
     if (pack == null) pack = [1, 2];
     versus_rank = 0;
     setup();
@@ -415,6 +422,10 @@ function ConnectToServer(is_reconnect = false) {
     if (is_recovered_from_snapshot == true) {
       is_recovered_from_snapshot = false;
       view.unblockGame();
+      //if replay ends and hand deck is empty, trigger final notify
+      if(model.player1.hand.getSize() === 0){
+          messenger.notifyFinal();
+      }
     }
   });
 
@@ -466,7 +477,7 @@ function ConnectToServer(is_reconnect = false) {
   });
 
   socket.on('Game_OpponentGameEnd', () => {
-    messenger.notifyFinal();
+    // messenger.notifyFinal();
   });
 
   socket.on('connect', () => {
@@ -521,7 +532,7 @@ function ShowContinueDialog() {
   ShowVotePlayAgainButtons(true);
   document.getElementById('continuedialog').style.display = 'block';
   delayedFunc(function() {
-    document.getElementById('continuedialog').style.height = '17vw';
+    document.getElementById('continuedialog').style.height = 'calc(13vw + 13vh)';
   }, 0.1);
 }
 
