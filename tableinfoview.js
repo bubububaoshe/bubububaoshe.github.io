@@ -114,7 +114,7 @@ class TableInfoView{
     this.hide();
     if(this.on){
       if(tableviewcount == 1){
-        messenger.note("");
+        messenger.note(roundHintMsg);
       }
       this.on = false;
       tableviewcount --;
@@ -152,7 +152,7 @@ class TableInfoView{
     this.fadeUnder("selectionpanel", true);
   }
   exitSpecialsPanel(){
-    messenger.note("");
+    messenger.note(roundHintMsg);
     var container = document.getElementsByClassName("tableinfocontainer")[3];
     showOpacity(container, false);
     this.fadeUnder("tableinfo", false);

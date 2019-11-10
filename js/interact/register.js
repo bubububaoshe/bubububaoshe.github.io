@@ -29,6 +29,7 @@ function authToken(username, token){
  */
 function logoff() {
     loginStatus = false;
+    document.getElementById('vs_ai').disabled = null;
     removeCookie('nickname');
     removeCookie('token');
     switchConnectButton(false);
@@ -121,7 +122,7 @@ function getInputUsernameAndPwdThenRegister(isLogin){
     let confirmPassword = document.getElementById("confirm_password_input").value;
     if(username.length===0){
         showRegMsg("请输入名字!");
-    } else if(password.length<1){
+    } else if(password.length<(online?8:1)){
         showRegMsg("密码太短!");
     } else if(password!==confirmPassword && !isLogin){
         showRegMsg("密码不符!");

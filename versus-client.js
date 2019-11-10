@@ -4,6 +4,9 @@ avatar = new Avatar(0, 'url("avatars/avatar1.png")');
 avatar.LoadFromCookie();
 UpdateAvatarPreview();
 
+// Round hint
+var roundHintMsg = "";
+
 // New variables for multiplayer mode
 var socket = null;
 var is_my_move = false;
@@ -404,7 +407,7 @@ function ConnectToServer(is_reconnect = false) {
     var delay = 0;
     // 2 turns = 1回合
     delayedFunc(function() {
-      messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]该你出牌了');
+      messenger.note(roundHintMsg = '[第'+Math.floor((turn_idx+1)/2)+'回合]该你出牌了');
     }, delay);
     model.checkMatch1(); // 压力测试时发现似乎要加一下这个？头有点晕 @_@
 
@@ -422,7 +425,7 @@ function ConnectToServer(is_reconnect = false) {
 
     var delay = 0;
     delayedFunc(function() {
-      messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]对方出牌');
+      messenger.note( roundHintMsg = '[第'+Math.floor((turn_idx+1)/2)+'回合]对方出牌');
     }, delay);
 
     console.log('>>> 对方行动');
@@ -463,7 +466,7 @@ function ConnectToServer(is_reconnect = false) {
   });
 
   socket.on('Game_OpponentGameEnd', () => {
-    // messenger.notifyFinal();
+    messenger.notifyFinal();
   });
 
   socket.on('connect', () => {
@@ -478,6 +481,7 @@ function ConnectToServer(is_reconnect = false) {
   socket.on('disconnect', () => {
     if(loginStatus === true) {
         ShowWaitMessage('啊！你好像离线了。请点此消息刷新页面并重新连接来恢复目前的游戏。', function () {
+          //
             location.reload();
         });
     }
@@ -487,7 +491,7 @@ function ConnectToServer(is_reconnect = false) {
     document.getElementById('vote_playagain_msg').textContent = '因为大家没有都选继续，所以就返回主菜单啦。';
     delayedFunc(function() {
       GotoMainMenu();
-      ShowVotePlayAgainForNewRound(false)
+      ShowVotePlayAgainForNewRound(false);
     }, 7);
   });
 
@@ -519,6 +523,15 @@ function ShowContinueDialog() {
   delayedFunc(function() {
     document.getElementById('continuedialog').style.height = '17vw';
   }, 0.1);
+}
+
+function hideContinueDialog() {
+    document.getElementById('avatarselection_blocker').style.display='none';
+    ShowVotePlayAgainButtons(false);
+    document.getElementById('continuedialog').style.display = 'none';
+    delayedFunc(function() {
+        document.getElementById('continuedialog').style.height = '0';
+    }, 0.1);
 }
 
 function ShowVotePlayAgainButtons(is_shown) {
@@ -565,12 +578,23 @@ function VotePlayAgain() {
 }
 
 function VoteNotPlayAgain() {
-  if (is_multiplayer == true) {
+  if (is_multiplayer === true) {
     ShowVotePlayAgainButtons(false);
+    //TODO not play need to back to menu immediately instead of waiting the other's response
     document.getElementById('vote_playagain_msg').textContent = '正在等待另一名玩家的决定...';
     //model.init(); // 在重新开始之前总是要init()一下的
     socket.emit('Game_VoteNotPlayAgain');
+    delayedFunc(function() {
+        GotoMainMenu();
+        ShowVotePlayAgainForNewRound(false);
+    }, 7);
   }
+}
+
+function HideBarAndBack2Menu(){
+    GotoMainMenu();
+    HideGenericDialog();
+    hideContinueDialog();
 }
 
 function GotoMainMenu() { // 从多人状态退回主菜单

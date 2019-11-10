@@ -14,6 +14,9 @@ class SPManager{
     this.userSpecialRepoIDs = is_multiplayer?this.specialRepoIDs:this.loadSpecials("qqxspecials");
     if(this.userSpecialRepoIDs.length > 0) {
         model.player1.specialIDs = this.loadSpecials("qqxspecialpicks");
+        if(model.player1.specialIDs.length>5 && is_multiplayer){
+            model.player1.specialIDs = model.player1.specialIDs.slice(0, 5);
+        }
     }
     else {
         this.userSpecialRepoIDs.push(this.specialRepoIDs[getRandom(this.specialRepoIDs.length)]);

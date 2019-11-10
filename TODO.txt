@@ -15,14 +15,16 @@ Fixes
 牌太多待选区的底色样式无法自适应
 2. match panel & confirm panel need be centralize into one div to control display
 这几个按钮display分开处理得抽成个方法
+3. replay to end would trigger next game fail
+结算界面出现后断线再连接重放会出现错乱
 
 修复历史详见note.txt
 
 Features
-1. Register & Sign-in module
-注册登录模块
-2. Invite link
-邀请链接
+--1. Register & Sign-in module
+--注册登录模块
+--2. Invite link
+--邀请链接
 3. Reconnect hint
 掉线提示
 4. User game statistics & rank
@@ -31,8 +33,8 @@ Features
 烧绳啦！
 6. User related info ( Treasure cards, win & lose, friends? )
 主要是好友
-7. Chat window
-聊天窗口
+--7. Chat window
+--聊天窗口
 8. Replay
 类似蜘蛛纸牌的回放
 9. Multi Players ( 3-4 )

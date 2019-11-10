@@ -5,6 +5,7 @@ const opponentPrefix='对方说:';
  */
 function popChatPanel(){
     let chatPanel = document.getElementById("chat_panel");
+    document.getElementById("chat_signal").style.display = 'none';
     chatPanel.style.display = (chatPanel.style.display === 'none' ?'':'none');
 }
 
@@ -38,6 +39,10 @@ function sendChat2Server(content){
  * Receive other chat and show in panel.
  */
 function receiveChat(speaker, content){
+    //if panel not displayed, show the signal
+    if(document.getElementById("chat_panel").style.display === 'none'){
+        document.getElementById("chat_signal").style.display = '';
+    }
     let chatHistory = document.getElementById("chat_history_panel");
     chatHistory.innerHTML = chatHistory.innerHTML
         + '<br>'

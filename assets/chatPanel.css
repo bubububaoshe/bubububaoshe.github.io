@@ -1,8 +1,23 @@
+.point{
+    position: relative;
+    float: left;
+    margin-left: calc(-0.1vh + -0.1vw);
+    margin-top: calc(-0.1vh + -0.1vw);
+}
+
+.point::before{
+    content: " ";
+    border: calc(0.4vh + 0.4vw) solid var(--text-glow-color);
+    border-radius:calc(0.4vh + 0.4vw);
+    position: absolute;
+    z-index: 1000;
+}
+
 .chatPanel{
     background:rgba(114,90,64,0.9);
     float:right;
     height: calc( 16.5vh + 16.5vw);
-    width: calc(12.3vh + 12.3vw);
+    width: calc(15.3vh + 15.3vw);
     position: fixed;
     bottom: calc(2.05vh + 2.05vw);
     right:0;
@@ -55,7 +70,7 @@
     float:right;
     background:rgba(114,90,64,0.7);
     height: calc(2vh + 2vw);
-    width: calc(6vh + 6vw);
+    width: calc(7.5vh + 7.5vw);
     position: fixed;
     bottom: 0;
     z-index: 99;

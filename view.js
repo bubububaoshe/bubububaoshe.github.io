@@ -356,7 +356,7 @@ class Messenger {
     if (display == "show")
       messenger.note("无牌可匹配\n需抛弃一张牌");
     else if(display == "hidden")
-      messenger.note("");
+      messenger.note(roundHintMsg);
     else
       console.log("Invalid notifyNoMatch mode:" + display);
   }
