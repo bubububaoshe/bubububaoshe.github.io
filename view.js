@@ -356,7 +356,7 @@ class Messenger {
     if (display == "show")
       messenger.note("无牌可匹配\n需抛弃一张牌");
     else if(display == "hidden")
-      messenger.note("");
+      messenger.note(roundHintMsg);
     else
       console.log("Invalid notifyNoMatch mode:" + display);
   }
@@ -451,9 +451,13 @@ class Messenger {
         msg.textContent = "千秋\n戏王";
       else
         msg.textContent = "你赢了";
+      //TODO need enclosure nicknames into a single class
+      //TODO why list of list here????????????
+      gameManager.sendGameResult(g_nicknames[0][0], true, gameManager.getCurrentGameToken());
       sound.win();
     }
     else if(model.player1.score < model.player0.score){
+      gameManager.sendGameResult(g_nicknames[0][0], false, gameManager.getCurrentGameToken());
       msg.textContent = "你输了";
       sound.lose();
     }

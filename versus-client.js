@@ -4,6 +4,9 @@ avatar = new Avatar(0, 'url("avatars/avatar1.png")');
 avatar.LoadFromCookie();
 UpdateAvatarPreview();
 
+// Round hint
+var roundHintMsg = "";
+
 // New variables for multiplayer mode
 var socket = null;
 var is_my_move = false;
@@ -79,6 +82,7 @@ document.getElementById("cancel_match").addEventListener("click", function(){
   document.getElementById("confirm_match").style.display = "none";
   document.getElementById("cancel_match").style.display = "none";
   document.getElementById('find_opponent').style.display = 'block';
+  document.getElementById('share_button').style.display = 'block';
   HideOpponentAvatarPreview();
 });
 //document.getElementById("multiplayertype1").addEventListener("click", function(){
@@ -188,8 +192,11 @@ function DisableConnectButton() {
 
 function ConnectToServer(is_reconnect = false) {
   if (is_reconnect == false) {
+    // let logoffButton = document.getElementById('logoff_button');
+    // logoffButton.style.display = 'none';
     document.getElementById('vs_ai').disabled="disabled";
-    document.getElementById('avatar_nickname_hint').innerHTML = "<br/><br/>";
+
+    // document.getElementById('avatar_nickname_hint').innerHTML = "<br/><br/>";
     lobbystatus.textContent = '连线中・・・';
     if (socket != null && socket.connected == true) {
       lobbystatus.textContent = '已经连线啦。不用再连啦。';
@@ -203,20 +210,43 @@ function ConnectToServer(is_reconnect = false) {
     }
 
     delayedFunc(function() {
-      if (socket.connected == false) {
+      //User logoff
+      if (socket == null && loginStatus === false){
+        //TODO
+      }
+      else if (socket.connected == false) {
         lobbystatus.textContent = '似乎没有连上...';// socket.io.uri=' + socket.io.uri + "; location.origin=" + location.origin;
         document.getElementById('reconnect').style.display = 'block';
         document.getElementById('vs_ai').disabled = null;
-        document.getElementById('avatar_nickname_hint').opacity = 1;
+        switchMultiPlayerButtons();
+        // document.getElementById('avatar_nickname_hint').opacity = 1;
       }
     }, 10);
   }
-
-  var s = 'http://localhost:3000';
-  if (document.getElementById('servername2').checked == true) s = g_server_url;
+  var s = 'http://127.0.0.1:3000';
+  if(online) {
+      s = 'https://server.amadues.cn:3000';
+  }
+  // if (document.getElementById('servername2').checked == true) s = g_server_url;
   console.log('server:' + s);
   socket = io(s);
   console.log(socket);
+
+  /**
+   * Receive others' chat and show in panel.
+   * @param speaker{string} speaker name
+   * @param content{string} chat content
+   */
+  socket.on('Chat_Receive', function(speaker,content){
+    receiveChat(speaker, content);
+  });
+
+  /**
+   *
+   */
+  socket.on('Invited_Confirmed_Ack', function(){
+
+  });
 
   // Set callbacks
   socket.on('Info_OnlinePlayerCount', function(n) {
@@ -225,7 +255,7 @@ function ConnectToServer(is_reconnect = false) {
 
   socket.on('Info_MyPlayerId', function(pid) {
     g_my_player_id = pid;
-    document.getElementById('myplayerid').textContent = '临时ID: ' + pid;
+    // document.getElementById('myplayerid').textContent = '临时ID: ' + pid;
     // Respond = my avatar idx & nickname
     g_nicknames[1] = avatar.GetNickname();
     g_avataridxes[1] = avatar.idx;
@@ -245,6 +275,7 @@ function ConnectToServer(is_reconnect = false) {
   socket.on('Match_ReadyToMatchAck', function() {
     document.getElementById("start_match").style.display = "none";
     document.getElementById("confirm_match").style.display = "none";
+    document.getElementById('share_button').style.display = 'none';
     document.getElementById("cancel_match").style.display = "inline-block";
     lobbystatus.innerHTML = "正在寻找同伴中";
   });
@@ -262,6 +293,7 @@ function ConnectToServer(is_reconnect = false) {
     ShowMultiplayerStep3();
     document.getElementById('find_opponent').style.display='none';
     document.getElementById("start_match").style.display = "none";
+    document.getElementById("share_button").style.display = "none";
     document.getElementById("confirm_match").style.display = "inline-block";
     document.getElementById("cancel_match").style.display = "inline-block";
     lobbystatus.innerHTML = reason;
@@ -281,8 +313,15 @@ function ConnectToServer(is_reconnect = false) {
 
   var AUTOTEST = true;
   socket.on('Room_PlayerDisconnected', () => {
+    //if match has been notified end, just drop current game as well.
     console.log('对方玩家已离线');
-    ShowGenericDialog('游戏状态改变','对方玩家已离线，只有双方都再连线时游戏才会继续')
+    //TODO fix the condition to a state store ( even a variable ) instead of judge by frontend component
+    if(document.getElementById("finalcontainer").style.visibility = "visible"){
+        alert('对方玩家已退出');
+        HideBarAndBack2Menu();
+    } else {
+        ShowGenericDialog('游戏状态改变', '对方玩家已离线，只有双方都再连线时游戏才会继续')
+    }
   });
 
   socket.on('Room_PlayerReconnected', () => {
@@ -298,6 +337,7 @@ function ConnectToServer(is_reconnect = false) {
     document.getElementById("confirm_match").style.display = "none";
     document.getElementById("cancel_match").style.display = "none";
     document.getElementById('find_opponent').style.display = 'block';
+    document.getElementById('share_button').style.display = 'block';
     HideOpponentAvatarPreview();
   });
 
@@ -312,6 +352,7 @@ function ConnectToServer(is_reconnect = false) {
     // 默认：1+2
     if (pack == null) pack = [1, 2];
     console.log('[先手选取特殊牌], pack=' + pack);
+    MAX_SP_NUM = MAX_SP_NUM_MULTI;
     versus_rank = 1;
     setup();
     model.setPack(pack[0], pack[1]);
@@ -322,6 +363,7 @@ function ConnectToServer(is_reconnect = false) {
 
   socket.on('Match_GameSetupDefensive', (pack) => { // 后手开局
     console.log('[后手选取特殊牌], pack=' + pack);
+    MAX_SP_NUM = MAX_SP_NUM_MULTI;
     if (pack == null) pack = [1, 2];
     versus_rank = 0;
     setup();
@@ -329,6 +371,11 @@ function ConnectToServer(is_reconnect = false) {
     controller.configure();
     ShowVotePlayAgainForNewRound(true);
     oppoTurnActionCount = 0;
+  });
+
+  // get game token, update token and win lose info to crud server after finish
+  socket.on('Match_GameToken', (token) => {
+      gameManager.setCurrentGameToken(token);
   });
 
   socket.on('Match_GameInitOffensive', (other_sp, snapshot, game_id) => {
@@ -367,7 +414,7 @@ function ConnectToServer(is_reconnect = false) {
     var delay = 0;
     // 2 turns = 1回合
     delayedFunc(function() {
-      messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]该你出牌了');
+      messenger.note(roundHintMsg = '[第'+Math.floor((turn_idx+1)/2)+'回合]该你出牌了');
     }, delay);
     model.checkMatch1(); // 压力测试时发现似乎要加一下这个？头有点晕 @_@
 
@@ -375,6 +422,10 @@ function ConnectToServer(is_reconnect = false) {
     if (is_recovered_from_snapshot == true) {
       is_recovered_from_snapshot = false;
       view.unblockGame();
+      //if replay ends and hand deck is empty, trigger final notify
+      if(model.player1.hand.getSize() === 0){
+          messenger.notifyFinal();
+      }
     }
   });
 
@@ -385,7 +436,7 @@ function ConnectToServer(is_reconnect = false) {
 
     var delay = 0;
     delayedFunc(function() {
-      messenger.note('[第'+Math.floor((turn_idx+1)/2)+'回合]对方出牌');
+      messenger.note( roundHintMsg = '[第'+Math.floor((turn_idx+1)/2)+'回合]对方出牌');
     }, delay);
 
     console.log('>>> 对方行动');
@@ -426,25 +477,32 @@ function ConnectToServer(is_reconnect = false) {
   });
 
   socket.on('Game_OpponentGameEnd', () => {
-    messenger.notifyFinal();
+    // messenger.notifyFinal();
   });
 
   socket.on('connect', () => {
     document.getElementById('lobbystatus').textContent = '连接好啦。';
+    document.getElementById('lobbystatus').style.display = 'block';
     document.getElementById('reconnect').style.display = 'none';
     document.getElementById('multiplayerButtons').style.display = 'block';
+    loginStatus = true;
     ShowMultiplayerStep2();
   });
 
   socket.on('disconnect', () => {
-    ShowWaitMessage('啊！你好像离线了。请点此消息刷新页面并重新连接来恢复目前的游戏。', function(){location.reload();});
+    if(loginStatus === true) {
+        ShowWaitMessage('啊！你好像离线了。请点此消息刷新页面并重新连接来恢复目前的游戏。', function () {
+          //
+            location.reload();
+        });
+    }
   });
 
   socket.on('Game_GotoMainMenu', () => {
     document.getElementById('vote_playagain_msg').textContent = '因为大家没有都选继续，所以就返回主菜单啦。';
     delayedFunc(function() {
       GotoMainMenu();
-      ShowVotePlayAgainForNewRound(false)
+      ShowVotePlayAgainForNewRound(false);
     }, 7);
   });
 
@@ -474,8 +532,17 @@ function ShowContinueDialog() {
   ShowVotePlayAgainButtons(true);
   document.getElementById('continuedialog').style.display = 'block';
   delayedFunc(function() {
-    document.getElementById('continuedialog').style.height = '17vw';
+    document.getElementById('continuedialog').style.height = 'calc(13vw + 13vh)';
   }, 0.1);
+}
+
+function hideContinueDialog() {
+    document.getElementById('avatarselection_blocker').style.display='none';
+    ShowVotePlayAgainButtons(false);
+    document.getElementById('continuedialog').style.display = 'none';
+    delayedFunc(function() {
+        document.getElementById('continuedialog').style.height = '0';
+    }, 0.1);
 }
 
 function ShowVotePlayAgainButtons(is_shown) {
@@ -522,12 +589,23 @@ function VotePlayAgain() {
 }
 
 function VoteNotPlayAgain() {
-  if (is_multiplayer == true) {
+  if (is_multiplayer === true) {
     ShowVotePlayAgainButtons(false);
+    //TODO not play need to back to menu immediately instead of waiting the other's response
     document.getElementById('vote_playagain_msg').textContent = '正在等待另一名玩家的决定...';
     //model.init(); // 在重新开始之前总是要init()一下的
     socket.emit('Game_VoteNotPlayAgain');
+    delayedFunc(function() {
+        GotoMainMenu();
+        ShowVotePlayAgainForNewRound(false);
+    }, 7);
   }
+}
+
+function HideBarAndBack2Menu(){
+    GotoMainMenu();
+    HideGenericDialog();
+    hideContinueDialog();
 }
 
 function GotoMainMenu() { // 从多人状态退回主菜单
@@ -535,11 +613,19 @@ function GotoMainMenu() { // 从多人状态退回主菜单
   messenger.hideFinalNotice();
   view.unblockGame();
 
+  //update user info
+  {
+      // let logoffButton = document.getElementById('logoff_button');
+      // logoffButton.style.display = 'none';
+      getUserWinAndLostInfo();
+  }
+
   { // hide match result
     document.getElementById("start_match").style.display = "inline-block";
     document.getElementById("confirm_match").style.display = "none";
     document.getElementById("cancel_match").style.display = "none";
     document.getElementById('find_opponent').style.display = 'block';
+    document.getElementById('share_button').style.display = 'block';
     HideOpponentAvatarPreview();
   }
 
@@ -550,7 +636,7 @@ function GotoMainMenu() { // 从多人状态退回主菜单
   document.getElementById('vs_ai').disabled = null;
   model.clear(); // clearing the model; same as single player mode
   
-  document.getElementById('myplayerid').textContent="";
+  // document.getElementById('myplayerid').textContent="";
   
   { // disconnect
     if (socket != undefined)

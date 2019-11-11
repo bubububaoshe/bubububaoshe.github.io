@@ -37,7 +37,7 @@ html .appcontainer, .appwrapper{
 }
 @media (max-height: 500px) and (orientation: landscape) {
   .appcontainer {
-    margin-top: 5em;
+    /*margin-top: 5em;*/
     position: relative;
   }
 }
@@ -51,9 +51,11 @@ html .appcontainer, .appwrapper{
                                   supported by Chrome and Opera */
 }
 .appwrapper{
-  background: url("https://quadpixels.github.io/img/background.jpg"),
-    repeating-linear-gradient(to top left, var(--page-background), var(--page-background) 5px, var(--page-background2) 5px, var(--page-background2) 10px),
-    var(--page-background);
+  /*background: url("https://quadpixels.github.io/img/background.jpg"),*/
+  /*background: url("img/background.jpg"),*/
+    /*repeating-linear-gradient(to top left, var(--page-background), var(--page-background) 5px, var(--page-background2) 5px, var(--page-background2) 10px),*/
+    /*var(--page-background);*/
+  background: RGB(205,185,155);
   background-size: cover;
   position: fixed;
   top: 0;
@@ -175,7 +177,8 @@ html .appcontainer, .appwrapper{
   transition: background-image var(--transition-sec);
 }
 .cardback{
-  background-image: url("https://quadpixels.github.io/img/back.jpg");
+  /*background-image: url("https://quadpixels.github.io/img/back.jpg");*/
+  background-image: url("img/back.jpg");
 }
 .glow{
   box-shadow: 0px 0px 0.6vw 0.4vw var(--card-glow-color);
@@ -193,12 +196,20 @@ html .appcontainer, .appwrapper{
   text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
   -webkit-text-shadow: calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) calc(var(--card-width)*0.03) var(--text-shadow-color);
 }
+.avatarselect {
+  margin-top: 1vw;
+  width: 7vw;
+  height: 7vw;
+  background-size: 100% 100%;
+  margin-left: -3vw;
+}
 
 .avatarpreview {
+  margin-top: 1vw;
   width: 6vw;
   height: 6vw;
   background-size: 100% 100%;
-  margin-left: 1vw;
+  margin-left: 2vw;
 }
 
 .avatarpreview_small {
@@ -210,7 +221,7 @@ html .appcontainer, .appwrapper{
 
 #continuedialog, #restore_snapshot_dialog, #offensive_wait_msg {
   position: absolute;
-  top: 50%;
+  top: 30%;
   width:100%;
   z-index:100;
   background-color:#281B11;
@@ -240,25 +251,39 @@ html .appcontainer, .appwrapper{
   line-height:4vw;
   margin-left:1vw;
   float:left;
+  cursor: pointer;
 }
 .continue_dialog_button {
   float: left;
   margin: 1vw;
-  width:10vw;
-  height:5vw;
-  line-height:5vw;
+  width:calc(7vw + 7vh);
+  height:calc(2.5vw + 2.5vh);
+  line-height:calc(2.5vw + 2.5vh);
   background-color:#566555;
   color:#aa917f;
+  cursor: pointer;
+  text-align:center;
 }
 
-.configurator_popup_window {
+.register_popup_window {
   position: absolute;
-	width: 100%; top: 10%;
+  width: 100%; top: 10%;
   height: 0;
   color: #EEE;
   text-align: center;
   z-index:100;
-	transition: height 0.7s;
+  transition: height 0.7s;
+  overflow: hidden;
+}
+
+.configurator_popup_window {
+  position: absolute;
+  width: 100%; top: 10%;
+  height: 0;
+  color: #EEE;
+  text-align: center;
+  z-index:100;
+  transition: height 0.7s;
   overflow: hidden;
 }
 

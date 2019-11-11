@@ -3,6 +3,10 @@
 <head>
 	<title>千秋戏 - 开发版</title>
 	<meta charset="UTF-8">
+	<meta name='apple-mobile-web-app-capable' content='yes' />
+	<meta name='full-screen' content='yes' />
+	<meta name='x5-fullscreen' content='true' />
+	<meta name='360-fullscreen' content='true' />
 	<meta name="viewport" content="height=device-height,
                       width=device-width, initial-scale=1.0,
                       minimum-scale=1.0, maximum-scale=1.0,
@@ -13,12 +17,59 @@
 	<link rel="stylesheet" type="text/css" href="decks.css">
 	<link rel="stylesheet" type="text/css" href="notifications.css">
 	<link rel="stylesheet" type="text/css" href="tableinfo.css">
+	<link rel="stylesheet" type="text/css" href="assets/chatPanel.css">
+	<base target="_blank">
 </head>
 
 <div class="appcontainer noselect">
 	<div class="appwrapper">
 	<div id="configurator" class="flexbox transitopacity">
-	  <div id="btn_autotest" style="background-color:#66f; display:none" onclick="AUTOTEST_autostartmatch()">自动测试</div>
+
+		<!--<div id="register_window" class="register_popup_window" style="height: 34vw;" >-->
+		<div id="register_window" class="register_popup_window" >
+			<div style="width:100%; position: relative;
+				background-color: #281B11; height:100%;
+							border: 1px #EEE solid;">
+				<!-- Top Row -->
+				<div style="position:relative; margin-left:6vw; left:-50%; top:1vw;">
+					<div onclick="closeRegisterWindow();"
+						 style="left:1vw; top:1vw; width:4vw; height:4vw;
+							background-size:100% 100%;
+									background-image:url('avatars/back.png');
+									float:left;">
+					</div>
+				</div>
+				<br>
+				输入名字：
+				<input style="width: 70%;height: 5vh;" id="username_input" type="text" name="yourname" value = ""><br>
+				<br>
+				输入密码：
+				<input style="width: 70%;height: 5vh" id="password_input" type="password" name="yourpw" value = ""><br>
+				<br>
+				<div style="width: 100%;height: 5vh" id="confirm_password_block">
+					确认密码：
+					<input style="width: 70%;height: 5vh"  id="confirm_password_input" type="password" name="yourpw" value = "">
+				</div>
+				<br>
+				<div id="login_submit"
+					 onclick="getInputUsernameAndPwdThenRegister(true)"
+					 style="width:50%; height:5vh;line-height: 5vh; margin-top:1vh; background: #fceba4; color: #000000; cursor: pointer;">
+					登录
+				</div>
+				<div id="register_submit"
+					 onclick="getInputUsernameAndPwdThenRegister(false)"
+					 style="width:50%; height:5vh;line-height: 5vh; margin-top:1vh; background: #fceba4; color: #000000; cursor: pointer;">
+					注册
+				</div>
+				<br><br>
+				<div id="register_message" style="display: none">
+					错误信息
+				</div>
+				<!--a div to render register result-->
+			</div>
+		</div>
+
+		<div id="btn_autotest" style="background-color:#66f; display:none" onclick="AUTOTEST_autostartmatch()">自动测试</div>
 
 		<div id="modeinput" class="segmented-control" style="width: 100%; color: #334422">
 			<input type="radio" name="gamemode" id="vs_ai"     checked onclick='SetGameMode(1);'>
@@ -26,10 +77,10 @@
 			<label for="vs_ai"     data-value="独享的快乐">单人游戏</label>
 			<label for="vs_player" data-value="双倍的快乐">双人对战</label>
 		</div>
-		
+
 		<div id="packselect_info">
 		</div>
-		
+
 		<div id="packinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="version" id="p12" onclick='SetPack([1,2]);'>
 			<input type="radio" name="version" id="p13" onclick='SetPack([1,3]);'>
@@ -38,7 +89,7 @@
 			<label for="p13" data-value="1+3 代人物">1+3</label>
 			<label for="p23" data-value="2+3 代人物">2+3</label>
 		</div>
-		
+
 		<div id="voiceinput" class="segmented-control" style="width: 100%; color: #281B11">
 			<input type="radio" name="voice" id="voiceon">
 			<input type="radio" name="voice" id="voiceoff">
@@ -65,16 +116,48 @@
 		</div>
 		<div id="comfirmSetting" class="confirmbutton">确认此设置</div>
 		<div id="multiplayerinfo" style="width:100%; color:#112211; border: 1px #112211 solid; height: 16vw; font-size:2vw;">
-      <div id="avatar_and_nickname" style="width:50%; float:left;">
 
-        <div style="height: 6vw">
-          <div id="avatar_nickname_hint" style="text-align:center;float:left;clear:both;">点击修改头像与昵称<br/>连线之后就不能改了</div>
-          <div id="curr_avatar" class="avatarpreview glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;" onclick="ShowAvatarSelectionMenu();"></div>
-          <div style="height: 6vw; margin-left: 0.5vw; vertical-align:middle; float:left;">
-            <div id="nickname_disp" style="margin-top:1.5vw; font-size:2vw; display:block"
-              onclick="StartEditingNickname();">名字在这</div>
-          </div>
-        </div> <!-- End of 头像设置 -->
+	  <!--头像设置 登录注册部分-->
+      <div id="avatar_and_nickname" style="width:50%; float:left;">
+		  <div id='avatar_panel' style="margin-top:1vw; display: none;height: 55%; width: 100%">
+			<!--<div id="avatar_nickname_hint" style="text-align:center;float:left;clear:both;">点击修改头像与昵称<br/>连线之后就不能改了</div>-->
+			<div id="curr_avatar" class="avatarpreview glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;" onclick="ShowAvatarSelectionMenu();">
+
+			</div>
+			<div style="width: 60%; height: 6vh; margin-left: 2vw; vertical-align:middle; float:left;">
+				<div id="nickname_disp" style="float:left; font-size:2vw; display:block">
+					名字在这
+				</div>
+				<div id="logoff_button" style="float:right;width:50%; color:white; font-size:2vw; display:block;cursor:pointer; background:#281b11"
+							onclick="logoff(); ">
+					退出
+				</div>
+				<div id="title_panel" style="clear:both;margin-top:0.2vh; font-size: 2vw;color: yellow; float: left;">
+					称号: [--]
+				</div>
+			</div>
+
+
+		  </div>
+		  <div id="win_lose_panel" style="display:none;text-align:center;float:left;clear:both;width:100%;height:30%;margin-top: 3%" >
+			  <div id="win_panel" style="font-size: 2vw;color: #DB4D3D; float:left;margin-left: 2vw">
+				  胜: --
+			  </div>
+			  <div id="lose_panel" style="font-size: 2vw;color: green; float: left;margin-left: 2vw">
+				  负: --
+			  </div>
+		  </div>
+		  <div id="login_panel" style="text-align:center;float:left;clear:both;width:100%;height:30%;margin-top: 3%" >
+			  <div id="login_button" style="width:40%;padding:3%; margin-top:2.5vw;color:white; font-size:2vw; display:inline-block; ;cursor:pointer; background:#281b11"
+				   onclick="popRegisterWindow(true); ">
+				  登录
+			  </div>
+			  <div id="register_button" style="width:40%;padding:3%; margin-top:2.5vw;color:white; font-size:2vw; display:inline-block; ;cursor:pointer; background:#281b11"
+				   onclick="popRegisterWindow(false);">
+				  注册
+			  </div>
+		  </div>
+	  <!-- End of 头像设置 -->
       </div>
       <div style="width:50%; float: left">
         <!-- 连线前 -->
@@ -86,7 +169,10 @@
             <label for="servername2" data-value="默认服务器">不要打雷</label>
             <!--<label for="servername3" data-value="不怕打雷" disabled>二号服务器</label>-->
           </div>
-        <div id="connect_to_server" style="width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;" onclick='ConnectToServer();'>
+	    <div id="connect_to_server_mask" style="width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;cursor: default">
+		  [请先登录！]
+	    </div>
+        <div id="connect_to_server" style="display:none; width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;" onclick='ConnectToServer();'>
           [决定好了，连线]
         </div>
         <div id="reconnect" style="width:100%; height:5vw; background-color: #112211; display:none;">
@@ -97,7 +183,7 @@
         <!-- 当前服务器信息 -->
         <div style="height:3vw; width:100%">
           <div id="lobbystatus" style="float:left;"></div>
-          <div id="myplayerid" style="float:right; margin-right:1vw"></div>
+          <!--<div id="myplayerid" style="float:right; margin-right:1vw"></div>-->
           <div style="clear:both;"></div>
           <div id="refresh_lobbystatus" style="width:100%; display: none">
             [刷新]
@@ -105,12 +191,12 @@
         </div>
 
         <!-- 开始多人游戏 -->
-        <div id="multiplayerButtons" style="width:100%; display: none">
-          <div id="opponent_avatar_name" style="display:none">
-            <div style="height: 6vw">
+        <div id="multiplayerButtons" style="width:100%; display: none;margin-top: 0vw">
+          <div id="opponent_avatar_name" style="display: none">
+            <div style="height: 6vw; float: left; width:50%">
               <div id="oppo_avatar" class="avatarpreview glow" style="background-image: url('avatars/avatar1.png'); float:left; clear:left;"></div>
-              <div style="height: 6vw; margin-left: 0.5vw; vertical-align:middle; float:left;">
-                <div id="oppo_nickname" style="margin-top:1.5vw; font-size:2vw; display:block">对手的名字
+              <div style="height: 6vw; ; vertical-align:middle; float:left;">
+                <div id="oppo_nickname" style="margin-top:1vw; font-size:2vw; display:block">对手的名字
                 </div>
               </div>
             </div>
@@ -118,8 +204,9 @@
           <div id="match_buttons" style="margin-bottom: 0.5vw; margin-top: 0.5vw">
             <div id="find_opponent" class="multiplayerbutton" onclick="ShowOpponentFinderMenu();">查找玩家</div>
             <div id="start_match" class="multiplayerbutton">随机匹配</div>
+			<div id="share_button" class="multiplayerbutton" onclick="shareLink()">点击邀请</div>
           </div>
-          <div id="confirm_cancel_buttons" style="width:100%; margin-bottom: 0.5vw; margin-top: 0.5vw">
+          <div id="confirm_cancel_buttons" style="width:50%; margin-bottom: 0.5vw; margin-top: 0.5vw">
             <div id="confirm_match" class="multiplayerbutton" style="background-color:#66CC66;display:none">确认</div>
             <div id="cancel_match" class="multiplayerbutton" style="background-color:#CC6666;display:none">放弃</div>
             <div style="clear: both; width:100%;"></div>
@@ -133,12 +220,19 @@
 		</div>
 
 		<div style="width:100%" id="footer">
+			原版以及原作者主页:
 			<br/>
-			原版以及原作者主页：
-			<br/>
-			<a style="color:#281b11" href="https://bubububaoshe.github.io/">https://bubububaoshe.github.io/</a> | <a style="color:#281b11" href="https://github.com/bubububaoshe/bubububaoshe.github.io">[github]</a></div>
-			<br/>
-			<div><a onclick="ShowUpdateInfo();" style="color:#281b11" href="#">更新记录</a></div>
+			<a style="color:#281b11" href="https://bubububaoshe.github.io/">https://bubububaoshe.github.io/</a> | <a style="color:#281b11" href="https://github.com/bubububaoshe/bubububaoshe.github.io">[github]</a>
+			<br>
+			<a style="color:#281b11" href="https://github.com/Aicitel/bubububaoshe.github.io/">当前更新分支</a> | <a style="color:#281b11" href="https://github.com/Aicitel">求活的美术拯救直男审美</a>
+			<br>
+			<div style="width:100%;font-size: 1.5vw">
+				<del>找牌友</del>测试建议群:914630192 <del>欢迎小白鼠</del>
+			</div>
+		</div>
+	</div>
+
+			<!--<div><a onclick="ShowUpdateInfo();" style="color:#281b11" href="#">更新记录</a></div>-->
 	</div>
 	<div id="spselection" class="transitopacity">
 		<div class="selectionarea verticalflex">
@@ -152,7 +246,7 @@
 		</div>
 		<div class="rightsidebar verticalflex">
 			<div></div>
-			<div id="selectioninfo" class="centeredtext"><div>从上方牌库<br />选择特殊牌<br />到下方牌组<br />最多选15张</div></div>
+			<div id="selectioninfo" class="centeredtext"><div>选择特殊牌<br />到下方牌组<br />最多选15张<br />(对战模式下5张)</div></div>
 			<div id="gamestart" class="centeredtext button"><div>开始<br />游戏</div></div>
 		</div>
 	</div>
@@ -220,6 +314,7 @@
 			</div>
 		</div>
 	</div>
+
 
   <div id="opponentfinder" class="configurator_popup_window">
     <div style="width: 60%; margin-left: 20%;
@@ -293,20 +388,23 @@
     </div>
   </div>
 
-  <div id="continuedialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:0px;">
-    <div style="color:#7a614f">还继续玩吗？</div>
-    <div style="color:#999">只有双方都选“继续玩”才会新开一局，不然就返回主菜单啦。</div>
-    <div style="width:24vw; margin-left:auto; margin-right:auto;">
-      <div id="vote_play_again" class='continue_dialog_button' onclick="VotePlayAgain();">
-      继续玩
-      </div>
-      <div id="vote_not_play_again" class='continue_dialog_button' onclick="VoteNotPlayAgain();">
-      不玩了
-      </div>
-      <div style="clear:both; width:100%;"></div>
-    </div>
-    <div id="vote_playagain_msg" style="color:#EEE;width:100%";></div>
-  </div>
+	<div id="continuedialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:calc(13vw + 13vh);">
+		<div style="color:#7a614f">还继续玩吗？</div>
+		<div style="color:#999">只有双方都选“继续玩”才会新开一局，不然就返回主菜单啦。</div>
+		<div style="width:100%; margin-left:auto; margin-right:auto;">
+			<div id="vote_play_again" class='continue_dialog_button' onclick="VotePlayAgain();">
+				继续玩
+			</div>
+			<div id="vote_not_play_again" class='continue_dialog_button' onclick="VoteNotPlayAgain();">
+				不玩了
+			</div>
+			<div id="back_button" class='continue_dialog_button' onclick="HideBarAndBack2Menu();">
+				退出
+			</div>
+			<div style="clear:both; width:100%;"></div>
+		</div>
+		<div id="vote_playagain_msg" style="color:#EEE;width:100%";></div>
+	</div>
 
 	<div id="restore_snapshot_dialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:0px;">
 		<div style="color:#EEE">是否恢复之前的游戏？</div>
@@ -355,7 +453,7 @@
 					</div>
 					<div id= "restart" class="button centeredtext">
 						<div id="finalmsg" class="bignotice"></div>
-						<div class="bannertext">再来亿局</div>
+						<div class="bannertext2">再来亿局</div>
 					</div>
 					<div class="string"></div>
 				</div>
@@ -411,6 +509,24 @@
 		<div id="specialboard">
 			<div id="specials0" class="cardstack"></div>
 			<div id="hoverinfobox" class="bignotice"></div>
+			<!--聊天框部分 start-->
+			<div id="chat_panel_pop_button" class="chatButton" style="right:0;" onclick="popChatPanel()">
+				<div id="chat_signal" style="display: none;" class="point"></div>
+				<span>聊天</span>
+			</div>
+			<div id="chat_panel" class="chatPanel" style="display:none;" >
+				<div id="chat_history_panel" class="chatPanelHistory">
+			<span class="opponent_chat">
+				对局开始！
+			</span>
+				</div>
+				<textarea id="chat_input"></textarea>
+				<div id="chat_panel_send_button" class="chatButton" style="right:calc(7.75vh + 7.75vw);" onclick="sendChat()">
+					<span>发送</span>
+				</div>
+			</div>
+			<!--聊天框部分 end-->
+
 			<div id="avatarboxes" class="bignotice"
 			     style="position:absolute;
 					        padding:0;
@@ -482,29 +598,27 @@
 	  请等待另一名玩家选择完特殊牌
 	  </div>
 	</div>
+
 	<div id="genericdialog" style="width:100%;position:absolute;top:50%;
 	                               z-index:100;display:none;background-color:#281B11;
 																 border:1px #FFF solid;color:#EEE;">
 		<div id="genericdialog_title" style="color:#7a614f">标题</div>
 		<div id="genericdialog_content" style="margin-left:auto; margin-right:auto;"></div>
+		<div id="genericdialog_buton" onclick="HideBarAndBack2Menu()" style="margin-left: auto;">退出</div>
 	</div>
 
 	<audio id="soundeffect" src=""></audio>
+
 </div>
 </div>
 </body>
 </html>
 <script type="text/javascript">
-  var g_server_url = 'http://47.75.12.130:3002';
-</script>
-<script src="http://edgeofmap.com/qqxupd/1000autumns.js"></script>
-
-<script type="text/javascript">
   // GLOBAL VARIABLES!
   var is_using_localstore = false;
 	var g_resource_prefix = "";
 	var g_version_id = 1010;
-	var g_update_url = "http://edgeofmap.com/qqxupd/index.php"
+	// var g_update_url = "http://edgeofmap.com/qqxupd/index.php"
 	//var g_update_url = "http://localhost/qqxupd/index.php";
 
   //
@@ -597,15 +711,23 @@
 			var x=document.getElementsByClassName('appwrapper');
 			if (x.length > 0) {
 				x = x[0];
-				x.style.backgroundImage = "url('img/background.jpg')";
+				// x.style.backgroundImage = "url('img/background.jpg')";
 			}
 			g_resource_prefix = "";
 	  } else {
 			console.log("Resources will be fetched from remote");
-	    g_resource_prefix = "https://quadpixels.github.io/";
+          g_resource_prefix = "";
+	    // g_resource_prefix = "https://quadpixels.github.io/";
+        //   g_resource_prefix = "https://qianqiuxi.net/";
 	  }
 	}
 </script>
+<script type="text/javascript">
+	const online = false;
+</script>
+<script src="js/tool/ajax.js"></script>
+<script src="socket.io/socket.io.js"></script>
+
 <script src="cookieAndLocalStore.js"></script>
 <script src="tricks.js"></script>
 <script src="model.js"></script>
@@ -614,10 +736,24 @@
 <script src="tableinfoview.js"></script>
 <script src="view.js"></script>
 <script src="avatar.js"></script>
-<script src="socket.io/socket.io.js"></script>
 <script src="versus-client.js"></script>
+<script src="js/interact/gameManager.js"></script>
+<script src="js/interact/register.js"></script>
+<script src="js/interact/info.js"></script>
+<script src="js/interact/chat.js"></script>
+<script src="js/interact/shareLink.js"></script>
+
 <script type="text/javascript">
 
-FetchUpdateInfo(g_version_id);
+	// FetchUpdateInfo(g_version_id);
+	/**
+	 * Check cookie and login.
+	 */
+	checkCookieAndLogin();
+
+	/**
+	 * Parse link and if there is inviter, jump to login.
+	 */
+    setTimeout(parseLink, 200);
 
 </script>

@@ -1,0 +1,42 @@
+Enhances
+1. Split server code base & client code base.
+分开CS端仓库
+2. Refactor the js files.
+调节一下文件目录结构
+3. Compress the resources and use http2.0+ to reduce transfer latency.
+目前web端resource太多体积很大传输过慢，代码侧考虑添加优化，运维侧考虑添加多HOST参与静态分发
+4. Quite a lot data binding work, maybe SPA framework could make the development easier.
+上框架会让数据绑定工作简单很多，但是对移动端的兼容性比较堪忧，性能上也会有一定挑战
+5. Mobile font adaptation
+移动端有些尺寸下界面还是怪怪的...
+
+Fixes
+1. Fix too many special card style in pick stage
+牌太多待选区的底色样式无法自适应
+2. match panel & confirm panel need be centralize into one div to control display
+这几个按钮display分开处理得抽成个方法
+3. replay to end would trigger next game fail
+结算界面出现后断线再连接重放会出现错乱
+
+修复历史详见note.txt
+
+Features
+--1. Register & Sign-in module
+--注册登录模块
+--2. Invite link
+--邀请链接
+3. Reconnect hint
+掉线提示
+4. User game statistics & rank
+用户对据统计&排位
+5. Count down time
+烧绳啦！
+6. User related info ( Treasure cards, win & lose, friends? )
+主要是好友
+--7. Chat window
+--聊天窗口
+8. Replay
+类似蜘蛛纸牌的回放
+9. Multi Players ( 3-4 )
+多人麻将
+

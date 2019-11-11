@@ -31,6 +31,11 @@
   justify-content: space-between;
 }
 .bannertext{
+  margin-left: 25%;
+  font-size: calc(var(--card-height)*0.2);
+  color: var(--text-color);
+}
+.bannertext2{
   font-size: calc(var(--card-height)*0.2);
   color: var(--text-color);
 }
@@ -205,7 +210,7 @@
   position: relative;
   min-height: 50%;
   max-height: 70%;
-  width: 60%;
+  width: 70%;
   top: 10%;
   margin: auto;
   align-items: center;

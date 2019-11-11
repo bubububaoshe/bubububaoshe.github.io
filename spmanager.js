@@ -7,13 +7,20 @@ SPECIAL_CHAR_LIST = [
 
 class SPManager{
   constructor(){}
-  setup(){
+  setup(is_multiplayer){
+    //when multi players, set all special cards available
     this.specialRepoIDs = SPECIAL_CHAR_LIST[model.pack[0]-1].concat(SPECIAL_CHAR_LIST[model.pack[1]-1]);
-    this.userSpecialRepoIDs = this.loadSpecials("qqxspecials");
-    if(this.userSpecialRepoIDs.length > 0)
-      model.player1.specialIDs = this.loadSpecials("qqxspecialpicks");
-    else
-      this.userSpecialRepoIDs.push(this.specialRepoIDs[getRandom(this.specialRepoIDs.length)]);
+    this.userSpecialRepoIDs = this.specialRepoIDs;
+    this.userSpecialRepoIDs = is_multiplayer?this.specialRepoIDs:this.loadSpecials("qqxspecials");
+    if(this.userSpecialRepoIDs.length > 0) {
+        model.player1.specialIDs = this.loadSpecials("qqxspecialpicks");
+        if(model.player1.specialIDs.length>5 && is_multiplayer){
+            model.player1.specialIDs = model.player1.specialIDs.slice(0, MAX_SP_NUM_MULTI);
+        }
+    }
+    else {
+        this.userSpecialRepoIDs.push(this.specialRepoIDs[getRandom(this.specialRepoIDs.length)]);
+    }
     //this.userSpecialRepoIDs = this.specialRepoIDs;
     this.userSpecialRepository = new SpecialRepository();
     this.userSpecialRepository.init(this.userSpecialRepoIDs);
