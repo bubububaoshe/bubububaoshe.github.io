@@ -287,11 +287,14 @@ class Controller{
       oppoinfo.exitSelectionPanel(controller.selectSwap);
       var type = "SwapTrick";
       obtainVector.setTrickTarget(type, model.player0.table.getChar(div.id));
-      if (is_multiplayer) // changed in multiplayer
-        socket.emit('Game_SetSwapTrickTarget', div.id);
+      if (is_multiplayer) { // changed in multiplayer
+          socket.emit('Game_SetSwapTrickTarget', div.id);
+      }
       controller.handleCopies();
+      //Need decrement barrier here, or click blank area will trigger decrement as well and trigger issue
+      //https://github.com/bubububaoshe/bubububaoshe.github.io/issues/10
+      DecrementActionBarrier();
     }
-    DecrementActionBarrier();
   }
   selectBan(event){
     var div = event.target.closest(".smallchar");
