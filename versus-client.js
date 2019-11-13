@@ -1,5 +1,7 @@
 // 选取头像的面板
-PopulateAvatarChoicePanel(document.getElementById('avatar_choices'));
+// lazy select avatar after open selection window
+var avatarLoaded = false;
+// PopulateAvatarChoicePanel(document.getElementById('avatar_choices'));
 avatar = new Avatar(0, 'url("avatars/avatar1.png")');
 avatar.LoadFromCookie();
 UpdateAvatarPreview();
@@ -298,9 +300,9 @@ function ConnectToServer(is_reconnect = false) {
     document.getElementById("cancel_match").style.display = "inline-block";
     lobbystatus.innerHTML = reason;
     CloseOpponentFinderMenu();
-    ShowOpponentAvatarPreview(oppo_nickname, oppo_avataridx);
     g_nicknames[0] = oppo_nickname;
     g_avataridxes[0] = oppo_avataridx;
+    ShowOpponentAvatarPreview(oppo_nickname, oppo_avataridx);
   });
 
   socket.on('Match_ConfirmMatchAck', function(msg) {
@@ -316,7 +318,7 @@ function ConnectToServer(is_reconnect = false) {
     //if match has been notified end, just drop current game as well.
     console.log('对方玩家已离线');
     //TODO fix the condition to a state store ( even a variable ) instead of judge by frontend component
-    if(document.getElementById("finalcontainer").style.visibility = "visible"){
+    if(document.getElementById("finalcontainer").style.visibility === "visible"){
         alert('对方玩家已退出');
         HideBarAndBack2Menu();
     } else {
@@ -615,8 +617,6 @@ function GotoMainMenu() { // 从多人状态退回主菜单
 
   //update user info
   {
-      // let logoffButton = document.getElementById('logoff_button');
-      // logoffButton.style.display = 'none';
       getUserWinAndLostInfo();
   }
 

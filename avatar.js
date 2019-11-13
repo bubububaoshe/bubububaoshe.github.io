@@ -79,6 +79,10 @@ function CloseAvatarSelectionMenu() {
 function ShowAvatarSelectionMenu() {
   //TODO need hide the avatar selection panel instead of short drop here
   if (socket != undefined && socket.connected == true) return;
+  if (avatar.nickname === "无名之人") return;
+  if(avatarLoaded === false){
+      PopulateAvatarChoicePanel(document.getElementById('avatar_choices'));
+  }
   var s = document.getElementById('avatarselection');
   var b = document.getElementById('avatarselection_blocker');
   var avatars = document.getElementById('avatar_choices').children;
@@ -194,7 +198,7 @@ class Avatar {
 
     var n = getCookie('nickname');
     if (n != null && n.length > 0) this.nickname = n;
-    else this.nickname = '没有名字';
+    else this.nickname = '无名之人';
   }
   SaveToCookie() {
     setCookie('avatar_idx', this.idx);

@@ -17,7 +17,7 @@ const invitePrefix = "inviter=";
  * Generate share link.
  */
 function shareLink(){
-    let link = shareHeader + webUrl + encodeURI(invitePrefix + avatar.GetNickname());
+    let link = "【"+avatar.nickname+"】" + shareHeader + webUrl + encodeURI(invitePrefix + avatar.GetNickname());
     let tag = document.createElement('input');
     tag.setAttribute('id', 'copy_input');
     tag.value = link;
@@ -41,8 +41,7 @@ function parseLink(){
     if(inviter === undefined){
         //TODO alert user url not valid
     } else{
-        console.log(inviter);
-        if(inviter === avatar.GetNickname()){
+        if(inviter === avatar.GetNickname()[0]){
             //TODO alert cannot invite self.
         }
         //If already login

@@ -2,8 +2,16 @@
  * Information module for query info from server
  */
 
-function getUserWinAndLostInfo(){
-    getUserInfo(getCookie('nickname')[0], getCookie('token')[0]);
+/**
+ * Wrapper to get info
+ * @param isAnonymous{boolean} show -- when anonymous login
+ */
+function getUserWinAndLostInfo(isAnonymous = false){
+    if(isAnonymous){
+        updateWinAndLostInfo('??', '??', '无名' );
+    } else {
+        getUserInfo(getCookie('nickname')[0], getCookie('token')[0]);
+    }
 }
 
 /**
