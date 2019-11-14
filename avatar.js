@@ -197,7 +197,7 @@ class Avatar {
     this.bkimgurl = 'url("' + g_resource_prefix + AVATAR_PREFIX + AVATAR_FILENAMES[this.idx] + '")';
 
     var n = getCookie('nickname');
-    if (n != null && n.length > 0) this.nickname = n;
+    if (n != null && n.length > 0) this.nickname = n[0];
     else this.nickname = '无名之人';
   }
   SaveToCookie() {

@@ -67,12 +67,14 @@ function switchLobbyStatus(isActive) {
 }
 /**
  * Update ui components:
+ *  vs_ai
  *  connection_button
  *  win_lose_title_panel
  *  avatar_nickame_panel
  *  @param isAnonymous{boolean}
  */
 function updateLoginRelatedInfo(isAnonymous = false){
+    document.getElementById('vs_ai').disabled = true;
     loginStatus = true;
     nickname_disp.textContent = avatar.GetNickname();
     switchAvatarAndLoginPanel(true);
