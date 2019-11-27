@@ -339,7 +339,7 @@ class SPManager{
       return;
     }
     var arrs = [[],[]];
-    for(var i=0; i<carray.length; i++)
+    for(let i=0; i<carray.length; i++)
       if(carray[i].includes(model.pack[0]))
         arrs[0].push(carray[i]);
       else
@@ -347,8 +347,11 @@ class SPManager{
           arrs[1].push(carray[i]);
         else
           alert("Illegal SPChar ID:" + carray[i]);
-    for(var i=0; i<2; i++)
-      setCookie(type+model.pack[i], arrs[i]);
+    if(loginStatus === false && socket === null) {
+        for (let i = 0; i < 2; i++) {
+            setCookie(type + model.pack[i], arrs[i]);
+        }
+    }
   }
   loadSpecials(type){
     return getCookie(type+model.pack[0]).concat(getCookie(type+model.pack[1]));

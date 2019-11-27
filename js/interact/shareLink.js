@@ -10,14 +10,14 @@
  */
 
 const shareHeader = "邀你来玩一局千秋戏！：";
-const webUrl = "https://amadeus-lab.club/game/#";
+const webUrl = "https://www.qianqiuxi.net/game/#";
 const invitePrefix = "inviter=";
 
 /**
  * Generate share link.
  */
 function shareLink(){
-    let link = shareHeader + webUrl + encodeURI(invitePrefix + avatar.GetNickname());
+    let link = "【"+avatar.nickname+"】" + shareHeader + webUrl + encodeURI(invitePrefix + avatar.GetNickname());
     let tag = document.createElement('input');
     tag.setAttribute('id', 'copy_input');
     tag.value = link;
@@ -32,7 +32,7 @@ function shareLink(){
  * Parse invite link and response to server.
  */
 function parseLink(){
-    //If not connected, retry after 1S
+    //If not connected, retry after 0.5S
     if(socket === null || socket === undefined) {
         setTimeout(parseLink, 500);
         return;
@@ -41,7 +41,6 @@ function parseLink(){
     if(inviter === undefined){
         //TODO alert user url not valid
     } else{
-        console.log(inviter);
         if(inviter === avatar.GetNickname()){
             //TODO alert cannot invite self.
         }

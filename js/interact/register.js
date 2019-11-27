@@ -67,18 +67,21 @@ function switchLobbyStatus(isActive) {
 }
 /**
  * Update ui components:
+ *  vs_ai
  *  connection_button
  *  win_lose_title_panel
  *  avatar_nickame_panel
+ *  @param isAnonymous{boolean}
  */
-function updateLoginRelatedInfo(){
+function updateLoginRelatedInfo(isAnonymous = false){
+    document.getElementById('vs_ai').disabled = true;
     loginStatus = true;
     nickname_disp.textContent = avatar.GetNickname();
     switchAvatarAndLoginPanel(true);
     switchConnectButton(true);
     switchMultiPlayerButtons(loginStatus && socket!=null && socket.connected === true);
     switchLobbyStatus(loginStatus);
-    getUserWinAndLostInfo();
+    getUserWinAndLostInfo(isAnonymous);
     ConnectToServer();
 }
 
@@ -91,16 +94,11 @@ function popRegisterWindow(isLogin) {
     let confirmPwdWindow = document.getElementById('confirm_password_block');
     let registerSubmit = document.getElementById('register_submit');
     let loginSubmit = document.getElementById('login_submit');
-    showRegMsg('');
-    if(isLogin){
-        confirmPwdWindow.style.display = 'none';
-        loginSubmit.style.display = '';
-        registerSubmit.style.display = 'none';
-    } else {
-        confirmPwdWindow.style.display = '';
-        registerSubmit.style.display = '';
-        loginSubmit.style.display = 'none';
-    }
+    let anonymousLoginSubmit = document.getElementById('anonymous_login_submit');
+    confirmPwdWindow.style.display = isLogin?'none':'';
+    loginSubmit.style.display = isLogin?'':'none';
+    anonymousLoginSubmit.style.display = isLogin?'':'none';
+    registerSubmit.style.display = isLogin?'none':'';
     registerWindow.style.height = "45vh";
 }
 
@@ -174,6 +172,16 @@ function login(username, password){
             showRegMsg(message);
         }
     });
+}
+
+/**
+ * Login anonymous
+ */
+function anonymousLogin(){
+    logoff();
+    closeRegisterWindow();
+    avatar.SetNickname("无名之人");
+    updateLoginRelatedInfo(true)
 }
 
 /**

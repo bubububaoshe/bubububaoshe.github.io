@@ -40,26 +40,31 @@
 					</div>
 				</div>
 				<br>
-				输入名字：
+				阁下名号
 				<input style="width: 70%;height: 5vh;" id="username_input" type="text" name="yourname" value = ""><br>
 				<br>
-				输入密码：
+				阁下口令
 				<input style="width: 70%;height: 5vh" id="password_input" type="password" name="yourpw" value = ""><br>
 				<br>
 				<div style="width: 100%;height: 5vh" id="confirm_password_block">
-					确认密码：
+					重复口令
 					<input style="width: 70%;height: 5vh"  id="confirm_password_input" type="password" name="yourpw" value = "">
 				</div>
 				<br>
 				<div id="login_submit"
 					 onclick="getInputUsernameAndPwdThenRegister(true)"
 					 style="width:50%; height:5vh;line-height: 5vh; margin-top:1vh; background: #fceba4; color: #000000; cursor: pointer;">
-					登录
+					入局！
+				</div>
+				<div id="anonymous_login_submit"
+					 onclick="anonymousLogin()"
+					 style="width:50%; height:5vh;line-height: 5vh; margin-top:1vh; background: #fceba4; color: #000000; cursor: pointer;">
+					吾乃无名之人
 				</div>
 				<div id="register_submit"
 					 onclick="getInputUsernameAndPwdThenRegister(false)"
 					 style="width:50%; height:5vh;line-height: 5vh; margin-top:1vh; background: #fceba4; color: #000000; cursor: pointer;">
-					注册
+					留名！
 				</div>
 				<br><br>
 				<div id="register_message" style="display: none">
@@ -150,11 +155,11 @@
 		  <div id="login_panel" style="text-align:center;float:left;clear:both;width:100%;height:30%;margin-top: 3%" >
 			  <div id="login_button" style="width:40%;padding:3%; margin-top:2.5vw;color:white; font-size:2vw; display:inline-block; ;cursor:pointer; background:#281b11"
 				   onclick="popRegisterWindow(true); ">
-				  登录
+				  入局！
 			  </div>
 			  <div id="register_button" style="width:40%;padding:3%; margin-top:2.5vw;color:white; font-size:2vw; display:inline-block; ;cursor:pointer; background:#281b11"
 				   onclick="popRegisterWindow(false);">
-				  注册
+				  留名！
 			  </div>
 		  </div>
 	  <!-- End of 头像设置 -->
@@ -170,7 +175,7 @@
             <!--<label for="servername3" data-value="不怕打雷" disabled>二号服务器</label>-->
           </div>
 	    <div id="connect_to_server_mask" style="width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;cursor: default">
-		  [请先登录！]
+		  [请先入局！]
 	    </div>
         <div id="connect_to_server" style="display:none; width:100%; height:6vw; line-height:6vw; background-color: #112211; color:#fff;" onclick='ConnectToServer();'>
           [决定好了，连线]
@@ -409,7 +414,7 @@
 	<div id="restore_snapshot_dialog" style="font-size: 2vw; display:none; transition:height 0.7s; overflow:hidden; height:0px;">
 		<div style="color:#EEE">是否恢复之前的游戏？</div>
 		<div style="color:#aa9976" id="restore_dialog_info"></div>
-		<div style="width:24vw; margin-left:auto; margin-right:auto;">
+		<div style="margin-left:auto; margin-right:auto;">
       <div id="restore_snapshot_yes" class='continue_dialog_button' onclick="RestoreSnapshotButtonClicked(true);">
       是
       </div>
@@ -723,9 +728,10 @@
 	}
 </script>
 <script type="text/javascript">
-	const online = false;
+	const online = true;
 </script>
 <script src="js/tool/ajax.js"></script>
+<script src="js/tool/lazyLoader.js"></script>
 <script src="socket.io/socket.io.js"></script>
 
 <script src="cookieAndLocalStore.js"></script>
@@ -755,5 +761,12 @@
 	 * Parse link and if there is inviter, jump to login.
 	 */
     setTimeout(parseLink, 200);
+    /**
+	 * Load all img to avoid render blank card
+     */
+    window.onload = function() {
+        setTimeout(loadAllResources, 1000);
+    };
+
 
 </script>
