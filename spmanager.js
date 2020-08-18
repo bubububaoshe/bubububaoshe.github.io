@@ -172,7 +172,7 @@ class SPManager{
           char.addTrick(trick);
       break;
       case "fls1a":
-          char = new SpecialCharacter("fls1a", "方兰生", "浮灯", 4, "春", "六艺四书全抛却，\n一身尽然素心香。");
+          char = new SpecialCharacter("fls1a", "方兰生", "浮灯", 4, "春", "六艺四书全抛却，\n一身尽染素心香。");
           trick = new UnnamedBanTrick();
           char.addTrick(trick);
       break;
