@@ -127,6 +127,11 @@ class Controller{
       playerinfo.showSpecialsPanel();
     }
   }
+  removeInfoPanels(){
+    oppoinfo.exit();
+    playerinfo.exit();
+    playerinfo.exitSpecialsPanel();
+  }
   selectInfo(){
     var header = this.parentNode;
     var nodes = header.children;

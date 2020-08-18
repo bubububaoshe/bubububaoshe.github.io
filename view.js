@@ -512,6 +512,8 @@ class View {
     this.table1.addController(controller.checkPlayerInfo);
     this.pool.addController(controller.obtain);
 
+    document.getElementById("hoverinfobox").addEventListener("click", controller.removeInfoPanels);
+    document.getElementById("infobox").addEventListener("click", controller.removeInfoPanels);
     document.getElementById("sprepo").addEventListener("click", controller.spPick);
     document.getElementById("sppick").addEventListener("click", controller.spUnpick);
 
