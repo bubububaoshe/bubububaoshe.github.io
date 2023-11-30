@@ -156,7 +156,7 @@ class Card{
     this.container.classList.add("charcontainer");
     var cardContainer = document.createElement("div");
     this.container.appendChild(cardContainer);
-    cardContainer.classList.add("cardContainer", "transitall");
+    cardContainer.classList.add("cardcontainer", "transitall");
     this.card = document.createElement("div");
     cardContainer.appendChild(this.card);
     this.container.id = char.id;
