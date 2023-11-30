@@ -349,6 +349,21 @@
 .rightsidebar>div:first-child{
   height: 60%;
   background-color: var(--board-background);
+  writing-mode: vertical-rl;
+  padding-right: 45%;
+}
+
+.rightsidebar #ruleinfo{
+	font-size: calc(var(--main-height)*0.03);
+	margin-right: 0;
+}
+
+.rightsidebar #ruleinfo a, .rightsidebar #ruleinfo a:visited{
+	color: var(--text-shadow-color);
+}
+
+.rightsidebar #ruleinfo a:hover{
+	font-size: calc(var(--main-height)*0.035);
 }
 .rightsidebar #selectioninfo{
   font-size: calc(var(--main-height)*0.03);
